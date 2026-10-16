@@ -355,3 +355,18 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
 .btn.hintb.nudge{animation:nudge 1s ease-in-out 3;border-color:var(--gold)}
 @keyframes nudge{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg) scale(1.08)}40%{transform:rotate(10deg) scale(1.08)}60%{transform:rotate(-6deg)}}
+
+/* Yanlış cevap = öğrenme anı: ceza kırmızısı yerine sıcak, yumuşak ton */
+.sheet.learnc{background:#FFF3E0} .sheet.learnc h3{color:#B3560B}
+.sheet.learnc .sub{color:var(--muted);font-weight:700;font-size:14px;margin-top:2px}
+.sheet.learnc .mis b{color:#B3560B}
+.howto{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 10px}
+.howto summary{font-weight:900;cursor:pointer;list-style:none} .howto summary::-webkit-details-marker{display:none}
+.howto summary::after{content:' ▾';color:var(--muted)} .howto[open] summary::after{content:' ▴'}
+.howto .steps{margin-top:8px}
+.modal-bg{position:fixed;inset:0;z-index:35;background:rgba(10,8,30,.55);animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .sheet.learnc{background:#3A2A16} :root:not([data-theme="light"]) .sheet.learnc h3, :root:not([data-theme="light"]) .sheet.learnc .mis b{color:#FFC27A} :root:not([data-theme="light"]) .lcard .rule{color:#D4CEFF} }
+:root[data-theme="dark"] .sheet.learnc{background:#3A2A16} :root[data-theme="dark"] .sheet.learnc h3, :root[data-theme="dark"] .sheet.learnc .mis b{color:#FFC27A} :root[data-theme="dark"] .lcard .rule{color:#D4CEFF}
+.vstat{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;padding:10px 12px;border-radius:12px;background:var(--surface2);margin-top:8px}
+.vstat .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)} .vstat.ok .dot{background:var(--ok)} .vstat.bad .dot{background:var(--bad)}

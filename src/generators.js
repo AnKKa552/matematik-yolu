@@ -392,8 +392,10 @@
       if (Math.random() < .5) { const n = pick([4, 5, 6, 8]), k = ri(1, n - 1); return Q({ prompt: 'Şeklin boyalı kısmı bütünün kaçta kaçıdır?', visual: V.bar(k, n), options: mc(fr(k, n), [[fr(n - k, n), 'kesir_tur'], [fr(k, n - k), 'kesir_tur'], [fr(n, k), 'kesir_tur']]), steps: [`Bütün ${n} eş parçaya bölünmüş → payda ${n}`, `${k} parça boyalı → pay ${k}`] }); }
       const t = pick(['birim', 'basit', 'bilesik']); let n, d;
       if (t === 'birim') { n = 1; d = ri(2, 12); } if (t === 'basit') { d = ri(4, 12); n = ri(2, d - 1); } if (t === 'bilesik') { d = ri(2, 9); n = d + ri(0, 9); }
-      const name = { birim: 'Birim kesir', basit: 'Basit kesir (birim kesir değil)', bilesik: 'Bileşik kesir' };
-      return Q({ prompt: `${fr(n, d)} kesri hangi türdendir?`, options: mc(name[t], Object.keys(name).filter(k => k !== t).map(k => [name[k], 'kesir_tur']), [['Tam sayılı kesir', 'kesir_tur']]), steps: ['Pay 1 → birim kesir', 'Pay < payda → basit kesir', 'Pay ≥ payda → bileşik kesir'] });
+      // Birim kesir aynı zamanda basit kesirdir; birim sorusunda "Basit kesir" şık olarak verilmez (iki doğru olmasın)
+      const name = { birim: 'Birim kesir', basit: 'Basit kesir', bilesik: 'Bileşik kesir' };
+      const yanlis = Object.keys(name).filter(k => k !== t && !(t === 'birim' && k === 'basit')).map(k => [name[k], 'kesir_tur']);
+      return Q({ prompt: `${fr(n, d)} kesri hangi türdendir?`, options: mc(name[t], yanlis, [['Tam sayılı kesir', 'kesir_tur']]), steps: ['Pay 1 → birim kesir', 'Pay < payda → basit kesir', 'Pay ≥ payda → bileşik kesir'] });
     }
     if (lv === 2) {
       const d = ri(3, 9), w = ri(1, 4), r = ri(1, d - 1), n = w * d + r;

@@ -37,21 +37,42 @@
   /* ---------------- Sesli anlatım (cihaz TTS; üretimde ElevenLabs) ---------------- */
   const toSpeech = U.toSpeech;
   const ttsSpeak = (text) => { if (!('speechSynthesis' in window)) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'tr-TR'; u.rate = 0.95; u.pitch = 1.1; const v = speechSynthesis.getVoices().find(v => /^tr/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { } };
-  // Ses paketi: audio/manifest.json varsa ElevenLabs ile üretilmiş Pi sesi çalınır, yoksa cihaz sesi
-  const AUDIO = { keys: null, cur: null, base: (CL && CL.sesAdresi) || 'audio/' };
-  try { fetch(AUDIO.base + 'manifest.json').then(r => r.ok ? r.json() : null).then(m => { if (m && m.keys) AUDIO.keys = new Set(m.keys); }).catch(() => { }); } catch (e) { }
-  // ElevenLabs ses efekti paketi varsa (sfx_*.mp3) sentez sesin yerine onu çal
-  ['ok', 'bad', 'win', 'fire', 'unstop', 'legend', 'grow', 'badge', 'swoosh'].forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { if (A.st.settings.sound && AUDIO.keys && AUDIO.keys.has('sfx_' + k)) { try { const au = new Audio(AUDIO.base + 'sfx_' + k + '.mp3'); au.volume = .7; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
-  const stopVoice = () => { try { if (AUDIO.cur) { AUDIO.cur.pause(); AUDIO.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } };
-  const say = (key, html) => {
-    if (!A.st.settings.voice) return; stopVoice();
-    if (key && AUDIO.keys && AUDIO.keys.has(key)) { try { const a = new Audio(AUDIO.base + key + '.mp3'); AUDIO.cur = a; a.play().catch(() => ttsSpeak(toSpeech(html))); return; } catch (e) { } }
-    ttsSpeak(toSpeech(html));
+  // Pi'nin ElevenLabs sesleri: sunucudaki manifest + mp3'ler. Dosyalar fetch ile alınır, telefonda saklanır (Cache API)
+  // ve blob olarak çalınır. Böylece çevrimdışı katman ve "range" istekleri sesi bozamaz; ikinci açılışta internetsiz çalar.
+  const AUDIO = { keys: null, cur: null, tok: 0, blob: {}, durum: 'yukleniyor', base: (CL && CL.sesAdresi) || 'audio/' };
+  const SES_DEPO = 'pi-sesleri-v1';
+  AUDIO.hazir = fetch(AUDIO.base + 'manifest.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null)
+    .then(m => { if (m && m.keys) { AUDIO.keys = new Set(m.keys); AUDIO.durum = 'hazir'; } else AUDIO.durum = 'yok'; })
+    .catch(() => { AUDIO.durum = 'hata'; });
+  const sesAl = async (key) => {
+    if (AUDIO.blob[key]) return AUDIO.blob[key];
+    const url = AUDIO.base + key + '.mp3'; let res = null, depo = null;
+    try { depo = await caches.open(SES_DEPO); res = await depo.match(url); } catch (e) { }
+    if (!res) { res = await fetch(url, { mode: 'cors' }); if (res.ok && depo) depo.put(url, res.clone()).catch(() => { }); }
+    if (!res || !res.ok) throw new Error('ses yok');
+    return (AUDIO.blob[key] = URL.createObjectURL(await res.blob()));
+  };
+  // Sık çalan kısa replikleri ve efektleri arka planda önceden indir (ilk dokunuştan sonra, ~1 MB)
+  const onYukle = () => AUDIO.hazir.then(() => { if (!AUDIO.keys) return; const l = [...AUDIO.keys].filter(k => k.startsWith('pi_') || k.startsWith('sfx_')); let n = 0; const tek = () => { if (n >= l.length) return; sesAl(l[n++]).catch(() => { }).finally(() => setTimeout(tek, 120)); }; tek(); tek(); });
+  AUDIO.hazir.then(() => setTimeout(() => { try { if (A.view !== 'lesson' && A.tab === 'profil') render(); } catch (e) { } }, 0));
+  document.addEventListener('pointerdown', function ilk() { document.removeEventListener('pointerdown', ilk); onYukle(); }, { once: true });
+  const sesCal = (key, tok) => sesAl(key).then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; return a.play(); });
+  ['ok', 'bad', 'win', 'fire', 'unstop', 'legend', 'grow', 'badge', 'swoosh'].forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { const key = 'sfx_' + k; if (A.st.settings.sound && AUDIO.keys && AUDIO.keys.has(key) && AUDIO.blob[key]) { try { const au = new Audio(AUDIO.blob[key]); au.volume = .7; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
+  const stopVoice = () => { AUDIO.tok++; try { if (AUDIO.cur) { AUDIO.cur.pause(); AUDIO.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } };
+  // robot=false: Pi'nin sabit replikleri. Pi sesi çalamazsa robot ses yerine sessiz kalınır (karakter bozulmasın).
+  const say = (key, html, robot = true) => {
+    if (!A.st.settings.voice) return; stopVoice(); const tok = AUDIO.tok;
+    const calis = () => {
+      if (tok !== AUDIO.tok) return;
+      if (key && AUDIO.keys && AUDIO.keys.has(key)) { sesCal(key, tok).catch(() => { if (robot && tok === AUDIO.tok) ttsSpeak(toSpeech(html)); }); return; }
+      if (robot) ttsSpeak(toSpeech(html));
+    };
+    if (key && AUDIO.durum === 'yukleniyor') AUDIO.hazir.then(calis); else calis();
   };
   const speak = (html) => say(null, html);
   const sayCard = (id, f) => say(`kart_${id}_${f}`, cardText(id, f));
   const PI = window.MY_PI_LINES;
-  const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i]); return arr[i]; };
+  const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
 
   /* ---------------- Maskot: Pi ---------------- */
   const mascot = (state = '', w = 110) => `<div class="mascot ${state}" style="width:${w}px" aria-hidden="true"><svg viewBox="0 0 120 124"><g class="m-body">
@@ -170,6 +191,7 @@
       <h2 class="sect">Ayarlar</h2><div class="card list">
         <label class="check"><input type="checkbox" data-act="set-sound" ${A.st.settings.sound ? 'checked' : ''}> Ses efektleri</label>
         <label class="check"><input type="checkbox" data-act="set-voice" ${A.st.settings.voice ? 'checked' : ''}> Sesli anlatım (Pi soruları okusun)</label>
+        ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
         <button class="btn ghost small" data-act="reset" style="color:var(--bad)">Tüm verileri sıfırla</button></div></div>${nav()}`;
@@ -282,13 +304,14 @@
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
     if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div></div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
     const right = q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
-    const m = MIS[fb.mis] || MIS.genel, best = E.formatRank(A.st)[0].f;
-    const steps = `<ol class="steps">${(q.steps || []).map(s => `<li>${s}</li>`).join('')}</ol>`;
-    return `<div class="sheet badc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div></div>${mascot('sad', 64)}</div>
-      ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start"><b>Burada şu karışmış olabilir:</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div>${esc(m.t)}<div style="margin-top:6px;font-weight:700">${m.fix}</div></div>` : ''}
-      <div class="mis"><b style="color:var(--ink)">🪜 Çözüm</b>${steps}</div>
-      <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn bad" style="flex:1.3" data-act="next">Anladım</button></div>
-      ${best === 'gorsel' && q.visual ? '' : ''}</div>`;
+    // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
+    if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
+    const m = MIS[fb.mis] || MIS.genel;
+    const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div></div>${mascot('think', 60)}</div>
+      ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
+      ${steps}
+      <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
   }
 
   function viewEnd() {
@@ -334,7 +357,7 @@
     else if (A.view === 'lesson') h = viewLesson();
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
-    if (A.modal) h += A.modal;
+    if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     $app.innerHTML = h;
   }
 
@@ -377,8 +400,8 @@
     ({ normal: sfx.ok, calm: sfx.ok, fire: sfx.fire, unstop: sfx.unstop, legend: sfx.legend, rescue: sfx.grow }[tier] || sfx.ok)();
     if (navigator.vibrate) try { navigator.vibrate(tier === 'normal' || tier === 'calm' ? 25 : [30, 40, 60]); } catch (e) { }
     if (A.ses.mode === 'speed') return;
-    if (tier === 'fire') piSay('seri3'); else if (tier === 'unstop') piSay('seri5'); else if (tier === 'legend') piSay('seri8'); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word);
-    else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word);
+    if (tier === 'fire') piSay('seri3'); else if (tier === 'unstop') piSay('seri5'); else if (tier === 'legend') piSay('seri8'); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
+    else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   function checkAnswer() {
     const q = A.q, ans = q.type === 'input' ? A.input : A.sel; if (ans === null || ans === '') return;

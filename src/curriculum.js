@@ -27,7 +27,7 @@
       gorsel: { text: 'Uçlarına bak! İki uç noktası olan <b>doğru parçası</b>, bir başlangıcı ve tek oku olan <b>ışın</b>, iki yönde oku olan <b>doğru</b>dur.', vis: () => V.lineKind('dp') + V.lineKind('isin') + V.lineKind('dogru') },
       hikaye: 'Ela evden okula yürüdü: evi ve okulu belli, yani yolu bir <b>doğru parçası</b>. Bir el feneri yaktı: ışık fenerden başlayıp tek yönde sonsuza gidiyor, bu bir <b>ışın</b>. Uzayda iki yönde de bitmeyen bir yol düşün: bu da bir <b>doğru</b>!',
       adim: ['Çizimin uçlarına bak.', 'İki uç noktası varsa → doğru parçası: [AB]', 'Bir uç noktası ve tek ok varsa → ışın: [AB', 'İki ok varsa → doğru: AB doğrusu', 'Doğru parçasının uzunluğu |AB| ile gösterilir.'],
-      kural: '[AB] doğru parçası (2 uç) • [AB ışın (1 uç) • AB doğrusu (uç yok) • |AB| uzunluk.',
+      kural: 'Doğru parçasının 2 ucu var, uzunluğu ölçülür. • Işının 1 ucu var, tek yöne sonsuz gider. • Doğrunun hiç ucu yok, iki yöne sonsuz gider.',
     }),
     S('g_cember', 't1', 'Çember ve Daire', '26–28', {
       gorsel: { text: 'Merkezden çembere giden çizgi <b>yarıçap</b>tır. Merkezden geçip iki ucu çemberde olan çizgi <b>çap</b>tır. Çap = 2 × yarıçap.', vis: () => V.circle('r', 'r') + V.circle('d', 'çap') },
