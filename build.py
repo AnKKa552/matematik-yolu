@@ -18,8 +18,10 @@ if not cfg.exists() and (S/'config.js').exists(): cfg.write_text((S/'config.js')
 if not cfg.exists(): cfg.write_text("// Supabase bağlantısı. Boş bırakılırsa uygulama çevrimdışı çalışır.\n// Değerler: Supabase paneli → Project Settings → API (anon key herkese açık olabilir, service role ASLA buraya yazılmaz)\nwindow.MY_CONFIG = { supabaseUrl: '', anonKey: '' };\n")
 print('ok', len(base)//1024, 'KB')
 
-# Yayın kopyası: GitHub Pages docs/ klasöründen yayınlar
+# PWA dosyaları (src/pwa) → dist
 import shutil
+for f in (S/'pwa').glob('*'): shutil.copy(f, D/f.name)
+# Yayın kopyası: GitHub Pages docs/ klasöründen yayınlar
 P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch()
 for f in ['index.html', 'config.js', 'sw.js', 'icon.svg', 'manifest.webmanifest']:
     if (D/f).exists(): shutil.copy(D/f, P/f)
