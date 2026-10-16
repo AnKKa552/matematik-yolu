@@ -72,6 +72,7 @@ Mekanikler (fikir/işleyiş) alındı; görsel tasarım, karakterler, metinler v
 | Lig kademeleri, yükselme ve düşme bölgesi | 5 kademe şeridi, ilk 3 yükselir, son 3 düşer, haftalık devir ve "ilk 3" sayacı |
 | Profil özet kartları | Seri, toplam XP, lig, ilk 3 sayısı, tema kupası, gerçek görev |
 | Bölüm sonu kale/kupa | Tema Sınavı (10 soru, %70) → kupa + 50 elmas |
+| Haritada yaşayan karakterler | **Harita mahallesi (17.10.2026):** her temanın özgün bir komşusu var (Pergo pergelli robot, Bilge baykuş, Metre Usta kunduz, Aşçı Dilim kedi, Grafi tavşan, Denge fil, Şans ejder). Yolun 2. düğümünün yanında durur, kendine has boşta hareketi var (sallanma/eğilme/zıplama/uçma). Dokununca zıplar ve konuyla ilgili kısa bir ipucu söyler (3 cümle sırayla). Tema değişince kendini bir kez tanıtır. **Sesleri yok** (uygulamadaki tek ses Pi'nin, §6.1); sadece yazı balonu ve kısa nota. Görseller `src/pwa/img/komsu_t1…t7.webp` (12–21 KB), kaynaklar `tasarim/kaynak/komsu_k*.png`. |
 
 ### 2.2 Kitaplarım (iki kitabın tam haritası)
 "Kitap" sekmesinde 1. ve 2. kitabın içindekilerindeki **83 başlığın tamamı** sayfa numarasıyla yer alır ve her başlık bir eyleme bağlıdır:

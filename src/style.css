@@ -387,3 +387,23 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .sahne-yazi{position:absolute;top:calc(9% + env(safe-area-inset-top));left:0;right:0;text-align:center;font-weight:900;font-size:clamp(30px,9vw,46px);color:#fff;letter-spacing:.02em;text-shadow:0 0 18px #2be4ff,0 0 36px #5b4bff,0 3px 0 #1b1f6b;animation:sahneYazi .5s cubic-bezier(.2,1.6,.4,1)}
 .sahne-gec{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(255,255,255,.6);font-weight:800;font-size:13px}
 @keyframes sahneYazi{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* Harita mahallesi: tema komşuları */
+.komsu{position:absolute;right:calc(100% + 26px);top:-34px;width:96px;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;-webkit-tap-highlight-color:transparent;z-index:2}
+.komsu img{width:96px;height:auto;display:block;transform-origin:50% 92%;filter:drop-shadow(0 6px 8px rgba(20,30,90,.28));user-select:none;-webkit-user-drag:none}
+.komsu .kad{margin-top:2px;font-size:11px;font-weight:900;color:var(--muted);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:1px 8px;white-space:nowrap}
+.komsu .kbal{position:absolute;top:calc(100% + 8px);left:-14px;width:160px;background:var(--surface);color:var(--text);border:2px solid var(--line);border-radius:14px;padding:7px 10px;font-size:12.5px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 4px 0 var(--line);opacity:0;transform:translateY(-6px) scale(.9);transform-origin:30% 0;pointer-events:none;transition:opacity .2s,transform .2s}
+.komsu .kbal:after{content:'';position:absolute;left:56px;top:-9px;border:8px solid transparent;border-bottom-color:var(--line);border-top:0}
+.komsu .kbal.acik{opacity:1;transform:none}
+.komsu:after{content:'💬';position:absolute;top:-2px;right:-4px;font-size:16px;animation:float 1.8s ease-in-out infinite}
+.komsu.tik:after{display:none}
+.k-sal img{animation:kSal 3.2s ease-in-out infinite}
+.k-egil img{animation:kEgil 4s ease-in-out infinite}
+.k-zipla img{animation:kZipla 2.4s ease-in-out infinite}
+.k-uc img{animation:kUc 2.8s ease-in-out infinite}
+.komsu.tik img{animation:jump .6s ease-out}
+@keyframes kSal{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes kEgil{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-8deg)}85%{transform:rotate(3deg)}}
+@keyframes kZipla{0%,55%,100%{transform:translateY(0) scaleY(1)}62%{transform:translateY(0) scaleY(.9)}75%{transform:translateY(-12px) scaleY(1.04)}88%{transform:translateY(0) scaleY(.95)}}
+@keyframes kUc{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
+@media (prefers-reduced-motion: reduce){.komsu img,.komsu:after{animation:none!important}}

@@ -118,6 +118,20 @@
   const topbar = () => `<div class="topbar"><div class="stat fire" title="Seri"><span class="ic">🔥</span>${A.st.streak}</div><div class="stat gem" title="Elmas"><span class="ic">💎</span>${A.st.gems}</div><div class="stat" title="Günlük hedef">${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></div><div class="stat" title="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</div></div>`;
   const nav = () => `<nav class="nav">${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
 
+  /* Harita mahallesi: her temanın kendine has komşusu (özgün karakterler, ses yok: konuşan tek ses Pi) */
+  const KOMSU = {
+    t1: { ad: 'Pergo', tur: 'pergelli robot', h: 'sal', soz: ['Merhaba, ben Pergo! Açıları ben ölçerim 📐', 'Dik açı tam 90 derecedir. Köşesi bir kare köşesi gibi!', 'Bir üçgenin iç açılarını topla: hep 180 derece!'] },
+    t2: { ad: 'Bilge', tur: 'sayı baykuşu', h: 'egil', soz: ['Ben Bilge! Büyük sayıları bölük bölük okurum 🦉', 'Sayıyı sağdan üçerli ayır, okuması kolaylaşır.', 'Önce tahmin et, sonra hesapla, sonra kontrol et!'] },
+    t3: { ad: 'Metre Usta', tur: 'ölçü ustası kunduz', h: 'zipla', soz: ['Ben Metre Usta! Her şeyi ölçerim 📏', 'Çevre için kenarların hepsini topla.', 'Alan, içini kaplayan birim karelerin sayısıdır.'] },
+    t4: { ad: 'Aşçı Dilim', tur: 'pizzacı kedi', h: 'sal', soz: ['Ben Aşçı Dilim! Pizzayı hep eşit dilimlerim 🍕', 'Payda: bütün kaç eşit parçaya bölündü?', 'Pay: o parçalardan kaç tane aldın?'] },
+    t5: { ad: 'Grafi', tur: 'muhabir tavşan', h: 'zipla', soz: ['Ben Grafi! Herkese soru sorarım 📋', 'Önce veriyi topla, sonra tabloya yaz.', 'Sütun grafiğinde en uzun sütun en çok seçileni gösterir.'] },
+    t6: { ad: 'Denge', tur: 'terazici fil', h: 'egil', soz: ['Ben Denge! Teraziyi hiç düşürmem ⚖️', 'Eşittir işareti iki tarafın denk olduğunu söyler.', 'Önce parantez, sonra çarpma ve bölme, en son toplama ve çıkarma!'] },
+    t7: { ad: 'Şans', tur: 'zarcı ejder', h: 'uc', soz: ['Ben Şans! Zarımla ve paramla oynarım 🎲', 'Kesin olan bir olayın olasılığı 1’dir.', 'İmkânsız bir olayın olasılığı 0’dır.'] },
+  };
+  const komsuHtml = (thId) => { const k = KOMSU[thId]; if (!k) return '';
+    return `<button class="komsu k-${k.h}" data-act="komsu" data-v="${thId}" aria-label="${esc(k.ad)}, ${esc(k.tur)}: dokun, konuşsun"><span class="kbal">${esc(k.soz[0])}</span><img src="img/komsu_${thId}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.komsu').remove()"><span class="kad">${esc(k.ad)}</span></button>`; };
+  const komsuSay = {};
+
   function viewHome() {
     const th = THEMES.find(t => t.id === A.theme), sks = SKILLS.filter(s => s.theme === th.id);
     const done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
@@ -128,7 +142,7 @@
       const isCur = un && !curFound && cr < 3; if (isCur) curFound = true;
       const col = th.color;
       const style = un ? `background:var(--${col});box-shadow:0 7px 0 var(--${col}-d);color:#fff` : '';
-      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>`;
+      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>`;
     }).join('');
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
     const due = E.dueSkills(A.st).length;
@@ -457,8 +471,12 @@
     const act = el.dataset.act, v = el.dataset.v;
     switch (act) {
       case 'tab': A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
-      case 'theme': A.theme = v; sfx.tap(); render(); break;
+      case 'theme': A.theme = v; sfx.tap(); render(); setTimeout(() => { const k = document.querySelector('.komsu'); if (k && komsuSay[v] === undefined) k.click(); }, 500); break;
       case 'node': A.modal = skillModal(v); render(); break;
+      case 'komsu': { const k = KOMSU[v]; if (!k) break; const n = komsuSay[v] = komsuSay[v] === undefined ? 0 : (komsuSay[v] + 1) % k.soz.length;
+        const b = el.querySelector('.kbal'); if (b) { b.textContent = k.soz[n]; b.classList.remove('acik'); void b.offsetWidth; b.classList.add('acik'); }
+        el.classList.remove('tik'); void el.offsetWidth; el.classList.add('tik'); tone(520 + 80 * n, .12, 'triangle'); tone(780 + 80 * n, .12, 'triangle', .09);
+        clearTimeout(el._t); el._t = setTimeout(() => { el.classList.remove('tik'); b && b.classList.remove('acik'); }, 4200); break; }
       case 'trophy': { const sk = SKILLS.filter(x => x.theme === v); if (A.st.trophies[v] || sk.every(x => E.crowns(E.eff(A.st.skills[x.id])) >= 1)) startSession('exam', null, v); else toast('🎓 Temadaki tüm becerilerde en az 1 yıldız topla, sınav açılsın!'); break; }
       case 'exam': startSession('exam', null, v); break;
       case 'hazir': startSession('hazir', null, v); break;
