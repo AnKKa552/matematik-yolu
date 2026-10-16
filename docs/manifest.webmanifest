@@ -1,0 +1,3 @@
+{ "name": "Matematik Yolu", "short_name": "Mat. Yolu", "lang": "tr", "start_url": "./", "display": "standalone",
+  "background_color": "#F5F4FF", "theme_color": "#5B4BFF", "orientation": "portrait",
+  "icons": [ { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" } ] }

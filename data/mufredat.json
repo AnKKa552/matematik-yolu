@@ -1,0 +1,1433 @@
+{
+  "meta": {
+    "ad": "Matematik Yolu müfredat bilgi havuzu",
+    "sinif": 5,
+    "kaynak": "MEB 5. Sınıf Matematik Ders Kitabı 1. ve 2. kitap (Maarif Modeli, 2024 basım; TTKB kabul 17.07.2024)",
+    "not": "Sayfa numaraları öğrenciyi kendi kitabına yönlendirmek içindir. Kitap metni, sorusu ve görseli kopyalanmaz.",
+    "olusturma": "2026-10-16"
+  },
+  "temalar": [
+    {
+      "id": "t1",
+      "no": 1,
+      "title": "Geometrik Şekiller",
+      "book": 1,
+      "pages": "12–91",
+      "color": "teal",
+      "icon": "📐",
+      "goal": "Temel geometrik çizimleri yapmak, açıları ölçmek, çokgen ve üçgenleri tanımak.",
+      "beceriler": [
+        "g_temel",
+        "g_cember",
+        "g_dikme_paralel",
+        "g_aci",
+        "g_aci_iliski",
+        "g_cokgen",
+        "g_ucgen"
+      ]
+    },
+    {
+      "id": "t2",
+      "no": 2,
+      "title": "Doğal Sayılar ve İşlemler",
+      "book": 1,
+      "pages": "92–137",
+      "color": "blue",
+      "icon": "🔢",
+      "goal": "Çok basamaklı sayıları okumak, yazmak ve gerçek yaşam problemlerini dört işlemle çözmek.",
+      "beceriler": [
+        "n_okuma",
+        "n_basamak",
+        "n_karsilastir",
+        "n_toplacikar",
+        "n_carpbol",
+        "n_problem",
+        "n_tahmin"
+      ]
+    },
+    {
+      "id": "t3",
+      "no": 3,
+      "title": "Geometrik Nicelikler",
+      "book": 1,
+      "pages": "138–166",
+      "color": "orange",
+      "icon": "📏",
+      "goal": "Dikdörtgenin çevre uzunluğunu ve alanını yorumlamak, problemler çözmek.",
+      "beceriler": [
+        "a_cevre",
+        "a_alan",
+        "a_cevre_alan"
+      ]
+    },
+    {
+      "id": "t4",
+      "no": 4,
+      "title": "Kesirler",
+      "book": 2,
+      "pages": "12–55",
+      "color": "pink",
+      "icon": "🍕",
+      "goal": "Kesirleri farklı gösterimlerle (kesir, ondalık, yüzde) ifade edip karşılaştırmak.",
+      "beceriler": [
+        "f_tur",
+        "f_denk",
+        "f_ondalik",
+        "f_yuzde",
+        "f_karsilastir",
+        "f_ondalik_karsilastir"
+      ]
+    },
+    {
+      "id": "t5",
+      "no": 5,
+      "title": "İstatistiksel Araştırma",
+      "book": 2,
+      "pages": "56–113",
+      "color": "purple",
+      "icon": "📊",
+      "goal": "Kategorik veriyle çalışmak, grafikleri okumak ve veriye dayalı karar vermek.",
+      "beceriler": [
+        "s_arastirma",
+        "s_tablo_sutun",
+        "s_daire",
+        "s_okuryazar"
+      ]
+    },
+    {
+      "id": "t6",
+      "no": 6,
+      "title": "Cebirsel Düşünme",
+      "book": 2,
+      "pages": "114–163",
+      "color": "green",
+      "icon": "⚖️",
+      "goal": "Eşitlik, işlem özellikleri, işlem önceliği, örüntüler ve algoritmalarla düşünmek.",
+      "beceriler": [
+        "e_esitlik",
+        "e_ozellik",
+        "e_us",
+        "e_oncelik",
+        "e_oruntu",
+        "e_algoritma"
+      ]
+    },
+    {
+      "id": "t7",
+      "no": 7,
+      "title": "Veriden Olasılığa",
+      "book": 2,
+      "pages": "164–182",
+      "color": "yellow",
+      "icon": "🎲",
+      "goal": "Olayların olasılığını 0 ile 1 arasında yorumlamak, az/çok olası olarak sınıflamak.",
+      "beceriler": [
+        "p_olay",
+        "p_spektrum"
+      ]
+    }
+  ],
+  "beceriler": [
+    {
+      "id": "g_temel",
+      "tema": "t1",
+      "ad": "Nokta, Doğru, Işın",
+      "kitap_sayfa": "17–25",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "isin_dogru",
+        "dp_dogru",
+        "nokta_sayma"
+      ],
+      "anlatim": {
+        "gorsel": "Uçlarına bak! İki uç noktası olan doğru parçası , bir başlangıcı ve tek oku olan ışın , iki yönde oku olan doğru dur.",
+        "hikaye": "Ela evden okula yürüdü: evi ve okulu belli, yani yolu bir doğru parçası . Bir el feneri yaktı: ışık fenerden başlayıp tek yönde sonsuza gidiyor, bu bir ışın . Uzayda iki yönde de bitmeyen bir yol düşün: bu da bir doğru !",
+        "adim": [
+          "Çizimin uçlarına bak.",
+          "İki uç noktası varsa → doğru parçası: [AB]",
+          "Bir uç noktası ve tek ok varsa → ışın: [AB",
+          "İki ok varsa → doğru: AB doğrusu",
+          "Doğru parçasının uzunluğu |AB| ile gösterilir."
+        ],
+        "kural": "[AB] doğru parçası (2 uç) • [AB ışın (1 uç) • AB doğrusu (uç yok) • |AB| uzunluk."
+      }
+    },
+    {
+      "id": "g_cember",
+      "tema": "t1",
+      "ad": "Çember ve Daire",
+      "kitap_sayfa": "26–28",
+      "onkosul": [
+        "g_temel"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "cap_yaricap"
+      ],
+      "anlatim": {
+        "gorsel": "Merkezden çembere giden çizgi yarıçap tır. Merkezden geçip iki ucu çemberde olan çizgi çap tır. Çap = 2 × yarıçap.",
+        "hikaye": "Kerem bahçeye bir kazık çaktı, ipin ucunu bağladı ve gerilmiş iple etrafında döndü. İzi çember , kazık merkez , ip ise yarıçap ! Kerem bir uçtan merkezden geçerek diğer uca yürüdüğünde ipin 2 katını yürüdü: bu da çap .",
+        "adim": [
+          "Merkezi bul (O noktası).",
+          "Merkezden çembere olan uzaklık yarıçaptır (r).",
+          "Çap merkezden geçer ve 2 yarıçap uzunluğundadır.",
+          "Çap verilirse yarıçap = çap ÷ 2."
+        ],
+        "kural": "Çap = 2 × yarıçap. Çember sadece kenar çizgisi, daire ise çember + iç bölgedir."
+      }
+    },
+    {
+      "id": "g_dikme_paralel",
+      "tema": "t1",
+      "ad": "Dikme ve Paralellik",
+      "kitap_sayfa": "29–38",
+      "onkosul": [
+        "g_cember"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "dik_yatay",
+        "paralel_kesisen"
+      ],
+      "anlatim": {
+        "gorsel": "Köşede küçük bir kare varsa doğrular dik tir (⊥). Hiç kesişmeyen, arası hep aynı olan doğrular paralel dir (//).",
+        "hikaye": "Tren rayları hiç birleşmez, aralarındaki mesafe hep aynıdır: paralel ! Bir defterin kenarları köşede dik açı yapar: dik ! Defteri çevirsen bile köşe hâlâ diktir.",
+        "adim": [
+          "İki doğru kesişiyor mu? Bak.",
+          "Kesişmiyorsa ve aralarındaki uzaklık hep aynıysa → paralel (//).",
+          "Kesişiyorsa köşedeki açıya bak.",
+          "Açı 90° (küçük kare işareti) ise → dik (⊥).",
+          "Şekil dönük olsa da kural değişmez."
+        ],
+        "kural": "⊥ : 90° ile kesişir. // : hiç kesişmez. Aynı doğruya dik iki doğru birbirine paraleldir."
+      }
+    },
+    {
+      "id": "g_aci",
+      "tema": "t1",
+      "ad": "Açılar ve Açı Ölçme",
+      "kitap_sayfa": "39–44",
+      "onkosul": [
+        "g_dikme_paralel"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "aci_tur",
+        "aci_kol",
+        "iletki_ters"
+      ],
+      "anlatim": {
+        "gorsel": "Açının büyüklüğü kolların ne kadar açıldığına bağlıdır, uzunluğuna değil. 90° (dik açı) referans noktandır.",
+        "hikaye": "Saat tam 3'te akrep ve yelkovan dik açı yapar (90°). Saat 1'de aralarındaki açı daha kapalı: dar açı . Saat 5'te iyice açılır: geniş açı . Saat 6'da düz bir çizgi: doğru açı (180°)!",
+        "adim": [
+          "Açıyı bir dik açıyla (defter köşesi) karşılaştır.",
+          "Daha kapalıysa dar açı (90°'den küçük).",
+          "Tam köşe gibiyse dik açı (90°).",
+          "Daha açıksa geniş açı (90°–180°).",
+          "İletkiyle ölçerken kolun başladığı 0'ın olduğu ölçeği oku."
+        ],
+        "kural": "Dar < 90° = Dik < Geniş < 180° = Doğru açı. Tam açı 360°."
+      }
+    },
+    {
+      "id": "g_aci_iliski",
+      "tema": "t1",
+      "ad": "Tümler, Bütünler, Ters Açılar",
+      "kitap_sayfa": "45–56",
+      "onkosul": [
+        "g_aci"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "tumler_butunler",
+        "ters_aci"
+      ],
+      "anlatim": {
+        "gorsel": "Kesişen iki doğruda karşı karşıya duran açılar ( ters açılar ) eşittir. Yan yana olan açılar toplamı 180°'dir.",
+        "hikaye": "Makas açtığında iki bıçak bir X oluşturur. Üstteki açı ne kadarsa alttaki de o kadardır: ters açılar hep ikizdir! Bir pizza dilimini dik köşeden kesersen iki parçanın açıları toplamı 90° olur: tümler .",
+        "adim": [
+          "Tümler mi bütünler mi soruluyor? Bak.",
+          "Tümler: toplam 90° → 90 − verilen.",
+          "Bütünler: toplam 180° → 180 − verilen.",
+          "Ters açı: karşıdaki açı → aynı ölçü."
+        ],
+        "kural": "Tümler = 90°, Bütünler = 180°, Ters açılar eşittir."
+      }
+    },
+    {
+      "id": "g_cokgen",
+      "tema": "t1",
+      "ad": "Çokgenler",
+      "kitap_sayfa": "57–69",
+      "onkosul": [
+        "g_aci_iliski"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "cokgen_sayi",
+        "duzgun_eksik",
+        "kosegen_kenar"
+      ],
+      "anlatim": {
+        "gorsel": "Çokgende kenar = köşe = iç açı sayısı. Köşegen, yan yana olmayan iki köşeyi birleştirir.",
+        "hikaye": "Arılar peteklerini düzgün altıgen yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir köşeden köşegen çizmek istersen kendine ve iki komşuna çizemezsin, geriye 6 − 3 = 3 köşe kalır.",
+        "adim": [
+          "Kenarları say → çokgenin adı (5 → beşgen).",
+          "Köşe ve iç açı sayısı kenar sayısına eşittir.",
+          "Bir köşeden köşegen: köşe sayısı − 3.",
+          "Düzgün çokgen: kenarlar eşit + açılar eşit."
+        ],
+        "kural": "n kenarlı çokgen: n köşe, n iç açı; bir köşeden (n − 3) köşegen."
+      }
+    },
+    {
+      "id": "g_ucgen",
+      "tema": "t1",
+      "ad": "Üçgenler",
+      "kitap_sayfa": "70–85",
+      "onkosul": [
+        "g_cokgen"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "ucgen_360",
+        "ucgen_sinif"
+      ],
+      "anlatim": {
+        "gorsel": "Üçgenin üç iç açısını yan yana koyarsan bir doğru açı (180°) oluşur.",
+        "hikaye": "Defne kâğıttan bir üçgen kesti, üç köşesini yırtıp yan yana dizdi. Şaşırdı: köşeler tam bir düz çizgi oluşturdu! Her üçgende iç açılar toplamı 180° .",
+        "adim": [
+          "İki açı verildiyse topla.",
+          "180'den çıkar → üçüncü açı.",
+          "Türünü bulmak için EN BÜYÜK açıya bak.",
+          "90°'den büyükse geniş, tam 90° ise dik, hepsi küçükse dar açılı."
+        ],
+        "kural": "İç açılar toplamı 180°. Eşkenar üçgende her açı 60°. İkizkenarda taban açıları eşit."
+      }
+    },
+    {
+      "id": "n_okuma",
+      "tema": "t2",
+      "ad": "Büyük Sayıları Okuma-Yazma",
+      "kitap_sayfa": "97–103",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "basamak_kayma",
+        "bolük_kayma",
+        "sifir_atlama"
+      ],
+      "anlatim": {
+        "gorsel": "Sayıyı sağdan üçerli bölüklere ayır: milyar | milyon | bin | birler . Her bölüğü oku, adını ekle.",
+        "hikaye": "Emre, Neptün'ün Güneş'e uzaklığını okumak istedi ama sayı çok uzundu! Sağdan üçer üçer ayırdı, her gruba bir isim verdi: birler, binler, milyonlar... Birden sayı kolayca okunur hâle geldi.",
+        "adim": [
+          "Sayıyı sağdan üçerli ayır.",
+          "Bölük adlarını yaz: birler, bin, milyon, milyar.",
+          "Soldan başlayarak her bölüğü oku ve adını söyle.",
+          "000 olan bölüğün adı okunmaz.",
+          "Yazarken okunmayan basamaklara 0 koy."
+        ],
+        "kural": "Her bölük 3 basamak. \"Bin\" önünde \"bir\" söylenmez; \"bir milyon\" söylenir."
+      }
+    },
+    {
+      "id": "n_basamak",
+      "tema": "t2",
+      "ad": "Basamak Değeri ve Çözümleme",
+      "kitap_sayfa": "103–106",
+      "onkosul": [
+        "n_okuma"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "basamak_deger",
+        "basamak_kayma",
+        "cozumleme_bitisik"
+      ],
+      "anlatim": {
+        "gorsel": "Rakamın değeri bulunduğu yere göre değişir: 5, yüzler basamağında 500, binler basamağında 5 000 değerindedir.",
+        "hikaye": "Bir sinemada aynı koltuk numarası farklı sıralarda farklı yerdir. Rakamlar da öyle: aynı 7, birler sırasında 7, on binler sırasında 70 000 eder!",
+        "adim": [
+          "Rakamın hangi basamakta olduğunu sağdan sayarak bul.",
+          "O basamağın değerini yaz (1, 10, 100, 1 000...).",
+          "Rakam × basamak değeri = basamak değeri.",
+          "Çözümleme: sayıyı basamak değerlerinin toplamı olarak yaz."
+        ],
+        "kural": "Basamak değeri = rakam × basamağın değeri. 4 725 = 4 000 + 700 + 20 + 5."
+      }
+    },
+    {
+      "id": "n_karsilastir",
+      "tema": "t2",
+      "ad": "Sayıları Karşılaştırma",
+      "kitap_sayfa": "107",
+      "onkosul": [
+        "n_basamak"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "ilk_rakam"
+      ],
+      "anlatim": {
+        "gorsel": "Önce basamak sayısına bak; basamağı fazla olan büyüktür. Eşitse soldan rakam rakam karşılaştır.",
+        "hikaye": "İki kardeş kumbaralarını saydı. Ali'nin parası 9 999 TL, Ece'ninki 10 000 TL. Ali \"benimki 9 ile başlıyor, daha büyük!\" dedi. Ece güldü: \"Benim sayım 5 basamaklı, seninki 4!\"",
+        "adim": [
+          "Basamak sayılarını karşılaştır.",
+          "Fazla olan büyüktür.",
+          "Eşitse en soldaki rakamlardan başla.",
+          "İlk farklı rakamı büyük olan sayı büyüktür."
+        ],
+        "kural": "Önce uzunluk, sonra soldan ilk farklı rakam."
+      }
+    },
+    {
+      "id": "n_toplacikar",
+      "tema": "t2",
+      "ad": "Toplama ve Çıkarma",
+      "kitap_sayfa": "111–121",
+      "onkosul": [
+        "n_karsilastir"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "elde_unutma",
+        "ters_islem",
+        "problem_adim"
+      ],
+      "anlatim": {
+        "gorsel": "Toplama ve çıkarma birbirinin tersidir : 25 + 15 = 40 ise 40 − 15 = 25.",
+        "hikaye": "Suzan bir çıkarma işleminde eksileni sildi. Kardeşi Nazlı düşündü: \"Bir şeyden 15 çıkınca 25 kaldıysa, başta 25 + 15 = 40 vardı!\" Ters işlem, kayıp sayıyı buldu.",
+        "adim": [
+          "Basamakları hizalayarak alt alta yaz.",
+          "Birlerden başla.",
+          "Toplamada 10'u geçerse eldeyi taşı.",
+          "Çıkarmada üstteki küçükse onluk boz.",
+          "Bilinmeyen terim için ters işlemi kullan."
+        ],
+        "kural": "Bilinmeyen terim = toplam − diğer terim. Eksilen = çıkan + fark."
+      }
+    },
+    {
+      "id": "n_carpbol",
+      "tema": "t2",
+      "ad": "Çarpma ve Bölme",
+      "kitap_sayfa": "123–131",
+      "onkosul": [
+        "n_toplacikar"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "sifir_sayisi",
+        "kismi_carpim"
+      ],
+      "anlatim": {
+        "gorsel": "Sıfırları ayır, kalanları çarp, sıfırları geri ekle: 32 × 300 → 32 × 3 = 96 → 9 600 .",
+        "hikaye": "Tahir hesap makinesiz bir hile keşfetti: 6 000 ÷ 20 için iki sayıdan da birer sıfır sildi, 600 ÷ 2 = 300 buldu. Sıfırlar hem bölünende hem bölende olduğu için silmek sonucu değiştirmedi!",
+        "adim": [
+          "Sondaki sıfırları say.",
+          "Çarpmada: sıfırsız kısımları çarp, tüm sıfırları sona ekle.",
+          "Bölmede: ortak sıfırları sil, sonra böl.",
+          "İki basamaklı çarpmada ikinci satırı bir basamak sola kaydır."
+        ],
+        "kural": "Çarpmada sıfırlar toplanır, bölmede ortak sıfırlar sadeleşir."
+      }
+    },
+    {
+      "id": "n_problem",
+      "tema": "t2",
+      "ad": "Gerçek Yaşam Problemleri",
+      "kitap_sayfa": "111–134",
+      "onkosul": [
+        "n_carpbol"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "problem_adim",
+        "saat_ondalik"
+      ],
+      "anlatim": {
+        "gorsel": "Problemi bir şema ya dök: Elimde ne var? Ne harcadım? Ne kaldı?",
+        "hikaye": "Okul, atık kâğıt kampanyasından kazandığı parayla fidan alacak. Önce bütçe, sonra harcama, sonra kalan para... Her adımı tek tek çözünce problem bir bulmaca gibi açıldı.",
+        "adim": [
+          "1. Verilenleri ve isteneni yaz.",
+          "2. Hangi işlemler gerekiyor, belirle.",
+          "3. Ara sonucu bul.",
+          "4. Asıl soruyu çöz.",
+          "5. Cevabın mantıklı olup olmadığını kontrol et."
+        ],
+        "kural": "Saat hesabında 1 saat = 60 dakika, 100 değil!"
+      }
+    },
+    {
+      "id": "n_tahmin",
+      "tema": "t2",
+      "ad": "Yuvarlama ve Tahmin",
+      "kitap_sayfa": "121",
+      "onkosul": [
+        "n_problem"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "yuvarlama_kesme",
+        "basamak_kayma"
+      ],
+      "anlatim": {
+        "gorsel": "Sayı doğrusunda hangi onluğa daha yakın sa oraya yuvarla. Tam ortadaysa (5) yukarı.",
+        "hikaye": "Mert markette 47 TL'lik ürün aldı. \"Yaklaşık 50 TL\" dedi çünkü 47, 40'tan çok 50'ye yakın. Hızlı tahmin, cebindeki paranın yetip yetmeyeceğini hemen gösterdi!",
+        "adim": [
+          "Hangi basamağa yuvarlanacağını bul.",
+          "Onun sağındaki rakama bak.",
+          "5 veya büyükse bir artır, küçükse aynı bırak.",
+          "Sağdaki tüm rakamları 0 yap."
+        ],
+        "kural": "Sağdaki rakam ≥ 5 → yukarı; < 5 → aşağı."
+      }
+    },
+    {
+      "id": "a_cevre",
+      "tema": "t3",
+      "ad": "Dikdörtgenin Çevresi",
+      "kitap_sayfa": "142–144",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "cevre_yarim",
+        "cevre_alan",
+        "ters_cevre"
+      ],
+      "anlatim": {
+        "gorsel": "Çevre, şeklin etrafında bir tam tur atınca yürüdüğün yoldur: 4 kenarın toplamı .",
+        "hikaye": "Nehir, bahçesinin etrafına çit çekecek. Bahçe 8 m'ye 4 m. Etrafında yürüyerek saydı: 8 + 4 + 8 + 4 = 24 m çit gerekiyor!",
+        "adim": [
+          "Uzun ve kısa kenarı bul.",
+          "Topla: uzun + kısa.",
+          "2 ile çarp (her kenardan iki tane var).",
+          "Birimi yaz: cm, m."
+        ],
+        "kural": "Ç = 2 × (a + b). Karede Ç = 4 × a."
+      }
+    },
+    {
+      "id": "a_alan",
+      "tema": "t3",
+      "ad": "Dikdörtgenin Alanı",
+      "kitap_sayfa": "145–149",
+      "onkosul": [
+        "a_cevre"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "cevre_alan",
+        "birim"
+      ],
+      "anlatim": {
+        "gorsel": "Alan, şeklin içini dolduran birim karelerin sayısıdır: sıra sayısı × bir sıradaki kare.",
+        "hikaye": "Odanın zeminini kare parkelerle döşeyen usta, bir sıraya 6 parke dizdi, toplam 3 sıra yaptı. \"6 × 3 = 18 parke\" dedi. İşte alan buydu!",
+        "adim": [
+          "Uzun kenarı bul.",
+          "Kısa kenarı bul.",
+          "Çarp: a × b.",
+          "Birimi kare olarak yaz: cm², m²."
+        ],
+        "kural": "A = a × b. Birim: cm², m² (kare birim)."
+      }
+    },
+    {
+      "id": "a_cevre_alan",
+      "tema": "t3",
+      "ad": "Çevre mi Alan mı?",
+      "kitap_sayfa": "150–163",
+      "onkosul": [
+        "a_alan"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "cevre_yarim",
+        "cevre_alan",
+        "birim",
+        "cevre_alan_ayni"
+      ],
+      "anlatim": {
+        "gorsel": "Aynı çevreyle farklı alanlar olabilir! Kenarlar birbirine yaklaştıkça alan büyür.",
+        "hikaye": "Aras ile Duru'nun ikisinde de 12 m ip var. Aras 5 m ve 1 m'lik dikdörtgen yaptı: alanı 5 m². Duru 3 m'ye 3 m kare yaptı: alanı 9 m²! Aynı ip, farklı alan.",
+        "adim": [
+          "Soru etrafını mı içini mi soruyor?",
+          "Etrafı (çit, şerit, çerçeve) → çevre.",
+          "İçi (boya, halı, parke) → alan.",
+          "Doğru formülü uygula."
+        ],
+        "kural": "Etraf → çevre (cm). İç → alan (cm²). Aynı çevrede en büyük alan karededir."
+      }
+    },
+    {
+      "id": "f_tur",
+      "tema": "t4",
+      "ad": "Kesir Türleri",
+      "kitap_sayfa": "17–19",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "kesir_tur",
+        "tamsayili"
+      ],
+      "anlatim": {
+        "gorsel": "Payda bütünün kaç parçaya bölündüğünü, pay kaç parça alındığını gösterir.",
+        "hikaye": "Bir pizza 4 dilime bölündü. Asel 1 dilim yedi: 1/4, bu bir birim kesir . Kardeşlerle 5 dilim yemek istediler ama bir pizzada 4 dilim var; ikinci pizza açıldı: 5/4 = 1 tam 1/4, bu bileşik kesir !",
+        "adim": [
+          "Pay ile paydayı karşılaştır.",
+          "Pay 1 → birim kesir.",
+          "Pay < payda → basit kesir.",
+          "Pay ≥ payda → bileşik kesir.",
+          "Bileşiği tam sayılıya çevir: payı paydaya böl."
+        ],
+        "kural": "11 4 = 2 3 4 (11 ÷ 4 = 2 kalan 3). Geri: 2 × 4 + 3 = 11."
+      }
+    },
+    {
+      "id": "f_denk",
+      "tema": "t4",
+      "ad": "Denk Kesirler",
+      "kitap_sayfa": "17–18",
+      "onkosul": [
+        "f_tur"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "denk_toplama"
+      ],
+      "anlatim": {
+        "gorsel": "Aynı miktarı farklı parçalarla gösterebilirsin: 1/2 ile 2/4 aynı uzunluktadır.",
+        "hikaye": "Ada çikolatayı 2 parçaya bölüp 1 parçasını yedi. Emir aynı çikolatayı 4 parçaya bölüp 2 parçasını yedi. Kim daha çok yedi? İkisi de aynı! 1/2 = 2/4.",
+        "adim": [
+          "Pay ve paydayı AYNI sayıyla çarp → genişletme.",
+          "Pay ve paydayı AYNI sayıya böl → sadeleştirme.",
+          "Asla pay ve paydaya sayı EKLEME."
+        ],
+        "kural": "a b = a × k b × k (k ≠ 0)"
+      }
+    },
+    {
+      "id": "f_ondalik",
+      "tema": "t4",
+      "ad": "Ondalık Gösterim",
+      "kitap_sayfa": "20–27",
+      "onkosul": [
+        "f_denk"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "ondalik_basamak",
+        "ondalik_okunus"
+      ],
+      "anlatim": {
+        "gorsel": "Paydası 10 → virgülden sonra 1 basamak (onda). Paydası 100 → 2 basamak (yüzde).",
+        "hikaye": "Market fişinde \"14,25 TL\" yazıyordu. Defne sordu: \"Virgül ne?\" Annesi: \"14 tam lira ve 25 kuruş; 1 lira 100 kuruş olduğu için 25/100 lira!\" İşte ondalık gösterim!",
+        "adim": [
+          "Paydayı 10 veya 100 yap (genişlet).",
+          "Payda 10 → virgülden sonra 1 basamak.",
+          "Payda 100 → virgülden sonra 2 basamak.",
+          "Okurken: \"… tam onda …\" veya \"… tam yüzde …\"."
+        ],
+        "kural": "3 10 = 0,3 • 3 100 = 0,03 • 1 4 = 25 100 = 0,25"
+      }
+    },
+    {
+      "id": "f_yuzde",
+      "tema": "t4",
+      "ad": "Yüzde Gösterimi",
+      "kitap_sayfa": "28–31",
+      "onkosul": [
+        "f_ondalik"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "yuzde_ondalik"
+      ],
+      "anlatim": {
+        "gorsel": "% işareti \" yüzde \" demektir: 100 eş parçadan kaç tanesi.",
+        "hikaye": "Mağazada \"%40 indirim\" tabelası vardı. Kerem yüzlük tabloyu düşündü: 100 karenin 40'ı boyalı. Yani fiyatın 100'de 40'ı düşülüyordu!",
+        "adim": [
+          "Kesrin paydasını 100 yap.",
+          "Pay, yüzde değeridir.",
+          "Ondalığa çevirmek için: % sayısını 100'e böl."
+        ],
+        "kural": "%13 = 13 100 = 0,13 • %5 = 0,05 (0,5 değil!)"
+      }
+    },
+    {
+      "id": "f_karsilastir",
+      "tema": "t4",
+      "ad": "Kesirleri Karşılaştırma",
+      "kitap_sayfa": "35–39",
+      "onkosul": [
+        "f_yuzde"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "pay_payda_ayri",
+        "payda_buyuk"
+      ],
+      "anlatim": {
+        "gorsel": "Paydalar eşitse payı büyük olan büyüktür. Paylar eşitse paydası küçük olan büyüktür (parçalar daha büyük).",
+        "hikaye": "Saba iki eş pasta yaptı: birini 8, birini 10 dilime böldü. Neva 10'luktan 3 dilim, Revna 8'likten 3 dilim yedi. Kim daha çok yedi? Revna! Çünkü 8'e bölünen pastanın dilimleri daha büyük.",
+        "adim": [
+          "Paydalar eşit mi? → payları karşılaştır.",
+          "Paylar eşit mi? → paydası küçük olan büyük.",
+          "İkisi de farklıysa paydaları eşitle (genişlet).",
+          "Sonra payları karşılaştır."
+        ],
+        "kural": "3 7 5 7 • 1 3 > 1 8"
+      }
+    },
+    {
+      "id": "f_ondalik_karsilastir",
+      "tema": "t4",
+      "ad": "Ondalık ve Yüzde Karşılaştırma",
+      "kitap_sayfa": "40–48",
+      "onkosul": [
+        "f_karsilastir"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "uzun_buyuk",
+        "sifir_fark",
+        "yuzde_ondalik"
+      ],
+      "anlatim": {
+        "gorsel": "Sayı doğrusunda sağdaki sayı daha büyüktür. 0,7 = 0,70 > 0,58.",
+        "hikaye": "Selin süt fiyatlarına baktı: A markette 22,10 TL, B markette 21,99 TL. \"99 daha büyük!\" dedi ama önce tam kısma bakması gerekiyordu: 21 < 22, yani B daha ucuz!",
+        "adim": [
+          "Önce tam kısımları karşılaştır.",
+          "Eşitse onda birler basamağına bak.",
+          "O da eşitse yüzde birlere bak.",
+          "Basamak sayısı eşit değilse sona 0 ekleyerek eşitle.",
+          "Yüzde varsa hepsini aynı gösterime çevir."
+        ],
+        "kural": "0,7 = 0,70 • 0,7 > 0,58 • %41 > 0,4"
+      }
+    },
+    {
+      "id": "s_arastirma",
+      "tema": "t5",
+      "ad": "İstatistiksel Araştırma Süreci",
+      "kitap_sayfa": "60–69",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "soru_tek",
+        "adim_sira"
+      ],
+      "anlatim": {
+        "gorsel": "Araştırma 4 adımdır: Soru → Veri → Grafik → Yorum .",
+        "hikaye": "Sınıf temsilcisi Nehir, \"Sınıfımız en çok hangi sporu seviyor?\" diye merak etti. Herkese sordu, sonuçları tabloya yazdı, sütun grafiği çizdi ve yorumladı: \"Voleybol kazandı!\" Tam bir istatistikçi!",
+        "adim": [
+          "Bir gruba sorulabilecek, birçok cevabı olan bir soru belirle.",
+          "Anket/gözlem ile veri topla veya hazır veri bul.",
+          "Veriyi tablo ve grafikle göster.",
+          "Sonuçları özetle ve yorumla."
+        ],
+        "kural": "Araştırma sorusu: bir gruba yönelik ve birden çok cevaplı olmalı. Kişisel bilgiler gizli tutulur."
+      }
+    },
+    {
+      "id": "s_tablo_sutun",
+      "tema": "t5",
+      "ad": "Sıklık Tablosu ve Sütun Grafiği",
+      "kitap_sayfa": "70–71",
+      "onkosul": [
+        "s_arastirma"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "grafik_okuma",
+        "fark_toplam"
+      ],
+      "anlatim": {
+        "gorsel": "Her sütunun yüksekliği o kategorinin sıklığını gösterir. Tepeden eksene doğru bak.",
+        "hikaye": "Atatürk Ortaokulu Cumhuriyet Bayramı için tişört aldı. Hangi bedenden kaç tane alındığı bir tabloya yazıldı, sonra sütun grafiğine dönüştü. En uzun sütun en çok alınan bedendi!",
+        "adim": [
+          "Grafiğin başlığını ve eksenlerini oku.",
+          "İstenen kategorinin sütununu bul.",
+          "Sütunun tepesinden eksene yatay bak.",
+          "Fark için çıkar, toplam için topla."
+        ],
+        "kural": "Uzun sütun = çok tercih. \"Kaç fazla\" → çıkarma."
+      }
+    },
+    {
+      "id": "s_daire",
+      "tema": "t5",
+      "ad": "Daire Grafiği",
+      "kitap_sayfa": "72–77",
+      "onkosul": [
+        "s_tablo_sutun"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "dilim_oran"
+      ],
+      "anlatim": {
+        "gorsel": "Bütün daire = tüm veri. Yarım daire 1/2 , çeyrek daire 1/4 .",
+        "hikaye": "40 öğrenciye en sevdiği spor soruldu. Daire grafiğinde futbol dairenin yarısını kaplıyordu. Zeynep hemen hesapladı: 40'ın yarısı 20 öğrenci futbolu seçmiş!",
+        "adim": [
+          "Dilimin bütünün kaçta kaçı olduğunu bul.",
+          "Toplam kişi sayısını paydaya böl.",
+          "Payla çarp.",
+          "Tüm dilimler toplamının bütünü verdiğini kontrol et."
+        ],
+        "kural": "Kişi sayısı = toplam × dilimin oranı."
+      }
+    },
+    {
+      "id": "s_okuryazar",
+      "tema": "t5",
+      "ad": "Nokta Grafiği ve İstatistik Okuryazarlığı",
+      "kitap_sayfa": "76–107",
+      "onkosul": [
+        "s_daire"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "grafik_okuma",
+        "eksen_yanilsama",
+        "asiri_genelleme"
+      ],
+      "anlatim": {
+        "gorsel": "Nokta grafiğinde her nokta bir kişidir. Bir grafiğe hemen inanma: eksenler 0'dan mı başlıyor? Kontrol et!",
+        "hikaye": "Bir reklam \"B markası A'dan kat kat fazla satıyor!\" diyordu. Ömer grafiğin eksenine baktı: 38'den başlıyordu! Gerçek fark sadece 4 taneydi. Ömer bir istatistik dedektifi oldu.",
+        "adim": [
+          "Grafiğin neyi gösterdiğini oku.",
+          "Eksenin nereden başladığını kontrol et.",
+          "Sadece verinin söylediğini söyle.",
+          "\"Herkes, hiç kimse, her zaman\" gibi aşırı genellemelere dikkat et."
+        ],
+        "kural": "Veri sadece toplandığı grubu anlatır. Kesik eksen farkları abartabilir."
+      }
+    },
+    {
+      "id": "e_esitlik",
+      "tema": "t6",
+      "ad": "Eşitlik ve Denge",
+      "kitap_sayfa": "118–123",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "esittir_sonuc",
+        "denge_bozma"
+      ],
+      "anlatim": {
+        "gorsel": "\"=\" bir terazi gibidir: iki taraf her zaman dengede.",
+        "hikaye": "Aylin teraziye 5 kg ve 7 kg koydu. Diğer kefeye 9 kg koyunca terazi hâlâ eğikti. \"3 kg eksik!\" dedi ve ekledi; terazi dengeye geldi: 5 + 7 = 9 + 3.",
+        "adim": [
+          "Bilinen tarafı hesapla.",
+          "Diğer taraf da o kadar olmalı.",
+          "Eksik sayıyı ters işlemle bul.",
+          "Bir tarafa ne yaparsan diğerine de aynısını yap."
+        ],
+        "kural": "3 + 5 = 6 + 2 ✓ (\"=\" sonuç değil, denge işaretidir)."
+      }
+    },
+    {
+      "id": "e_ozellik",
+      "tema": "t6",
+      "ad": "İşlem Özellikleri",
+      "kitap_sayfa": "124–130",
+      "onkosul": [
+        "e_esitlik"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "ozellik_karis",
+        "dagilma_eksik",
+        "cikarma_degisme"
+      ],
+      "anlatim": {
+        "gorsel": "6 × 12 = 6 × 10 + 6 × 2: dikdörtgeni ikiye böl, alanları topla. Bu dağılma dır!",
+        "hikaye": "Sevil Öğretmen tahtaya 49 × 12 yazdı. Bir öğrenci 49 × 10 = 490 ve 49 × 2 = 98 bulup topladı: 588! Dağılma özelliği zor bir çarpmayı iki kolay çarpmaya çevirdi.",
+        "adim": [
+          "Yerleri değişmiş mi? → değişme.",
+          "Parantezler kaymış mı? → birleşme.",
+          "Çarpan parantezin içine dağılmış mı? → dağılma.",
+          "Çıkarma ve bölmede değişme özelliği YOKTUR."
+        ],
+        "kural": "a×b = b×a • (a+b)+c = a+(b+c) • a×(b+c) = a×b + a×c"
+      }
+    },
+    {
+      "id": "e_us",
+      "tema": "t6",
+      "ad": "Kare ve Küp",
+      "kitap_sayfa": "131–132",
+      "onkosul": [
+        "e_ozellik"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "us_carpim"
+      ],
+      "anlatim": {
+        "gorsel": "4² = 4 × 4: 4 sıra 4 kare. 3³ = 3 × 3 × 3: küp şeklinde 27 top.",
+        "hikaye": "Sezen not kâğıtlarını panoya 5 sıra 5 sütun yapıştırdı: 5 × 5 = 25 kâğıt. Buna \"5'in karesi\" denir ve 5² yazılır. Umay topları 3 × 3 × 3 dizip küp yaptı: 27 top, \"3'ün küpü\"!",
+        "adim": [
+          "Kare: sayıyı kendisiyle 1 kez çarp.",
+          "Küp: sayıyı kendisiyle 3 kez yan yana yazıp çarp.",
+          "Asla üs ile çarpma! (5² ≠ 10)"
+        ],
+        "kural": "a² = a × a • a³ = a × a × a"
+      }
+    },
+    {
+      "id": "e_oncelik",
+      "tema": "t6",
+      "ad": "İşlem Önceliği",
+      "kitap_sayfa": "133–136",
+      "onkosul": [
+        "e_us"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "oncelik_soldan",
+        "us_carpim"
+      ],
+      "anlatim": {
+        "gorsel": "Sıra: Parantez → Üs → Çarpma/Bölme → Toplama/Çıkarma",
+        "hikaye": "Mert 3 paket kalem (her biri 4 tane) ve 2 tane tek kalem aldı. \"3 × 4 + 2\" yazdı. Soldan sağa yapsa 3 × 6 = 18 bulurdu ama gerçekte 12 + 2 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!",
+        "adim": [
+          "Önce parantez içini yap.",
+          "Sonra üslü ifadeleri (kare, küp) hesapla.",
+          "Sonra çarpma ve bölmeyi soldan sağa yap.",
+          "En son toplama ve çıkarmayı soldan sağa yap."
+        ],
+        "kural": "2 + 3 × 4 = 14 (20 değil!)"
+      }
+    },
+    {
+      "id": "e_oruntu",
+      "tema": "t6",
+      "ad": "Sayı ve Şekil Örüntüleri",
+      "kitap_sayfa": "139–148",
+      "onkosul": [
+        "e_oncelik"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "oruntu_baslangic",
+        "oruntu_bir"
+      ],
+      "anlatim": {
+        "gorsel": "Örüntüde her adımda aynı miktar artar. Kural: ilk terim + (adım − 1) × artış .",
+        "hikaye": "Ertuğrul kumbarasına her gün 15 TL attı: 15, 30, 45, 60... 10. gün ne kadar olur? Her gün 15 eklendiği için 10 × 15 = 150 TL! Ama kumbarada başta 20 TL olsaydı 20 + 150 = 170 TL olurdu.",
+        "adim": [
+          "Ardışık terimlerin farkını bul (artış).",
+          "İlk terimi belirle.",
+          "n. terim = ilk terim + (n − 1) × artış.",
+          "Kuralı ilk terimlerle kontrol et."
+        ],
+        "kural": "3, 7, 11, 15… → kural: 4 × adım − 1"
+      }
+    },
+    {
+      "id": "e_algoritma",
+      "tema": "t6",
+      "ad": "Algoritma ve Akış Şeması",
+      "kitap_sayfa": "149–159",
+      "onkosul": [
+        "e_oruntu"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "algoritma_sira",
+        "dongu_sayma"
+      ],
+      "anlatim": {
+        "gorsel": "Algoritma = sıralı adımlar. Akış şemasında oklar sırayı, karar kutuları \"evet/hayır\" yollarını gösterir.",
+        "hikaye": "Ayşe annesinden ayran tarifini aldı: yoğurt koy, su koy, çırp, tuz ekle, tadına bak, tuz yeterli değilse tekrar ekle... Bu bir algoritma! Sırayı karıştırsa ayran olmazdı.",
+        "adim": [
+          "Adımları yazıldığı sırayla uygula.",
+          "Her adımdan sonra elindeki değeri not et.",
+          "Karar adımında koşulu kontrol et.",
+          "Döngüde kaç kez döndüğünü işaretle."
+        ],
+        "kural": "Algoritma: Başla → adımlar (sırayla) → Bitir."
+      }
+    },
+    {
+      "id": "p_olay",
+      "tema": "t7",
+      "ad": "Olaylar: Kesin, İmkânsız, Mümkün",
+      "kitap_sayfa": "167–169",
+      "onkosul": [],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "olay_tur",
+        "olasilik_buyuk"
+      ],
+      "anlatim": {
+        "gorsel": "Olasılık 0 ile 1 arasındadır: 0 = imkânsız , 1 = kesin , arası = mümkün .",
+        "hikaye": "Piknik günü yağmur yağar mı? Belki: mümkün . Zarla 7 atabilir miyiz? Asla: imkânsız . Yarın güneş doğacak mı? Kesinlikle: kesin !",
+        "adim": [
+          "Olay mutlaka oluyor mu? → kesin (1).",
+          "Asla olamıyor mu? → imkânsız (0).",
+          "Olabilir de olmayabilir de mi? → mümkün."
+        ],
+        "kural": "İmkânsız = 0 • Kesin = 1 • Mümkün: 0 ile 1 arası."
+      }
+    },
+    {
+      "id": "p_spektrum",
+      "tema": "t7",
+      "ad": "Olasılık Spektrumu",
+      "kitap_sayfa": "170–178",
+      "onkosul": [
+        "p_olay"
+      ],
+      "zorluk_seviyeleri": [
+        1,
+        2,
+        3
+      ],
+      "yanilgilar": [
+        "az_cok",
+        "olay_tur",
+        "olasilik_oran",
+        "olasilik_buyuk"
+      ],
+      "anlatim": {
+        "gorsel": "Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa az olası , fazlaysa çok olası .",
+        "hikaye": "Doğum günü çarkında 4 dilimin 3'ü mavi. Duru \"Mavi gelme ihtimali yüksek!\" dedi. Haklıydı: 3/4, yarıdan fazla, yani çok olası .",
+        "adim": [
+          "İstenen durumları say.",
+          "Tüm durumları say.",
+          "Olasılık = istenen / tüm.",
+          "1/2 ile karşılaştır: az mı, eşit mi, çok mu?"
+        ],
+        "kural": "Olasılık 0 ile 1 arasındadır; asla 1'den büyük olamaz."
+      }
+    }
+  ],
+  "yanilgilar": {
+    "isin_dogru": {
+      "ad": "Işın ile doğruyu karıştırma",
+      "duzeltme": "Işının bir başlangıç noktası vardır ve tek yönde sonsuza gider. Doğru ise iki yönde de sonsuza uzar."
+    },
+    "dp_dogru": {
+      "ad": "Doğru parçası ile doğruyu karıştırma",
+      "duzeltme": "Doğru parçasının iki uç noktası vardır, bu yüzden uzunluğu ölçülebilir. Doğrunun ucu yoktur."
+    },
+    "nokta_sayma": {
+      "ad": "Doğru parçalarını eksik sayma",
+      "duzeltme": "Sadece yan yana olanları değil, aradaki noktaları atlayan doğru parçalarını da say: A-C de bir doğru parçasıdır."
+    },
+    "cap_yaricap": {
+      "ad": "Çap ile yarıçapı karıştırma",
+      "duzeltme": "Çap, merkezden geçip çemberin iki ucuna değer. Çap = 2 × yarıçap."
+    },
+    "dik_yatay": {
+      "ad": "\"Dik olmak için yatay-dikey olmalı\" sanma",
+      "duzeltme": "İki doğru dönük çizilse de aralarındaki açı 90° ise birbirine diktir. Köşedeki küçük kare işareti bunu gösterir."
+    },
+    "paralel_kesisen": {
+      "ad": "Paralel ile kesişeni karıştırma",
+      "duzeltme": "Paralel doğrular ne kadar uzatılırsa uzatılsın hiç kesişmez, aralarındaki uzaklık hep aynıdır."
+    },
+    "aci_tur": {
+      "ad": "Açı türlerini karıştırma",
+      "duzeltme": "90°'den küçükse dar, tam 90° ise dik, 90° ile 180° arasındaysa geniş açıdır. 180° doğru açı, 360° tam açıdır."
+    },
+    "iletki_ters": {
+      "ad": "İletkide yanlış ölçeği okuma",
+      "duzeltme": "İletkide iki sıra sayı vardır. Açının kolu hangi taraftaki 0'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90'dan küçük olmalı."
+    },
+    "aci_kol": {
+      "ad": "Açıyı kol uzunluğuna göre karşılaştırma",
+      "duzeltme": "Açının büyüklüğü kolların ne kadar uzun olduğuna değil, kolların ne kadar açıldığına bağlıdır."
+    },
+    "tumler_butunler": {
+      "ad": "Tümler ile bütünleri karıştırma",
+      "duzeltme": "Tümler açıların toplamı 90°, bütünler açıların toplamı 180°'dir. Akılda kalsın: \"Tümler: Tek dik açı\"."
+    },
+    "ters_aci": {
+      "ad": "Ters açıları eşit görmeme",
+      "duzeltme": "Kesişen iki doğrunun karşı karşıya duran açılarına ters açı denir ve ölçüleri her zaman eşittir."
+    },
+    "cokgen_sayi": {
+      "ad": "Kenar, köşe ve iç açı sayısını karıştırma",
+      "duzeltme": "Bir çokgende kenar, köşe ve iç açı sayısı birbirine eşittir."
+    },
+    "kosegen_kenar": {
+      "ad": "Kenarı köşegen sanma",
+      "duzeltme": "Köşegen, yan yana OLMAYAN iki köşeyi birleştirir. Bir köşeden kendisine ve iki komşusuna köşegen çizilmez."
+    },
+    "duzgun_eksik": {
+      "ad": "Düzgün çokgen tanımını eksik bilme",
+      "duzeltme": "Düzgün çokgende hem bütün kenarlar hem de bütün iç açılar eşittir. Sadece kenarların eşit olması yetmez."
+    },
+    "ucgen_360": {
+      "ad": "Üçgenin iç açılarını 360° sanma",
+      "duzeltme": "Üçgenin iç açılarının toplamı 180°'dir (bir doğru açı). 360° dörtgenin iç açılarının toplamıdır."
+    },
+    "ucgen_sinif": {
+      "ad": "Üçgeni yanlış sınıflandırma",
+      "duzeltme": "Üçgenin türüne EN BÜYÜK açısına bakarak karar ver: 90°'den büyükse geniş açılı, tam 90° ise dik, hepsi 90°'den küçükse dar açılı üçgendir."
+    },
+    "sifir_atlama": {
+      "ad": "Bölükteki sıfırları atlama",
+      "duzeltme": "Her bölük üç basamaklıdır. Okunmayan bölükleri 000 ile doldurmayı unutma."
+    },
+    "bolük_kayma": {
+      "ad": "Bölük adlarını kaydırma",
+      "duzeltme": "Sağdan sola: birler, binler, milyonlar, milyarlar bölüğü. Her bölükte üç basamak vardır."
+    },
+    "basamak_deger": {
+      "ad": "Basamak değeri yerine rakamı söyleme",
+      "duzeltme": "Basamak değeri = rakam × bulunduğu basamağın değeri. Örneğin 5 yüzler basamağındaysa değeri 500'dür."
+    },
+    "basamak_kayma": {
+      "ad": "Basamağı bir kaydırma",
+      "duzeltme": "Basamakları sağdan saymaya birlerden başla: birler, onlar, yüzler, binler..."
+    },
+    "cozumleme_bitisik": {
+      "ad": "Çözümlemede sıfırları kaybetme",
+      "duzeltme": "Çözümlenmiş sayıyı toplarken her parçayı kendi basamağına yaz; boş kalan basamaklara 0 koy."
+    },
+    "ilk_rakam": {
+      "ad": "Sadece ilk rakama bakarak karşılaştırma",
+      "duzeltme": "Önce basamak sayısına bak: basamak sayısı fazla olan sayı daha büyüktür. Eşitse soldan rakam rakam karşılaştır."
+    },
+    "ters_islem": {
+      "ad": "Bilinmeyeni bulurken ters işlemi seçmeme",
+      "duzeltme": "Toplamda bilinmeyen terimi bulmak için toplamdan diğer terimi ÇIKAR. Çıkarmada eksileni bulmak için çıkan ile farkı TOPLA."
+    },
+    "elde_unutma": {
+      "ad": "Eldeyi veya onluk bozmayı unutma",
+      "duzeltme": "İşlemi basamak basamak yap; 10 ve üzeri olunca eldeyi bir sonraki basamağa ekle."
+    },
+    "sifir_sayisi": {
+      "ad": "Kısa yoldan çarpma/bölmede sıfırları yanlış sayma",
+      "duzeltme": "Sıfırları ayır, sıfır olmayan kısımları çarp, sonra ayırdığın TÜM sıfırları sona ekle. Bölmede ortak sıfırları sil."
+    },
+    "kismi_carpim": {
+      "ad": "Çarpmada ikinci satırı kaydırmama",
+      "duzeltme": "İki basamaklı sayıyla çarparken onlar basamağıyla çarptığın sonucu bir basamak sola kaydırarak yaz (aslında 10 ile çarpıyorsun)."
+    },
+    "saat_ondalik": {
+      "ad": "Saati ondalık sayı gibi çıkarma",
+      "duzeltme": "1 saat 60 dakikadır, 100 değil! Önce tam saate kadar olan dakikaları say, sonra kalanları ekle."
+    },
+    "problem_adim": {
+      "ad": "Çok adımlı problemde adım atlama",
+      "duzeltme": "Problemi adımlara ayır: Verilenler neler? İstenen ne? Önce ara sonucu bul, sonra asıl soruyu çöz."
+    },
+    "yuvarlama_kesme": {
+      "ad": "Yuvarlarken sadece kesip atma",
+      "duzeltme": "Yuvarlayacağın basamağın sağındaki rakama bak: 5 veya daha büyükse bir artır, 5'ten küçükse aynı bırak."
+    },
+    "cevre_yarim": {
+      "ad": "Çevreyi hesaplarken sadece iki kenarı toplama",
+      "duzeltme": "Çevre, şeklin etrafındaki TÜM kenarların toplamıdır. Dikdörtgenin 4 kenarı vardır: Çevre = 2 × (uzun kenar + kısa kenar)."
+    },
+    "cevre_alan": {
+      "ad": "Çevre ile alanı karıştırma",
+      "duzeltme": "Çevre bir uzunluktur (etrafını dolaşmak, cm). Alan ise yüzeyin kapladığı yerdir (içini kaplamak, cm²)."
+    },
+    "birim": {
+      "ad": "Alan birimini yanlış yazma",
+      "duzeltme": "Alan birim karelerle ölçülür: cm², m². Uzunluk birimi (cm, m) alan için kullanılmaz."
+    },
+    "ters_cevre": {
+      "ad": "Çevreden kenar bulurken yarıya bölmeyi unutma",
+      "duzeltme": "Çevre = 2 × (a + b) olduğu için önce çevreyi 2'ye böl (a + b), sonra bilinen kenarı çıkar."
+    },
+    "cevre_alan_ayni": {
+      "ad": "\"Çevreleri eşitse alanları da eşittir\" sanma",
+      "duzeltme": "Aynı çevreye sahip dikdörtgenlerin alanları farklı olabilir. Kenarlar birbirine yaklaştıkça alan büyür; en büyük alan kareye aittir."
+    },
+    "kesir_tur": {
+      "ad": "Kesir türlerini karıştırma",
+      "duzeltme": "Pay paydadan küçükse basit, pay 1 ise birim kesir, pay paydaya eşit ya da büyükse bileşik kesirdir."
+    },
+    "tamsayili": {
+      "ad": "Bileşik ↔ tam sayılı kesir dönüşüm hatası",
+      "duzeltme": "Payı paydaya böl: Bölüm tam kısım, kalan yeni pay olur, payda aynı kalır. Geri dönüş: (tam × payda) + pay."
+    },
+    "denk_toplama": {
+      "ad": "Denk kesir için pay ve paydaya aynı sayıyı ekleme",
+      "duzeltme": "Denk kesir için pay ve paydayı aynı sayıyla ÇARP veya BÖL. Toplamak kesrin değerini değiştirir."
+    },
+    "ondalik_basamak": {
+      "ad": "Ondalık gösterimde basamak sayısını karıştırma",
+      "duzeltme": "Paydası 10 ise virgülden sonra 1, paydası 100 ise 2 basamak olur: 3/100 = 0,03."
+    },
+    "ondalik_okunus": {
+      "ad": "Ondalık gösterimi yanlış okuma",
+      "duzeltme": "Virgülden sonra 1 basamak varsa \"onda\", 2 basamak varsa \"yüzde\" diye okunur: 4,25 → dört tam yüzde yirmi beş."
+    },
+    "yuzde_ondalik": {
+      "ad": "Yüzdeyi ondalığa yanlış çevirme",
+      "duzeltme": "% işareti \"yüzde\", yani paydası 100 demektir: %5 = 5/100 = 0,05 (0,5 değil!)."
+    },
+    "payda_buyuk": {
+      "ad": "\"Paydası büyük olan kesir büyüktür\" sanma",
+      "duzeltme": "Payda bütünün kaç parçaya bölündüğünü gösterir. Parça sayısı arttıkça her parça KÜÇÜLÜR: 1/8 < 1/3."
+    },
+    "pay_payda_ayri": {
+      "ad": "Kesirleri karşılaştırırken sadece paya bakma",
+      "duzeltme": "Paydalar farklıysa önce paydaları eşitle (genişlet), sonra payları karşılaştır."
+    },
+    "uzun_buyuk": {
+      "ad": "\"Basamağı çok olan ondalık sayı büyüktür\" sanma",
+      "duzeltme": "Ondalık sayıları karşılaştırırken önce tam kısma, sonra onda birler basamağına bak: 0,7 > 0,58 çünkü 7 onda > 5 onda."
+    },
+    "sifir_fark": {
+      "ad": "Sondaki sıfırın değeri değiştirdiğini sanma",
+      "duzeltme": "Ondalık kısmın sonuna eklenen sıfır değeri değiştirmez: 0,7 = 0,70 (7 onda = 70 yüzde)."
+    },
+    "soru_tek": {
+      "ad": "Araştırma sorusunu tek kişiye/tek cevaba yönlendirme",
+      "duzeltme": "İstatistiksel araştırma sorusu bir GRUBA sorulur ve birden çok farklı cevabı olabilir."
+    },
+    "adim_sira": {
+      "ad": "Araştırma adımlarının sırasını karıştırma",
+      "duzeltme": "Sıra: 1) Araştırma sorusunu belirle 2) Veri topla 3) Görselleştir 4) Özetle ve yorumla."
+    },
+    "grafik_okuma": {
+      "ad": "Grafikten yanlış değer okuma",
+      "duzeltme": "Sütunun tepesinden sola doğru düz bir çizgi çekip eksendeki değeri oku. Hangi kategoriye baktığını kontrol et."
+    },
+    "fark_toplam": {
+      "ad": "\"Fark\" sorulduğunda toplama yapma",
+      "duzeltme": "\"Kaç fazla / fark\" soruları çıkarma ister; \"toplam / hepsi\" soruları toplama ister."
+    },
+    "dilim_oran": {
+      "ad": "Daire grafiğinde dilim oranını yanlış belirleme",
+      "duzeltme": "Bütün daire = tüm veri. Yarım daire 1/2, çeyrek daire 1/4'tür. Kişi sayısı = toplam × dilimin oranı."
+    },
+    "asiri_genelleme": {
+      "ad": "Veriden kesin olmayan sonuç çıkarma",
+      "duzeltme": "Grafik sadece toplanan veriyi anlatır. \"Herkes\", \"her zaman\" gibi kesin yargılar veriyle desteklenmiyorsa doğru değildir."
+    },
+    "eksen_yanilsama": {
+      "ad": "Kesik eksenli grafikte yanılma",
+      "duzeltme": "Grafikteki eksen 0'dan başlamıyorsa sütun boyları yanıltıcı olabilir. Her zaman eksendeki gerçek sayıları oku."
+    },
+    "esittir_sonuc": {
+      "ad": "\"=\" işaretini \"sonucu yaz\" diye görme",
+      "duzeltme": "\"=\" işareti iki tarafın DENGEDE olduğunu gösterir. Sol taraf ne kadarsa sağ taraf da o kadar olmalı."
+    },
+    "denge_bozma": {
+      "ad": "Eşitliğin korunumunu bilmeme",
+      "duzeltme": "Bir eşitliğin iki tarafına da aynı işlemi yaparsan denge bozulmaz. Bir tarafa 2 eklersen diğer tarafa da 2 eklemelisin."
+    },
+    "ozellik_karis": {
+      "ad": "İşlem özelliklerini karıştırma",
+      "duzeltme": "Değişme: yer değiştirme (a×b=b×a). Birleşme: gruplama ((a+b)+c=a+(b+c)). Dağılma: çarpımı içeriye dağıtma (a×(b+c)=a×b+a×c)."
+    },
+    "dagilma_eksik": {
+      "ad": "Dağılmada sadece ilk terimi çarpma",
+      "duzeltme": "Parantezin önündeki sayı parantez içindeki HER terimle çarpılır: 6×(10+2) = 6×10 + 6×2."
+    },
+    "cikarma_degisme": {
+      "ad": "Çıkarma/bölmede değişme özelliği var sanma",
+      "duzeltme": "Değişme özelliği toplama ve çarpmada vardır. 9 − 4 ile 4 − 9 aynı değildir."
+    },
+    "us_carpim": {
+      "ad": "Kareyi 2 ile çarpmak sanma",
+      "duzeltme": "5² = 5 × 5 = 25 demektir, 5 × 2 değil. Küp: 3³ = 3 × 3 × 3 = 27."
+    },
+    "oncelik_soldan": {
+      "ad": "İşlem önceliğini atlayıp soldan sağa yapma",
+      "duzeltme": "Önce parantez, sonra üslü ifade, sonra çarpma-bölme, en son toplama-çıkarma yapılır."
+    },
+    "oruntu_baslangic": {
+      "ad": "Örüntüde başlangıç değerini hesaba katmama",
+      "duzeltme": "n. adım = ilk terim + (n − 1) × artış. Sadece artış × n demek ilk terimi unutmak olur."
+    },
+    "oruntu_bir": {
+      "ad": "Örüntüde adım sayısını bir fazla sayma",
+      "duzeltme": "1. adımda henüz hiç artış olmadı. n. adıma gelene kadar (n − 1) kez artış olur."
+    },
+    "algoritma_sira": {
+      "ad": "Algoritma adımlarını sırasız uygulama",
+      "duzeltme": "Algoritma adımları yazıldığı sırayla, tek tek uygulanır. Her adımdan sonra elindeki sayıyı not et."
+    },
+    "dongu_sayma": {
+      "ad": "Döngü tekrarlarını yanlış sayma",
+      "duzeltme": "Döngünün her turunda değeri yaz ve koşulu kontrol et. Kaç kez tekrar ettiğini tek tek işaretle."
+    },
+    "olay_tur": {
+      "ad": "Kesin, imkânsız ve mümkün olayları karıştırma",
+      "duzeltme": "Kesin olay mutlaka olur (olasılık 1), imkânsız olay asla olmaz (0). Arada kalanlar mümkün olaylardır."
+    },
+    "olasilik_buyuk": {
+      "ad": "Olasılığın 1'den büyük olabileceğini sanma",
+      "duzeltme": "Olasılık her zaman 0 ile 1 arasındadır (%0 ile %100). İstenen durum sayısı tüm durumlardan fazla olamaz."
+    },
+    "olasilik_oran": {
+      "ad": "Olasılık kesrini yanlış kurma",
+      "duzeltme": "Olasılık = istenen durum sayısı / tüm durumların sayısı. Paydaya tüm dilimleri yaz."
+    },
+    "az_cok": {
+      "ad": "Az olası ile çok olasıyı karıştırma",
+      "duzeltme": "1/2'den küçük olasılıklar az olası, 1/2'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır."
+    },
+    "genel": {
+      "ad": "İşlem hatası",
+      "duzeltme": "Çözümü adım adım tekrar kontrol et."
+    }
+  },
+  "anlatim_bicimleri": {
+    "gorsel": {
+      "name": "Görsel model",
+      "icon": "🖼️"
+    },
+    "hikaye": {
+      "name": "Hikâye ile",
+      "icon": "📖"
+    },
+    "adim": {
+      "name": "Adım adım",
+      "icon": "🪜"
+    },
+    "kural": {
+      "name": "Kısa ve net",
+      "icon": "⚡"
+    }
+  }
+}

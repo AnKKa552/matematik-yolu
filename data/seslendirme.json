@@ -1,0 +1,1315 @@
+{
+ "ses": {
+  "ad": "Pi",
+  "voice_id": "Hr3W7yWIljG9YBJn39oK",
+  "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
+ },
+ "toplam_karakter": 28282,
+ "kayitlar": [
+  {
+   "key": "pi_dogru_1",
+   "grup": "pi",
+   "text": "Harika!"
+  },
+  {
+   "key": "pi_dogru_2",
+   "grup": "pi",
+   "text": "Süpersin!"
+  },
+  {
+   "key": "pi_dogru_3",
+   "grup": "pi",
+   "text": "Mükemmel!"
+  },
+  {
+   "key": "pi_dogru_4",
+   "grup": "pi",
+   "text": "Tam isabet!"
+  },
+  {
+   "key": "pi_dogru_5",
+   "grup": "pi",
+   "text": "Bravo!"
+  },
+  {
+   "key": "pi_dogru_6",
+   "grup": "pi",
+   "text": "Çok iyi!"
+  },
+  {
+   "key": "pi_dogru_7",
+   "grup": "pi",
+   "text": "İşte bu!"
+  },
+  {
+   "key": "pi_dogru_8",
+   "grup": "pi",
+   "text": "Matematik dehası!"
+  },
+  {
+   "key": "pi_dogru_9",
+   "grup": "pi",
+   "text": "Şahane!"
+  },
+  {
+   "key": "pi_dogru_10",
+   "grup": "pi",
+   "text": "Kafana sağlık!"
+  },
+  {
+   "key": "pi_telafi_1",
+   "grup": "pi",
+   "text": "Hatandan öğrendin!"
+  },
+  {
+   "key": "pi_telafi_2",
+   "grup": "pi",
+   "text": "İşte gerçek öğrenme bu!"
+  },
+  {
+   "key": "pi_telafi_3",
+   "grup": "pi",
+   "text": "Geri döndün, harika!"
+  },
+  {
+   "key": "pi_telafi_4",
+   "grup": "pi",
+   "text": "Gördün mü, yapabiliyorsun!"
+  },
+  {
+   "key": "pi_yanlis_1",
+   "grup": "pi",
+   "text": "Sorun değil, birlikte bakalım."
+  },
+  {
+   "key": "pi_yanlis_2",
+   "grup": "pi",
+   "text": "Hata yapmak öğrenmenin parçası."
+  },
+  {
+   "key": "pi_yanlis_3",
+   "grup": "pi",
+   "text": "Neredeyse! Şimdi nedenine bakalım."
+  },
+  {
+   "key": "pi_yanlis_4",
+   "grup": "pi",
+   "text": "Hiç dert etme, bir daha deneyeceğiz."
+  },
+  {
+   "key": "pi_yanlis_5",
+   "grup": "pi",
+   "text": "Bu soru biraz zordu, ama sen pes etmezsin."
+  },
+  {
+   "key": "pi_yanlis_6",
+   "grup": "pi",
+   "text": "Güzel denemeydi! Gel, birlikte çözelim."
+  },
+  {
+   "key": "pi_aciklama_1",
+   "grup": "pi",
+   "text": "Gel, nerede karıştığına birlikte bakalım."
+  },
+  {
+   "key": "pi_aciklama_2",
+   "grup": "pi",
+   "text": "Şuraya bir bak, bence burada küçük bir karışıklık oldu."
+  },
+  {
+   "key": "pi_telafi_soru_1",
+   "grup": "pi",
+   "text": "Şimdi benzer ama biraz daha kolay bir soru geliyor. Sen yaparsın!"
+  },
+  {
+   "key": "pi_telafi_soru_2",
+   "grup": "pi",
+   "text": "Hadi bir daha deneyelim, bu sefer olacak!"
+  },
+  {
+   "key": "pi_yonlendir_1",
+   "grup": "pi",
+   "text": "Takıldın mı? Ampule dokunursan sana ipucu veririm."
+  },
+  {
+   "key": "pi_yonlendir_2",
+   "grup": "pi",
+   "text": "Acele etme, düşünmek de öğrenmektir."
+  },
+  {
+   "key": "pi_yonlendir_3",
+   "grup": "pi",
+   "text": "Soruyu bir daha oku, bazen cevap orada saklıdır."
+  },
+  {
+   "key": "pi_ipucu_1",
+   "grup": "pi",
+   "text": "Bak, sana küçük bir ipucu."
+  },
+  {
+   "key": "pi_ipucu_2",
+   "grup": "pi",
+   "text": "İşte bir ipucu, gerisi sende!"
+  },
+  {
+   "key": "pi_ders_basla_1",
+   "grup": "pi",
+   "text": "Hadi başlayalım!"
+  },
+  {
+   "key": "pi_ders_basla_2",
+   "grup": "pi",
+   "text": "Bugün beynini çalıştırma zamanı!"
+  },
+  {
+   "key": "pi_ders_basla_3",
+   "grup": "pi",
+   "text": "Hazır mısın? Başlıyoruz!"
+  },
+  {
+   "key": "pi_yari_1",
+   "grup": "pi",
+   "text": "Yarıyı geçtin, harika gidiyorsun!"
+  },
+  {
+   "key": "pi_yari_2",
+   "grup": "pi",
+   "text": "Yarı yoldayız, devam!"
+  },
+  {
+   "key": "pi_hosgeldin_geri_1",
+   "grup": "pi",
+   "text": "Tekrar hoş geldin! Kaldığımız yerden devam edelim mi?"
+  },
+  {
+   "key": "pi_hosgeldin_geri_2",
+   "grup": "pi",
+   "text": "Seni özledim! Hadi biraz matematik yapalım."
+  },
+  {
+   "key": "pi_hosgeldin_geri_3",
+   "grup": "pi",
+   "text": "Yine geldin, süpersin! Bugün ne öğreniyoruz?"
+  },
+  {
+   "key": "pi_sinav_1",
+   "grup": "pi",
+   "text": "Tema sınavı başlıyor. Sakin ol, sen buna hazırsın!"
+  },
+  {
+   "key": "pi_kupa_1",
+   "grup": "pi",
+   "text": "Kupa senin! Bu temanın ustası oldun!"
+  },
+  {
+   "key": "pi_gorev_1",
+   "grup": "pi",
+   "text": "Bir görevi daha tamamladın, ödülünü al!"
+  },
+  {
+   "key": "pi_seri3_1",
+   "grup": "pi",
+   "text": "Üç doğru üst üste! Seri ateşi yandı!"
+  },
+  {
+   "key": "pi_seri3_2",
+   "grup": "pi",
+   "text": "Seri başladı, devam!"
+  },
+  {
+   "key": "pi_seri5_1",
+   "grup": "pi",
+   "text": "Durdurulamazsın!"
+  },
+  {
+   "key": "pi_seri5_2",
+   "grup": "pi",
+   "text": "Beş doğru üst üste! İnanılmaz!"
+  },
+  {
+   "key": "pi_seri8_1",
+   "grup": "pi",
+   "text": "Efsane! Gerçek bir matematik ustasısın!"
+  },
+  {
+   "key": "pi_seri8_2",
+   "grup": "pi",
+   "text": "Bu seri efsanelere yakışır!"
+  },
+  {
+   "key": "pi_bitti_1",
+   "grup": "pi",
+   "text": "Ders bitti, harika çalıştın!"
+  },
+  {
+   "key": "pi_bitti_2",
+   "grup": "pi",
+   "text": "Bugün beynin biraz daha güçlendi!"
+  },
+  {
+   "key": "pi_bitti_3",
+   "grup": "pi",
+   "text": "Bir adım daha ileridesin, aferin!"
+  },
+  {
+   "key": "pi_rekor_1",
+   "grup": "pi",
+   "text": "Süre doldu! Bakalım rekoru kırdın mı?"
+  },
+  {
+   "key": "pi_rekor_2",
+   "grup": "pi",
+   "text": "Şimşek gibiydin!"
+  },
+  {
+   "key": "pi_hosgeldin_1",
+   "grup": "pi",
+   "text": "Merhaba, ben Pi! Beşinci sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım."
+  },
+  {
+   "key": "pi_kart_1",
+   "grup": "pi",
+   "text": "Önce sana bu konuyu anlatayım. Olmazsa başka türlü anlatırım!"
+  },
+  {
+   "key": "kart_g_temel_gorsel",
+   "grup": "kart",
+   "text": "Uçlarına bak! İki uç noktası olan doğru parçası, bir başlangıcı ve tek oku olan ışın, iki yönde oku olan doğrudur."
+  },
+  {
+   "key": "kart_g_temel_hikaye",
+   "grup": "kart",
+   "text": "Ela evden okula yürüdü: evi ve okulu belli, yani yolu bir doğru parçası. Bir el feneri yaktı: ışık fenerden başlayıp tek yönde sonsuza gidiyor, bu bir ışın. Uzayda iki yönde de bitmeyen bir yol düşün: bu da bir doğru!"
+  },
+  {
+   "key": "kart_g_temel_adim",
+   "grup": "kart",
+   "text": "Çizimin uçlarına bak. İki uç noktası varsa doğru parçasıdır. Bir uç noktası ve tek ok varsa ışındır. İki yönde ok varsa doğrudur."
+  },
+  {
+   "key": "kart_g_temel_kural",
+   "grup": "kart",
+   "text": "Doğru parçasının iki ucu, ışının bir ucu vardır. Doğrunun hiç ucu yoktur."
+  },
+  {
+   "key": "kart_g_cember_gorsel",
+   "grup": "kart",
+   "text": "Merkezden çembere giden çizgi yarıçaptır. Merkezden geçip iki ucu çemberde olan çizgi çaptır. Çap eşittir 2 çarpı yarıçap."
+  },
+  {
+   "key": "kart_g_cember_hikaye",
+   "grup": "kart",
+   "text": "Kerem bahçeye bir kazık çaktı, ipin ucunu bağladı ve gerilmiş iple etrafında döndü. İzi çember, kazık merkez, ip ise yarıçap! Kerem bir uçtan merkezden geçerek diğer uca yürüdüğünde ipin 2 katını yürüdü: bu da çap."
+  },
+  {
+   "key": "kart_g_cember_adim",
+   "grup": "kart",
+   "text": "Merkezi bul (O noktası). Merkezden çembere olan uzaklık yarıçaptır (r). Çap merkezden geçer ve 2 yarıçap uzunluğundadır. Çap verilirse yarıçap eşittir çap bölü 2."
+  },
+  {
+   "key": "kart_g_cember_kural",
+   "grup": "kart",
+   "text": "Çap eşittir 2 çarpı yarıçap. Çember sadece kenar çizgisi, daire ise çember artı iç bölgedir."
+  },
+  {
+   "key": "kart_g_dikme_paralel_gorsel",
+   "grup": "kart",
+   "text": "Köşede küçük bir kare varsa doğrular diktir. Hiç kesişmeyen, arası hep aynı olan doğrular paraleldir."
+  },
+  {
+   "key": "kart_g_dikme_paralel_hikaye",
+   "grup": "kart",
+   "text": "Tren rayları hiç birleşmez, aralarındaki mesafe hep aynıdır: paralel! Bir defterin kenarları köşede dik açı yapar: dik! Defteri çevirsen bile köşe hâlâ diktir."
+  },
+  {
+   "key": "kart_g_dikme_paralel_adim",
+   "grup": "kart",
+   "text": "İki doğru kesişiyor mu? Bak. Kesişmiyorsa ve aralarındaki uzaklık hep aynıysa, paralel. Kesişiyorsa köşedeki açıya bak. Açı 90 derece (küçük kare işareti) ise, dik. Şekil dönük olsa da kural değişmez."
+  },
+  {
+   "key": "kart_g_dikme_paralel_kural",
+   "grup": "kart",
+   "text": "Dik doğrular 90 derece ile kesişir. Paralel doğrular hiç kesişmez. Aynı doğruya dik iki doğru birbirine paraleldir."
+  },
+  {
+   "key": "kart_g_aci_gorsel",
+   "grup": "kart",
+   "text": "Açının büyüklüğü kolların ne kadar açıldığına bağlıdır, uzunluğuna değil. 90 derece (dik açı) referans noktandır."
+  },
+  {
+   "key": "kart_g_aci_hikaye",
+   "grup": "kart",
+   "text": "Saat tam 3'te akrep ve yelkovan dik açı yapar (90 derece). Saat 1'de aralarındaki açı daha kapalı: dar açı. Saat 5'te iyice açılır: geniş açı. Saat 6'da düz bir çizgi: doğru açı (180 derece)!"
+  },
+  {
+   "key": "kart_g_aci_adim",
+   "grup": "kart",
+   "text": "Açıyı bir dik açıyla (defter köşesi) karşılaştır. Daha kapalıysa dar açı (90 dereceden küçük). Tam köşe gibiyse dik açı (90 derece). Daha açıksa geniş açı (90 ile 180 derece). İletkiyle ölçerken kolun başladığı 0'ın olduğu ölçeği oku."
+  },
+  {
+   "key": "kart_g_aci_kural",
+   "grup": "kart",
+   "text": "Dar açı 90 dereceden küçüktür. Dik açı tam 90 derecedir. Geniş açı 90 ile 180 derece arasındadır. Doğru açı 180, tam açı 360 derecedir."
+  },
+  {
+   "key": "kart_g_aci_iliski_gorsel",
+   "grup": "kart",
+   "text": "Kesişen iki doğruda karşı karşıya duran açılar ( ters açılar ) eşittir. Yan yana olan açılar toplamı 180 derecedir."
+  },
+  {
+   "key": "kart_g_aci_iliski_hikaye",
+   "grup": "kart",
+   "text": "Makas açtığında iki bıçak bir X oluşturur. Üstteki açı ne kadarsa alttaki de o kadardır: ters açılar hep ikizdir! Bir pizza dilimini dik köşeden kesersen iki parçanın açıları toplamı 90 derece olur: tümler."
+  },
+  {
+   "key": "kart_g_aci_iliski_adim",
+   "grup": "kart",
+   "text": "Tümler mi bütünler mi soruluyor? Bak. Tümler: toplam 90 derece, 90 eksi verilen. Bütünler: toplam 180 derece, 180 eksi verilen. Ters açı: karşıdaki açı, aynı ölçü."
+  },
+  {
+   "key": "kart_g_aci_iliski_kural",
+   "grup": "kart",
+   "text": "Tümler eşittir 90 derece, Bütünler eşittir 180 derece, Ters açılar eşittir."
+  },
+  {
+   "key": "kart_g_cokgen_gorsel",
+   "grup": "kart",
+   "text": "Çokgende kenar eşittir köşe eşittir iç açı sayısı. Köşegen, yan yana olmayan iki köşeyi birleştirir."
+  },
+  {
+   "key": "kart_g_cokgen_hikaye",
+   "grup": "kart",
+   "text": "Arılar peteklerini düzgün altıgen yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir köşeden köşegen çizmek istersen kendine ve iki komşuna çizemezsin, geriye 6 eksi 3 eşittir 3 köşe kalır."
+  },
+  {
+   "key": "kart_g_cokgen_adim",
+   "grup": "kart",
+   "text": "Kenarları say, çokgenin adı (5, beşgen). Köşe ve iç açı sayısı kenar sayısına eşittir. Bir köşeden köşegen: köşe sayısı eksi 3. Düzgün çokgen: kenarlar eşit artı açılar eşit."
+  },
+  {
+   "key": "kart_g_cokgen_kural",
+   "grup": "kart",
+   "text": "n kenarlı çokgen: n köşe, n iç açı; bir köşeden (n eksi 3) köşegen."
+  },
+  {
+   "key": "kart_g_ucgen_gorsel",
+   "grup": "kart",
+   "text": "Üçgenin üç iç açısını yan yana koyarsan bir doğru açı (180 derece) oluşur."
+  },
+  {
+   "key": "kart_g_ucgen_hikaye",
+   "grup": "kart",
+   "text": "Defne kâğıttan bir üçgen kesti, üç köşesini yırtıp yan yana dizdi. Şaşırdı: köşeler tam bir düz çizgi oluşturdu! Her üçgende iç açılar toplamı 180 derece."
+  },
+  {
+   "key": "kart_g_ucgen_adim",
+   "grup": "kart",
+   "text": "İki açı verildiyse topla. 180'den çıkar, üçüncü açı. Türünü bulmak için EN BÜYÜK açıya bak. 90 dereceden büyükse geniş, tam 90 derece ise dik, hepsi küçükse dar açılı."
+  },
+  {
+   "key": "kart_g_ucgen_kural",
+   "grup": "kart",
+   "text": "İç açılar toplamı 180 derece. Eşkenar üçgende her açı 60 derece. İkizkenarda taban açıları eşit."
+  },
+  {
+   "key": "kart_n_okuma_gorsel",
+   "grup": "kart",
+   "text": "Sayıyı sağdan üçerli bölüklere ayır: milyarlar, milyonlar, binler, birler. Her bölüğü oku, adını ekle."
+  },
+  {
+   "key": "kart_n_okuma_hikaye",
+   "grup": "kart",
+   "text": "Emre, Neptün'ün Güneş'e uzaklığını okumak istedi ama sayı çok uzundu! Sağdan üçer üçer ayırdı, her gruba bir isim verdi: birler, binler, milyonlar. Birden sayı kolayca okunur hâle geldi."
+  },
+  {
+   "key": "kart_n_okuma_adim",
+   "grup": "kart",
+   "text": "Sayıyı sağdan üçerli ayır. Bölük adlarını yaz: birler, bin, milyon, milyar. Soldan başlayarak her bölüğü oku ve adını söyle. 000 olan bölüğün adı okunmaz. Yazarken okunmayan basamaklara 0 koy."
+  },
+  {
+   "key": "kart_n_okuma_kural",
+   "grup": "kart",
+   "text": "Her bölük 3 basamak. Bin önünde bir söylenmez; bir milyon söylenir."
+  },
+  {
+   "key": "kart_n_basamak_gorsel",
+   "grup": "kart",
+   "text": "Rakamın değeri bulunduğu yere göre değişir: 5, yüzler basamağında 500, binler basamağında 5000 değerindedir."
+  },
+  {
+   "key": "kart_n_basamak_hikaye",
+   "grup": "kart",
+   "text": "Bir sinemada aynı koltuk numarası farklı sıralarda farklı yerdir. Rakamlar da öyle: aynı 7, birler sırasında 7, on binler sırasında 70000 eder!"
+  },
+  {
+   "key": "kart_n_basamak_adim",
+   "grup": "kart",
+   "text": "Rakamın hangi basamakta olduğunu sağdan sayarak bul. O basamağın değerini yaz (1, 10, 100, 1000. ). Rakam çarpı basamak değeri eşittir basamak değeri. Çözümleme: sayıyı basamak değerlerinin toplamı olarak yaz."
+  },
+  {
+   "key": "kart_n_basamak_kural",
+   "grup": "kart",
+   "text": "Basamak değeri eşittir rakam çarpı basamağın değeri. 4725 eşittir 4000 artı 700 artı 20 artı 5."
+  },
+  {
+   "key": "kart_n_karsilastir_gorsel",
+   "grup": "kart",
+   "text": "Önce basamak sayısına bak; basamağı fazla olan büyüktür. Eşitse soldan rakam rakam karşılaştır."
+  },
+  {
+   "key": "kart_n_karsilastir_hikaye",
+   "grup": "kart",
+   "text": "İki kardeş kumbaralarını saydı. Ali'nin parası 9999 TL, Ece'ninki 10000 TL. Ali benimki 9 ile başlıyor, daha büyük! dedi. Ece güldü: Benim sayım 5 basamaklı, seninki 4!"
+  },
+  {
+   "key": "kart_n_karsilastir_adim",
+   "grup": "kart",
+   "text": "Basamak sayılarını karşılaştır. Fazla olan büyüktür. Eşitse en soldaki rakamlardan başla. İlk farklı rakamı büyük olan sayı büyüktür."
+  },
+  {
+   "key": "kart_n_karsilastir_kural",
+   "grup": "kart",
+   "text": "Önce uzunluk, sonra soldan ilk farklı rakam."
+  },
+  {
+   "key": "kart_n_toplacikar_gorsel",
+   "grup": "kart",
+   "text": "Toplama ve çıkarma birbirinin tersidir: 25 artı 15 eşittir 40 ise 40 eksi 15 eşittir 25."
+  },
+  {
+   "key": "kart_n_toplacikar_hikaye",
+   "grup": "kart",
+   "text": "Suzan bir çıkarma işleminde eksileni sildi. Kardeşi Nazlı düşündü: Bir şeyden 15 çıkınca 25 kaldıysa, başta 25 artı 15 eşittir 40 vardı! Ters işlem, kayıp sayıyı buldu."
+  },
+  {
+   "key": "kart_n_toplacikar_adim",
+   "grup": "kart",
+   "text": "Basamakları hizalayarak alt alta yaz. Birlerden başla. Toplamada 10'u geçerse eldeyi taşı. Çıkarmada üstteki küçükse onluk boz. Bilinmeyen terim için ters işlemi kullan."
+  },
+  {
+   "key": "kart_n_toplacikar_kural",
+   "grup": "kart",
+   "text": "Bilinmeyen terim eşittir toplam eksi diğer terim. Eksilen eşittir çıkan artı fark."
+  },
+  {
+   "key": "kart_n_carpbol_gorsel",
+   "grup": "kart",
+   "text": "Sıfırları ayır, kalanları çarp, sıfırları geri ekle: 32 çarpı 300, 32 çarpı 3 eşittir 96, 9600."
+  },
+  {
+   "key": "kart_n_carpbol_hikaye",
+   "grup": "kart",
+   "text": "Tahir hesap makinesiz bir hile keşfetti: 6000 bölü 20 için iki sayıdan da birer sıfır sildi, 600 bölü 2 eşittir 300 buldu. Sıfırlar hem bölünende hem bölende olduğu için silmek sonucu değiştirmedi!"
+  },
+  {
+   "key": "kart_n_carpbol_adim",
+   "grup": "kart",
+   "text": "Sondaki sıfırları say. Çarpmada: sıfırsız kısımları çarp, tüm sıfırları sona ekle. Bölmede: ortak sıfırları sil, sonra böl. İki basamaklı çarpmada ikinci satırı bir basamak sola kaydır."
+  },
+  {
+   "key": "kart_n_carpbol_kural",
+   "grup": "kart",
+   "text": "Çarpmada sıfırlar toplanır, bölmede ortak sıfırlar sadeleşir."
+  },
+  {
+   "key": "kart_n_problem_gorsel",
+   "grup": "kart",
+   "text": "Problemi bir şema ya dök: Elimde ne var? Ne harcadım? Ne kaldı?"
+  },
+  {
+   "key": "kart_n_problem_hikaye",
+   "grup": "kart",
+   "text": "Okul, atık kâğıt kampanyasından kazandığı parayla fidan alacak. Önce bütçe, sonra harcama, sonra kalan para. Her adımı tek tek çözünce problem bir bulmaca gibi açıldı."
+  },
+  {
+   "key": "kart_n_problem_adim",
+   "grup": "kart",
+   "text": "1. Verilenleri ve isteneni yaz. 2. Hangi işlemler gerekiyor, belirle. 3. Ara sonucu bul. 4. Asıl soruyu çöz. 5. Cevabın mantıklı olup olmadığını kontrol et."
+  },
+  {
+   "key": "kart_n_problem_kural",
+   "grup": "kart",
+   "text": "Saat hesabında 1 saat eşittir 60 dakika, 100 değil!"
+  },
+  {
+   "key": "kart_n_tahmin_gorsel",
+   "grup": "kart",
+   "text": "Sayı doğrusunda hangi onluğa daha yakın sa oraya yuvarla. Tam ortadaysa (5) yukarı."
+  },
+  {
+   "key": "kart_n_tahmin_hikaye",
+   "grup": "kart",
+   "text": "Mert markette 47 TL'lik ürün aldı. Yaklaşık 50 TL dedi çünkü 47, 40'tan çok 50'ye yakın. Hızlı tahmin, cebindeki paranın yetip yetmeyeceğini hemen gösterdi!"
+  },
+  {
+   "key": "kart_n_tahmin_adim",
+   "grup": "kart",
+   "text": "Hangi basamağa yuvarlanacağını bul. Onun sağındaki rakama bak. 5 veya büyükse bir artır, küçükse aynı bırak. Sağdaki tüm rakamları 0 yap."
+  },
+  {
+   "key": "kart_n_tahmin_kural",
+   "grup": "kart",
+   "text": "Sağdaki rakam büyük ya da eşit 5, yukarı; küçüktür 5, aşağı."
+  },
+  {
+   "key": "kart_a_cevre_gorsel",
+   "grup": "kart",
+   "text": "Çevre, şeklin etrafında bir tam tur atınca yürüdüğün yoldur: 4 kenarın toplamı."
+  },
+  {
+   "key": "kart_a_cevre_hikaye",
+   "grup": "kart",
+   "text": "Nehir, bahçesinin etrafına çit çekecek. Bahçe 8 m'ye 4 m. Etrafında yürüyerek saydı: 8 artı 4 artı 8 artı 4 eşittir 24 m çit gerekiyor!"
+  },
+  {
+   "key": "kart_a_cevre_adim",
+   "grup": "kart",
+   "text": "Uzun ve kısa kenarı bul. Topla: uzun artı kısa. 2 ile çarp (her kenardan iki tane var). Birimi yaz: cm, m."
+  },
+  {
+   "key": "kart_a_cevre_kural",
+   "grup": "kart",
+   "text": "Ç eşittir 2 çarpı (a artı b). Karede Ç eşittir 4 çarpı a."
+  },
+  {
+   "key": "kart_a_alan_gorsel",
+   "grup": "kart",
+   "text": "Alan, şeklin içini dolduran birim karelerin sayısıdır: sıra sayısı çarpı bir sıradaki kare."
+  },
+  {
+   "key": "kart_a_alan_hikaye",
+   "grup": "kart",
+   "text": "Odanın zeminini kare parkelerle döşeyen usta, bir sıraya 6 parke dizdi, toplam 3 sıra yaptı. 6 çarpı 3 eşittir 18 parke dedi. İşte alan buydu!"
+  },
+  {
+   "key": "kart_a_alan_adim",
+   "grup": "kart",
+   "text": "Uzun kenarı bul. Kısa kenarı bul. Çarp: a çarpı b. Birimi kare olarak yaz: cm kare, m kare."
+  },
+  {
+   "key": "kart_a_alan_kural",
+   "grup": "kart",
+   "text": "A eşittir a çarpı b. Birim: cm kare, m kare (kare birim)."
+  },
+  {
+   "key": "kart_a_cevre_alan_gorsel",
+   "grup": "kart",
+   "text": "Aynı çevreyle farklı alanlar olabilir! Kenarlar birbirine yaklaştıkça alan büyür."
+  },
+  {
+   "key": "kart_a_cevre_alan_hikaye",
+   "grup": "kart",
+   "text": "Aras ile Duru'nun ikisinde de 12 m ip var. Aras 5 m ve 1 m'lik dikdörtgen yaptı: alanı 5 m kare. Duru 3 m'ye 3 m kare yaptı: alanı 9 m kare! Aynı ip, farklı alan."
+  },
+  {
+   "key": "kart_a_cevre_alan_adim",
+   "grup": "kart",
+   "text": "Soru etrafını mı içini mi soruyor?. Etrafı (çit, şerit, çerçeve), çevre. İçi (boya, halı, parke), alan. Doğru formülü uygula."
+  },
+  {
+   "key": "kart_a_cevre_alan_kural",
+   "grup": "kart",
+   "text": "Etraf, çevre (cm). İç, alan (cm kare). Aynı çevrede en büyük alan karededir."
+  },
+  {
+   "key": "kart_f_tur_gorsel",
+   "grup": "kart",
+   "text": "Payda bütünün kaç parçaya bölündüğünü, pay kaç parça alındığını gösterir."
+  },
+  {
+   "key": "kart_f_tur_hikaye",
+   "grup": "kart",
+   "text": "Bir pizza 4 dilime bölündü. Asel 1 dilim yedi: 1/4, bu bir birim kesir. Kardeşlerle 5 dilim yemek istediler ama bir pizzada 4 dilim var; ikinci pizza açıldı: 5/4 eşittir 1 tam 1/4, bu bileşik kesir!"
+  },
+  {
+   "key": "kart_f_tur_adim",
+   "grup": "kart",
+   "text": "Pay ile paydayı karşılaştır. Pay 1, birim kesir. Pay küçüktür payda, basit kesir. Pay büyük ya da eşit payda, bileşik kesir. Bileşiği tam sayılıya çevir: payı paydaya böl."
+  },
+  {
+   "key": "kart_f_tur_kural",
+   "grup": "kart",
+   "text": "dörtte on bir eşittir 2 dörtte üç (11 bölü 4 eşittir 2 kalan 3). Geri: 2 çarpı 4 artı 3 eşittir 11."
+  },
+  {
+   "key": "kart_f_denk_gorsel",
+   "grup": "kart",
+   "text": "Aynı miktarı farklı parçalarla gösterebilirsin: 1/2 ile 2/4 aynı uzunluktadır."
+  },
+  {
+   "key": "kart_f_denk_hikaye",
+   "grup": "kart",
+   "text": "Ada çikolatayı 2 parçaya bölüp 1 parçasını yedi. Emir aynı çikolatayı 4 parçaya bölüp 2 parçasını yedi. Kim daha çok yedi? İkisi de aynı! 1/2 eşittir 2/4."
+  },
+  {
+   "key": "kart_f_denk_adim",
+   "grup": "kart",
+   "text": "Pay ve paydayı AYNI sayıyla çarp, genişletme. Pay ve paydayı AYNI sayıya böl, sadeleştirme. Asla pay ve paydaya sayı EKLEME."
+  },
+  {
+   "key": "kart_f_denk_kural",
+   "grup": "kart",
+   "text": "a bölü b eşittir a çarpı k bölü b çarpı k (k eşit değil 0)"
+  },
+  {
+   "key": "kart_f_ondalik_gorsel",
+   "grup": "kart",
+   "text": "Paydası 10, virgülden sonra 1 basamak (onda). Paydası 100, 2 basamak (yüzde)."
+  },
+  {
+   "key": "kart_f_ondalik_hikaye",
+   "grup": "kart",
+   "text": "Market fişinde 14,25 TL yazıyordu. Defne sordu: Virgül ne? Annesi: 14 tam lira ve 25 kuruş; 1 lira 100 kuruş olduğu için 25/100 lira! İşte ondalık gösterim!"
+  },
+  {
+   "key": "kart_f_ondalik_adim",
+   "grup": "kart",
+   "text": "Paydayı 10 veya 100 yap. Payda 10 ise virgülden sonra 1 basamak, payda 100 ise 2 basamak olur. Okurken tam onda ya da tam yüzde diye oku."
+  },
+  {
+   "key": "kart_f_ondalik_kural",
+   "grup": "kart",
+   "text": "onda üç eşittir 0,3, yüzde üç eşittir 0,03, dörtte bir eşittir yüzde yirmi beş eşittir 0,25"
+  },
+  {
+   "key": "kart_f_yuzde_gorsel",
+   "grup": "kart",
+   "text": "% işareti yüzde demektir: 100 eş parçadan kaç tanesi."
+  },
+  {
+   "key": "kart_f_yuzde_hikaye",
+   "grup": "kart",
+   "text": "Mağazada yüzde 40 indirim tabelası vardı. Kerem yüzlük tabloyu düşündü: 100 karenin 40'ı boyalı. Yani fiyatın 100'de 40'ı düşülüyordu!"
+  },
+  {
+   "key": "kart_f_yuzde_adim",
+   "grup": "kart",
+   "text": "Kesrin paydasını 100 yap. Pay, yüzde değeridir. Ondalığa çevirmek için: % sayısını 100'e böl."
+  },
+  {
+   "key": "kart_f_yuzde_kural",
+   "grup": "kart",
+   "text": "yüzde 13 eşittir yüzde on üç eşittir 0,13, yüzde 5 eşittir 0,05 (0,5 değil!)"
+  },
+  {
+   "key": "kart_f_karsilastir_gorsel",
+   "grup": "kart",
+   "text": "Paydalar eşitse payı büyük olan büyüktür. Paylar eşitse paydası küçük olan büyüktür (parçalar daha büyük)."
+  },
+  {
+   "key": "kart_f_karsilastir_hikaye",
+   "grup": "kart",
+   "text": "Saba iki eş pasta yaptı: birini 8, birini 10 dilime böldü. Neva 10'luktan 3 dilim, Revna 8'likten 3 dilim yedi. Kim daha çok yedi? Revna! Çünkü 8'e bölünen pastanın dilimleri daha büyük."
+  },
+  {
+   "key": "kart_f_karsilastir_adim",
+   "grup": "kart",
+   "text": "Paydalar eşit mi?, payları karşılaştır. Paylar eşit mi?, paydası küçük olan büyük. İkisi de farklıysa paydaları eşitle (genişlet). Sonra payları karşılaştır."
+  },
+  {
+   "key": "kart_f_karsilastir_kural",
+   "grup": "kart",
+   "text": "Paydalar eşitse payı büyük olan büyüktür. Paylar eşitse paydası küçük olan büyüktür."
+  },
+  {
+   "key": "kart_f_ondalik_karsilastir_gorsel",
+   "grup": "kart",
+   "text": "Sayı doğrusunda sağdaki sayı daha büyüktür. 0,7 eşittir 0,70 büyüktür 0,58."
+  },
+  {
+   "key": "kart_f_ondalik_karsilastir_hikaye",
+   "grup": "kart",
+   "text": "Selin süt fiyatlarına baktı: A markette 22,10 TL, B markette 21,99 TL. 99 daha büyük! dedi ama önce tam kısma bakması gerekiyordu: 21 küçüktür 22, yani B daha ucuz!"
+  },
+  {
+   "key": "kart_f_ondalik_karsilastir_adim",
+   "grup": "kart",
+   "text": "Önce tam kısımları karşılaştır. Eşitse onda birler basamağına bak. O da eşitse yüzde birlere bak. Basamak sayısı eşit değilse sona 0 ekleyerek eşitle. Yüzde varsa hepsini aynı gösterime çevir."
+  },
+  {
+   "key": "kart_f_ondalik_karsilastir_kural",
+   "grup": "kart",
+   "text": "0,7 eşittir 0,70, 0,7 büyüktür 0,58, yüzde 41 büyüktür 0,4"
+  },
+  {
+   "key": "kart_s_arastirma_gorsel",
+   "grup": "kart",
+   "text": "Araştırma 4 adımdır: Soru, Veri, Grafik, Yorum."
+  },
+  {
+   "key": "kart_s_arastirma_hikaye",
+   "grup": "kart",
+   "text": "Sınıf temsilcisi Nehir, Sınıfımız en çok hangi sporu seviyor? diye merak etti. Herkese sordu, sonuçları tabloya yazdı, sütun grafiği çizdi ve yorumladı: Voleybol kazandı! Tam bir istatistikçi!"
+  },
+  {
+   "key": "kart_s_arastirma_adim",
+   "grup": "kart",
+   "text": "Bir gruba sorulabilecek, birçok cevabı olan bir soru belirle. Anket/gözlem ile veri topla veya hazır veri bul. Veriyi tablo ve grafikle göster. Sonuçları özetle ve yorumla."
+  },
+  {
+   "key": "kart_s_arastirma_kural",
+   "grup": "kart",
+   "text": "Araştırma sorusu: bir gruba yönelik ve birden çok cevaplı olmalı. Kişisel bilgiler gizli tutulur."
+  },
+  {
+   "key": "kart_s_tablo_sutun_gorsel",
+   "grup": "kart",
+   "text": "Her sütunun yüksekliği o kategorinin sıklığını gösterir. Tepeden eksene doğru bak."
+  },
+  {
+   "key": "kart_s_tablo_sutun_hikaye",
+   "grup": "kart",
+   "text": "Atatürk Ortaokulu Cumhuriyet Bayramı için tişört aldı. Hangi bedenden kaç tane alındığı bir tabloya yazıldı, sonra sütun grafiğine dönüştü. En uzun sütun en çok alınan bedendi!"
+  },
+  {
+   "key": "kart_s_tablo_sutun_adim",
+   "grup": "kart",
+   "text": "Grafiğin başlığını ve eksenlerini oku. İstenen kategorinin sütununu bul. Sütunun tepesinden eksene yatay bak. Fark için çıkar, toplam için topla."
+  },
+  {
+   "key": "kart_s_tablo_sutun_kural",
+   "grup": "kart",
+   "text": "Uzun sütun eşittir çok tercih. Kaç fazla, çıkarma."
+  },
+  {
+   "key": "kart_s_daire_gorsel",
+   "grup": "kart",
+   "text": "Bütün daire eşittir tüm veri. Yarım daire 1/2, çeyrek daire 1/4."
+  },
+  {
+   "key": "kart_s_daire_hikaye",
+   "grup": "kart",
+   "text": "40 öğrenciye en sevdiği spor soruldu. Daire grafiğinde futbol dairenin yarısını kaplıyordu. Zeynep hemen hesapladı: 40'ın yarısı 20 öğrenci futbolu seçmiş!"
+  },
+  {
+   "key": "kart_s_daire_adim",
+   "grup": "kart",
+   "text": "Dilimin bütünün kaçta kaçı olduğunu bul. Toplam kişi sayısını paydaya böl. Payla çarp. Tüm dilimler toplamının bütünü verdiğini kontrol et."
+  },
+  {
+   "key": "kart_s_daire_kural",
+   "grup": "kart",
+   "text": "Kişi sayısı eşittir toplam çarpı dilimin oranı."
+  },
+  {
+   "key": "kart_s_okuryazar_gorsel",
+   "grup": "kart",
+   "text": "Nokta grafiğinde her nokta bir kişidir. Bir grafiğe hemen inanma: eksenler 0'dan mı başlıyor? Kontrol et!"
+  },
+  {
+   "key": "kart_s_okuryazar_hikaye",
+   "grup": "kart",
+   "text": "Bir reklam B markası A'dan kat kat fazla satıyor! diyordu. Ömer grafiğin eksenine baktı: 38'den başlıyordu! Gerçek fark sadece 4 taneydi. Ömer bir istatistik dedektifi oldu."
+  },
+  {
+   "key": "kart_s_okuryazar_adim",
+   "grup": "kart",
+   "text": "Grafiğin neyi gösterdiğini oku. Eksenin nereden başladığını kontrol et. Sadece verinin söylediğini söyle. Herkes, hiç kimse, her zaman gibi aşırı genellemelere dikkat et."
+  },
+  {
+   "key": "kart_s_okuryazar_kural",
+   "grup": "kart",
+   "text": "Veri sadece toplandığı grubu anlatır. Kesik eksen farkları abartabilir."
+  },
+  {
+   "key": "kart_e_esitlik_gorsel",
+   "grup": "kart",
+   "text": "eşittir bir terazi gibidir: iki taraf her zaman dengede."
+  },
+  {
+   "key": "kart_e_esitlik_hikaye",
+   "grup": "kart",
+   "text": "Aylin teraziye 5 kg ve 7 kg koydu. Diğer kefeye 9 kg koyunca terazi hâlâ eğikti. 3 kg eksik! dedi ve ekledi; terazi dengeye geldi: 5 artı 7 eşittir 9 artı 3."
+  },
+  {
+   "key": "kart_e_esitlik_adim",
+   "grup": "kart",
+   "text": "Bilinen tarafı hesapla. Diğer taraf da o kadar olmalı. Eksik sayıyı ters işlemle bul. Bir tarafa ne yaparsan diğerine de aynısını yap."
+  },
+  {
+   "key": "kart_e_esitlik_kural",
+   "grup": "kart",
+   "text": "3 artı 5 eşittir 6 artı 2 ( eşittir sonuç değil, denge işaretidir)."
+  },
+  {
+   "key": "kart_e_ozellik_gorsel",
+   "grup": "kart",
+   "text": "6 çarpı 12 eşittir 6 çarpı 10 artı 6 çarpı 2: dikdörtgeni ikiye böl, alanları topla. Bu dağılmadır!"
+  },
+  {
+   "key": "kart_e_ozellik_hikaye",
+   "grup": "kart",
+   "text": "Sevil Öğretmen tahtaya 49 çarpı 12 yazdı. Bir öğrenci 49 çarpı 10 eşittir 490 ve 49 çarpı 2 eşittir 98 bulup topladı: 588! Dağılma özelliği zor bir çarpmayı iki kolay çarpmaya çevirdi."
+  },
+  {
+   "key": "kart_e_ozellik_adim",
+   "grup": "kart",
+   "text": "Yerleri değişmiş mi?, değişme. Parantezler kaymış mı?, birleşme. Çarpan parantezin içine dağılmış mı?, dağılma. Çıkarma ve bölmede değişme özelliği YOKTUR."
+  },
+  {
+   "key": "kart_e_ozellik_kural",
+   "grup": "kart",
+   "text": "a çarpı b eşittir b çarpı a, (a artı b) artı c eşittir a artı (b artı c), a çarpı (b artı c) eşittir a çarpı b artı a çarpı c"
+  },
+  {
+   "key": "kart_e_us_gorsel",
+   "grup": "kart",
+   "text": "4 kare eşittir 4 çarpı 4: 4 sıra 4 kare. 3 küp eşittir 3 çarpı 3 çarpı 3: küp şeklinde 27 top."
+  },
+  {
+   "key": "kart_e_us_hikaye",
+   "grup": "kart",
+   "text": "Sezen not kâğıtlarını panoya 5 sıra 5 sütun yapıştırdı: 5 çarpı 5 eşittir 25 kâğıt. Buna 5'in karesi denir ve 5 kare yazılır. Umay topları 3 çarpı 3 çarpı 3 dizip küp yaptı: 27 top, 3'ün küpü!"
+  },
+  {
+   "key": "kart_e_us_adim",
+   "grup": "kart",
+   "text": "Kare: sayıyı kendisiyle 1 kez çarp. Küp: sayıyı kendisiyle 3 kez yan yana yazıp çarp. Asla üs ile çarpma! (5 kare eşit değil 10)"
+  },
+  {
+   "key": "kart_e_us_kural",
+   "grup": "kart",
+   "text": "a kare eşittir a çarpı a, a küp eşittir a çarpı a çarpı a"
+  },
+  {
+   "key": "kart_e_oncelik_gorsel",
+   "grup": "kart",
+   "text": "Sıra: Parantez, Üs, Çarpma/Bölme, Toplama/Çıkarma"
+  },
+  {
+   "key": "kart_e_oncelik_hikaye",
+   "grup": "kart",
+   "text": "Mert 3 paket kalem (her biri 4 tane) ve 2 tane tek kalem aldı. 3 çarpı 4 artı 2 yazdı. Soldan sağa yapsa 3 çarpı 6 eşittir 18 bulurdu ama gerçekte 12 artı 2 eşittir 14 kalemi vardı. Öncelik gerçek hayatı anlatır!"
+  },
+  {
+   "key": "kart_e_oncelik_adim",
+   "grup": "kart",
+   "text": "Önce parantez içini yap. Sonra üslü ifadeleri (kare, küp) hesapla. Sonra çarpma ve bölmeyi soldan sağa yap. En son toplama ve çıkarmayı soldan sağa yap."
+  },
+  {
+   "key": "kart_e_oncelik_kural",
+   "grup": "kart",
+   "text": "2 artı 3 çarpı 4 eşittir 14 (20 değil!)"
+  },
+  {
+   "key": "kart_e_oruntu_gorsel",
+   "grup": "kart",
+   "text": "Örüntüde her adımda aynı miktar artar. Kural: ilk terim artı (adım eksi 1) çarpı artış."
+  },
+  {
+   "key": "kart_e_oruntu_hikaye",
+   "grup": "kart",
+   "text": "Ertuğrul kumbarasına her gün 15 TL attı: 15, 30, 45, 60. 10. gün ne kadar olur? Her gün 15 eklendiği için 10 çarpı 15 eşittir 150 TL! Ama kumbarada başta 20 TL olsaydı 20 artı 150 eşittir 170 TL olurdu."
+  },
+  {
+   "key": "kart_e_oruntu_adim",
+   "grup": "kart",
+   "text": "Ardışık terimlerin farkını bul (artış). İlk terimi belirle. n. terim eşittir ilk terim artı (n eksi 1) çarpı artış. Kuralı ilk terimlerle kontrol et."
+  },
+  {
+   "key": "kart_e_oruntu_kural",
+   "grup": "kart",
+   "text": "3, 7, 11, 15 diye giden örüntünün kuralı: 4 çarpı adım sayısı, eksi 1."
+  },
+  {
+   "key": "kart_e_algoritma_gorsel",
+   "grup": "kart",
+   "text": "Algoritma eşittir sıralı adımlar. Akış şemasında oklar sırayı, karar kutuları evet/hayır yollarını gösterir."
+  },
+  {
+   "key": "kart_e_algoritma_hikaye",
+   "grup": "kart",
+   "text": "Ayşe annesinden ayran tarifini aldı: yoğurt koy, su koy, çırp, tuz ekle, tadına bak, tuz yeterli değilse tekrar ekle. Bu bir algoritma! Sırayı karıştırsa ayran olmazdı."
+  },
+  {
+   "key": "kart_e_algoritma_adim",
+   "grup": "kart",
+   "text": "Adımları yazıldığı sırayla uygula. Her adımdan sonra elindeki değeri not et. Karar adımında koşulu kontrol et. Döngüde kaç kez döndüğünü işaretle."
+  },
+  {
+   "key": "kart_e_algoritma_kural",
+   "grup": "kart",
+   "text": "Algoritma: Başla, adımlar (sırayla), Bitir."
+  },
+  {
+   "key": "kart_p_olay_gorsel",
+   "grup": "kart",
+   "text": "Olasılık 0 ile 1 arasındadır: 0 eşittir imkânsız, 1 eşittir kesin, arası eşittir mümkün."
+  },
+  {
+   "key": "kart_p_olay_hikaye",
+   "grup": "kart",
+   "text": "Piknik günü yağmur yağar mı? Belki: mümkün. Zarla 7 atabilir miyiz? Asla: imkânsız. Yarın güneş doğacak mı? Kesinlikle: kesin!"
+  },
+  {
+   "key": "kart_p_olay_adim",
+   "grup": "kart",
+   "text": "Olay mutlaka oluyor mu?, kesin (1). Asla olamıyor mu?, imkânsız (0). Olabilir de olmayabilir de mi?, mümkün."
+  },
+  {
+   "key": "kart_p_olay_kural",
+   "grup": "kart",
+   "text": "İmkânsız eşittir 0, Kesin eşittir 1, Mümkün: 0 ile 1 arası."
+  },
+  {
+   "key": "kart_p_spektrum_gorsel",
+   "grup": "kart",
+   "text": "Çarkta mavi dilim sayısı / tüm dilimler eşittir olasılık. Yarıdan azsa az olası, fazlaysa çok olası."
+  },
+  {
+   "key": "kart_p_spektrum_hikaye",
+   "grup": "kart",
+   "text": "Doğum günü çarkında 4 dilimin 3'ü mavi. Duru Mavi gelme ihtimali yüksek! dedi. Haklıydı: 3/4, yarıdan fazla, yani çok olası."
+  },
+  {
+   "key": "kart_p_spektrum_adim",
+   "grup": "kart",
+   "text": "İstenen durumları say. Tüm durumları say. Olasılık eşittir istenen / tüm. 1/2 ile karşılaştır: az mı, eşit mi, çok mu?"
+  },
+  {
+   "key": "kart_p_spektrum_kural",
+   "grup": "kart",
+   "text": "Olasılık 0 ile 1 arasındadır; asla 1'den büyük olamaz."
+  },
+  {
+   "key": "mis_isin_dogru",
+   "grup": "yanilgi",
+   "text": "Işın ile doğruyu karıştırma. Işının bir başlangıç noktası vardır ve tek yönde sonsuza gider. Doğru ise iki yönde de sonsuza uzar."
+  },
+  {
+   "key": "mis_dp_dogru",
+   "grup": "yanilgi",
+   "text": "Doğru parçası ile doğruyu karıştırma. Doğru parçasının iki uç noktası vardır, bu yüzden uzunluğu ölçülebilir. Doğrunun ucu yoktur."
+  },
+  {
+   "key": "mis_nokta_sayma",
+   "grup": "yanilgi",
+   "text": "Doğru parçalarını eksik sayma. Sadece yan yana olanları değil, aradaki noktaları atlayan doğru parçalarını da say: A-C de bir doğru parçasıdır."
+  },
+  {
+   "key": "mis_cap_yaricap",
+   "grup": "yanilgi",
+   "text": "Çap ile yarıçapı karıştırma. Çap, merkezden geçip çemberin iki ucuna değer. Çap eşittir 2 çarpı yarıçap."
+  },
+  {
+   "key": "mis_dik_yatay",
+   "grup": "yanilgi",
+   "text": "Dik olmak için yatay-dikey olmalı sanma. İki doğru dönük çizilse de aralarındaki açı 90 derece ise birbirine diktir. Köşedeki küçük kare işareti bunu gösterir."
+  },
+  {
+   "key": "mis_paralel_kesisen",
+   "grup": "yanilgi",
+   "text": "Paralel ile kesişeni karıştırma. Paralel doğrular ne kadar uzatılırsa uzatılsın hiç kesişmez, aralarındaki uzaklık hep aynıdır."
+  },
+  {
+   "key": "mis_aci_tur",
+   "grup": "yanilgi",
+   "text": "Açı türlerini karıştırma. 90 dereceden küçükse dar, tam 90 derece ise dik, 90 derece ile 180 derece arasındaysa geniş açıdır. 180 derece doğru açı, 360 derece tam açıdır."
+  },
+  {
+   "key": "mis_iletki_ters",
+   "grup": "yanilgi",
+   "text": "İletkide yanlış ölçeği okuma. İletkide iki sıra sayı vardır. Açının kolu hangi taraftaki 0'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90'dan küçük olmalı."
+  },
+  {
+   "key": "mis_aci_kol",
+   "grup": "yanilgi",
+   "text": "Açıyı kol uzunluğuna göre karşılaştırma. Açının büyüklüğü kolların ne kadar uzun olduğuna değil, kolların ne kadar açıldığına bağlıdır."
+  },
+  {
+   "key": "mis_tumler_butunler",
+   "grup": "yanilgi",
+   "text": "Tümler ile bütünleri karıştırma. Tümler açıların toplamı 90 derece, bütünler açıların toplamı 180 derecedir. Akılda kalsın: Tümler: Tek dik açı."
+  },
+  {
+   "key": "mis_ters_aci",
+   "grup": "yanilgi",
+   "text": "Ters açıları eşit görmeme. Kesişen iki doğrunun karşı karşıya duran açılarına ters açı denir ve ölçüleri her zaman eşittir."
+  },
+  {
+   "key": "mis_cokgen_sayi",
+   "grup": "yanilgi",
+   "text": "Kenar, köşe ve iç açı sayısını karıştırma. Bir çokgende kenar, köşe ve iç açı sayısı birbirine eşittir."
+  },
+  {
+   "key": "mis_kosegen_kenar",
+   "grup": "yanilgi",
+   "text": "Kenarı köşegen sanma. Köşegen, yan yana OLMAYAN iki köşeyi birleştirir. Bir köşeden kendisine ve iki komşusuna köşegen çizilmez."
+  },
+  {
+   "key": "mis_duzgun_eksik",
+   "grup": "yanilgi",
+   "text": "Düzgün çokgen tanımını eksik bilme. Düzgün çokgende hem bütün kenarlar hem de bütün iç açılar eşittir. Sadece kenarların eşit olması yetmez."
+  },
+  {
+   "key": "mis_ucgen_360",
+   "grup": "yanilgi",
+   "text": "Üçgenin iç açılarını 360 derece sanma. Üçgenin iç açılarının toplamı 180 derecedir (bir doğru açı). 360 derece dörtgenin iç açılarının toplamıdır."
+  },
+  {
+   "key": "mis_ucgen_sinif",
+   "grup": "yanilgi",
+   "text": "Üçgeni yanlış sınıflandırma. Üçgenin türüne EN BÜYÜK açısına bakarak karar ver: 90 dereceden büyükse geniş açılı, tam 90 derece ise dik, hepsi 90 dereceden küçükse dar açılı üçgendir."
+  },
+  {
+   "key": "mis_sifir_atlama",
+   "grup": "yanilgi",
+   "text": "Bölükteki sıfırları atlama. Her bölük üç basamaklıdır. Okunmayan bölükleri 000 ile doldurmayı unutma."
+  },
+  {
+   "key": "mis_bolük_kayma",
+   "grup": "yanilgi",
+   "text": "Bölük adlarını kaydırma. Sağdan sola: birler, binler, milyonlar, milyarlar bölüğü. Her bölükte üç basamak vardır."
+  },
+  {
+   "key": "mis_basamak_deger",
+   "grup": "yanilgi",
+   "text": "Basamak değeri yerine rakamı söyleme. Basamak değeri eşittir rakam çarpı bulunduğu basamağın değeri. Örneğin 5 yüzler basamağındaysa değeri 500'dür."
+  },
+  {
+   "key": "mis_basamak_kayma",
+   "grup": "yanilgi",
+   "text": "Basamağı bir kaydırma. Basamakları sağdan saymaya birlerden başla: birler, onlar, yüzler, binler."
+  },
+  {
+   "key": "mis_cozumleme_bitisik",
+   "grup": "yanilgi",
+   "text": "Çözümlemede sıfırları kaybetme. Çözümlenmiş sayıyı toplarken her parçayı kendi basamağına yaz; boş kalan basamaklara 0 koy."
+  },
+  {
+   "key": "mis_ilk_rakam",
+   "grup": "yanilgi",
+   "text": "Sadece ilk rakama bakarak karşılaştırma. Önce basamak sayısına bak: basamak sayısı fazla olan sayı daha büyüktür. Eşitse soldan rakam rakam karşılaştır."
+  },
+  {
+   "key": "mis_ters_islem",
+   "grup": "yanilgi",
+   "text": "Bilinmeyeni bulurken ters işlemi seçmeme. Toplamda bilinmeyen terimi bulmak için toplamdan diğer terimi ÇIKAR. Çıkarmada eksileni bulmak için çıkan ile farkı TOPLA."
+  },
+  {
+   "key": "mis_elde_unutma",
+   "grup": "yanilgi",
+   "text": "Eldeyi veya onluk bozmayı unutma. İşlemi basamak basamak yap; 10 ve üzeri olunca eldeyi bir sonraki basamağa ekle."
+  },
+  {
+   "key": "mis_sifir_sayisi",
+   "grup": "yanilgi",
+   "text": "Kısa yoldan çarpma/bölmede sıfırları yanlış sayma. Sıfırları ayır, sıfır olmayan kısımları çarp, sonra ayırdığın TÜM sıfırları sona ekle. Bölmede ortak sıfırları sil."
+  },
+  {
+   "key": "mis_kismi_carpim",
+   "grup": "yanilgi",
+   "text": "Çarpmada ikinci satırı kaydırmama. İki basamaklı sayıyla çarparken onlar basamağıyla çarptığın sonucu bir basamak sola kaydırarak yaz (aslında 10 ile çarpıyorsun)."
+  },
+  {
+   "key": "mis_saat_ondalik",
+   "grup": "yanilgi",
+   "text": "Saati ondalık sayı gibi çıkarma. 1 saat 60 dakikadır, 100 değil! Önce tam saate kadar olan dakikaları say, sonra kalanları ekle."
+  },
+  {
+   "key": "mis_problem_adim",
+   "grup": "yanilgi",
+   "text": "Çok adımlı problemde adım atlama. Problemi adımlara ayır: Verilenler neler? İstenen ne? Önce ara sonucu bul, sonra asıl soruyu çöz."
+  },
+  {
+   "key": "mis_yuvarlama_kesme",
+   "grup": "yanilgi",
+   "text": "Yuvarlarken sadece kesip atma. Yuvarlayacağın basamağın sağındaki rakama bak: 5 veya daha büyükse bir artır, 5'ten küçükse aynı bırak."
+  },
+  {
+   "key": "mis_cevre_yarim",
+   "grup": "yanilgi",
+   "text": "Çevreyi hesaplarken sadece iki kenarı toplama. Çevre, şeklin etrafındaki TÜM kenarların toplamıdır. Dikdörtgenin 4 kenarı vardır: Çevre eşittir 2 çarpı (uzun kenar artı kısa kenar)."
+  },
+  {
+   "key": "mis_cevre_alan",
+   "grup": "yanilgi",
+   "text": "Çevre ile alanı karıştırma. Çevre bir uzunluktur (etrafını dolaşmak, cm). Alan ise yüzeyin kapladığı yerdir (içini kaplamak, cm kare)."
+  },
+  {
+   "key": "mis_birim",
+   "grup": "yanilgi",
+   "text": "Alan birimini yanlış yazma. Alan birim karelerle ölçülür: cm kare, m kare. Uzunluk birimi (cm, m) alan için kullanılmaz."
+  },
+  {
+   "key": "mis_ters_cevre",
+   "grup": "yanilgi",
+   "text": "Çevreden kenar bulurken yarıya bölmeyi unutma. Çevre eşittir 2 çarpı (a artı b) olduğu için önce çevreyi 2'ye böl (a artı b), sonra bilinen kenarı çıkar."
+  },
+  {
+   "key": "mis_cevre_alan_ayni",
+   "grup": "yanilgi",
+   "text": "Çevreleri eşitse alanları da eşittir sanma. Aynı çevreye sahip dikdörtgenlerin alanları farklı olabilir. Kenarlar birbirine yaklaştıkça alan büyür; en büyük alan kareye aittir."
+  },
+  {
+   "key": "mis_kesir_tur",
+   "grup": "yanilgi",
+   "text": "Kesir türlerini karıştırma. Pay paydadan küçükse basit, pay 1 ise birim kesir, pay paydaya eşit ya da büyükse bileşik kesirdir."
+  },
+  {
+   "key": "mis_tamsayili",
+   "grup": "yanilgi",
+   "text": "Bileşik ve tam sayılı kesir dönüşüm hatası. Payı paydaya böl: Bölüm tam kısım, kalan yeni pay olur, payda aynı kalır. Geri dönüş: (tam çarpı payda) artı pay."
+  },
+  {
+   "key": "mis_denk_toplama",
+   "grup": "yanilgi",
+   "text": "Denk kesir için pay ve paydaya aynı sayıyı ekleme. Denk kesir için pay ve paydayı aynı sayıyla ÇARP veya BÖL. Toplamak kesrin değerini değiştirir."
+  },
+  {
+   "key": "mis_ondalik_basamak",
+   "grup": "yanilgi",
+   "text": "Ondalık gösterimde basamak sayısını karıştırma. Paydası 10 ise virgülden sonra 1, paydası 100 ise 2 basamak olur: 3/100 eşittir 0,03."
+  },
+  {
+   "key": "mis_ondalik_okunus",
+   "grup": "yanilgi",
+   "text": "Ondalık gösterimi yanlış okuma. Virgülden sonra 1 basamak varsa onda, 2 basamak varsa yüzde diye okunur: 4,25, dört tam yüzde yirmi beş."
+  },
+  {
+   "key": "mis_yuzde_ondalik",
+   "grup": "yanilgi",
+   "text": "Yüzdeyi ondalığa yanlış çevirme. % işareti yüzde, yani paydası 100 demektir: yüzde 5 eşittir 5/100 eşittir 0,05 (0,5 değil!)."
+  },
+  {
+   "key": "mis_payda_buyuk",
+   "grup": "yanilgi",
+   "text": "Paydası büyük olan kesir büyüktür sanma. Payda bütünün kaç parçaya bölündüğünü gösterir. Parça sayısı arttıkça her parça KÜÇÜLÜR: 1/8 küçüktür 1/3."
+  },
+  {
+   "key": "mis_pay_payda_ayri",
+   "grup": "yanilgi",
+   "text": "Kesirleri karşılaştırırken sadece paya bakma. Paydalar farklıysa önce paydaları eşitle (genişlet), sonra payları karşılaştır."
+  },
+  {
+   "key": "mis_uzun_buyuk",
+   "grup": "yanilgi",
+   "text": "Basamağı çok olan ondalık sayı büyüktür sanma. Ondalık sayıları karşılaştırırken önce tam kısma, sonra onda birler basamağına bak: 0,7 büyüktür 0,58 çünkü 7 onda büyüktür 5 onda."
+  },
+  {
+   "key": "mis_sifir_fark",
+   "grup": "yanilgi",
+   "text": "Sondaki sıfırın değeri değiştirdiğini sanma. Ondalık kısmın sonuna eklenen sıfır değeri değiştirmez: 0,7 eşittir 0,70 (7 onda eşittir 70 yüzde)."
+  },
+  {
+   "key": "mis_soru_tek",
+   "grup": "yanilgi",
+   "text": "Araştırma sorusunu tek kişiye/tek cevaba yönlendirme. İstatistiksel araştırma sorusu bir GRUBA sorulur ve birden çok farklı cevabı olabilir."
+  },
+  {
+   "key": "mis_adim_sira",
+   "grup": "yanilgi",
+   "text": "Araştırma adımlarının sırasını karıştırma. Sıra: 1) Araştırma sorusunu belirle 2) Veri topla 3) Görselleştir 4) Özetle ve yorumla."
+  },
+  {
+   "key": "mis_grafik_okuma",
+   "grup": "yanilgi",
+   "text": "Grafikten yanlış değer okuma. Sütunun tepesinden sola doğru düz bir çizgi çekip eksendeki değeri oku. Hangi kategoriye baktığını kontrol et."
+  },
+  {
+   "key": "mis_fark_toplam",
+   "grup": "yanilgi",
+   "text": "Fark sorulduğunda toplama yapma. Kaç fazla / fark soruları çıkarma ister; toplam / hepsi soruları toplama ister."
+  },
+  {
+   "key": "mis_dilim_oran",
+   "grup": "yanilgi",
+   "text": "Daire grafiğinde dilim oranını yanlış belirleme. Bütün daire eşittir tüm veri. Yarım daire 1/2, çeyrek daire 1/4'tür. Kişi sayısı eşittir toplam çarpı dilimin oranı."
+  },
+  {
+   "key": "mis_asiri_genelleme",
+   "grup": "yanilgi",
+   "text": "Veriden kesin olmayan sonuç çıkarma. Grafik sadece toplanan veriyi anlatır. Herkes, her zaman gibi kesin yargılar veriyle desteklenmiyorsa doğru değildir."
+  },
+  {
+   "key": "mis_eksen_yanilsama",
+   "grup": "yanilgi",
+   "text": "Kesik eksenli grafikte yanılma. Grafikteki eksen 0'dan başlamıyorsa sütun boyları yanıltıcı olabilir. Her zaman eksendeki gerçek sayıları oku."
+  },
+  {
+   "key": "mis_esittir_sonuc",
+   "grup": "yanilgi",
+   "text": "eşittir işaretini sonucu yaz diye görme. eşittir işareti iki tarafın DENGEDE olduğunu gösterir. Sol taraf ne kadarsa sağ taraf da o kadar olmalı."
+  },
+  {
+   "key": "mis_denge_bozma",
+   "grup": "yanilgi",
+   "text": "Eşitliğin korunumunu bilmeme. Bir eşitliğin iki tarafına da aynı işlemi yaparsan denge bozulmaz. Bir tarafa 2 eklersen diğer tarafa da 2 eklemelisin."
+  },
+  {
+   "key": "mis_ozellik_karis",
+   "grup": "yanilgi",
+   "text": "İşlem özelliklerini karıştırma. Değişme: yer değiştirme (a çarpı b eşittir b çarpı a). Birleşme: gruplama ((a artı b) artı c eşittir a artı (b artı c)). Dağılma: çarpımı içeriye dağıtma (a çarpı (b artı c) eşittir a çarpı b artı a çarpı c)."
+  },
+  {
+   "key": "mis_dagilma_eksik",
+   "grup": "yanilgi",
+   "text": "Dağılmada sadece ilk terimi çarpma. Parantezin önündeki sayı parantez içindeki HER terimle çarpılır: 6 çarpı (10 artı 2) eşittir 6 çarpı 10 artı 6 çarpı 2."
+  },
+  {
+   "key": "mis_cikarma_degisme",
+   "grup": "yanilgi",
+   "text": "Çıkarma/bölmede değişme özelliği var sanma. Değişme özelliği toplama ve çarpmada vardır. 9 eksi 4 ile 4 eksi 9 aynı değildir."
+  },
+  {
+   "key": "mis_us_carpim",
+   "grup": "yanilgi",
+   "text": "Kareyi 2 ile çarpmak sanma. 5 kare eşittir 5 çarpı 5 eşittir 25 demektir, 5 çarpı 2 değil. Küp: 3 küp eşittir 3 çarpı 3 çarpı 3 eşittir 27."
+  },
+  {
+   "key": "mis_oncelik_soldan",
+   "grup": "yanilgi",
+   "text": "İşlem önceliğini atlayıp soldan sağa yapma. Önce parantez, sonra üslü ifade, sonra çarpma-bölme, en son toplama-çıkarma yapılır."
+  },
+  {
+   "key": "mis_oruntu_baslangic",
+   "grup": "yanilgi",
+   "text": "Örüntüde başlangıç değerini hesaba katmama. n. adım eşittir ilk terim artı (n eksi 1) çarpı artış. Sadece artış çarpı n demek ilk terimi unutmak olur."
+  },
+  {
+   "key": "mis_oruntu_bir",
+   "grup": "yanilgi",
+   "text": "Örüntüde adım sayısını bir fazla sayma. 1. adımda henüz hiç artış olmadı. n. adıma gelene kadar (n eksi 1) kez artış olur."
+  },
+  {
+   "key": "mis_algoritma_sira",
+   "grup": "yanilgi",
+   "text": "Algoritma adımlarını sırasız uygulama. Algoritma adımları yazıldığı sırayla, tek tek uygulanır. Her adımdan sonra elindeki sayıyı not et."
+  },
+  {
+   "key": "mis_dongu_sayma",
+   "grup": "yanilgi",
+   "text": "Döngü tekrarlarını yanlış sayma. Döngünün her turunda değeri yaz ve koşulu kontrol et. Kaç kez tekrar ettiğini tek tek işaretle."
+  },
+  {
+   "key": "mis_olay_tur",
+   "grup": "yanilgi",
+   "text": "Kesin, imkânsız ve mümkün olayları karıştırma. Kesin olay mutlaka olur (olasılık 1), imkânsız olay asla olmaz (0). Arada kalanlar mümkün olaylardır."
+  },
+  {
+   "key": "mis_olasilik_buyuk",
+   "grup": "yanilgi",
+   "text": "Olasılığın 1'den büyük olabileceğini sanma. Olasılık her zaman 0 ile 1 arasındadır (yüzde 0 ile yüzde 100). İstenen durum sayısı tüm durumlardan fazla olamaz."
+  },
+  {
+   "key": "mis_olasilik_oran",
+   "grup": "yanilgi",
+   "text": "Olasılık kesrini yanlış kurma. Olasılık eşittir istenen durum sayısı / tüm durumların sayısı. Paydaya tüm dilimleri yaz."
+  },
+  {
+   "key": "mis_az_cok",
+   "grup": "yanilgi",
+   "text": "Az olası ile çok olasıyı karıştırma. 1/2'den küçük olasılıklar az olası, 1/2'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır."
+  },
+  {
+   "key": "mis_sifir_basta",
+   "grup": "yanilgi",
+   "text": "En küçük sayıyı 0 ile başlatma. Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0'ı yaz."
+  },
+  {
+   "key": "mis_fiyat_okuma",
+   "grup": "yanilgi",
+   "text": "Fiyatı lira-kuruş olarak yanlış okuma. Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL, on dört lira elli kuruş."
+  }
+ ]
+}

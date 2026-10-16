@@ -1,0 +1,12 @@
+{ "not": "ElevenLabs Sound Effects ile üretilecek özgün oyun sesleri. Uygulama sfx_<anahtar>.mp3 bulursa çalar, yoksa kendi sentez sesini kullanır.",
+  "efektler": [
+  {"key": "sfx_ok", "sure": 1.0, "text": "short bright magical chime with a sparkle, cheerful correct answer sound for a children's math game, clean, no voice"},
+  {"key": "sfx_bad", "sure": 0.8, "text": "soft gentle low wooden bonk, friendly and not harsh, mild oops sound for a children's game, no buzzer, no voice"},
+  {"key": "sfx_fire", "sure": 1.5, "text": "quick rising whoosh with fiery crackle and bright chime, combo streak sound for a kids game, energetic, no voice"},
+  {"key": "sfx_unstop", "sure": 2.0, "text": "triumphant short brass and bell fanfare with sparkles, unstoppable streak celebration for a kids game, no voice"},
+  {"key": "sfx_legend", "sure": 3.0, "text": "epic joyful orchestral victory fanfare with fireworks pops and shimmering bells, legendary achievement in a kids game, no voice"},
+  {"key": "sfx_grow", "sure": 1.5, "text": "warm magical growing sound, plant sprouting with soft rising harp glissando, encouraging, no voice"},
+  {"key": "sfx_win", "sure": 2.5, "text": "happy level complete jingle with xylophone and bells, kids learning game, bright and short, no voice"},
+  {"key": "sfx_badge", "sure": 1.5, "text": "shiny badge unlocked sound, metallic sparkle and ascending bells, kids game reward, no voice"},
+  {"key": "sfx_swoosh", "sure": 0.6, "text": "soft airy swoosh transition, light and quick, mobile game screen change, no voice"}
+] }

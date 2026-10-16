@@ -1,0 +1,7 @@
+dist/
+out/
+node_modules/
+__pycache__/
+test/shots/
+*.zip
+sunucu/kurulum_sql.html
