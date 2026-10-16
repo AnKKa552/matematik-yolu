@@ -216,6 +216,7 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 - "Hareketi azalt" açık cihazlarda sadece büyük ✓ ve +XP gösterilir.
 - Canvas parçacık motoru (kütüphane yok) → düşük pil ve dosya maliyeti.
 - Üretim fazında Pi'nin `bekle / sevin / üzül / düşün / konuş` durumları **Rive** dosyasına taşınır (Duolingo karakter animasyonlarında Rive kullanıyor; dosyalar küçük ve etkileşimli).
+- **Bilim kurgu sahneleri (17.10.2026):** seri 3 (`ates`), 5 (`durdurulamaz`), 8 ve sonrasında her 5'te (`efsane`) ve ders sonunda (`bitti`) 2–3 sn'lik dikey video (`src/pwa/img/sahne_*.mp4`). Higgsfield: önce Pi referanslı 9:16 açılış karesi (gpt_image_2_5), sonra Seedance 2.0 Mini ile 4 sn sessiz video; ffmpeg ile kırpılıp ~480p H.264'e sıkıştırıldı. Dokununca geçilir, bitince kapanır, en fazla 4,2 sn. **Sıradan doğru cevapta sahne yok** (ders temposu). Hız yarışında ve seviye belirlemede oynamaz; "hareketi azalt" açıksa hiç oynamaz. Ders başında arka planda blob olarak indirilir.
 - **Higgsfield** uygulama *dışı* içerik için: tema açılış videoları (10–20 sn), mağaza tanıtım videosu, sosyal medya reklamları, Pi karakter sayfası. Uygulama içine ağır video konmaz.
 
 ## 7. Mimari (telefondan geliştirilebilir yol)

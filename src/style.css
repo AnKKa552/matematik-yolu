@@ -379,3 +379,11 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @media (prefers-reduced-motion: reduce){.mascot.pim img{animation:none}}
 
 .onb .hero{width:min(78vw,300px);aspect-ratio:1;border-radius:28px;box-shadow:0 12px 40px rgba(40,60,200,.35);display:block;margin:0 auto}
+
+/* Bilim kurgu kutlama sahnesi */
+.sahne{position:fixed;inset:0;z-index:90;background:#070a2a;display:flex;align-items:center;justify-content:center;animation:fade .18s;cursor:pointer}
+.sahne video{width:100%;height:100%;object-fit:cover;max-width:560px}
+.sahne.kapan{opacity:0;transition:opacity .2s}
+.sahne-yazi{position:absolute;top:calc(9% + env(safe-area-inset-top));left:0;right:0;text-align:center;font-weight:900;font-size:clamp(30px,9vw,46px);color:#fff;letter-spacing:.02em;text-shadow:0 0 18px #2be4ff,0 0 36px #5b4bff,0 3px 0 #1b1f6b;animation:sahneYazi .5s cubic-bezier(.2,1.6,.4,1)}
+.sahne-gec{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(255,255,255,.6);font-weight:800;font-size:13px}
+@keyframes sahneYazi{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}

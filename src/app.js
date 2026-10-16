@@ -384,7 +384,7 @@
     if (A.ses.format && mode !== 'lesson' && mode !== 'learn') A.ses.format = null;
     A.ses.showCard = !!A.ses.format;
     if (mode === 'speed') { A.ses.left = 60; clearInterval(A.timer); A.timer = setInterval(() => { A.ses.left -= 1; if (A.ses.left <= 0) { clearInterval(A.timer); finishSession(); } else if (A.view === 'lesson' && !A.fb) { const t = document.querySelector('.timer'); if (t) t.textContent = Math.ceil(A.ses.left) + ' sn'; const p = document.querySelector('.prog>i'); if (p) p.style.width = (100 * (1 - A.ses.left / 60)) + '%'; } }, 1000); }
-    A.view = 'lesson'; sfx.swoosh(); if (mode === 'exam') setTimeout(() => piSay('sinav'), 200); else if (!A.ses.showCard && !['speed', 'placement'].includes(mode)) setTimeout(() => piSay('ders_basla'), 200);
+    A.view = 'lesson'; sfx.swoosh(); sahneHazirla(); if (mode === 'exam') setTimeout(() => piSay('sinav'), 200); else if (!A.ses.showCard && !['speed', 'placement'].includes(mode)) setTimeout(() => piSay('ders_basla'), 200);
     if (!A.ses.showCard) nextQuestion(); else { render(); if (A.st.settings.voice) setTimeout(() => sayCard(skillId, A.ses.format), 300); }
   }
   // Ders ortası mola ekranı (kısa, motive edici)
@@ -404,6 +404,25 @@
     clearTimeout(A.idle); const uid = A.q.uid; A.idle = setTimeout(() => { if (A.view === 'lesson' && A.q && A.q.uid === uid && !A.fb && A.ses.mode !== 'speed') { piSay('yonlendir'); const h = document.querySelector('[data-act="hint"]'); if (h) h.classList.add('nudge'); } }, 25000);
   }
   // Doğru cevap kutlaması: seviye seriye göre yükselir
+  /* ---------------- Bilim kurgu kutlama sahneleri (Higgsfield) ----------------
+     Seride (3, 5, 8, sonra her 5) ve ders sonunda 2–3 sn'lik kısa sahne. Dokununca geçilir, bitince kendiliğinden kapanır.
+     Sıradan doğru cevapta sahne YOK (ders temposu bozulmasın). Hareketi azalt açık cihazlarda hiç oynatılmaz. */
+  const SAHNE = { ates: { yazi: '🔥 3 Seri!' }, durdurulamaz: { yazi: 'DURDURULAMAZ!' }, efsane: { yazi: 'EFSANE!' }, bitti: { yazi: '' } };
+  const sahneBlob = {};
+  // MP4 (H.264) daha küçük ve telefonların hepsinde oynar; oynatamayan tarayıcıda WebM (VP9)
+  const SAHNE_UZANTI = (() => { try { const v = document.createElement('video'); return v.canPlayType('video/mp4; codecs="avc1.4D401E"') ? '.mp4' : '.webm'; } catch (e) { return '.mp4'; } })();
+  const sahneHazirla = () => Object.keys(SAHNE).forEach(k => { if (sahneBlob[k]) return; fetch('img/sahne_' + k + SAHNE_UZANTI).then(r => r.ok ? r.blob() : null).then(b => { if (b) sahneBlob[k] = URL.createObjectURL(b); }).catch(() => { }); });
+  const sahneOyna = (ad, bitince) => {
+    const azalt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (azalt || !sahneBlob[ad]) { if (bitince) bitince(); return false; }
+    const d = document.createElement('div'); d.className = 'sahne'; d.setAttribute('role', 'presentation');
+    d.innerHTML = `<video muted playsinline autoplay preload="auto" src="${sahneBlob[ad]}"></video>${SAHNE[ad].yazi ? `<div class="sahne-yazi">${SAHNE[ad].yazi}</div>` : ''}<div class="sahne-gec">Geçmek için dokun</div>`;
+    let kapandi = false; const kapat = () => { if (kapandi) return; kapandi = true; d.classList.add('kapan'); setTimeout(() => d.remove(), 220); if (bitince) bitince(); };
+    d.addEventListener('pointerdown', kapat); document.body.appendChild(d);
+    const v = d.querySelector('video'); v.addEventListener('ended', kapat); v.play().catch(kapat); setTimeout(kapat, 4200);
+    return true;
+  };
+  const seriSahnesi = (st) => st === 3 ? 'ates' : st === 5 ? 'durdurulamaz' : (st === 8 || (st > 8 && st % 5 === 0)) ? 'efsane' : null;
   function celebrate(q, gain) {
     const st = A.ses.streak, b = document.querySelector('[data-act="check"]'), r = b ? b.getBoundingClientRect() : null;
     const word = q.rescue ? pick(PRAISE_RESCUE) : pick(PRAISE); A.fb.word = word;
@@ -411,6 +430,7 @@
     ({ normal: sfx.ok, calm: sfx.ok, fire: sfx.fire, unstop: sfx.unstop, legend: sfx.legend, rescue: sfx.grow }[tier] || sfx.ok)();
     if (navigator.vibrate) try { navigator.vibrate(tier === 'normal' || tier === 'calm' ? 25 : [30, 40, 60]); } catch (e) { }
     if (A.ses.mode === 'speed') return;
+    const sh = seriSahnesi(st); if (sh && !q.rescue) setTimeout(() => sahneOyna(sh), 350);
     if (tier === 'fire') piSay('seri3'); else if (tier === 'unstop') piSay('seri5'); else if (tier === 'legend') piSay('seri8'); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
@@ -427,7 +447,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
