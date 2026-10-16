@@ -370,3 +370,12 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 :root[data-theme="dark"] .sheet.learnc{background:#3A2A16} :root[data-theme="dark"] .sheet.learnc h3, :root[data-theme="dark"] .sheet.learnc .mis b{color:#FFC27A} :root[data-theme="dark"] .lcard .rule{color:#D4CEFF}
 .vstat{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;padding:10px 12px;border-radius:12px;background:var(--surface2);margin-top:8px}
 .vstat .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)} .vstat.ok .dot{background:var(--ok)} .vstat.bad .dot{background:var(--bad)}
+
+/* Pi görsel seti (Higgsfield) */
+.mascot.pim img{width:100%;height:auto;display:block;transform-origin:50% 95%;animation:idle 2.6s ease-in-out infinite;filter:drop-shadow(0 6px 10px rgba(20,30,90,.25));user-select:none;-webkit-user-drag:none}
+.mascot.pim.happy img{animation:jump .6s ease-out 2, idle 2.6s ease-in-out 1.2s infinite}
+.mascot.pim.sad img{animation:wobble .7s ease-in-out, idle 2.6s ease-in-out .7s infinite}
+.mascot.pim.think img{animation:idle 3.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.mascot.pim img{animation:none}}
+
+.onb .hero{width:min(78vw,300px);aspect-ratio:1;border-radius:28px;box-shadow:0 12px 40px rgba(40,60,200,.35);display:block;margin:0 auto}

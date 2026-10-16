@@ -10,7 +10,10 @@
   const cfg = G.MY_CONFIG || {};
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } };
   C.ayarli = !!(cfg.supabaseUrl && cfg.anonKey);
-  C.sesAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/sesler/` : 'audio/';
+  // Ses sürümü klasörü: 'damla/' (ElevenLabs Damla sesi, eleven_v4, 128 kbps). Eski Gamze sesleri kökte duruyor.
+  C.sesAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/sesler/damla/` : 'audio/';
+  // Pi'nin görselleri (Higgsfield ile üretildi, 'gorseller' deposu)
+  C.gorselAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/gorseller/` : null;
   let sb = null, kayitZaman = null;
   const yukle = () => new Promise((ok, no) => { if (G.supabase) return ok(); const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
   const takma = () => { const a = ['Hızlı', 'Parlak', 'Cesur', 'Neşeli', 'Akıllı', 'Yıldız', 'Şimşek', 'Gizemli']; const h = ['Kartal', 'Tilki', 'Yunus', 'Baykuş', 'Kaplan', 'Panda', 'Ejder', 'Sincap']; return `${a[Math.floor(Math.random() * a.length)]} ${h[Math.floor(Math.random() * h.length)]} ${10 + Math.floor(Math.random() * 90)}`; };

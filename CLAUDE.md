@@ -41,7 +41,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 | Haftalık ligler (10 lig, ilk sıralar yükselir) | Sosyal karşılaştırma, rekabet | 5 lig (Bronz→Elmas), 10 kişilik grup, ilk 3 yükselir | ✅ Demo rakiplerle; gerçek eşleşme sunucu fazında |
 | Elmas (gems), sandık | Değişken ödül | Ders sonu sandıktan elmas; elmas yalnızca seri koruyucuya harcanır | ✅ |
 | Kalp/can | Dikkat, aynı zamanda abonelik satışı | **Alınmadı.** Yerine "telafi sorusu" | ❌ bilinçli |
-| Maskot (Duo) | Duygusal bağ, geri bildirim | Özgün maskot **Pi** (π antenli turkuaz karakter): sevinir, üzülür, düşünür | ✅ |
+| Maskot (Duo) | Duygusal bağ, geri bildirim | Özgün maskot **Pi** (17.10.2026'dan itibaren: mavi, ters kasketli 3B karakter; proje sahibi yapay zekâ ile üretti). 6 hal görseli `src/pwa/img/pi_*.webp` (bekle, sevin, düşün, üzgün-teselli, konuş, roket), kaynaklar `tasarim/kaynak/` | ✅ |
 | Birdbrain (zorluk kişiselleştirme) | Doğru zorluk = akış | BKT ustalık modeli + seviye seçimi (bkz. §4) | ✅ |
 | Half-Life Regression (aralıklı tekrar) | Unutma eğrisine göre tekrar | Beceri başına yarı ömür; "Tekrar Zamanı" | ✅ basitleştirilmiş |
 | "Hatalarımı çalış" | Zayıf noktayı kapatma | "Hatalarım" defteri, yanılgı bazında tekrar | ✅ |
@@ -189,9 +189,9 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 
 ### 6.1 Seslendirme — KARAR VERİLDİ
 - **Pi'nin tek bir sesi var; uygulamadaki her şeyi (replik, konu anlatımı, yanılgı açıklaması) aynı ses okur.** Çocuk Pi'yi hem arkadaş hem öğretmen olarak tanır; ses değişirse karakter dağılır.
-- **Seçilen ses:** ElevenLabs kütüphanesinden "Gamze – Cartoon Character, Animated Voice" (`voice_id: Hr3W7yWIljG9YBJn39oK`, Türkçe, İstanbul aksanı). Gerekçe: canlı ve karakterli bir çizgi film sesi, net diksiyon, 10–11 yaşa hitap ediyor. İlk test 16.10.2026'da yapıldı (4 çekim, ~29 sn, ElevenLabs Flows'ta duruyor).
+- **Seçilen ses (17.10.2026):** ElevenLabs "Damla – Energetic YouTuber" (`voice_id: A2XgcJ6lQVEFeIaIUyrc`), model `eleven_v4`, mp3 44.1 kHz **128 kbps**; Pi'nin kısa repliklerine `[cheerful]` yön etiketi. Sesler `sesler/damla/` klasöründe. Önceki ses (Gamze, 64 kbps) telefonda "telefon görüşmesi gibi" duyulduğu için değiştirildi; eski dosyalar depo kökünde duruyor. Seçim, proje sahibinin 4 sesi dinleyerek karşılaştırmasıyla yapıldı.
 - **Model:** toplu üretimde `eleven_multilingual_v2` (kararlı, Türkçe destekli). Duygu etiketli kısa replikler istenirse `eleven_v4` (`[cheerful]`, `[excited]` etiketleri).
-- **Ses ayarı:** stability 0.45, similarity 0.8, style 0.35, speaker boost açık. Biçim: mp3, 44.1 kHz, 64 kbps (küçük dosya, telefonda yeterli).
+- **Ses ayarı:** stability 0.5, similarity 0.8, speaker boost açık (eleven_v4). Biçim: mp3, 44.1 kHz, 128 kbps.
 - **Yönlendirme (öğrenciyi uygulamada tutmak için):** açılışta "tekrar hoş geldin", derse girişte cesaretlendirme, 25 sn takılınca ipucuna yönlendirme (ampul sallanır), her yanlışta incitmeyen bir cümle, telafi sorusundan önce "sen yaparsın", yarı yolda ve ders sonunda kutlama; yanılgı açıklaması 🔊 ile sesli dinlenir.
 - **Ne zaman konuşur (özet):** konu anlatım kartı açılınca; 3/5/8'li seride ve telafi doğrusunda (her zaman); normal doğruda %40 olasılıkla kısa övgü ("Harika!"); yanlışta %50 olasılıkla teselli; ders sonunda. Her soruda konuşmaz (sıkıcı ve yorucu olur).
 - **Mimari:** sesler önceden üretilir → Supabase `sesler` deposu (`<anahtar>.mp3` + `manifest.json`). Uygulama mp3'ü `fetch` ile alır, telefonda Cache API'de (`pi-sesleri-v1`) saklar ve blob olarak çalar; çevrimdışı katman (sw.js) ses/range isteklerine **karışmaz** (Android Chrome'da Pi sesinin yerine robot ses çalması bu yüzdendi, 16.10.2026). Pi'nin sabit replikleri çalınamazsa **robot sese düşülmez, sessiz kalınır**; cihaz sesi yalnızca değişken sayılı soru okumada kullanılır. Ayarlarda "Pi'nin sesi hazır (N kayıt)" göstergesi var.

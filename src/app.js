@@ -40,7 +40,8 @@
   // Pi'nin ElevenLabs sesleri: sunucudaki manifest + mp3'ler. Dosyalar fetch ile alınır, telefonda saklanır (Cache API)
   // ve blob olarak çalınır. Böylece çevrimdışı katman ve "range" istekleri sesi bozamaz; ikinci açılışta internetsiz çalar.
   const AUDIO = { keys: null, cur: null, tok: 0, blob: {}, durum: 'yukleniyor', base: (CL && CL.sesAdresi) || 'audio/' };
-  const SES_DEPO = 'pi-sesleri-v1';
+  const SES_DEPO = 'pi-sesleri-damla-v1';
+  try { caches.delete('pi-sesleri-v1'); } catch (e) { } // eski (Gamze) ses önbelleğini temizle
   AUDIO.hazir = fetch(AUDIO.base + 'manifest.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null)
     .then(m => { if (m && m.keys) { AUDIO.keys = new Set(m.keys); AUDIO.durum = 'hazir'; } else AUDIO.durum = 'yok'; })
     .catch(() => { AUDIO.durum = 'hata'; });
@@ -75,7 +76,7 @@
   const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
 
   /* ---------------- Maskot: Pi ---------------- */
-  const mascot = (state = '', w = 110) => `<div class="mascot ${state}" style="width:${w}px" aria-hidden="true"><svg viewBox="0 0 120 124"><g class="m-body">
+  const mascotSvg = (state = '', w = 110) => `<div class="mascot ${state}" style="width:${w}px" aria-hidden="true"><svg viewBox="0 0 120 124"><g class="m-body">
     <path d="M44 20 H78" stroke="#5B4BFF" stroke-width="7" stroke-linecap="round"/><path d="M52 21 V36" stroke="#5B4BFF" stroke-width="6" stroke-linecap="round"/><path d="M70 21 C70 30 71 35 77 36" stroke="#5B4BFF" stroke-width="6" stroke-linecap="round" fill="none"/>
     <ellipse cx="60" cy="74" rx="46" ry="44" fill="#22CDBE"/><ellipse cx="60" cy="86" rx="28" ry="24" fill="#BFF5EE"/>
     <ellipse cx="24" cy="80" rx="9" ry="14" fill="#1BAE9F" transform="rotate(20 24 80)"/><ellipse cx="96" cy="80" rx="9" ry="14" fill="#1BAE9F" transform="rotate(-20 96 80)"/>
@@ -87,6 +88,16 @@
     <path class="mouth m-oh" d="M52 88 Q60 82 68 88" stroke="#1E1B4B" stroke-width="4" fill="none" stroke-linecap="round"/>
     <path class="mouth m-hmm" d="M52 85 L68 83" stroke="#1E1B4B" stroke-width="4" stroke-linecap="round"/>
     <ellipse cx="44" cy="117" rx="12" ry="5" fill="#1BAE9F"/><ellipse cx="76" cy="117" rx="12" ry="5" fill="#1BAE9F"/></g></svg></div>`;
+  // Pi'nin çizim seti: her duygu için ayrı görsel (aynı karakter). Görsel yüklenemezse eski SVG Pi'ye döner.
+  const PI_DURUM = { '': 'pi_bekle', happy: 'pi_sevin', think: 'pi_dusun', sad: 'pi_uzgun', talk: 'pi_konus', rocket: 'pi_roket' };
+  // Görseller uygulamanın kendi 'img/' klasöründe (aynı adres: hızlı açılır, internetsiz de çalışır)
+  const PI_GORSEL = 'img/';
+  window.MY_MASCOT_SVG = mascotSvg;
+  const mascot = (state = '', w = 110) => PI_GORSEL
+    ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`
+    : mascotSvg(state, w);
+  // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
+  if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
 
   const PRAISE = window.MY_PI_LINES.dogru;
   const PRAISE_RESCUE = window.MY_PI_LINES.telafi;
@@ -308,7 +319,7 @@
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div></div>${mascot('think', 60)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div></div>${mascot('sad', 64)}</div>
       ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
       <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
@@ -332,7 +343,7 @@
   /* ---------------- Karşılama / kayıt ---------------- */
   function viewOnboard() {
     const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 2, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
-    if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:30px">${mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button></div>`;
+    if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button></div>`;
     if (o.step === 1) return `<div class="onb">${dots}<h2>Seni tanıyalım</h2>
       <div class="field"><label>Adın ve soyadın</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela Yılmaz" autocomplete="off"></div>
       <div class="field"><label>Doğum tarihin</label><input id="f-birth" type="date" value="${esc(d.birth || '')}"></div>
