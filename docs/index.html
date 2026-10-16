@@ -691,7 +691,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     ucgen_sinif: { t: 'Üçgeni yanlış sınıflandırma', fix: 'Üçgenin türüne EN BÜYÜK açısına bakarak karar ver: 90°\'den büyükse geniş açılı, tam 90° ise dik, hepsi 90°\'den küçükse dar açılı üçgendir.' },
     // Doğal sayılar
     sifir_atlama: { t: 'Bölükteki sıfırları atlama', fix: 'Her bölük üç basamaklıdır. Okunmayan bölükleri 000 ile doldurmayı unutma.' },
-    bolük_kayma: { t: 'Bölük adlarını kaydırma', fix: 'Sağdan sola: birler, binler, milyonlar, milyarlar bölüğü. Her bölükte üç basamak vardır.' },
+    boluk_kayma: { t: 'Bölük adlarını kaydırma', fix: 'Sağdan sola: birler, binler, milyonlar, milyarlar bölüğü. Her bölükte üç basamak vardır.' },
     basamak_deger: { t: 'Basamak değeri yerine rakamı söyleme', fix: 'Basamak değeri = rakam × bulunduğu basamağın değeri. Örneğin 5 yüzler basamağındaysa değeri 500\'dür.' },
     basamak_kayma: { t: 'Basamağı bir kaydırma', fix: 'Basamakları sağdan saymaya birlerden başla: birler, onlar, yüzler, binler...' },
     cozumleme_bitisik: { t: 'Çözümlemede sıfırları kaybetme', fix: 'Çözümlenmiş sayıyı toplarken her parçayı kendi basamağına yaz; boş kalan basamaklara 0 koy.' },
@@ -911,14 +911,14 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     const dropZero = (() => { const s = g.map((v, i) => i === 0 ? String(v) : String(v)).join(''); return +s; })();
     if (dropZero !== n) wrongs.push([fmtN(dropZero), 'sifir_atlama']);
     // bir bölük kaydırma
-    const shiftL = fromGroups(g.slice(0, -1)); if (shiftL > 0) wrongs.push([fmtN(shiftL), 'bolük_kayma']);
+    const shiftL = fromGroups(g.slice(0, -1)); if (shiftL > 0) wrongs.push([fmtN(shiftL), 'boluk_kayma']);
     wrongs.push([fmtN(n * 10), 'basamak_kayma']);
     if (Math.random() < .5 || lv === 1) {
       return Q({ prompt: `Okunuşu "${U.cap(U.words(n))}" olan sayı hangisidir?`, options: mc(fmtN(n), wrongs, near(n)), steps: ['Sayıyı bölüklere ayır (her bölük 3 basamak):', g.map((v, i) => String(v).padStart(i ? 3 : 1, '0')).join(' | '), 'Okunmayan basamaklara 0 yaz.'], hint: 'Her bölük 3 basamaklıdır.' });
     }
     const wrongW = [];
     if (dropZero !== n) wrongW.push([U.cap(U.words(dropZero)), 'sifir_atlama']);
-    if (shiftL > 0) wrongW.push([U.cap(U.words(shiftL)), 'bolük_kayma']);
+    if (shiftL > 0) wrongW.push([U.cap(U.words(shiftL)), 'boluk_kayma']);
     wrongW.push([U.cap(U.words(n * 10)), 'basamak_kayma']);
     return Q({ prompt: `${fmtN(n)} sayısının okunuşu hangisidir?`, options: mc(U.cap(U.words(n)), wrongW, [[U.cap(U.words(n + 1000)), 'genel']]), steps: ['Sayıyı sağdan üçerli bölüklere ayır.', 'Her bölüğü okuyup bölük adını ekle (milyar, milyon, bin).', '000 olan bölüğün adı okunmaz.'] });
   };

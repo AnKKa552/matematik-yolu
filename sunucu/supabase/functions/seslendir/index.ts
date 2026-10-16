@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
   const isler = [...kayitlar.map((k) => ({ ...k, tur: "ses" })), ...efektler.map((k) => ({ ...k, tur: "efekt" }))].filter((k) => !varOlan.has(k.key));
   const yapilan: string[] = [], hatalar: string[] = [];
   for (const k of isler.slice(0, PARTI)) {
+    if (!/^[a-z0-9_]+$/.test(k.key)) { hatalar.push(`${k.key}: geçersiz dosya adı (yalnızca a-z, 0-9, _), üretilmedi`); continue; }
     const url = k.tur === "ses" ? `https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_64` : "https://api.elevenlabs.io/v1/sound-generation";
     const body = k.tur === "ses" ? { text: k.text, model_id: MODEL, voice_settings: AYAR } : { text: k.text, duration_seconds: k.sure ?? 1, prompt_influence: 0.45 };
     const r = await fetch(url, { method: "POST", headers: { "xi-api-key": KEY, "Content-Type": "application/json", Accept: "audio/mpeg" }, body: JSON.stringify(body) });

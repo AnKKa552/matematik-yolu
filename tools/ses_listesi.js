@@ -14,6 +14,8 @@ for (const s of SKILLS) {
   items.push({ key: `kart_${s.id}_kural`, grup: 'kart', text: U.toSpeech(c.kural) });
 }
 for (const [k, v] of Object.entries(MIS)) if (k !== 'genel') items.push({ key: `mis_${k}`, grup: 'yanilgi', text: U.toSpeech(v.t + '. ' + v.fix) });
+// Sunucu deposu yalnızca Latin harfli dosya adı kabul eder; Türkçe harfli anahtar kredi yakar ama kaydedilemez.
+const bozuk = items.filter(x => !/^[a-z0-9_]+$/.test(x.key)); if (bozuk.length) { console.error('Latin dışı ses anahtarı:', bozuk.map(x => x.key).join(', ')); process.exit(1); }
 const chars = items.reduce((a, x) => a + x.text.length, 0);
 require('fs').writeFileSync(__dirname + '/../data/seslendirme.json', JSON.stringify({ ses: { ad: 'Pi', voice_id: 'Hr3W7yWIljG9YBJn39oK', ses_adi: 'Gamze - Cartoon Character (ElevenLabs kütüphanesi)' }, toplam_karakter: chars, kayitlar: items }, null, 1));
 console.log(`${items.length} kayıt, ${chars} karakter → data/seslendirme.json`);

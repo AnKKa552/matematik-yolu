@@ -199,6 +199,8 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 - **Sunucusuz yol (Termux):** `bash tools/sesleri_uret.sh` — anahtarı gizli sorar, **hiçbir dosyaya yazmaz**. Anahtar asla depoya, zip'e veya koda konmaz.
 - **Üretim:** `node tools/ses_listesi.js` (239 kayıt, ~27 600 karakter: 30 Pi repliği + 140 anlatım kartı + 69 yanılgı açıklaması) → `python3 tools/seslendir.py --grup pi` → `python3 tools/seslendir.py`. Betik var olan dosyaları atlar; yarıda kalırsa kaldığı yerden devam eder.
 - **Ölçülmüş maliyet:** ~470 karakterlik bir çekim ≈ 437 kredi (≈ 0,08 USD, eleven_v4). Buna göre tüm paket yaklaşık 26–28 bin kredi tutar ve **bir kerelik** maliyettir. Kesin rakam planına bağlıdır; `--dene` ile önce sayılır.
+- **Ses anahtarları yalnızca `a-z0-9_` olur** (Supabase deposu Türkçe harfli dosya adını reddeder; 16.10.2026'da `mis_bolük_kayma` bu yüzden 27 kez boşuna üretildi). `tools/ses_listesi.js`, `seslendir` fonksiyonu ve `ses_kuyrugu` tablosu bunu denetler. Yanılgı kimliklerinde Türkçe harf kullanma.
+- **Dikkat:** `data/seslendirme.json` 16.10.2026'da elle temizlendi ("boşluk", `<`, `→`, "doğru dur" gibi okunuş hataları). `node tools/ses_listesi.js` yeniden çalıştırılırsa bu düzeltmeler silinir; önce temizleme kurallarını `U.toSpeech`'e taşı.
 - **Metin normalleştirme (TTS'e gitmeden önce, `U.toSpeech`):** kesir → "dörtte üç", `%5` → "yüzde beş", `×` "çarpı", `÷` "bölü", `−` "eksi", `²` "kare", `°` "derece", `15 702 436` → boşluksuz sayı.
 
 ### 6.2 Animasyon — KARAR VERİLDİ

@@ -347,7 +347,7 @@
       ],
       "yanilgilar": [
         "basamak_kayma",
-        "bolük_kayma",
+        "boluk_kayma",
         "sifir_atlama"
       ],
       "anlatim": {
@@ -1211,7 +1211,7 @@
       "ad": "Bölükteki sıfırları atlama",
       "duzeltme": "Her bölük üç basamaklıdır. Okunmayan bölükleri 000 ile doldurmayı unutma."
     },
-    "bolük_kayma": {
+    "boluk_kayma": {
       "ad": "Bölük adlarını kaydırma",
       "duzeltme": "Sağdan sola: birler, binler, milyonlar, milyarlar bölüğü. Her bölükte üç basamak vardır."
     },

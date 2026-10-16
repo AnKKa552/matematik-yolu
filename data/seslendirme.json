@@ -1057,7 +1057,7 @@
    "text": "Bölükteki sıfırları atlama. Her bölük üç basamaklıdır. Okunmayan bölükleri 000 ile doldurmayı unutma."
   },
   {
-   "key": "mis_bolük_kayma",
+   "key": "mis_boluk_kayma",
    "grup": "yanilgi",
    "text": "Bölük adlarını kaydırma. Sağdan sola: birler, binler, milyonlar, milyarlar bölüğü. Her bölükte üç basamak vardır."
   },
