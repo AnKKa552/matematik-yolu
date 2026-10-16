@@ -14,6 +14,7 @@ pwa = '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="i
 sw = "<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>"
 (D/'index.html').write_text(base.replace('<!--PWA-->', pwa + '<script src="config.js"></script>').replace('<!--SW-->', sw))
 cfg = D/'config.js'
+if not cfg.exists() and (S/'config.js').exists(): cfg.write_text((S/'config.js').read_text())
 if not cfg.exists(): cfg.write_text("// Supabase bağlantısı. Boş bırakılırsa uygulama çevrimdışı çalışır.\n// Değerler: Supabase paneli → Project Settings → API (anon key herkese açık olabilir, service role ASLA buraya yazılmaz)\nwindow.MY_CONFIG = { supabaseUrl: '', anonKey: '' };\n")
 print('ok', len(base)//1024, 'KB')
 
