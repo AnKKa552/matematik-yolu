@@ -1356,11 +1356,11 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   };
   GEN.a_alan = (lv) => {
     if (lv === 1) {
-      const a = ri(3, 9), b = ri(2, 6);
+      const a = ri(3, 9), b = ri(2, Math.min(6, a - 1)); // eşit kenar = kare; "dikdörtgen" denen soruda kenarlar farklı
       return Q({ type: 'input', prompt: 'Şekildeki dikdörtgenin alanı kaç birimkaredir?', visual: V.rect(a, b, '', true), answer: String(a * b), unit: 'birimkare', inputMis: [{ v: 2 * (a + b), mis: 'cevre_alan' }, { v: a + b, mis: 'cevre_alan' }], steps: [`Bir sırada ${a} kare, ${b} sıra var.`, `${a} × ${b} = ${a * b} birimkare`] });
     }
     if (lv === 2) {
-      const a = ri(5, 20), b = ri(3, 12), u = pick(['cm', 'm']);
+      const a = ri(5, 20), b = ri(3, Math.min(12, a - 1)), u = pick(['cm', 'm']);
       return Q({ prompt: `Kenar uzunlukları ${a} ${u} ve ${b} ${u} olan dikdörtgenin alanı nedir?`, visual: V.rect(a, b, u), options: mc(`${a * b} ${u}²`, [[`${a * b} ${u}`, 'birim'], [`${2 * (a + b)} ${u}²`, 'cevre_alan'], [`${2 * (a + b)} ${u}`, 'cevre_alan']], [[`${a + b} ${u}²`, 'cevre_alan'], [`${a * b + a} ${u}²`, 'genel']]), steps: ['Alan = uzun kenar × kısa kenar', `A = ${a} × ${b} = ${a * b} ${u}²`, 'Alan birimi kare birimdir (²).'] });
     }
     const a = ri(4, 15), b = ri(3, 12);
@@ -1368,9 +1368,9 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   };
   GEN.a_cevre_alan = (lv) => {
     if (lv === 1) {
-      const a = ri(4, 12), b = ri(2, 8), ask = pick(['çevre', 'alan']);
+      const a = ri(4, 12), b = ri(2, a - 1), ask = pick(['çevre', 'alan']); // b < a: kenarlar eşit olunca "dikdörtgen" kafa karıştırıyordu (kare)
       const ok = ask === 'çevre' ? `${2 * (a + b)} cm` : `${a * b} cm²`, other = ask === 'çevre' ? `${a * b} cm` : `${2 * (a + b)} cm²`;
-      return Q({ prompt: `${a} cm ve ${b} cm kenarlı bir dikdörtgen kartonun etrafına şerit yapıştırılacak${ask === 'alan' ? ' değil, ÜSTÜ tamamen kaplanacak' : ''}. Hangi ölçü gerekir?`, options: mc(ok, [[other, 'cevre_alan'], [ask === 'çevre' ? `${a + b} cm` : `${a + b} cm²`, ask === 'çevre' ? 'cevre_yarim' : 'cevre_alan']], [[ask === 'çevre' ? `${2 * (a + b)} cm²` : `${a * b} cm`, 'birim']]), steps: [ask === 'çevre' ? 'Etrafına şerit → çevre (uzunluk, cm)' : 'Üstünü kaplamak → alan (cm²)', ask === 'çevre' ? `2 × (${a} + ${b}) = ${2 * (a + b)} cm` : `${a} × ${b} = ${a * b} cm²`] });
+      return Q({ prompt: ask === 'çevre' ? `Kenarları ${a} cm ve ${b} cm olan dikdörtgen bir kartonun etrafına şerit yapıştırılacak. Ne kadar şerit gerekir?` : `Kenarları ${a} cm ve ${b} cm olan dikdörtgen bir kartonun üstü renkli kâğıtla tamamen kaplanacak. Ne kadar kâğıt gerekir?`, options: mc(ok, [[other, 'cevre_alan'], [ask === 'çevre' ? `${a + b} cm` : `${a + b} cm²`, ask === 'çevre' ? 'cevre_yarim' : 'cevre_alan']], [[ask === 'çevre' ? `${2 * (a + b)} cm²` : `${a * b} cm`, 'birim']]), steps: [ask === 'çevre' ? 'Etrafına şerit → çevre (uzunluk, cm)' : 'Üstünü kaplamak → alan (cm²)', ask === 'çevre' ? `2 × (${a} + ${b}) = ${2 * (a + b)} cm` : `${a} × ${b} = ${a * b} cm²`] });
     }
     if (lv === 2) {
       const tip = pick(['genel', 'genel2', 'sayi', 'sayi']);
@@ -2607,7 +2607,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-17 8670cc1', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-17 7b2aa69', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
