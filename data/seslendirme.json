@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 30407,
+ "toplam_karakter": 31074,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1360,6 +1360,26 @@
    "key": "mis_kontrol_yuzeysel",
    "grup": "yanilgi",
    "text": "Cevabın büyüklüğünü kontrol sanma. Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin."
+  },
+  {
+   "key": "mis_nokta_ad",
+   "grup": "yanilgi",
+   "text": "Çizimi noktayla karıştırma. Nokta tek bir yeri gösterir ve boyutu yoktur. Uzayıp giden bir çizgi doğru, ışın ya da doğru parçasıdır; adını uçlarına bakarak verirsin."
+  },
+  {
+   "key": "mis_cember_parca",
+   "grup": "yanilgi",
+   "text": "Çemberin parçalarını karıştırma. Merkez bir noktadır. Çember yalnızca kenardaki eğri çizgidir. Daire, çember ile iç bölgesinin birleşimidir. Çap ve yarıçap ise doğru parçalarıdır."
+  },
+  {
+   "key": "mis_basamak_karsilastir",
+   "grup": "yanilgi",
+   "text": "Eşit basamaklı sayılarda yanlış basamağa bakma. Basamak sayıları eşitse soldan başla ve ilk farklı rakamı karşılaştır. Rakamı büyük olan sayı daha büyüktür."
+  },
+  {
+   "key": "mis_tahmin_tam",
+   "grup": "yanilgi",
+   "text": "Tahmin yerine tam sonucu hesaplama. Tahmin istenince önce sayıları istenen basamağa yuvarlarsın, sonra yuvarlanmış sayılarla işlem yaparsın. Tam sonuç tahmin değildir."
   },
   {
    "key": "pi_tekrar_dene_1",

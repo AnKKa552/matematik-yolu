@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 79 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 83 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -157,7 +157,7 @@ Her cevap `kanit` ile kaydedilir: **ilk** (ipucusuz ilk denemede doğru) · **ip
 3. Parametrik üreticiyi yaz: 3 zorluk seviyesi, her yanlış şık/yanlış sayı bir yanılgı etiketiyle.
 4. 4 anlatım kartını yaz (`curriculum.js`): gorsel (metin + SVG), hikaye (Türk çocuğunun günlük hayatından, isimler çeşitli), adim (3–5 adım), kural (1–2 satır).
 5. `node test/test_generators.js` çalıştır: her üreticiden 600×3 soru üretilir; tek doğru şık, tekrarsız şıklar, `undefined/NaN` yok, bilinmeyen yanılgı etiketi yok. **Hata 0 değilse yayın yok.**
-6. Matematik öğretmeni kontrolü: rastgele 30 örnek soru gözle incelenir (dil, seviye uygunluğu, müfredat uyumu).
+6. Matematik öğretmeni kontrolü: rastgele örnek sorular gözle incelenir (dil, seviye uygunluğu, müfredat uyumu). Araç: **Öğretmen inceleme paneli** (§5.4).
 7. Türkçe ek uyumu için `U.nk()`, `U.wk()`, `U.tk()` yardımcılarını kullan (12'nin, 40'ın, 3'er, 11.40'ta). Sayıya elle `'in` yazma.
 
 ### 5.1 Soru nesnesi şeması
@@ -217,6 +217,14 @@ Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular içi
   - Test: tablonun doğru yerleşimi kabul edilir, tek satırın her yanlış yerleşimi bilinen yanılgı + açıklama verir; işlem örneği kartlarla kurulup kabul edilir; iki kartlık bütün işlemler ya doğru ya bilinen yanılgıdır; tek kart, aynı kartı iki kez kullanma ve yarım işlem reddedilir.
 - Kutlama yazısı ("Bravo!") geri bildirim kartının hemen üstünde ve daha küçük çıkar; soru metninin üstünü kapatmaz.
 - Test: her şablon 400 kez üretilir; adım çözümlerindeki ve kontrol şıkkındaki her işlem bağımsız hesaplanır, şık/yanılgı kuralları ve Pi'nin okuyacağı metin denetlenir.
+
+### 5.4 Öğretmen inceleme paneli (17.10.2026)
+- Adres: `ogretmen.html?kod=<davet kodu>` (GitHub Pages'te `docs/ogretmen.html`; kaynak `src/ogretmen.html|js|css`, `build.py` üretir). Kodsuz ya da geçersiz kodla açılmaz, kayıt yapamaz.
+- **Kim inceler:** henüz belirlenmedi (proje sahibi arıyor). Tercihen bu yıl ya da geçen yıl 5. sınıf okutmuş, Maarif kitabını bilen bir ortaokul matematik öğretmeni; mümkünse iki kişi. Bu bir resmî onay değil, **bizim kalite kuralımız**.
+- **Örneklem (412):** her beceriden 10 soru (seviye 1·1·1·2·2·2·2·3·3·3), Hata Avcısı 42, Problem Atölyesi 20 (her şablondan biri klasik, biri tablo + işlem kurma + gerekçe). Sorular **tohumlu** rastgele üretilir (`soru_id` → hep aynı soru); ayrıca değerlendirilen sorunun tam kopyası (`soru` jsonb) ve yayın sürümü saklanır.
+- Öğretmen her soruda doğru cevabı, **her yanlış şıkkın bağlı olduğu yanılgıyı**, öğrenciye gösterilen açıklamayı, ipucunu ve çözüm adımlarını görür. Karar: ✅ Uygun (tek dokunuş) · ✏️ Düzeltilsin · ❌ Uygun değil (etiket: dil, seviye, matematik hatası, müfredat dışı, çeldirici, açıklama, görsel, yöntem + not). Kararlar önce cihaza, sonra sunucuya; internet yoksa sırada bekler. Başka cihazdan girince eski kararlar geri gelir.
+- Sunucu: `sunucu/supabase/ogretmen_inceleme.sql` (tablolar `inceleme_kodlari`, `soru_incelemeleri`; fonksiyonlar `inceleme_kod_gecerli`, `inceleme_kaydet`, `inceleme_listesi`, hepsi SECURITY DEFINER ve kod denetler; tabloya doğrudan yazma reddedilir). Yeni davet, iptal ve sonuç okuma sorguları dosyanın başında. Davet kodu gizli tutulur, yalnız öğretmenle paylaşılır.
+- **İlk bulgusu (17.10.2026):** panel denenirken 15 konu-seviyede "genel/işlem hatası" etiketli dolgu şıkları çıktı (§1-3 ihlali). Düzeltildi: `mc()` artık yanılgıya bağlı olmayan dolguyu eklemez (soru 3 şıkla kalabilir); gerçek hatalar doğru etikete bağlandı (`bos_kisim`, `ara_sonuc`, `sifir_sayisi`); 4 yeni yanılgı: `nokta_ad`, `cember_parca`, `basamak_karsilastir`, `tahmin_tam`; müfredatta olmayan "kiriş" şıkkı çıkarıldı. Test artık `genel` etiketli tek bir yanlış şıkta bile hata verir.
 
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
 | Kitap kalıbı (sayfa) | Bizim varyasyonumuz | Beceri |
@@ -309,7 +317,7 @@ CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
 data/mufredat.json        ← 7 tema, 35 beceri, 67 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (79) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (83) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar

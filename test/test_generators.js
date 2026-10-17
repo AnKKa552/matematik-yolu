@@ -38,11 +38,12 @@ for (const [name, g] of Object.entries(GEN)) {
     }
     if (q.type === 'input') {
       if (q.answer === undefined || isNaN(parseFloat(String(q.answer).replace(',','.')))) { console.log('BAD ANSWER', name, lv, q.answer); errors++; break; }
-      for (const m of q.inputMis||[]) { if (!MIS[m.mis]) { console.log('UNKNOWN MIS', name, m.mis); errors++; } }
+      for (const m of q.inputMis||[]) { if (!MIS[m.mis]) { console.log('UNKNOWN MIS', name, m.mis); errors++; } if (m.mis === 'genel') { console.log('GENEL ETİKET (§1-3: her yanlış bir yanılgıya bağlı olmalı)', name, lv, m.v); errors++; break; } }
     } else {
       const ok = q.options.filter(o=>o.ok).length, texts = q.options.map(o=>o.t);
       if (ok!==1 || q.options.length<2 || new Set(texts).size!==texts.length) { console.log('BAD OPTS', name, lv, strip(q.prompt), texts, ok); errors++; break; }
-      for (const o of q.options) if (!o.ok && !MIS[o.mis]) { console.log('UNKNOWN MIS', name, o.mis); errors++; break; }
+      for (const o of q.options) if (!o.ok && (!MIS[o.mis] || o.mis === 'genel')) { console.log(o.mis === 'genel' ? 'GENEL ETİKET (§1-3: her yanlış bir yanılgıya bağlı olmalı)' : 'UNKNOWN MIS', name, lv, strip(o.t)); errors++; break; }
+      if (q.type === 'mc' && q.options.length < 3) samples['iki_sikli_' + name + lv] = texts;
       if (q.options.length < 3 && q.type==='mc') { samples['few_'+name+lv]=texts; }
     }
     if (r===0) samples[name+'_'+lv] = { p: strip(q.prompt).replace(/\s+/g,' ').slice(0,170), a: q.type==='input'? q.answer : strip(q.options.find(o=>o.ok).t).trim(), o: q.options? q.options.map(o=>strip(o.t).replace(/\s+/g,' ').trim()).join(' | '):'' };

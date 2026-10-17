@@ -1458,6 +1458,22 @@
     "kontrol_yuzeysel": {
       "ad": "Cevabın büyüklüğünü kontrol sanma",
       "duzeltme": "Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin."
+    },
+    "nokta_ad": {
+      "ad": "Çizimi noktayla karıştırma",
+      "duzeltme": "Nokta tek bir yeri gösterir ve boyutu yoktur. Uzayıp giden bir çizgi doğru, ışın ya da doğru parçasıdır; adını uçlarına bakarak verirsin."
+    },
+    "cember_parca": {
+      "ad": "Çemberin parçalarını karıştırma",
+      "duzeltme": "Merkez bir noktadır. Çember yalnızca kenardaki eğri çizgidir. Daire, çember ile iç bölgesinin birleşimidir. Çap ve yarıçap ise doğru parçalarıdır."
+    },
+    "basamak_karsilastir": {
+      "ad": "Eşit basamaklı sayılarda yanlış basamağa bakma",
+      "duzeltme": "Basamak sayıları eşitse soldan başla ve ilk farklı rakamı karşılaştır. Rakamı büyük olan sayı daha büyüktür."
+    },
+    "tahmin_tam": {
+      "ad": "Tahmin yerine tam sonucu hesaplama",
+      "duzeltme": "Tahmin istenince önce sayıları istenen basamağa yuvarlarsın, sonra yuvarlanmış sayılarla işlem yaparsın. Tam sonuç tahmin değildir."
     }
   },
   "anlatim_bicimleri": {

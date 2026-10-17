@@ -97,6 +97,10 @@
     ara_sonuc: { t: 'Ara sonucu cevap sanma', fix: 'Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et.' },
     kalan_yok: { t: 'Bölmede kalanı hesaba katmama', fix: 'Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır.' },
     hata_yeri: { t: 'Doğru bir adımı hatalı sanma', fix: 'Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır.' },
+    nokta_ad: { t: 'Çizimi noktayla karıştırma', fix: 'Nokta tek bir yeri gösterir ve boyutu yoktur. Uzayıp giden bir çizgi doğru, ışın ya da doğru parçasıdır; adını uçlarına bakarak verirsin.' },
+    cember_parca: { t: 'Çemberin parçalarını karıştırma', fix: 'Merkez bir noktadır. Çember yalnızca kenardaki eğri çizgidir. Daire, çember ile iç bölgesinin birleşimidir. Çap ve yarıçap ise doğru parçalarıdır.' },
+    basamak_karsilastir: { t: 'Eşit basamaklı sayılarda yanlış basamağa bakma', fix: 'Basamak sayıları eşitse soldan başla ve ilk farklı rakamı karşılaştır. Rakamı büyük olan sayı daha büyüktür.' },
+    tahmin_tam: { t: 'Tahmin yerine tam sonucu hesaplama', fix: 'Tahmin istenince önce sayıları istenen basamağa yuvarlarsın, sonra yuvarlanmış sayılarla işlem yaparsın. Tam sonuç tahmin değildir.' },
     genel: { t: 'İşlem hatası', fix: 'Çözümü adım adım tekrar kontrol et.' },
   };
 
@@ -105,7 +109,8 @@
   function mc(correct, wrongs, fillers) {
     const seen = new Set([String(correct)]), opts = [{ t: String(correct), ok: true }];
     for (const [t, mis, ac] of wrongs) { const k = String(t); if (!seen.has(k) && opts.length < 4) { seen.add(k); opts.push(ac ? { t: k, ok: false, mis, ac } : { t: k, ok: false, mis }); } }
-    if (fillers) for (const [t, mis] of fillers) { const k = String(t); if (!seen.has(k) && opts.length < 4) { seen.add(k); opts.push({ t: k, ok: false, mis: mis || 'genel' }); } }
+    // Dolgu şıkları yalnız bir yanılgıya bağlıysa eklenir (§1-3: rastgele çeldirici yok). 'genel' dolgu atlanır; soru 3 şıkla kalabilir.
+    if (fillers) for (const [t, mis] of fillers) { const k = String(t); if (mis && mis !== 'genel' && !seen.has(k) && opts.length < 4) { seen.add(k); opts.push({ t: k, ok: false, mis }); } }
     return shuffle(opts);
   }
   // Sayısal yakın yanlışlar (dolgu için)
@@ -130,7 +135,7 @@
       const name = { dp: 'Doğru parçası', isin: 'Işın', dogru: 'Doğru', nokta: 'Nokta' };
       const wr = { dp: [['Doğru', 'dp_dogru'], ['Işın', 'isin_dogru']], isin: [['Doğru', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']], dogru: [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']] }[k];
       const harf = pick([['A', 'B'], ['K', 'L'], ['M', 'N'], ['P', 'R'], ['C', 'D'], ['E', 'F']]);
-      return Q({ prompt: 'Şekildeki geometrik çizimin adı nedir?', visual: V.lineKind(k, harf), options: mc(name[k], wr, [['Nokta', 'genel']]), steps: ['Uçlarına bak: iki uç noktası varsa doğru parçası,', 'bir başlangıç noktası ve tek ok varsa ışın,', 'iki yönde ok varsa doğrudur.'], hint: 'Okların sayısına bak!' });
+      return Q({ prompt: 'Şekildeki geometrik çizimin adı nedir?', visual: V.lineKind(k, harf), options: mc(name[k], wr, [['Nokta', 'nokta_ad']]), steps: ['Uçlarına bak: iki uç noktası varsa doğru parçası,', 'bir başlangıç noktası ve tek ok varsa ışın,', 'iki yönde ok varsa doğrudur.'], hint: 'Okların sayısına bak!' });
     }
     if (lv === 2) {
       const [X, Y] = pick([['A', 'B'], ['K', 'L'], ['M', 'N'], ['P', 'R'], ['C', 'D'], ['E', 'F']]), XY = X + Y;
@@ -161,9 +166,9 @@
     }
     if (lv === 2) {
       const it = pick([
-        ['Çemberin merkezinden geçen ve iki ucu çember üzerinde olan doğru parçasına ne denir?', 'Çap', [['Yarıçap', 'cap_yaricap'], ['Merkez', 'genel'], ['Daire', 'genel']]],
-        ['Merkezi çember üzerindeki bir noktaya birleştiren doğru parçasına ne denir?', 'Yarıçap', [['Çap', 'cap_yaricap'], ['Çember', 'genel'], ['Kiriş', 'genel']]],
-        ['Çember ile iç bölgesinin birleşimine ne denir?', 'Daire', [['Çember', 'genel'], ['Çap', 'cap_yaricap'], ['Merkez', 'genel']]],
+        ['Çemberin merkezinden geçen ve iki ucu çember üzerinde olan doğru parçasına ne denir?', 'Çap', [['Yarıçap', 'cap_yaricap'], ['Merkez', 'cember_parca'], ['Daire', 'cember_parca']]],
+        ['Merkezi çember üzerindeki bir noktaya birleştiren doğru parçasına ne denir?', 'Yarıçap', [['Çap', 'cap_yaricap'], ['Çember', 'cember_parca'], ['Merkez', 'cember_parca']]],
+        ['Çember ile iç bölgesinin birleşimine ne denir?', 'Daire', [['Çember', 'cember_parca'], ['Çap', 'cap_yaricap'], ['Merkez', 'cember_parca']]],
       ]);
       return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Çember: sadece kenar çizgisi. Daire: çember + içi.', 'Yarıçap: merkez → çember. Çap: çemberden çembere, merkezden geçerek.'] });
     }
@@ -249,7 +254,7 @@
   GEN.g_ucgen = (lv) => {
     if (lv === 1) {
       let a = ri(3, 10) * 10, b = ri(2, 8) * 10; if (a + b >= 170) b = 170 - a - 10 > 10 ? 170 - a - 10 : 20; if (a + b >= 180) { a = 60; b = 50; }
-      return Q({ type: 'input', prompt: `Bir üçgenin iki iç açısının ölçüsü ${a}° ve ${b}°'dir. Üçüncü açının ölçüsü kaç derecedir?`, answer: String(180 - a - b), unit: '°', inputMis: [{ v: 360 - a - b, mis: 'ucgen_360' }, { v: a + b, mis: 'genel' }], steps: ['Üçgenin iç açıları toplamı 180°', `${a} + ${b} = ${a + b}`, `180 − ${a + b} = ${180 - a - b}°`] });
+      return Q({ type: 'input', prompt: `Bir üçgenin iki iç açısının ölçüsü ${a}° ve ${b}°'dir. Üçüncü açının ölçüsü kaç derecedir?`, answer: String(180 - a - b), unit: '°', inputMis: [{ v: 360 - a - b, mis: 'ucgen_360' }, { v: a + b, mis: 'ara_sonuc', ac: `${a + b}° bilinen iki açının toplamı, yani bir ara sonuç. Üçüncü açı için bunu 180°'den çıkar.` }], steps: ['Üçgenin iç açıları toplamı 180°', `${a} + ${b} = ${a + b}`, `180 − ${a + b} = ${180 - a - b}°`] });
     }
     if (lv === 2) {
       const t = pick(['dar', 'dik', 'genis']); let A;
@@ -262,7 +267,7 @@
     }
     if (Math.random() < .35) return Q({ type: 'input', prompt: 'Eşkenar üçgenin bir iç açısı kaç derecedir?', answer: '60', unit: '°', inputMis: [{ v: 180, mis: 'ucgen_360' }, { v: 120, mis: 'ucgen_360' }], steps: ['Eşkenar üçgenin üç açısı eşit.', '180 ÷ 3 = 60°'] });
     const x = pick([20, 40, 50, 60, 70, 80, 100, 120, 30]);
-    return Q({ type: 'input', prompt: `İkizkenar bir üçgende eşit kenarların arasındaki (tepe) açı ${x}°'dir. Taban açılarından biri kaç derecedir?`, answer: String((180 - x) / 2), unit: '°', inputMis: [{ v: 180 - x, mis: 'genel' }, { v: (360 - x) / 2, mis: 'ucgen_360' }], steps: ['İkizkenar üçgende taban açıları eşittir.', `180 − ${x} = ${180 - x}`, `${180 - x} ÷ 2 = ${(180 - x) / 2}°`] });
+    return Q({ type: 'input', prompt: `İkizkenar bir üçgende eşit kenarların arasındaki (tepe) açı ${x}°'dir. Taban açılarından biri kaç derecedir?`, answer: String((180 - x) / 2), unit: '°', inputMis: [{ v: 180 - x, mis: 'ara_sonuc', ac: `${180 - x}° iki taban açısının toplamı. Taban açıları eşit olduğu için bunu 2'ye bölmelisin.` }, { v: (360 - x) / 2, mis: 'ucgen_360' }], steps: ['İkizkenar üçgende taban açıları eşittir.', `180 − ${x} = ${180 - x}`, `${180 - x} ÷ 2 = ${(180 - x) / 2}°`] });
   };
 
   /* =========================================================
@@ -323,7 +328,7 @@
     } else { const base = ri(1, 99) * 1e9; a = base + ri(0, 999) * 1e6 + 750000; b = base + Math.floor((a - base) / 1e6) * 1e6 + 750; if (Math.random() < .25) b = a; if (Math.random() < .5) [a, b] = [b, a]; }
     const rel = a > b ? '>' : a < b ? '<' : '=';
     const la = String(a).length, lb = String(b).length;
-    const misMap = { '<': la !== lb ? 'ilk_rakam' : 'genel', '>': la !== lb ? 'ilk_rakam' : 'genel', '=': 'genel' };
+    const misMap = { '<': la !== lb ? 'ilk_rakam' : 'basamak_karsilastir', '>': la !== lb ? 'ilk_rakam' : 'basamak_karsilastir', '=': la !== lb ? 'ilk_rakam' : 'basamak_karsilastir' };
     return cmpQ({ prompt: 'Boş yere hangi sembol gelmelidir?', cmp: [fmtN(a), fmtN(b)], steps: [`${fmtN(a)} → ${la} basamaklı, ${fmtN(b)} → ${lb} basamaklı.`, la !== lb ? 'Basamak sayısı fazla olan daha büyüktür.' : 'Basamak sayıları eşit; soldan başlayıp ilk farklı rakamı karşılaştır.', `${fmtN(a)} ${rel} ${fmtN(b)}`] }, rel, misMap);
   };
   GEN.n_toplacikar = (lv) => {
@@ -346,7 +351,7 @@
     if (lv === 1) {
       const a = pick([12, 15, 25, 32, 45, 64, 75, 80]), z = pick([10, 100, 1000]), m = pick([2, 3, 4, 5]) * z, ans = a * m;
       const zeros = String(m).length - 1;
-      return Q({ prompt: `${a} × ${fmtN(m)} işleminin sonucu kaçtır?`, options: mc(fmtN(ans), [[fmtN(ans / 10), 'sifir_sayisi'], [fmtN(ans * 10), 'sifir_sayisi'], [fmtN(a * (m / z) + z), 'genel']]), steps: [`Sıfırları ayır: ${a} × ${m / z} ve ${zeros} sıfır`, `${a} × ${m / z} = ${a * m / z}`, `Sona ${zeros} sıfır ekle → ${fmtN(ans)}`] });
+      return Q({ prompt: `${a} × ${fmtN(m)} işleminin sonucu kaçtır?`, options: mc(fmtN(ans), [[fmtN(ans / 10), 'sifir_sayisi'], [fmtN(ans * 10), 'sifir_sayisi'], [fmtN(a * (m / z) + z), 'sifir_sayisi']]), steps: [`Sıfırları ayır: ${a} × ${m / z} ve ${zeros} sıfır`, `${a} × ${m / z} = ${a * m / z}`, `Sona ${zeros} sıfır ekle → ${fmtN(ans)}`] });
     }
     if (lv === 2) {
       const it = pick(['bol', 'carpan']);
@@ -381,7 +386,7 @@
     }
     const a = ri(12, 48) * 100 + ri(1, 99), b = ri(12, 48) * 100 + ri(1, 99);
     const ra = Math.round(a / 1000) * 1000, rb = Math.round(b / 1000) * 1000;
-    return Q({ prompt: `${fmtN(a)} + ${fmtN(b)} toplamını sayıları en yakın binliğe yuvarlayarak TAHMİN edin.`, options: mc(fmtN(ra + rb), [[fmtN(Math.floor(a / 1000) * 1000 + Math.floor(b / 1000) * 1000), 'yuvarlama_kesme'], [fmtN(ra + rb + 1000), 'yuvarlama_kesme'], [fmtN(a + b), 'genel']]), steps: [`${fmtN(a)} ≈ ${fmtN(ra)}`, `${fmtN(b)} ≈ ${fmtN(rb)}`, `Tahmin: ${fmtN(ra + rb)}`] });
+    return Q({ prompt: `${fmtN(a)} + ${fmtN(b)} toplamını sayıları en yakın binliğe yuvarlayarak TAHMİN edin.`, options: mc(fmtN(ra + rb), [[fmtN(Math.floor(a / 1000) * 1000 + Math.floor(b / 1000) * 1000), 'yuvarlama_kesme'], [fmtN(ra + rb + 1000), 'yuvarlama_kesme'], [fmtN(a + b), 'tahmin_tam']]), steps: [`${fmtN(a)} ≈ ${fmtN(ra)}`, `${fmtN(b)} ≈ ${fmtN(rb)}`, `Tahmin: ${fmtN(ra + rb)}`] });
   };
 
   /* =========================================================
@@ -481,9 +486,9 @@
     if (lv === 1) {
       const p = pick([ri(1, 9), ri(10, 99)]);
       if (Math.random() < .5) return Q({ prompt: `%${p} ifadesinin ondalık gösterimi hangisidir?`, options: mc(fmtD(p / 100, 2), [[fmtD(p / 10, 1), 'yuzde_ondalik'], [String(p), 'yuzde_ondalik'], [fmtD(p / 1000, 3), 'yuzde_ondalik']]), steps: [`%${p} = ${p}/100`, `${p}/100 = ${fmtD(p / 100, 2)}`] });
-      return Q({ prompt: `${fr(p, 100)} kesrinin yüzde ile gösterimi hangisidir?`, options: mc('%' + p, [['%' + (p * 10), 'yuzde_ondalik'], ['%' + fmtD(p / 100, 2), 'yuzde_ondalik'], ['%' + (100 - p), 'genel']]), steps: ['Paydası 100 olan kesir doğrudan yüzde olarak okunur.', `${p}/100 = %${p}`] });
+      return Q({ prompt: `${fr(p, 100)} kesrinin yüzde ile gösterimi hangisidir?`, options: mc('%' + p, [['%' + (p * 10), 'yuzde_ondalik'], ['%' + fmtD(p / 100, 2), 'yuzde_ondalik'], ['%' + (100 - p), 'bos_kisim']]), steps: ['Paydası 100 olan kesir doğrudan yüzde olarak okunur.', `${p}/100 = %${p}`] });
     }
-    if (lv === 2) { const k = ri(5, 95); return Q({ type: 'input', prompt: 'Yüzlük tablonun yüzde kaçı boyalıdır? (Sadece sayıyı yaz)', visual: V.grid100(k), answer: String(k), unit: '%', inputMis: [{ v: 100 - k, mis: 'genel' }, { v: k / 10, mis: 'yuzde_ondalik' }], steps: ['Tabloda 100 kare var.', `${k} kare boyalı → ${k}/100 = %${k}`], hint: 'Her satırda 10 kare var.' }); }
+    if (lv === 2) { const k = ri(5, 95); return Q({ type: 'input', prompt: 'Yüzlük tablonun yüzde kaçı boyalıdır? (Sadece sayıyı yaz)', visual: V.grid100(k), answer: String(k), unit: '%', inputMis: [{ v: 100 - k, mis: 'bos_kisim', ac: `${100 - k} kare boyanmamış olanlar. Soru boyalı kısmı soruyor.` }, { v: k / 10, mis: 'yuzde_ondalik' }], steps: ['Tabloda 100 kare var.', `${k} kare boyalı → ${k}/100 = %${k}`], hint: 'Her satırda 10 kare var.' }); }
     const [n, d] = pick([[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [7, 10], [3, 20], [9, 25], [1, 20]]);
     const p = n * 100 / d;
     return Q({ type: 'input', prompt: `${fr(n, d)} kesri yüzde kaça eşittir? (Sadece sayıyı yaz)`, answer: String(p), unit: '%', inputMis: [{ v: n * 10 + d, mis: 'yuzde_ondalik' }, { v: n / d, mis: 'yuzde_ondalik' }], steps: [`Paydayı 100 yap: ${100 / d} ile genişlet.`, `${fr(n, d)} = ${fr(n * 100 / d, 100)} = %${p}`] });

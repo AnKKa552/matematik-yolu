@@ -17,6 +17,13 @@ cfg = D/'config.js'
 if not cfg.exists() and (S/'config.js').exists(): cfg.write_text((S/'config.js').read_text())
 if not cfg.exists(): cfg.write_text("// Supabase bağlantısı. Boş bırakılırsa uygulama çevrimdışı çalışır.\n// Değerler: Supabase paneli → Project Settings → API (anon key herkese açık olabilir, service role ASLA buraya yazılmaz)\nwindow.MY_CONFIG = { supabaseUrl: '', anonKey: '' };\n")
 print('ok', len(base)//1024, 'KB')
+# Öğretmen soru inceleme paneli (davet bağlantısıyla: ogretmen.html?kod=…)
+import datetime, subprocess
+try: surum = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=R, capture_output=True, text=True).stdout.strip()
+except Exception: surum = ''
+surum = datetime.date.today().isoformat() + (' ' + surum if surum else '')
+ojs = '\n'.join((S/f).read_text() for f in ['core.js', 'generators.js', 'curriculum.js', 'ogretmen.js']).replace('/*SURUM*/', surum)
+(D/'ogretmen.html').write_text((S/'ogretmen.html').read_text().replace('/*CSS*/', css).replace('/*PANELCSS*/', (S/'ogretmen.css').read_text()).replace('/*JS*/', ojs.replace('</script>', '<\\/script>')))
 
 # PWA dosyaları (src/pwa) → dist
 import shutil
@@ -26,7 +33,7 @@ for f in (S/'pwa').glob('*'):
 if (S/'pwa'/'img').exists(): shutil.copytree(S/'pwa'/'img', D/'img', dirs_exist_ok=True)
 # Yayın kopyası: GitHub Pages docs/ klasöründen yayınlar
 P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch()
-for f in ['index.html', 'config.js', 'sw.js', 'manifest.webmanifest']:
+for f in ['index.html', 'ogretmen.html', 'config.js', 'sw.js', 'manifest.webmanifest']:
     if (D/f).exists(): shutil.copy(D/f, P/f)
 if (D/'img').exists(): shutil.copytree(D/'img', P/'img', dirs_exist_ok=True)
 print('docs/ güncellendi')

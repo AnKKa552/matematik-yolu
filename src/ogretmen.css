@@ -1,0 +1,43 @@
+/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
+body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
+#panel{max-width:760px;margin:0 auto;padding:0 16px}
+.og-ust{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;margin:0 -16px 12px;background:var(--surface);border-bottom:1px solid var(--line)}
+.og-ust b{display:block;font-size:17px}.og-ust small{color:var(--muted);font-weight:700}
+.og-kutu{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:12px}
+.og-kutu.giris{max-width:560px;margin:24px auto;line-height:1.5}.giris h1{margin:6px 0 0;font-size:24px}.giris .sub{color:var(--muted);margin:2px 0 12px;font-weight:700}
+.giris ul{padding-left:20px}.giris li{margin:4px 0}.gpi{width:84px;height:84px;object-fit:contain;float:right}
+.not{background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.lbl{display:block;font-weight:800;margin:14px 0}.lbl input{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px;border-radius:12px;border:2px solid var(--line);font:inherit;background:var(--bg);color:var(--ink)}
+.og-kutu .btn{width:auto}.kucukb{padding:8px 12px;min-height:40px;font-size:14px}
+#bolum{width:100%;padding:12px;border-radius:12px;border:2px solid var(--line);font:inherit;font-weight:800;background:var(--bg);color:var(--ink)}
+.ilerle{height:6px;border-radius:6px;background:var(--surface2);margin:8px 0 12px;overflow:hidden}.ilerle i{display:block;height:100%;background:var(--ok)}
+.row{display:flex;gap:8px;align-items:center}.row.ust{justify-content:space-between;margin-bottom:10px}.sno{font-weight:800;color:var(--muted);font-size:14px}
+.kart{border:2px solid var(--line);border-radius:16px;padding:14px;background:var(--bg)}
+.tur{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.3px;text-transform:uppercase;color:var(--brand-d);background:var(--brand-t);border-radius:8px;padding:3px 8px;margin-bottom:8px}
+.pq{font-size:18px;font-weight:800;line-height:1.4;margin-bottom:8px}
+.dc{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--ok-bg);font-weight:700}
+.alt{margin-top:8px;font-size:13.5px;color:var(--muted);font-weight:700}
+.yl{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px}
+.ys{border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:10px;padding:8px 10px;background:var(--surface)}
+.ym{font-size:13.5px;color:var(--muted);margin-top:3px;font-weight:700}.ym span{font-weight:600}
+.eslesme{list-style:none;padding:0;margin:8px 0 0}.eslesme li{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}.eslesme li span{flex:1}
+.ek{margin-top:10px;font-size:14.5px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}.ek summary{font-weight:800;cursor:pointer}
+.baglam{background:var(--surface2);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-weight:700}.baglam .bt{font-weight:900;margin-bottom:4px}.baglam.kucuk{font-size:14px}
+.adim{border-top:2px dashed var(--line);padding-top:10px;margin-top:12px}.an{font-weight:900;color:var(--brand-d);margin-bottom:6px}.an small{color:var(--muted);font-weight:700}
+.adim .pq{font-size:16px}
+.kararlar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}.kararlar .btn{width:100%;padding-left:4px;padding-right:4px;font-size:14.5px}
+.kform{margin-top:14px;border:2px solid var(--accent);border-radius:14px;padding:12px;background:var(--surface)}.kbas{font-weight:900;margin-bottom:8px}
+.etler{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.et{border:2px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:999px;padding:6px 10px;font:inherit;font-size:13px;font-weight:800}
+.et.on{background:#FFF1D6;border-color:var(--accent);color:#7A4500}span.et{display:inline-block;padding:2px 8px;font-size:12px}
+.kform textarea{width:100%;box-sizing:border-box;min-height:80px;border-radius:12px;border:2px solid var(--line);padding:10px;font:inherit;background:var(--bg);color:var(--ink);margin-bottom:10px}
+.kform .row .btn{flex:1}
+.mevcut{margin-top:12px;padding:10px 12px;border-radius:12px;font-weight:800;background:var(--surface2)}.mevcut.uygun{background:var(--ok-bg)}.mevcut.duzelt{background:#FFF1D6}.mevcut.uygun_degil{background:var(--bad-bg)}
+.na{font-weight:600;font-style:italic;margin-top:4px}
+.uyari{margin-top:10px;padding:10px;border-radius:10px;background:#FFF1D6;font-weight:700;font-size:14px}
+.kimlik{margin-top:12px}
+.sayilar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.sayilar div{background:var(--surface2);border-radius:12px;padding:10px;text-align:center}.sayilar b{display:block;font-size:22px}.sayilar span{font-size:12px;font-weight:700;color:var(--muted)}
+.sayilar .u{background:var(--ok-bg)}.sayilar .d{background:#FFF1D6}.sayilar .r{background:var(--bad-bg)}
+.bliste{display:flex;flex-direction:column;gap:4px}.bsatir{display:grid;grid-template-columns:1fr 90px 44px;gap:8px;align-items:center;text-align:left;border:0;background:none;padding:6px 2px;font:inherit;font-weight:700;color:var(--ink);border-bottom:1px solid var(--line)}
+.bsatir .bar{height:6px;border-radius:6px;background:var(--surface2);overflow:hidden}.bsatir .bar i{display:block;height:100%;background:var(--ok)}.bsatir small{color:var(--muted);text-align:right}
+.isaretli{padding-left:0;list-style:none}.isaretli li{border-bottom:1px solid var(--line);padding:8px 0}.isaretli button{border:0;background:none;font:inherit;font-weight:800;color:var(--brand-d);padding:0;text-decoration:underline}
+@media (max-width:420px){.kararlar .btn{font-size:13px}.sayilar b{font-size:18px}.pq{font-size:16.5px}}
