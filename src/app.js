@@ -477,6 +477,17 @@
     $app.innerHTML = `<div class="mid">${mascot('happy', 150)}<h1>${msg}</h1><div class="muted" style="font-weight:800">${A.ses.correct} doğru · ⚡ ${A.ses.xp} XP</div></div>`;
     sfx.fire(); piSay('yari'); setTimeout(() => nextQuestion(), 1700);
   }
+  // Takılınca yönlendirme: 25 sn hiçbir şeye dokunmazsa Pi ipucuna yönlendirir.
+  // Pi ya da soru okuması sürerken ASLA araya girmez (17.10.2026: iPhone'da soru okunurken yarıda kesiliyordu); dokunuş sayacı sıfırlar.
+  const sesSuruyor = () => { try { return (window.speechSynthesis && speechSynthesis.speaking) || (AUDIO.cur && !AUDIO.cur.paused && !AUDIO.cur.ended); } catch (e) { return false; } };
+  function idleKur(ms = 25000) {
+    clearTimeout(A.idle); if (!A.q) return; const uid = A.q.uid;
+    A.idle = setTimeout(() => {
+      if (A.view !== 'lesson' || !A.q || A.q.uid !== uid || A.fb || A.ses.mode === 'speed') return;
+      if (sesSuruyor()) return idleKur(6000);
+      piSay('yonlendir'); const h = document.querySelector('[data-act="hint"]'); if (h) h.classList.add('nudge');
+    }, ms);
+  }
   function nextQuestion() {
     if (A.ses.mode !== 'speed' && A.ses.i >= A.ses.len && !A.ses.lastWrong) return finishSession();
     if (!A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
@@ -485,7 +496,7 @@
     A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
     if (A.q.rescue) setTimeout(() => piSay('telafi_soru'), 250);
-    clearTimeout(A.idle); const uid = A.q.uid; A.idle = setTimeout(() => { if (A.view === 'lesson' && A.q && A.q.uid === uid && !A.fb && A.ses.mode !== 'speed') { piSay('yonlendir'); const h = document.querySelector('[data-act="hint"]'); if (h) h.classList.add('nudge'); } }, 25000);
+    idleKur();
   }
   // Doğru cevap kutlaması: seviye seriye göre yükselir
   /* ---------------- Bilim kurgu kutlama sahneleri (Higgsfield) ----------------
@@ -540,6 +551,7 @@
   /* =================== OLAYLAR =================== */
   document.addEventListener('click', (ev) => {
     const el = ev.target.closest('[data-act]'); if (!el) return;
+    if (A.view === 'lesson' && A.q && !A.fb && A.idle) idleKur();
     const act = el.dataset.act, v = el.dataset.v;
     switch (act) {
       case 'tab': A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;

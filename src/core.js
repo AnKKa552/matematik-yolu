@@ -173,11 +173,12 @@
   };
   // Dikdörtgen (a x b), opsiyonel kareli
   V.rect = (a, b, unit, grid) => {
-    const sc = Math.min(200 / a, 110 / b), w = a * sc, h = b * sc, x = (260 - w) / 2, y = 24;
+    // Sağdaki kenar etiketi (örn. "14 cm") kesilmesin: şekil biraz sola, çizim alanı 280 birim
+    const sc = Math.min(180 / a, 110 / b), w = a * sc, h = b * sc, x = (280 - w) / 2 - 16, y = 24;
     let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="f2 ln"/>`;
     if (grid) { for (let i = 1; i < a; i++) s += `<line x1="${x + i * sc}" y1="${y}" x2="${x + i * sc}" y2="${y + h}" class="ln thin"/>`; for (let j = 1; j < b; j++) s += `<line x1="${x}" y1="${y + j * sc}" x2="${x + w}" y2="${y + j * sc}" class="ln thin"/>`; }
     if (unit) s += `<text x="${x + w / 2}" y="${y - 7}" class="tx" text-anchor="middle">${a} ${unit}</text><text x="${x + w + 8}" y="${y + h / 2 + 5}" class="tx">${b} ${unit}</text>`;
-    return svg(260, y + h + 14, s, `dikdörtgen ${a} ${unit || 'birim'} ve ${b} ${unit || 'birim'}`);
+    return svg(280, y + h + 14, s, `dikdörtgen ${a} ${unit || 'birim'} ve ${b} ${unit || 'birim'}`);
   };
   // Sütun grafiği
   V.barChart = (cats, vals, opts = {}) => {
