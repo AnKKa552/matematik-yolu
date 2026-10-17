@@ -342,7 +342,7 @@
     const fp = E.fingerprint(A.st), p = A.st.profile || {};
     // Ölçülmemiş göstergeyi sayı gibi göstermiyoruz: anlatım biçimi en az 2 karttan sonra görünür
     const fbars = fp.formats.map(f => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${FORMATS[f.f].icon} ${FORMATS[f.f].name}</b></div>${f.n >= 2 ? `<div class="bar grow"><i style="width:${Math.round(f.m * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">%${Math.round(f.m * 100)}</div>` : '<div class="grow muted sm">henüz ölçülmedi</div>'}</div>`).join('');
-    const K = fp.kanit, kbar = K && K.n >= 5 ? `<div class="kanitbar"><i class="k1" style="width:${K.ilk * 100}%"></i><i class="k2" style="width:${K.ipucu * 100}%"></i><i class="k3" style="width:${K.cozum * 100}%"></i></div><div class="kanitlej sm"><span><b class="k1"></b>İlk denemede doğru %${Math.round(K.ilk * 100)}</span><span><b class="k2"></b>İpucuyla doğru %${Math.round(K.ipucu * 100)}</span><span><b class="k3"></b>Çözüm gösterildi %${Math.round(K.cozum * 100)}</span></div>` : '<div class="muted sm">En az 5 cevaptan sonra görünür.</div>';
+    const K = fp.kanit, kbar = K && K.n >= 5 ? `<div class="kanitbar"><i class="k1" style="width:${K.ilk * 100}%"></i><i class="k2" style="width:${K.ipucu * 100}%"></i><i class="k3" style="width:${K.cozum * 100}%"></i></div><div class="kanitlej sm"><span><b class="k1"></b>İlk denemede doğru %${Math.round(K.ilk * 100)}</span><span><b class="k2"></b>İpucuyla doğru %${Math.round(K.ipucu * 100)}</span><span><b class="k3"></b>Çözüm gösterildi %${Math.round(K.cozum * 100)}</span><span>(${K.n} cevaba göre)</span></div>` : '<div class="muted sm">En az 5 cevaptan sonra görünür.</div>';
     const nasil = `<details class="nasil"><summary>ℹ️ Bu sayılar nasıl hesaplanıyor?</summary><ul>
       <li><b>Çalışma tarzı:</b> son 60 cevabın süresinin ortancası. 9 saniyeden kısaysa "hızlı karar veren", 22 saniyeye kadar "dengeli", daha uzunsa "derin düşünen". En az 5 cevap gerekir.</li>
       <li><b>İlk denemede doğru:</b> ipucu almadan, ilk denemede doğru verilen cevapların oranı. İpucuyla ya da ikinci denemede bulunanlar ayrı sayılır.</li>
@@ -351,15 +351,15 @@
       <li><b>Anlatım:</b> bir anlatım kartından sonraki ilk 3 sorudan en az 2'sinin doğru olma oranı. En az 2 kart gösterilince ölçülmüş sayılır.</li>
       <li><b>Problem adımları:</b> atölyede her adımın ilk denemede doğru oranı. "Kendin dene", benzer yeni problemi tek başına çözmektir.</li>
       <li>XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır.</li></ul></details>`;
-    const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${m.active ? 'warm' : 'ok'}">${m.active ? 'çalışılıyor' : 'düzeldi ✓'}</span></div>`).join('') || '<div class="muted sm">Henüz kavram yanılgısı tespit edilmedi.</div>';
+    const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'düzeldi ✓' : m.kesin ? 'çalışılıyor' : 'olası · 1 kez'}</span></div>`).join('') || '<div class="muted sm">Henüz kavram yanılgısı tespit edilmedi.</div>';
     return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${mascot('happy', 70)}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
       <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Tema kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
-        <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">İlk denemede doğru</span><b>${fp.ilkAcc === null ? '–' : '%' + Math.round(fp.ilkAcc * 100)}</b></div>
+        <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">İlk denemede doğru</span><b>${fp.ilkAcc === null ? '–' : '%' + Math.round(fp.ilkAcc * 100)}</b><small class="muted">${fp.ilkAcc === null ? 'en az 5 cevap' : fp.ilkSay.ok + '/' + fp.ilkSay.n + ' cevap'}</small></div>
         <div class="card"><span class="muted sm">Hatadan dönüş gücü</span><b>${fp.resil === null ? '–' : '%' + Math.round(fp.resil * 100)}</b></div><div class="card"><span class="muted sm">İpucu kullanımı</span><b>%${Math.round(fp.hintRate * 100)}</b></div></div>
         <h3 style="font-size:15px;margin:14px 0 4px">Cevaplarım nasıl geldi?</h3>${kbar}
         <h3 style="font-size:15px;margin:14px 0 4px">Bana en iyi gelen anlatım</h3>${fbars}
-        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım <span class="muted sm">(ilk denemede)</span></h3>${fp.problem.asamalar.concat(fp.problem.bagimsiz ? [{ ad: '🎯 Kendin dene', acc: fp.problem.bagimsiz.acc }] : []).map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100)}</div></div>`).join('')}` : ''}
+        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım <span class="muted sm">(ilk denemede)</span></h3>${fp.problem.asamalar.some(a => a.n && a.n < 5) ? '<div class="muted sm">Ön değerlendirme: henüz az veri var, sayılar çözdükçe netleşir.</div>' : ''}${fp.problem.asamalar.concat(fp.problem.bagimsiz ? [{ ad: '🎯 Kendin dene', acc: fp.problem.bagimsiz.acc, ok: fp.problem.bagimsiz.ok, n: fp.problem.bagimsiz.n }] : []).map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:74px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100) + ` <small class="muted">${a.ok}/${a.n}</small>`}</div></div>`).join('')}` : ''}
         <h3 style="font-size:15px;margin:14px 0 4px">Kavram yanılgılarım</h3>${mis}${nasil}</div>
       <h2 class="sect">Rozetler</h2><div class="badges">${E.BADGES.map(b => `<div class="badge ${A.st.badges.includes(b.id) ? '' : 'off'}" title="${esc(b.desc)}"><div class="i">${b.icon}</div><div class="n">${b.name}</div></div>`).join('')}</div>
       <h2 class="sect">Ayarlar</h2><div class="card list">
@@ -522,6 +522,9 @@
   }
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
+  // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
+  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2 };
+  const misSes = (id) => `mis_${id}${MIS_SES_SURUM[id] ? '_' + MIS_SES_SURUM[id] : ''}`;
   function ikinciIpucu(q, res) {
     if (res.ip) return res.ip;
     if (q.ip) return q.ip;
@@ -537,7 +540,7 @@
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Sorun değil! Doğru değerle bir sonraki adıma geçiyoruz.</div>' : ''}</div>${mascot('sad', 64)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}</div>${mascot('sad', 64)}</div>
       ${fb.ac ? `<div class="mis baglamli"><b>🧭 Neden olmadı?</b><div style="margin-top:4px">${fb.ac}</div></div>` : ''}
       ${fb.mis !== 'genel' ? `<div class="mis ${fb.ac ? 'kural' : ''}"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${fb.ac ? 'Genel kural: ' : ''}${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
@@ -794,7 +797,7 @@
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
       case 'pi-hello': piSay('hosgeldin'); break;
-      case 'say-mis': say(`mis_${v}`, MIS[v].t + '. ' + MIS[v].fix); break;
+      case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
       case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, birth: d.birth, school: d.school, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, created: Date.now() }; save(); if (act === 'onb-finish') startSession('placement', null); else render(); break; }
     }

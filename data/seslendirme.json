@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 28967,
+ "toplam_karakter": 29448,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1262,14 +1262,14 @@
    "text": "İşlem önceliğini atlayıp soldan sağa yapma. Önce parantez, sonra üslü ifade, sonra çarpma-bölme, en son toplama-çıkarma yapılır."
   },
   {
-   "key": "mis_oruntu_baslangic",
+   "key": "mis_oruntu_baslangic_2",
    "grup": "yanilgi",
-   "text": "Örüntüde başlangıç değerini hesaba katmama. n. adım eşittir ilk terim artı (n eksi 1) çarpı artış. Sadece artış çarpı n demek ilk terimi unutmak olur."
+   "text": "Örüntüde ilk terimi hesaba katmama. Kural ilk terimi de vermeli. Terimler birinci, ikinci, üçüncü diye sayılıyorsa, n'inci terim: ilk terim artı, n eksi bir kere artış. Sadece adım çarpı artış demek ilk terimi unutmak olur."
   },
   {
-   "key": "mis_oruntu_bir",
+   "key": "mis_oruntu_bir_2",
    "grup": "yanilgi",
-   "text": "Örüntüde adım sayısını bir fazla sayma. 1. adımda henüz hiç artış olmadı. n. adıma gelene kadar (n eksi 1) kez artış olur."
+   "text": "Örüntüde artış sayısını bir fazla sayma. Terimler birinci, ikinci, üçüncü diye sayılıyorsa birinci terimde henüz artış yoktur; n'inci terime kadar n eksi bir kez artış olur."
   },
   {
    "key": "mis_algoritma_sira",
@@ -1360,6 +1360,16 @@
    "key": "pi_tekrar_dene_2",
    "grup": "pi",
    "text": "Bir daha düşün, sana bir ipucu bıraktım."
+  },
+  {
+   "key": "mis_baslangic_unutma",
+   "grup": "yanilgi",
+   "text": "Başlangıçtaki miktarı eklememe. Başta var olan miktar sonuca eklenir: toplam, başlangıç artı geçen süre çarpı her seferki artıştır."
+  },
+  {
+   "key": "mis_baslangic_sira",
+   "grup": "yanilgi",
+   "text": "Başlangıç anını birinci adım sanma. Başlangıç, hiç zaman geçmemiş andır, yani sıfırıncı gün ya da sıfırıncı hafta; o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam, başlangıç artı n çarpı artıştır."
   }
  ]
 }

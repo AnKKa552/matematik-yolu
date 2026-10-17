@@ -62,7 +62,11 @@
   function banner(text, cls, sub) {
     const b = document.createElement('div'); b.className = 'fx-banner ' + (cls || '');
     b.innerHTML = `<span class="fx-word">${text}</span>${sub ? `<span class="fx-sub">${sub}</span>` : ''}`;
-    layer.appendChild(b); return b;
+    layer.appendChild(b);
+    // Yazı soru metninin üstünü kapatmasın: geri bildirim kartı çıkınca onun hemen üstüne yerleşir
+    const yerlestir = () => { const k = document.querySelector('.sheet'); if (k) { const r = k.getBoundingClientRect(); b.style.top = Math.max(80, r.top - 34) + 'px'; b.classList.add('kartta'); } };
+    requestAnimationFrame(() => requestAnimationFrame(yerlestir)); setTimeout(yerlestir, 120);
+    return b;
   }
   function flyXP(n, from) {
     const e = document.createElement('div'); e.className = 'fx-xp'; e.textContent = `+${n} XP`;

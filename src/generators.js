@@ -78,8 +78,10 @@
     cikarma_degisme: { t: 'Çıkarma/bölmede değişme özelliği var sanma', fix: 'Değişme özelliği toplama ve çarpmada vardır. 9 − 4 ile 4 − 9 aynı değildir.' },
     us_carpim: { t: 'Kareyi 2 ile çarpmak sanma', fix: '5² = 5 × 5 = 25 demektir, 5 × 2 değil. Küp: 3³ = 3 × 3 × 3 = 27.' },
     oncelik_soldan: { t: 'İşlem önceliğini atlayıp soldan sağa yapma', fix: 'Önce parantez, sonra üslü ifade, sonra çarpma-bölme, en son toplama-çıkarma yapılır.' },
-    oruntu_baslangic: { t: 'Örüntüde başlangıç değerini hesaba katmama', fix: 'n. adım = ilk terim + (n − 1) × artış. Sadece artış × n demek ilk terimi unutmak olur.' },
-    oruntu_bir: { t: 'Örüntüde adım sayısını bir fazla sayma', fix: '1. adımda henüz hiç artış olmadı. n. adıma gelene kadar (n − 1) kez artış olur.' },
+    oruntu_baslangic: { t: 'Örüntüde ilk terimi hesaba katmama', fix: 'Kural ilk terimi de vermeli. Terimler 1., 2., 3. diye sayılıyorsa: n. terim = ilk terim + (n − 1) × artış. Sadece adım × artış demek ilk terimi unutmak olur.' },
+    oruntu_bir: { t: 'Örüntüde artış sayısını bir fazla sayma', fix: 'Terimler 1., 2., 3. diye sayılıyorsa 1. terimde henüz artış yoktur; n. terime kadar (n − 1) kez artış olur.' },
+    baslangic_unutma: { t: 'Başlangıçtaki miktarı eklememe', fix: 'Başta var olan miktar sonuca eklenir: toplam = başlangıç + geçen süre × her seferki artış.' },
+    baslangic_sira: { t: 'Başlangıç anını 1. adım sanma', fix: 'Başlangıç, hiç zaman geçmemiş andır (0. gün ya da 0. hafta); o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam = başlangıç + n × artış.' },
     algoritma_sira: { t: 'Algoritma adımlarını sırasız uygulama', fix: 'Algoritma adımları yazıldığı sırayla, tek tek uygulanır. Her adımdan sonra elindeki sayıyı not et.' },
     dongu_sayma: { t: 'Döngü tekrarlarını yanlış sayma', fix: 'Döngünün her turunda değeri yaz ve koşulu kontrol et. Kaç kez tekrar ettiğini tek tek işaretle.' },
     // Olasılık
@@ -691,8 +693,8 @@
   }];
   VAR.e_oruntu = [(lv) => {
     const a = pick([0, 10, 20, 25, 50]), d = pick([5, 10, 15, 20]), n = pick([6, 8, 10, 12]);
-    if (a === 0) return Q({ type: 'input', prompt: `Boş bir kumbaraya her gün ${d} TL atılıyor. ${n}. günün sonunda kumbarada kaç TL olur?`, answer: String(d * n), unit: 'TL', inputMis: [{ v: d * (n - 1), mis: 'oruntu_bir' }, { v: d + n, mis: 'oruntu_baslangic' }], steps: [`Her gün ${d} TL: ${d}, ${2 * d}, ${3 * d}, ...`, `${n}. gün: ${n} × ${d} = ${d * n} TL`], ref: '2. kitap s. 139' });
-    return Q({ type: 'input', prompt: `Kumbarada başta ${a} TL vardı. Her gün ${d} TL ekleniyor. ${n}. günün sonunda kumbarada kaç TL olur?`, answer: String(a + d * n), unit: 'TL', inputMis: [{ v: d * n, mis: 'oruntu_baslangic' }, { v: a + d * (n - 1), mis: 'oruntu_bir' }], steps: [`${n} günde eklenen: ${n} × ${d} = ${d * n} TL`, `Başlangıçtaki parayı unutma: ${a} + ${d * n} = ${a + d * n} TL`], ref: '2. kitap s. 139' });
+    if (a === 0) return Q({ type: 'input', prompt: `Boş bir kumbaraya her gün ${d} TL atılıyor. ${n}. günün sonunda kumbarada kaç TL olur?`, answer: String(d * n), unit: 'TL', inputMis: [{ v: d * (n - 1), mis: 'baslangic_sira' }], steps: [`Her gün ${d} TL: ${d}, ${2 * d}, ${3 * d}, ...`, `${n}. gün: ${n} × ${d} = ${d * n} TL`], ref: '2. kitap s. 139' });
+    return Q({ type: 'input', prompt: `Kumbarada başta ${a} TL vardı. Her gün ${d} TL ekleniyor. ${n}. günün sonunda kumbarada kaç TL olur?`, answer: String(a + d * n), unit: 'TL', inputMis: [{ v: d * n, mis: 'baslangic_unutma' }, { v: a + d * (n - 1), mis: 'baslangic_sira' }], steps: [`Başlangıç (0. gün): ${a} TL. ${n} gün sonra ${n} kez ekleme olur.`, `${n} günde eklenen: ${n} × ${d} = ${d * n} TL`, `Başlangıçtaki parayı unutma: ${a} + ${d * n} = ${a + d * n} TL`], ref: '2. kitap s. 139' });
   }];
   VAR.e_algoritma = [(lv) => {
     const it = pick([
@@ -1052,18 +1054,20 @@
       kontrol: [`Kutuyu ${kutu} kg buldun. Hangi işlem bu cevabı doğrular?`, `${c} + ${kutu} = ${sol}`, [[`${kutu} + ${sol} = ${kutu + sol}`, 'denge_bozma', 'Kutuyu sol kefeye eklemek dengeyi kontrol etmez. Sağ kefedekileri topla, sol kefeye eşit mi bak.'], [`${a} + ${kutu} = ${a + kutu}`, 'denge_bozma', `Sağ kefede ${a} kg yok. Sağ kefede ${c} kg ve kutu var.`]], 'Sağ kefedeki ağırlıklar toplanınca sol kefedeki toplama eşit olmalı.'] });
   };
   PROB.kumbara = () => {
-    const ad = pick(NAMES); let s, d, n; do { s = ri(10, 60); d = pick([5, 10, 15, 20, 25]); n = ri(4, 12); } while (s * n === s + d * n || d + n === d * n);
-    const ek = d * n, top = s + ek;
-    return P({ skill: 'e_oruntu', baslik: 'Kumbara',
-      baglam: `${U.wk(ad, 'in')} kumbarasında ${s} TL var. Her hafta kumbarasına ${d} TL atıyor. ${n} hafta sonra kumbarasında kaç TL olur?`,
-      anla: [`${n} hafta sonra kumbaradaki toplam para`, [['Her hafta atılan para', 'istenen_verilen', `Haftalık para verilmiş (${d} TL). Soru ${n} hafta sonraki toplamı soruyor.`], [`${n} haftada atılan para`, 'ara_sonuc', `Bu bir ara sonuç. Kumbarada başta da ${s} TL vardı; soru toplamı soruyor.`], ['Kumbarada başta olan para', 'istenen_verilen', `Başlangıç parası verilmiş (${s} TL). Soru ${n} hafta SONRASINI soruyor.`]]],
-      plan: ['Haftalık parayı hafta sayısıyla çarparım, başlangıçtaki parayı eklerim.', [['Haftalık parayı hafta sayısıyla çarparım, başka bir şey yapmam.', 'oruntu_baslangic', `Kumbarada başta ${s} TL vardı; onu eklemezsen sonuç eksik kalır.`], ['Bütün sayıları toplarım.', 'problem_adim', `${d} TL her hafta yeniden atılıyor. Bir kez toplamak yetmez, hafta sayısıyla çarpmalıyız.`], ['Başlangıçtaki parayı hafta sayısıyla çarparım.', 'problem_adim', 'Başlangıç parası bir kez vardır. Her hafta artan, haftalık paradır.']]],
-      coz: [{ prompt: `${n} haftada kumbaraya kaç TL atar?`, answer: ek, unit: 'TL', ip: `Her hafta aynı para atılıyor. ${n} hafta boyunca bu kaç kez olur?`,
-          inputMis: [{ v: d + n, mis: 'problem_adim', ac: `Haftalık parayla hafta sayısını topladın. Her hafta ${d} TL atıldığı için ${n} hafta için çarpmalısın.` }], steps: [`${n} × ${d} = ${ek} TL`] },
-        { prompt: `${n} haftada ${ek} TL atıyor. ${n} hafta sonra kumbarada kaç TL olur?`, answer: top, unit: 'TL', ip: 'Kumbarada başta ne vardı? Ona ne eklendi?',
-          inputMis: [{ v: ek, mis: 'oruntu_baslangic', ac: `Bu sadece haftalarda atılan para. Başta kumbarada olan ${s} TL'yi de eklemelisin.` }, { v: s * n, mis: 'problem_adim', ac: 'Başlangıç parasını çarptın. Başlangıç parası bir kez eklenir.' }],
-          steps: [`Baştaki para unutulmaz: ${s} + ${ek} = ${top} TL`] }],
-      kontrol: [`${top} TL buldun. Hangi işlem bu cevabı doğrular?`, `${top} − ${s} = ${ek}`, [[`${top} + ${s} = ${top + s}`, 'ters_islem', 'Başlangıç parasını bir daha eklemek bir şey doğrulamaz. Sonuçtan başlangıcı ÇIKARIRSAN haftalarda atılanı bulmalısın.'], [`${top} − ${d} = ${top - d}`, 'oruntu_baslangic', 'Bir haftalık parayı çıkarmak sadece bir önceki haftayı verir; cevabı doğrulamaz.']], 'Sonuçtan baştaki parayı çıkarırsan haftalarda atılan parayı bulmalısın.'] });
+    // Örüntü: 0. hafta = başlangıç. n hafta sonra n kez artış olur → toplam = başlangıç + n × artış (ilk terim + (n − 1) × artış DEĞİL)
+    const ad = pick(NAMES), s = ri(2, 12) * 5, d = pick([5, 10, 15, 20, 25]), n = ri(6, 12), top = s + n * d;
+    const tablo = `<table class="atab yatay"><tr><th>Geçen hafta</th><td>0 <small>(başlangıç)</small></td><td>1</td><td>2</td><td>3</td></tr><tr><th>Para (TL)</th><td>${s}</td><td>${s + d}</td><td>${s + 2 * d}</td><td>${s + 3 * d}</td></tr></table>`;
+    return P({ skill: 'e_oruntu', baslik: 'Kumbara örüntüsü',
+      baglam: `${U.wk(ad, 'in')} kumbarasındaki para her hafta aynı miktarda artıyor. Tabloda başlangıç ve ilk haftalar var. ${n} hafta sonra kumbarada kaç TL olur?${tablo}`,
+      anla: [`${n} hafta sonra kumbaradaki para`, [['Paranın her hafta ne kadar arttığı', 'ara_sonuc', `Haftalık artış bir ara sonuç. Soru ${n} hafta sonraki parayı soruyor.`], ['Kumbarada başta olan para', 'istenen_verilen', `Başlangıç parası tabloda yazıyor (0. hafta: ${s} TL). Soru ${n} hafta SONRASINI soruyor.`], ['Tablodaki son sayı', 'istenen_verilen', `Tablodaki son sayı 3 hafta sonrası. Soru ${n} hafta sonrasını soruyor.`]]],
+      plan: ['Haftalık artışı bulurum; toplam = başlangıç + hafta sayısı × artış.', [['Haftalık artışı hafta sayısıyla çarparım, başka bir şey yapmam.', 'baslangic_unutma', `Kumbarada başta ${s} TL vardı; onu eklemezsen sonuç eksik kalır.`], ['Başlangıcı 1. hafta sayıp artışı bir eksik hafta kadar eklerim.', 'baslangic_sira', `Başlangıç 0. haftadır; o anda henüz para eklenmedi. ${n} hafta sonra ${n} kez artış olur.`], ['Tablodaki son sayıya artışı bir kez eklerim.', 'problem_adim', `Bu sadece 4. haftayı verir. ${n}. haftaya ulaşmak için kuralı kullanmalıyız.`]]],
+      coz: [{ prompt: 'Kumbaradaki para her hafta kaç TL artıyor?', answer: d, unit: 'TL', ip: 'İki komşu haftadaki parayı karşılaştır. Aradaki fark ne kadar?',
+          inputMis: [{ v: s + d, mis: 'grafik_okuma', ac: `Bu 1. haftanın sonundaki toplam para. Artış, iki komşu hafta arasındaki farktır: ${s + d} − ${s}.` }, { v: s, mis: 'istenen_verilen', ac: 'Bu başlangıç parası. Artış için iki komşu haftanın farkına bak.' }],
+          steps: [`${s + d} − ${s} = ${d}`, `${s + 2 * d} − ${s + d} = ${d}`, `Her hafta ${d} TL artıyor.`] },
+        { prompt: `Para her hafta ${d} TL artıyor. ${n} hafta sonra kumbarada kaç TL olur?`, answer: top, unit: 'TL', ip: 'Toplam = başlangıç + hafta sayısı × artış. Başlangıç tabloda 0. haftada yazıyor.',
+          inputMis: [{ v: n * d, mis: 'baslangic_unutma', ac: `Bu sadece ${n} haftada eklenen para. Başta kumbarada olan ${s} TL'yi de eklemelisin.` }, { v: s + (n - 1) * d, mis: 'baslangic_sira', ac: `Başlangıç 0. hafta. ${n} hafta sonra ${n} kez artış olur: ${s} + ${n} × ${d}.` }],
+          steps: ['Kural: toplam = başlangıç + hafta sayısı × artış', `${n} × ${d} = ${n * d}`, `${s} + ${n * d} = ${top} TL`] }],
+      kontrol: [`${top} TL buldun. Hangisi bu cevabı doğrular?`, `${top} − ${s} = ${n * d} ve ${n * d} ÷ ${d} = ${n} hafta`, [[`${top} + ${s} = ${top + s}`, 'ters_islem', 'Başlangıç parasını bir daha eklemek bir şey doğrulamaz. Sonuçtan başlangıcı ÇIKARIRSAN eklenen parayı bulursun.'], [`${top} − ${d} = ${top - d}`, 'ters_islem', 'Bir haftalık artışı çıkarmak sadece bir önceki haftayı verir; cevabı doğrulamaz.']], 'Sonuçtan başlangıcı çıkarırsan eklenen parayı bulursun; bunu haftalık artışa bölünce hafta sayısına ulaşmalısın.'] });
   };
   PROB.gezi = () => {
     let o, t, k; do { o = ri(40, 140); t = ri(2, 6); k = pick([14, 16, 18, 20, 25]); } while ((o + t) % k === 0);

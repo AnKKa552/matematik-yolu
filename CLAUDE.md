@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 75 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 77 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -143,6 +143,8 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 
 ### 4.7 Üç kademeli kanıt (17.10.2026)
 Her cevap `kanit` ile kaydedilir: **ilk** (ipucusuz ilk denemede doğru) · **ipucu** (💡 ipucuyla ya da ikinci denemede doğru) · **cozum** (çözüm gösterildi). Beceri (`sk.kanit`), toplam (`st.kanit`) ve atölye aşaması bazında tutulur. Profilde "Cevaplarım nasıl geldi?" çubuğu, veli raporunda "🧾 Cevapların: ilk denemede doğru %… · ipucuyla %… · çözüm gösterildi %…" satırı. "Doğruluk" artık **ilk denemede doğru** oranıdır. XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır (rapor bunu açıkça yazar).
+- **Olası güçlük ↔ yanılgı (17.10.2026):** bir yanılgı tek soruda görüldüyse "olası güçlük" (profilde "olası · 1 kez", raporda "🔎 Olası güçlükler… izleniyor"); en az 2 FARKLI soruda görüldüyse "yanılgı" olarak raporlanır (`st.mis[id].q` = gözlendiği soru kimlikleri). Seçilen şıktan yapılan teşhis olasılığa dayanır; tek gözlemle çocuğa etiket konmaz.
+- **Sayılar sayılarıyla:** her yüzdenin yanında dayandığı sayı yazar ("%75 3/4", "12 cevaba göre"); bir aşamada 5'ten az veri varsa "ön değerlendirme" denir.
 - **Dürüst gösterge kuralı:** ölçülmemiş bir şey sayı gibi gösterilmez. Anlatım biçimi en az 2 kart sonrası ölçülmüş sayılır, öncesinde "henüz ölçülmedi". Profilde "ℹ️ Bu sayılar nasıl hesaplanıyor?" açıklaması var.
 
 ---
@@ -201,6 +203,9 @@ Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular içi
 - Pi, ilk adımda problemin tamamını okur (`q.okuma`; tablo okunmaz, ekranda görünür).
 - **Ölçüm:** `st.atolye` aşama bazında doğruluk tutar. Profilde "Problem çözme adımlarım" çubukları; veli raporunda "🧩 Problem çözme: Anla %… · Planla %… · Çöz %… · Kontrol %…". Anlama/planlama, çözmeden 15 puan geride ise rapor "Hesaplamada değil, problemi anlamada zorlanıyor" der: satışın kalbi olan veli raporu için güçlü bir içgörü.
 - Nerede: Pratik Merkezi → **🧩 Problem Atölyesi** (2 problem × 6 adım; çalışılmış temalardan). Yeni yanılgı: `kalan_yok` (bölmede kalanı hesaba katmama).
+- **Örüntüde başlangıç ↔ ilk terim (17.10.2026, dış inceleme):** iki durum KARIŞTIRILMAZ. (a) Terimler 1., 2., 3. diye sayılıyorsa: n. terim = ilk terim + (n − 1) × artış → yanılgılar `oruntu_baslangic`, `oruntu_bir`. (b) Başlangıç anı varsa (0. gün/hafta, sonra n kez ekleme): toplam = başlangıç + n × artış → yanılgılar `baslangic_unutma`, `baslangic_sira` (başlangıcı 1. adım sanıp bir eksik artış eklemek). Kumbara problemi ve kitaptaki kumbara kalıbı (b) türüdür. Kumbara atölye problemi artık gerçek bir örüntü: hafta–para tablosu (0 = başlangıç), önce "her hafta kaç TL artıyor?", sonra kural.
+- Metni değişen yanılgı açıklamasının sesi **yeni sürüm adıyla** üretilir (`MIS_SES_SURUM` in app.js, ör. `mis_oruntu_bir_2`): telefonda saklanan eski ses çalınmasın. `seslendir` fonksiyonunda `yenile: [anahtar]` ile üzerine yazma da var, ama cihaz önbelleği yüzünden sürüm adı tercih edilir.
+- Kutlama yazısı ("Bravo!") geri bildirim kartının hemen üstünde ve daha küçük çıkar; soru metninin üstünü kapatmaz.
 - Test: her şablon 400 kez üretilir; adım çözümlerindeki ve kontrol şıkkındaki her işlem bağımsız hesaplanır, şık/yanılgı kuralları ve Pi'nin okuyacağı metin denetlenir.
 
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
@@ -294,7 +299,7 @@ CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
 data/mufredat.json        ← 7 tema, 35 beceri, 67 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (75) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (77) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar

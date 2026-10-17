@@ -1,6 +1,7 @@
 // seslendir — Pi'nin seslerini ElevenLabs ile üretip Supabase Storage'a koyar.
 // ElevenLabs anahtarı: Secrets (ELEVENLABS_API_KEY) ya da kasa (vault: elevenlabs_api_key). Yönetici parolası kasada (admin_token).
-// Çağrı: POST { klasor?, kayitlar:[{key,text}], efektler:[{key,text,sure}], kopyalar:[{from,to}] }  başlık: x-admin-token
+// Çağrı: POST { klasor?, kayitlar:[{key,text}], efektler:[{key,text,sure}], kopyalar:[{from,to}], yenile?:[key] }  başlık: x-admin-token
+// yenile: metni değişen kayıtlar; var olsa da yeniden üretilip üzerine yazılır.
 // klasor: ses sürümü klasörü (örn. "damla"). Boşsa kök (eski Gamze sesleri).
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
@@ -18,7 +19,7 @@ Deno.serve(async (req) => {
   if (yetki !== true) return new Response("yetkisiz", { status: 401 });
   const KEY = Deno.env.get("ELEVENLABS_API_KEY") || (await sb.rpc("gizli_al", { ad: "elevenlabs_api_key" })).data;
   if (!KEY) return new Response("ElevenLabs anahtarı tanımlı değil", { status: 500 });
-  const { klasor = "", kayitlar = [], efektler = [], kopyalar = [] } = await req.json() as { klasor?: string; kayitlar?: Kayit[]; efektler?: Kayit[]; kopyalar?: { from: string; to: string }[] };
+  const { klasor = "", kayitlar = [], efektler = [], kopyalar = [], yenile = [] } = await req.json() as { klasor?: string; kayitlar?: Kayit[]; efektler?: Kayit[]; kopyalar?: { from: string; to: string }[]; yenile?: string[] };
   if (!(klasor in SURUM)) return new Response("bilinmeyen klasör", { status: 400 });
   const S = SURUM[klasor], on = klasor ? klasor + "/" : "";
   const depo = sb.storage.from("sesler");
@@ -30,6 +31,7 @@ Deno.serve(async (req) => {
     data.filter((f) => f.name.endsWith(".mp3")).forEach((f) => varOlan.add(f.name.replace(/\.mp3$/, "")));
     if (data.length < 1000) break;
   }
+  for (const k of yenile) varOlan.delete(k);
   const hatalar: string[] = [], yapilan: string[] = [];
   // Kopyalar (örn. ses efektlerini yeni klasöre taşımak; kredi harcamaz)
   for (const k of kopyalar) {

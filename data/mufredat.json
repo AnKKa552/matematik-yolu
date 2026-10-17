@@ -1376,12 +1376,12 @@
       "duzeltme": "Önce parantez, sonra üslü ifade, sonra çarpma-bölme, en son toplama-çıkarma yapılır."
     },
     "oruntu_baslangic": {
-      "ad": "Örüntüde başlangıç değerini hesaba katmama",
-      "duzeltme": "n. adım = ilk terim + (n − 1) × artış. Sadece artış × n demek ilk terimi unutmak olur."
+      "ad": "Örüntüde ilk terimi hesaba katmama",
+      "duzeltme": "Kural ilk terimi de vermeli. Terimler 1., 2., 3. diye sayılıyorsa: n. terim = ilk terim + (n − 1) × artış. Sadece adım × artış demek ilk terimi unutmak olur."
     },
     "oruntu_bir": {
-      "ad": "Örüntüde adım sayısını bir fazla sayma",
-      "duzeltme": "1. adımda henüz hiç artış olmadı. n. adıma gelene kadar (n − 1) kez artış olur."
+      "ad": "Örüntüde artış sayısını bir fazla sayma",
+      "duzeltme": "Terimler 1., 2., 3. diye sayılıyorsa 1. terimde henüz artış yoktur; n. terime kadar (n − 1) kez artış olur."
     },
     "algoritma_sira": {
       "ad": "Algoritma adımlarını sırasız uygulama",
@@ -1442,6 +1442,14 @@
     "ara_sonuc": {
       "ad": "Ara sonucu cevap sanma",
       "duzeltme": "Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et."
+    },
+    "baslangic_unutma": {
+      "ad": "Başlangıçtaki miktarı eklememe",
+      "duzeltme": "Başta var olan miktar sonuca eklenir: toplam = başlangıç + geçen süre × her seferki artış."
+    },
+    "baslangic_sira": {
+      "ad": "Başlangıç anını 1. adım sanma",
+      "duzeltme": "Başlangıç, hiç zaman geçmemiş andır (0. gün ya da 0. hafta); o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam = başlangıç + n × artış."
     }
   },
   "anlatim_bicimleri": {

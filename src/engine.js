@@ -138,6 +138,7 @@
   E.yanilgiNotu = (st, q, mis) => {
     if (!mis) return; const now = Date.now();
     const m = st.mis[mis] || (st.mis[mis] = { n: 0, fixed: 0, skill: q.skill, last: 0 }); m.n++; m.last = now; m.skill = q.skill;
+    m.q = (m.q || []).filter(u => u !== q.uid).concat(q.uid || String(now)).slice(-10); // farklı sorular: tek gözlem 'olası güçlük', 2+ farklı soruda 'yanılgı'
     st.mistakes = st.mistakes.filter(x => !(x.skill === q.skill && x.mis === mis)); st.mistakes.unshift({ skill: q.skill, lv: q.level, mis, at: now }); st.mistakes = st.mistakes.slice(0, 30);
   };
   // kanit: 'ilk' (ilk denemede, ipucusuz doğru) · 'ipucu' (ipucuyla ya da ikinci denemede doğru) · 'cozum' (çözüm gösterildi)
@@ -237,17 +238,17 @@
     const attempted = SKILLS.filter(s => st.skills[s.id].n > 0);
     const strong = attempted.slice().sort((a, b) => E.eff(st.skills[b.id]) - E.eff(st.skills[a.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) >= 0.5);
     const weak = attempted.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7 && !strong.includes(s));
-    const misList = Object.entries(st.mis).filter(([k]) => k !== 'genel').map(([k, v]) => ({ id: k, ...v, t: MIS[k] ? MIS[k].t : k, active: v.n > v.fixed })).sort((a, b) => (b.n - b.fixed) - (a.n - a.fixed));
+    const misList = Object.entries(st.mis).filter(([k]) => k !== 'genel').map(([k, v]) => ({ id: k, ...v, t: MIS[k] ? MIS[k].t : k, active: v.n > v.fixed, kesin: (v.q ? v.q.length : v.n) >= 2 })).sort((a, b) => (b.n - b.fixed) - (a.n - a.fixed));
     const totalQ = attempted.reduce((a, s) => a + st.skills[s.id].n, 0), totalOk = attempted.reduce((a, s) => a + st.skills[s.id].ok, 0);
-    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'coz', 'kontrol'].map(k => ({ k, ad: ATOLYE.ASAMA[k], n: (A_[k] || {}).n || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
+    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'coz', 'kontrol'].map(k => ({ k, ad: ATOLYE.ASAMA[k], n: (A_[k] || {}).n || 0, ok: (A_[k] || {}).ok || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
     const olculen = asamalar.filter(a => a.n >= 3), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
     const problem = { asamalar, zayif: zayifAsama && zayifAsama.acc < 0.75 ? zayifAsama : null, sayi: A_.problem || 0 };
     const K = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }, kn = K.ilk + K.ipucu + K.cozum;
     const kanit = kn ? { n: kn, ilk: K.ilk / kn, ipucu: K.ipucu / kn, cozum: K.cozum / kn } : null;
-    const ilkAcc = kn >= 5 ? K.ilk / kn : null;
-    const bagimsiz = (A_.bagimsiz && A_.bagimsiz.n) ? { n: A_.bagimsiz.n, acc: A_.bagimsiz.ok / A_.bagimsiz.n } : null;
+    const ilkAcc = kn >= 5 ? K.ilk / kn : null, ilkSay = { ok: K.ilk, n: kn };
+    const bagimsiz = (A_.bagimsiz && A_.bagimsiz.n) ? { n: A_.bagimsiz.n, ok: A_.bagimsiz.ok, acc: A_.bagimsiz.ok / A_.bagimsiz.n } : null;
     problem.bagimsiz = bagimsiz;
-    return { kanit, ilkAcc, problem, pace, med, formats: fr, bestFormat: best && best.n >= 2 ? best.f : null, hintRate, resil, strong, weak, misList, totalQ, acc: totalQ ? totalOk / totalQ : 0 };
+    return { kanit, ilkAcc, ilkSay, problem, pace, med, formats: fr, bestFormat: best && best.n >= 2 ? best.f : null, hintRate, resil, strong, weak, misList, totalQ, acc: totalQ ? totalOk / totalQ : 0 };
   };
 
   /* ---------------- Veli raporu metni ---------------- */
@@ -265,17 +266,19 @@
     L.push(`✅ Doğruluk: %${acc}   ⚡ Kazanılan XP: ${xp}   🔥 Seri: ${st.streak} gün`);
     if (fp.strong.length) L.push(`💪 Güçlü olduğu konular: ${fp.strong.map(s => s.title).join(', ')}`);
     if (fp.weak.length) L.push(`🎯 Destek gereken konular: ${fp.weak.map(s => s.title).join(', ')}`);
-    const act = fp.misList.filter(m => m.active).slice(0, 3);
-    if (act.length) L.push(`🧩 Üzerinde çalıştığımız kavram yanılgıları: ${act.map(m => m.t).join('; ')}`);
+    const act = fp.misList.filter(m => m.active && m.kesin).slice(0, 3), olasi = fp.misList.filter(m => m.active && !m.kesin).slice(0, 3);
+    if (act.length) L.push(`🧩 Üzerinde çalıştığımız kavram yanılgıları (farklı sorularda tekrarladı): ${act.map(m => m.t).join('; ')}`);
+    if (olasi.length) L.push(`🔎 Olası güçlükler (şimdilik bir kez görüldü, izleniyor): ${olasi.map(m => m.t).join('; ')}`);
     const fixed = fp.misList.filter(m => !m.active && m.n > 0).slice(0, 3);
     if (fixed.length) L.push(`🌟 Düzelttiği yanılgılar: ${fixed.map(m => m.t).join('; ')}`);
-    if (fp.kanit && fp.kanit.n >= 5) L.push(`🧾 Cevapların: ilk denemede doğru %${Math.round(fp.kanit.ilk * 100)} · ipucuyla doğru %${Math.round(fp.kanit.ipucu * 100)} · çözüm gösterildi %${Math.round(fp.kanit.cozum * 100)}`);
+    if (fp.kanit && fp.kanit.n >= 5) { const K = st.kanit; L.push(`🧾 Cevapların (${fp.kanit.n} cevap): ilk denemede doğru %${Math.round(fp.kanit.ilk * 100)} (${K.ilk}) · ipucuyla doğru %${Math.round(fp.kanit.ipucu * 100)} (${K.ipucu}) · çözüm gösterildi %${Math.round(fp.kanit.cozum * 100)} (${K.cozum})`); }
     if (fp.problem.sayi >= 2) {
-      L.push(`🧩 Problem çözme (${fp.problem.sayi} problem, ilk denemede doğru): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)}`).join(' · ')}`);
+      const azVeri = fp.problem.asamalar.some(a => a.n && a.n < 5);
+      L.push(`🧩 Problem çözme (${fp.problem.sayi} problem, ilk denemede doğru${azVeri ? ', ön değerlendirme: veri az' : ''}): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)} (${a.ok}/${a.n})`).join(' · ')}`);
       const z = fp.problem.zayif, coz = fp.problem.asamalar.find(a => a.k === 'coz');
       if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) L.push(`   → Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`);
       else if (z) L.push(`   → En çok "${z.ad}" adımında desteğe ihtiyacı var.`);
-      if (fp.problem.bagimsiz) L.push(`   → Benzer yeni problemi tek başına çözme: ${fp.problem.bagimsiz.n} denemede %${Math.round(fp.problem.bagimsiz.acc * 100)} ilk denemede doğru (öğrenmenin en güçlü kanıtı).`);
+      if (fp.problem.bagimsiz) L.push(`   → Benzer yeni problemi tek başına çözme: ilk denemede %${Math.round(fp.problem.bagimsiz.acc * 100)} (${fp.problem.bagimsiz.ok}/${fp.problem.bagimsiz.n}${fp.problem.bagimsiz.n < 5 ? ', ön değerlendirme' : ''}). Öğrenmenin en güçlü kanıtı budur.`);
     }
     if (fp.bestFormat) L.push(`🧠 En iyi öğrendiği anlatım biçimi: ${FORMATS[fp.bestFormat].name}`);
     L.push(`🧭 Çalışma tarzı: ${fp.pace}${fp.resil !== null ? `, hatadan sonra doğruya dönme oranı %${Math.round(fp.resil * 100)}` : ''}`);

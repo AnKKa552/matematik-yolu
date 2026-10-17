@@ -597,3 +597,11 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .aserit span.hedef b{border-style:dashed}
 .aserit span.hedef.on b{background:var(--accent);border-color:var(--accent);border-style:solid;box-shadow:0 0 0 4px #FFE7C2}
 .abaglam.yeni{border-left-color:var(--accent)} .abaglam.yeni .abas{color:var(--accent-d)}
+.atab.yatay{min-width:0;width:100%;font-size:14px}
+.atab.yatay th{text-align:left;white-space:nowrap} .atab.yatay td{text-align:center}
+.atab.yatay small{display:block;font-size:10px;font-weight:800;color:var(--muted);line-height:1}
+/* Kutlama yazısı kartın üstünde: daha küçük, soruyu kapatmaz */
+.fx-banner.kartta{transform:translate(-50%,-100%)}
+.fx-banner.kartta .fx-word{font-size:34px}
+.fx-banner.kartta.rainbow .fx-word{font-size:40px}
+.kv .card small{display:block;font-size:11px;font-weight:800}
