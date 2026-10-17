@@ -613,3 +613,18 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .thnot{margin-top:6px;font-size:13px;font-weight:700;color:var(--muted);text-align:right}
 .kislem{margin:8px 0;padding:8px 12px;border-radius:12px;background:var(--surface2);font-weight:800;font-size:17px}
 .abaglam.derin{border-color:#f5b301;background:color-mix(in srgb,#f5b301 10%,var(--surface))}
+
+/* Faz 3: anla tablosu, kartlarla işlem kurma */
+.tablo{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.tsatir{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.tsatir.dogru{border-color:var(--ok);background:var(--ok-bg)}.tsatir.yanlis{border-color:var(--bad);background:var(--bad-bg)}
+.tmetin{font-weight:800;font-size:15px;margin-bottom:6px}.tmetin small{color:var(--ok-d);font-weight:800}
+.tsec{display:flex;gap:6px}.tsec button{flex:1;min-height:40px;border-radius:10px;border:2px solid var(--line);background:var(--surface2);color:var(--ink);font:inherit;font-size:12.5px;font-weight:800;padding:4px 2px}
+.tsec button.on.tv{background:#DCEBFF;border-color:var(--blue);color:#1E3A8A}.tsec button.on.ta{background:#FFF1D6;border-color:var(--accent);color:#7A4500}.tsec button.on.ts{background:var(--brand-t);border-color:var(--brand);color:var(--brand-d)}
+.kur{margin-top:10px}.kifade{min-height:54px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;padding:10px;border-radius:14px;background:var(--surface);border:2px dashed var(--brand);font-weight:900;font-size:22px;text-align:center}
+.kifade.bos{font-size:14px;font-weight:700;color:var(--muted);border-color:var(--line)}
+.kkart{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 8px}
+.kkart .ksayi{min-width:64px;min-height:52px;border-radius:14px;border:2px solid var(--brand);background:var(--brand-t);color:var(--brand-d);font:inherit;font-weight:900;font-size:20px;box-shadow:0 4px 0 var(--brand)}
+.kkart .ksayi:disabled{opacity:.35;box-shadow:none;transform:translateY(4px)}
+.kop{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.kop button{min-height:48px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:900;font-size:20px;box-shadow:0 3px 0 var(--line)}
+.kop button:disabled{opacity:.4}

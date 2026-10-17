@@ -124,7 +124,7 @@
   };
   const soruOku = () => {
     const q = A.q; if (!q || !A.st.settings.voice) return;
-    const metin = q.okuma || q.prompt, yedek = metin + '. ' + (q.type === 'input' || q.type === 'kes' || q.type === 'match' ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
+    const metin = q.okuma || q.prompt, yedek = metin + '. ' + (['input', 'kes', 'match', 'tablo', 'kur'].includes(q.type) ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
     if (!CL || !CL.soruDepo || !window.crypto || !crypto.subtle) return speak(yedek);
     stopVoice(); const tok = AUDIO.tok, pk = () => document.querySelectorAll('.pikonus');
     pk().forEach(e => e.classList.add('dusunuyor'));
@@ -429,6 +429,8 @@
     let ans = '';
     if (q.type === 'match') ans = matchBoard(q);
     else if (q.type === 'kes') ans = kesBoard(q);
+    else if (q.type === 'tablo') ans = tabloBoard(q);
+    else if (q.type === 'kur') ans = kurBoard(q);
     else if (q.type === 'input') ans = `<div class="inbox"><div class="val ${A.input ? '' : 'empty'}">${A.input ? esc(A.input) : '?'}</div>${q.unit ? `<div class="unit">${esc(q.unit)}</div>` : ''}</div><div class="pad">${['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '⌫'].map(k => `<button data-act="key" data-v="${k}" ${A.fb ? 'disabled' : ''}>${k}</button>`).join('')}</div>`;
     else {
       const cls = q.type === 'tf' || q.hata === 'kim' ? 'tf' : q.type === 'cmp' ? 'cmp' : q.hata === 'bul' ? 'defter-sec' : '';
@@ -436,7 +438,7 @@
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
       ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb && A.fb.tahmin) { if (i === A.sel) c = 'sel'; } else if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; const el = (A.elenen || []).includes(i); if (el && !(A.fb && o.ok)) c = 'elendi'; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb || el ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
-    const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
+    const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'tablo' ? A.tb.every(Boolean) : q.type === 'kur' ? E.ATOLYE.kurGecerli(q, A.kur) : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
     const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
@@ -444,6 +446,23 @@
       ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
+  }
+
+  /* ---------- Anla tablosu: her bilgi satırında Verilen / Önce bul / Sorulan düğmeleri (sürükle-bırak yok, tek dokunuş) ---------- */
+  function tabloBoard(q) {
+    const AD = E.ATOLYE.TABLO_AD, ic = { v: '📥', a: '🔧', s: '🎯' };
+    return `<div class="tablo">${q.satirlar.map((r, i) => { const sec = A.tb[i], dur = A.fb ? (A.fb.ok || sec === r.d ? 'dogru' : 'yanlis') : '';
+      return `<div class="tsatir ${dur}"><div class="tmetin">${r.t}${A.fb && sec !== r.d ? ` <small>→ ${AD[r.d]}</small>` : ''}</div><div class="tsec">${['v', 'a', 's'].map(d => `<button class="${sec === d ? 'on' : ''} t${d}" data-act="tb" data-v="${i}:${d}" ${A.fb ? 'disabled' : ''} aria-pressed="${sec === d}">${ic[d]} ${AD[d]}</button>`).join('')}</div></div>`; }).join('')}</div>`;
+  }
+  /* ---------- Kartlarla işlem kur: sayı kartı bir kez, işlem kartları sınırsız; değer kodla hesaplanır ---------- */
+  const kurMetin = (q, t) => t.map(x => /^n\d+$/.test(x) ? U.fmtN(q.kartlar[+x.slice(1)]) : x).join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
+  function kurBoard(q) {
+    const kul = new Set(A.kur.filter(x => /^n\d+$/.test(x))), dis = !!A.fb, gec = E.ATOLYE.kurGecerli(q, A.kur);
+    const deger = gec ? E.ATOLYE.sayiYaz(E.ATOLYE.ifadeHesapla(E.ATOLYE.kurIfade(q, A.kur))) : null;
+    return `<div class="kur"><div class="kifade ${A.kur.length ? '' : 'bos'}">${A.kur.length ? esc(kurMetin(q, A.kur)) : 'Kartlara dokunarak işlemi kur 👇'}${A.fb && deger !== null ? ` <b>= ${deger}</b>` : ''}</div>
+      <div class="kkart">${q.kartlar.map((k, i) => `<button class="ksayi" data-act="kur-k" data-v="${i}" ${dis || kul.has('n' + i) ? 'disabled' : ''}>${U.fmtN(k)}</button>`).join('')}</div>
+      <div class="kop">${['+', '−', '×', '÷', '(', ')'].map(o => `<button data-act="kur-o" data-v="${o}" ${dis ? 'disabled' : ''}>${o}</button>`).join('')}<button data-act="kur-sil" ${dis || !A.kur.length ? 'disabled' : ''} aria-label="Son kartı sil">⌫</button></div>
+      <div class="kes-not">Her sayı kartını bir kez kullanabilirsin. İstersen parantez kullan.</div></div>`;
   }
 
   /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster ---------- */
@@ -544,7 +563,7 @@
     if (fb.tahmin) return `<div class="sheet tahc"><div class="row"><div class="grow"><h3>📝 Tahminini not ettim!</h3><div class="ans">«${fb.secilen}» · +${fb.gain} XP</div><div class="sub">Şimdi adım adım çöz. Sonunda tahmininle karşılaştıracağız.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Çözmeye başla</button></div>`;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
     if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.kanit === 'ipucu' && A.deneme === 2 ? 'İpucuyla buldun!' : (fb.word || pick(PRAISE))}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}${tahminKarsilastir(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
-    const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
+    const right = q.type === 'kes' || q.type === 'tablo' || q.type === 'kur' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
@@ -672,6 +691,7 @@
     if (A.ses.mode !== 'speed' && A.ses.i >= A.ses.len && !A.ses.lastWrong) return finishSession();
     if (!A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
     A.q = E.nextQ(A.st, A.ses); A.sel = null; A.input = '';
+    A.tb = A.q.type === 'tablo' ? A.q.satirlar.map(() => null) : null; A.kur = A.q.type === 'kur' ? [] : null;
     A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
     A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.deneme = 1; A.elenen = []; A.ikinci = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
@@ -712,7 +732,7 @@
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   function checkAnswer() {
-    const q = A.q, ans = q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : A.sel; if (ans === null || ans === '') return;
+    const q = A.q, ans = q.type === 'tablo' ? A.tb.slice() : q.type === 'kur' ? A.kur.slice() : q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : A.sel; if (ans === null || ans === '') return;
     const res = E.check(q, ans), ms = Date.now() - A.t0;
     // Tahmin: doğru/yanlış denmez, not edilir; çocuk çözünce tahminiyle karşılaştırılır
     if (q.atolye && q.atolye.asama === 'tahmin') {
@@ -722,8 +742,10 @@
     // İkinci şans: cevabı söylemeden hedefli ipucu, bir yeniden deneme
     if (!res.ok && (A.deneme || 1) === 1 && E.ikinciSansUygun(A.ses, q)) {
       E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;
-      const once = q.type === 'input' ? A.input.replace('.', ',') : null;
-      if (q.type !== 'input' && q.type !== 'kes') { A.elenen.push(A.sel); A.sel = null; } else if (q.type === 'input') A.input = '';
+      const once = q.type === 'input' ? A.input.replace('.', ',') : q.type === 'kur' ? `${kurMetin(q, A.kur)}${res.deger ? ' = ' + res.deger : ''}` : null;
+      if (q.type === 'tablo') (res.yanlisSatir || []).forEach(i => { A.tb[i] = null; }); // yanlış satırlar boşalır, doğrular kalır
+      else if (q.type === 'kur') A.kur = [];
+      else if (q.type !== 'input' && q.type !== 'kes') { A.elenen.push(A.sel); A.sel = null; } else if (q.type === 'input') A.input = '';
       A.ikinci = { ipucu: ikinciIpucu(q, res), once }; save();
       sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(60); } catch (e) { }
       piSay('tekrar_dene'); render(); const s = document.querySelector('.ikinci'); if (s) s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); idleKur(); return;
@@ -773,6 +795,10 @@
       case 'say-card': sayCard(el.dataset.s, v); break;
       case 'fmt-modal': A.modal = explainModal(A.q.skill, v); render(); sayCard(A.q.skill, v); break;
       case 'say-q': soruOku(); break;
+      case 'tb': if (A.fb || !A.tb) break; { const [i, d] = v.split(':'); A.tb[+i] = A.tb[+i] === d ? null : d; sfx.tap(); render(); } break;
+      case 'kur-k': if (A.fb || !A.kur || A.kur.includes('n' + v)) break; A.kur.push('n' + v); tone(600 + 40 * A.kur.length % 400, .07, 'triangle'); render(); break;
+      case 'kur-o': if (A.fb || !A.kur) break; A.kur.push(v); sfx.tap(); render(); break;
+      case 'kur-sil': if (A.fb || !A.kur) break; A.kur.pop(); sfx.tap(); render(); break;
       case 'kes-dilim': if (A.fb || !A.kes) break; { const i = +v; A.kes.on[i] = !A.kes.on[i]; tone(A.kes.on[i] ? 620 + 30 * A.kes.on.filter(Boolean).length : 420, .09, 'triangle'); render(); } break;
       case 'kes-parca': if (A.fb || !A.kes) break; { const P = Math.max(1, Math.min(12, A.kes.parca + +v)); A.kes = { parca: P, on: Array(P).fill(false), konum: null }; sfx.tap(); render(); } break;
       case 'kes-nokta': if (A.fb || !A.kes) break; A.kes.konum = +v; tone(560 + 25 * +v, .08, 'triangle'); render(); break;

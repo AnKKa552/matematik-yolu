@@ -36,7 +36,7 @@
 
   /* ---------------- 1) BKT ---------------- */
   const P = { T: 0.07, S: 0.10 };
-  const guessOf = (q) => q.type === 'match' || q.type === 'kes' ? 0.1 : q.type === 'input' ? 0.15 : q.type === 'tf' ? 0.5 : (1 / Math.max(2, (q.options || []).length));
+  const guessOf = (q) => ['match', 'kes', 'tablo', 'kur'].includes(q.type) ? 0.1 : q.type === 'input' ? 0.15 : q.type === 'tf' ? 0.5 : (1 / Math.max(2, (q.options || []).length));
   E.bkt = (pL, correct, guess, hinted) => {
     const S = P.S, Gs = guess;
     let post = correct ? pL * (1 - S) / (pL * (1 - S) + (1 - pL) * Gs) : pL * S / (pL * S + (1 - pL) * (1 - Gs));
@@ -87,7 +87,7 @@
 
   // Problem Atölyesi: 2 problem (farklı şablon); çalıştığı temalardan, yoksa temel şablonlardan
   E.atolyeBecerileri = (st) => { const cal = ATOLYE.ids.filter(id => st.skills[ATOLYE.skillOf(id)] && st.skills[ATOLYE.skillOf(id)].n > 0); return cal.length >= 2 ? cal : ['market', 'bahce', 'kumbara', 'terazi']; };
-  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap((id, i) => ATOLYE.sorular(id, { gerekce: i === 1, no: i + 1 })); }; // 2. problemin kontrolü gerekçe sorusu
+  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap((id, i) => ATOLYE.sorular(id, { tablo: i === 0, kur: i === 1, gerekce: i === 1, no: i + 1 })); }; // 2. problemin kontrolü gerekçe sorusu
   E.ATOLYE = ATOLYE;
 
   // Ders oturumu planı
@@ -152,6 +152,8 @@
   /* ---------------- Cevap değerlendirme ---------------- */
   E.check = (q, ans) => {
     if (q.type === 'kes') return KES_CHECK(q, ans);
+    if (q.type === 'tablo') return ATOLYE.tabloKontrol(q, ans);
+    if (q.type === 'kur') return ATOLYE.kurKontrol(q, ans);
     if (q.type === 'input') {
       const ok = U.numEq(ans, q.answer);
       let mis = null, hit = null; if (!ok) { hit = (q.inputMis || []).find(m => U.numEq(ans, m.v)); mis = hit ? hit.mis : 'genel'; }

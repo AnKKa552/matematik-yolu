@@ -95,6 +95,19 @@ const SKILLS_OK = (id) => id in GEN;
       for (const q of L) { an++;
         if (/undefined|NaN|Infinity/.test(strip(q.prompt) + JSON.stringify(q.options || '') + (q.answer || '') + JSON.stringify(q.steps) + strip(q.atolye.baglam))) { bad('metin', q); stop = true; break; }
         if (!q.ip || /undefined|NaN/.test(q.ip)) { bad('ipucu yok', q); stop = true; break; }
+        if (q.type === 'tablo') { // Anla tablosu: doğru yerleşim kabul edilir; tek satırın her yanlış yerleşimi bilinen yanılgı + açıklama verir
+          const d = q.satirlar.map(r => r.d); if (d.filter(x => x === 's').length !== 1 || !d.includes('a') || !d.includes('v') || !ATOLYE.tabloKontrol(q, d).ok) { bad('tablo yapısı', q); stop = true; break; }
+          for (let i = 0; i < d.length && !stop; i++) for (const w of ['v', 'a', 's']) if (w !== d[i]) { const a = d.slice(); a[i] = w; const r = ATOLYE.tabloKontrol(q, a); if (r.ok || !MIS[r.mis] || !r.ac || !(r.yanlisSatir || []).includes(i)) { bad('tablo yanlış yerleşim', q); stop = true; break; } }
+          if (stop) break; continue;
+        }
+        if (q.type === 'kur') { // Kartlarla işlem: örnek işlem kartlarla kurulabilmeli ve kabul edilmeli; her iki kartlık işlem ya doğru ya da bilinen yanılgı
+          const kul = new Set(), tok = ATOLYE.ifadeParcala(q.ornek).map(x => { if (!/\d/.test(x)) return x; const v = parseFloat(x.replace(',', '.')), j = q.kartlar.findIndex((c, k) => c === v && !kul.has(k)); kul.add(j); return j < 0 ? 'YOK' : 'n' + j; });
+          if (tok.includes('YOK') || !ATOLYE.kurKontrol(q, tok).ok || Math.abs(ATOLYE.ifadeHesapla(ATOLYE.ifadeParcala(q.ornek)) - q.hedef) > 1e-9) { bad('kur örneği: ' + q.ornek, q); stop = true; break; }
+          if (q.yanilgi.some(y => !MIS[y.mis] || !y.ac || Math.abs(y.v - q.hedef) < 1e-9)) { bad('kur yanılgı listesi', q); stop = true; break; }
+          for (let i = 0; i < q.kartlar.length && !stop; i++) for (let j = 0; j < q.kartlar.length; j++) if (i !== j) for (const o of ['+', '−', '×', '÷']) { const r = ATOLYE.kurKontrol(q, ['n' + i, o, 'n' + j]); if (!r.ok && (!MIS[r.mis] || !r.ac || /undefined|NaN|Infinity/.test(r.ac))) { bad('kur değerlendirme', q); stop = true; break; } }
+          if (ATOLYE.kurKontrol(q, ['n0']).ok || ATOLYE.kurKontrol(q, ['n0', '+', 'n0']).ok || ATOLYE.kurKontrol(q, ['(', 'n0', '+']).ok) { bad('kur geçersiz işlemi kabul etti', q); stop = true; }
+          if (stop) break; continue;
+        }
         const yanlislar = q.type === 'input' ? q.inputMis : q.options.filter(o => !o.ok);
         if (yanlislar.some(w => !w.ac || /undefined|NaN|Infinity/.test(w.ac))) { bad('yanlışın kendi açıklaması yok', q); stop = true; break; }
         if (q.type === 'input' && (q.ip.match(/\d+/g) || []).includes(q.answer) && !((strip(q.prompt) + ' ' + strip(q.atolye.baglam)).match(/\d+/g) || []).includes(q.answer)) { bad('ipucu cevabı söylüyor: ' + q.ip, q); stop = true; break; }
@@ -118,7 +131,7 @@ const SKILLS_OK = (id) => id in GEN;
         if (stop) break;
       }
       if (stop) break;
-      if (r === 0) samples['atolye_' + id] = { b: strip(L[0].atolye.baglam).replace(/\s+/g, ' ').slice(0, 200), adim: L.map(q => strip(q.prompt).replace(/\s+/g, ' ') + ' → ' + (q.type === 'input' ? q.answer : strip(q.options.find(o => o.ok).t).trim())).join(' | ') };
+      if (r === 0) samples['atolye_' + id] = { b: strip(L[0].atolye.baglam).replace(/\s+/g, ' ').slice(0, 200), adim: L.map(q => strip(q.prompt).replace(/\s+/g, ' ') + ' → ' + (q.type === 'input' ? q.answer : q.type === 'kur' ? q.ornek : q.type === 'tablo' ? 'tablo' : strip(q.options.find(o => o.ok).t).trim())).join(' | ') };
     }
     console.log('Problem Atölyesi soru adımı:', an, '· şablon:', ATOLYE.ids.length);
   }
