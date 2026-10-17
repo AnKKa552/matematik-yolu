@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 67 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 71 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -159,6 +159,12 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
   "hint": "ipucu", "steps": ["adım 1", "adım 2"]
 }
 ```
+
+### 5.1.1 Parmakla kesir (`type: 'kes'`, 17.10.2026)
+Öğrenci şıktan seçmez; modeli kendi eliyle kurar. `model`: `pie` (pasta), `bar` (şerit) ya da `line` (sayı doğrusu). Alanlar: `hedef: [pay, payda]`, `parca` (sabit parça sayısı; `null` ise öğrenci − / + ile 1–12 arası kendisi böler), `denk` (true ise denk kesir de doğru: 6/8 = 3/4), `ust` (sayı doğrusunun sonu, 1 ya da 2), `cevap` (geri bildirimde gösterilen metin).
+- Cevap `{parca, boyali}` ya da `{konum}` olarak gelir ve `KES_CHECK` ile **kodla** değerlendirilir. Açık uçlu olduğu için her yanlış durum bir yanılgıya bağlanır: tümleyeni boyamak → `bos_kisim`; ters kesir → `pay_payda_ters`; sayı doğrusunda bir eksik/fazla → `cizgi_sayma`; geri kalan her şey → `kesir_model`.
+- Nerede: `f_tur` (boya; sayı doğrusu 0–1; bileşik kesir 0–2), `f_denk` (12 parçalık şeritte 3/4 boya; kendin böl ve boya), `f_ondalik` (10 parçalık şeritte 0,7 boya). Bu becerilerde soruların %25'i. Hız yarışında gelmez (dokunmak zaman alır). BKT tahmin olasılığı 0,1.
+- Test: `test_generators.js` her `kes` sorusunda doğru cevabın kabulünü ve olası **bütün** yanlış durumların bilinen bir yanılgıya düştüğünü dener.
 
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
 | Kitap kalıbı (sayfa) | Bizim varyasyonumuz | Beceri |
@@ -308,7 +314,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 - Lig rakipleri demo (ekranda "(demo)" yazar).
 - Veli raporu tek dokunuşla WhatsApp/Telegram/e-posta açar; **otomatik** haftalık gönderim sunucu ister.
 - BKT parametreleri literatürdeki tipik değerlerle elle ayarlandı; gerçek öğrenci verisiyle (pyBKT) yeniden kalibre edilecek.
-- Performans görevleri, anket yapma, iletki/pergel ile çizim gibi **uygulamalı** kazanımlar ekranda tam karşılanamaz; uygulama bunlar için kitaptaki sayfaya ve sınıf etkinliğine yönlendirir. Sürükle-bırak açı ölçer ve grafik çizme etkileşimleri A2'de eklenecek.
+- Performans görevleri, anket yapma, iletki/pergel ile çizim gibi **uygulamalı** kazanımlar ekranda tam karşılanamaz; uygulama bunlar için kitaptaki sayfaya ve sınıf etkinliğine yönlendirir. Kesirde parmakla bölme/boyama ve sayı doğrusu eklendi (§5.1.1); sürükle-bırak açı ölçer ve grafik çizme etkileşimleri A2'de eklenecek.
 
 ---
 

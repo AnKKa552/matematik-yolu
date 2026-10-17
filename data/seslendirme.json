@@ -1310,6 +1310,26 @@
    "key": "mis_fiyat_okuma",
    "grup": "yanilgi",
    "text": "Fiyatı lira-kuruş olarak yanlış okuma. Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL, on dört lira elli kuruş."
+  },
+  {
+   "key": "mis_bos_kisim",
+   "grup": "yanilgi",
+   "text": "Boyalı yerine boş kısmı sayma. Kesrin payı, istenen boyalı parça sayısıdır. Boş kalan parçaları değil, boyadığın parçaları say."
+  },
+  {
+   "key": "mis_pay_payda_ters",
+   "grup": "yanilgi",
+   "text": "Pay ile paydayı karıştırma. Payda, yani alttaki sayı, bütünün kaç eş parçaya bölündüğünü söyler. Pay, yani üstteki sayı, bu parçalardan kaçının alındığını söyler."
+  },
+  {
+   "key": "mis_kesir_model",
+   "grup": "yanilgi",
+   "text": "Bütünü ve parçaları karıştırma. Önce bütünü paydadaki sayı kadar eş parçaya böl, sonra paydaki sayı kadar parçayı al. Parça sayısı ile alınan sayıyı ayrı ayrı say."
+  },
+  {
+   "key": "mis_cizgi_sayma",
+   "grup": "yanilgi",
+   "text": "Sayı doğrusunda çizgileri sayma. Sayı doğrusunda çizgileri değil, aralıkları say. Sıfırdan başla, her atlama bir parçadır. Sıfır noktası sayılmaz."
   }
  ]
 }

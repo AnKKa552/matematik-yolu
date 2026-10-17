@@ -392,7 +392,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .komsu{position:absolute;right:calc(100% + 26px);top:-34px;width:96px;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;-webkit-tap-highlight-color:transparent;z-index:2}
 .komsu img{width:96px;height:auto;display:block;transform-origin:50% 92%;filter:drop-shadow(0 6px 8px rgba(20,30,90,.28));user-select:none;-webkit-user-drag:none}
 .komsu .kad{margin-top:2px;font-size:11px;font-weight:900;color:var(--muted);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:1px 8px;white-space:nowrap}
-.komsu .kbal{position:absolute;top:calc(100% + 8px);left:-14px;width:160px;background:var(--surface);color:var(--text);border:2px solid var(--line);border-radius:14px;padding:7px 10px;font-size:12.5px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 4px 0 var(--line);opacity:0;transform:translateY(-6px) scale(.9);transform-origin:30% 0;pointer-events:none;transition:opacity .2s,transform .2s}
+.komsu .kbal{position:absolute;top:calc(100% + 8px);left:-14px;width:160px;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:7px 10px;font-size:12.5px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 4px 0 var(--line);opacity:0;transform:translateY(-6px) scale(.9);transform-origin:30% 0;pointer-events:none;transition:opacity .2s,transform .2s}
 .komsu .kbal:after{content:'';position:absolute;left:56px;top:-9px;border:8px solid transparent;border-bottom-color:var(--line);border-top:0}
 .komsu .kbal.acik{opacity:1;transform:none}
 .komsu:after{content:'💬';position:absolute;top:-2px;right:-4px;font-size:16px;animation:float 1.8s ease-in-out infinite}
@@ -407,3 +407,26 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes kZipla{0%,55%,100%{transform:translateY(0) scaleY(1)}62%{transform:translateY(0) scaleY(.9)}75%{transform:translateY(-12px) scaleY(1.04)}88%{transform:translateY(0) scaleY(.95)}}
 @keyframes kUc{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
 @media (prefers-reduced-motion: reduce){.komsu img,.komsu:after{animation:none!important}}
+
+/* Parmakla kesir (type 'kes') */
+.kes{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0 4px}
+.kes-svg{width:100%;max-width:340px;height:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.kes-svg.pie{max-width:230px}
+.kes-svg .kd{fill:var(--surface);stroke:var(--brand);stroke-width:2.5;cursor:pointer;transition:fill .15s}
+.kes-svg .kd.on{fill:var(--pink,#FF5FA2)}
+.kes-svg .kd:active{opacity:.8}
+.kes-not{font-weight:800;color:var(--muted);min-height:28px;display:flex;align-items:center;gap:6px}
+.kes-fr{font-size:20px;color:var(--ink)}
+.kes-adim{display:flex;align-items:center;gap:14px}
+.kes-adim .btn{width:52px;height:52px;min-height:52px;padding:0;font-size:26px;flex:none}
+.kes-adim div{display:flex;flex-direction:column;align-items:center;min-width:56px;font-size:26px;font-weight:900;line-height:1}
+.kes-adim small{font-size:12px;color:var(--muted)}
+.kl-ana{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.kl-cizgi{stroke:var(--muted);stroke-width:2}
+.kl-cizgi.tam{stroke:var(--ink);stroke-width:3}
+.kl-yazi{font:900 17px Nunito,sans-serif;fill:var(--ink);text-anchor:middle}
+.kl-hedef{fill:transparent;cursor:pointer}
+.kl-pin circle,.kl-pin path{fill:var(--brand)}
+.kl-pin.dogru circle,.kl-pin.dogru path{fill:var(--ok)}
+.kl-pin.yanlis circle,.kl-pin.yanlis path{fill:var(--bad)}
+.kl-pin{animation:pop .3s ease-out;transform-box:fill-box;transform-origin:50% 100%}

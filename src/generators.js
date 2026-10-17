@@ -55,6 +55,10 @@
     ondalik_okunus: { t: 'Ondalık gösterimi yanlış okuma', fix: 'Virgülden sonra 1 basamak varsa "onda", 2 basamak varsa "yüzde" diye okunur: 4,25 → dört tam yüzde yirmi beş.' },
     yuzde_ondalik: { t: 'Yüzdeyi ondalığa yanlış çevirme', fix: '% işareti "yüzde", yani paydası 100 demektir: %5 = 5/100 = 0,05 (0,5 değil!).' },
     payda_buyuk: { t: '"Paydası büyük olan kesir büyüktür" sanma', fix: 'Payda bütünün kaç parçaya bölündüğünü gösterir. Parça sayısı arttıkça her parça KÜÇÜLÜR: 1/8 < 1/3.' },
+    bos_kisim: { t: 'Boyalı yerine boş kısmı sayma', fix: 'Kesrin payı, istenen (boyalı) parça sayısıdır. Boş kalan parçaları değil, boyadığın parçaları say.' },
+    pay_payda_ters: { t: 'Pay ile paydayı karıştırma', fix: 'Payda (alttaki sayı) bütünün kaç EŞ parçaya bölündüğünü, pay (üstteki sayı) bu parçalardan kaçının alındığını söyler.' },
+    kesir_model: { t: 'Bütünü ve parçaları karıştırma', fix: 'Önce bütünü paydadaki sayı kadar EŞ parçaya böl, sonra paydaki sayı kadar parçayı al. Parça sayısı ile alınan sayıyı ayrı ayrı say.' },
+    cizgi_sayma: { t: 'Sayı doğrusunda çizgileri sayma', fix: 'Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0\'dan başla; her atlama bir parçadır. 0 noktası sayılmaz.' },
     pay_payda_ayri: { t: 'Kesirleri karşılaştırırken sadece paya bakma', fix: 'Paydalar farklıysa önce paydaları eşitle (genişlet), sonra payları karşılaştır.' },
     uzun_buyuk: { t: '"Basamağı çok olan ondalık sayı büyüktür" sanma', fix: 'Ondalık sayıları karşılaştırırken önce tam kısma, sonra onda birler basamağına bak: 0,7 > 0,58 çünkü 7 onda > 5 onda.' },
     sifir_fark: { t: 'Sondaki sıfırın değeri değiştirdiğini sanma', fix: 'Ondalık kısmın sonuna eklenen sıfır değeri değiştirmez: 0,7 = 0,70 (7 onda = 70 yüzde).' },
@@ -722,9 +726,39 @@
   GRID.e_oruntu = [(lv) => { const m = ri(2, 5), c = ri(0, 6), f = (x) => m * x + c, xs = [1, 2, 3], q = pick([5, 6, 10]); return GQ('Örüntüyü takip et: Kurala göre eksik sayı hangisi?', [...xs.map(x => [`${x}. adım`, String(f(x))]), [`${q}. adım`, '?']], String(f(q)), [String(f(q) + m), String(m * q), String(f(q - 1))], [`Her adımda ${m} artıyor; kural: adım × ${m}${c ? ' + ' + c : ''}`, `${q} × ${m}${c ? ' + ' + c : ''} = ${f(q)}`], 'oruntu_baslangic'); }];
   GRID.f_denk = [(lv) => { const k = ri(2, 4), bs = [[1, 2], [1, 3], [1, 4]], d = pick([5, 6, 8]); return GQ('Örüntüyü takip et: Eksik kesir hangisi?', [...bs.map(([n, dd]) => [fr(n, dd), fr(n * k, dd * k)]), [fr(1, d), '?']], fr(k, d * k), [fr(1 + k, d + k), fr(k, d)], [`Her satırda pay ve payda ${k} ile çarpılmış.`, `1/${d} → ${k}/${d * k}`], 'denk_toplama'); }];
   GRID.e_us = [(lv) => { const e = pick([2, 3]), bs = e === 2 ? [2, 3, 4] : [1, 2, 3], q = e === 2 ? pick([5, 6, 7]) : 4; return GQ('Örüntüyü takip et: Eksik değer hangisi?', [...bs.map(b => [`${b}${e === 2 ? '²' : '³'}`, String(b ** e)]), [`${q}${e === 2 ? '²' : '³'}`, '?']], String(q ** e), [String(q * e), String(q ** e + q)], [`${q}${e === 2 ? '²' : '³'} = ${Array(e).fill(q).join(' × ')} = ${q ** e}`], 'us_carpim'); }];
+  /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster (type 'kes') ----------
+     model: 'pie' | 'bar' | 'line'. Öğrencinin cevabı {parca, boyali} ya da {konum}; denetim KES_CHECK ile kodla yapılır. */
+  const KQ = (o) => Q(Object.assign({ type: 'kes' }, o));
+  const KES = {};
+  KES.f_tur = [(lv) => {
+    if (lv === 1) { const d = ri(3, 8), n = ri(1, d - 1), model = pick(['pie', 'bar']);
+      return KQ({ model, prompt: `Şeklin ${fr(n, d)} kadarını boya. Parçalara dokun!`, hedef: [n, d], parca: d, cevap: fr(n, d), steps: [`Payda ${d}: şekil ${d} eş parçaya bölünmüş.`, `Pay ${n}: ${n} parçayı boya.`], hint: 'Pay kaç parça boyanacağını söyler.' }); }
+    if (lv === 2) { const d = ri(3, 8), n = ri(1, d - 1);
+      return KQ({ model: 'line', prompt: `${fr(n, d)} kesrini sayı doğrusunda göster. Doğru çizgiye dokun!`, hedef: [n, d], parca: d, ust: 1, cevap: fr(n, d), steps: [`0 ile 1 arası ${d} eş aralığa bölünmüş.`, `0'dan başla, ${n} aralık atla.`], hint: 'Çizgileri değil, aralıkları say.' }); }
+    const d = ri(2, 6), n = d + ri(1, d - 1);
+    return KQ({ model: 'line', prompt: `${fr(n, d)} kesrini sayı doğrusunda göster.`, hedef: [n, d], parca: d, ust: 2, cevap: `${fr(n, d)} = ${mixed(1, n - d, d)}`, steps: [`Her birlik ${d} eş aralığa bölünmüş.`, `${n} aralık atla: 1'i geçip ${n - d} aralık daha.`], hint: `${d} aralık = 1 bütün.` });
+  }];
+  KES.f_denk = [(lv) => {
+    const [n, d] = pick([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5]]);
+    if (lv === 3) { return KQ({ model: pick(['pie', 'bar']), prompt: `Önce dilim sayısını seç, sonra ${fr(n, d)} kadarını boya. Denk bir kesir de olur!`, hedef: [n, d], parca: null, denk: true, cevap: `${fr(n, d)} ya da ona denk bir kesir`, steps: [`${d} parçaya böl, ${n} tanesini boya.`, `Ya da ${d * 2} parçaya böl, ${n * 2} tanesini boya: ${fr(n * 2, d * 2)} = ${fr(n, d)}`], hint: 'Pay ve paydayı aynı sayıyla çarparsan denk kesir bulursun.' }); }
+    const k = lv === 1 ? 2 : pick([3, 4]), P = d * k; if (P > 12) return KES.f_denk[0](1);
+    return KQ({ model: 'bar', prompt: `Bu şerit ${P} eş parçaya bölünmüş. Şeridin ${fr(n, d)} kadarını boya.`, hedef: [n, d], parca: P, denk: true, cevap: `${fr(n * k, P)} (= ${fr(n, d)})`, steps: [`${fr(n, d)} kesrini paydası ${P} olacak şekilde genişlet: pay ve paydayı ${k} ile çarp.`, `${fr(n, d)} = ${fr(n * k, P)} → ${n * k} parça boya.`], hint: `Her ${d} parçalık grupta değil; ${P} parçanın ${n * k} tanesi.` });
+  }];
+  KES.f_ondalik = [(lv) => { const n = ri(1, 9); return KQ({ model: 'bar', prompt: `Şerit 10 eş parçaya bölünmüş. Şeridin ${fmtD(n / 10)} kadarını boya.`, hedef: [n, 10], parca: 10, cevap: `${fmtD(n / 10)} = ${fr(n, 10)}`, steps: [`${fmtD(n / 10)} = ${fr(n, 10)} (onda ${n})`, `10 parçanın ${n} tanesini boya.`], hint: '0,1 bir parça demektir.' }); }];
+  const KES_CHECK = (q, a) => {
+    const [n, d] = q.hedef;
+    if (q.model === 'line') { const k = a.konum; if (k === n) return { ok: true, mis: null }; return { ok: false, mis: Math.abs(k - n) === 1 ? 'cizgi_sayma' : (k === d - n ? 'bos_kisim' : 'kesir_model') }; }
+    const p = a.parca, b = a.boyali;
+    const ok = q.denk ? b * d === n * p : (p === d && b === n);
+    if (ok) return { ok: true, mis: null };
+    if (b * d === (d - n) * p) return { ok: false, mis: 'bos_kisim' };
+    if (b * n === d * p || (p === n && b > 0)) return { ok: false, mis: 'pay_payda_ters' };
+    return { ok: false, mis: 'kesir_model' };
+  };
+  for (const [id, list] of Object.entries(KES)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.25 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(MATCH)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(GRID)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
 
-  G.MY_GEN = GEN; G.MY_MIS = MIS;
-  if (typeof module !== 'undefined') module.exports = { GEN, MIS };
+  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK;
+  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK };
 })(typeof window !== 'undefined' ? window : globalThis);

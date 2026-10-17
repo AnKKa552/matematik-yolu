@@ -1410,6 +1410,22 @@
     "genel": {
       "ad": "İşlem hatası",
       "duzeltme": "Çözümü adım adım tekrar kontrol et."
+    },
+    "bos_kisim": {
+      "ad": "Boyalı yerine boş kısmı sayma",
+      "duzeltme": "Kesrin payı, istenen (boyalı) parça sayısıdır. Boş kalan parçaları değil, boyadığın parçaları say."
+    },
+    "pay_payda_ters": {
+      "ad": "Pay ile paydayı karıştırma",
+      "duzeltme": "Payda (alttaki sayı) bütünün kaç EŞ parçaya bölündüğünü, pay (üstteki sayı) bu parçalardan kaçının alındığını söyler."
+    },
+    "kesir_model": {
+      "ad": "Bütünü ve parçaları karıştırma",
+      "duzeltme": "Önce bütünü paydadaki sayı kadar EŞ parçaya böl, sonra paydaki sayı kadar parçayı al. Parça sayısı ile alınan sayıyı ayrı ayrı say."
+    },
+    "cizgi_sayma": {
+      "ad": "Sayı doğrusunda çizgileri sayma",
+      "duzeltme": "Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0'dan başla; her atlama bir parçadır. 0 noktası sayılmaz."
     }
   },
   "anlatim_bicimleri": {

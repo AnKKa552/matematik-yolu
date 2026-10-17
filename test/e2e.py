@@ -29,7 +29,20 @@ async def main():
                 for i in range(len(M['L'])):
                     j = M['R'].index(M['L'][i]); await pg.click(f'[data-act=mt][data-v="L{i}"]'); await pg.click(f'[data-act=mt][data-v="R{j}"]'); await pg.wait_for_timeout(60)
                 await pg.wait_for_timeout(700); await pg.click('[data-act=next]'); await pg.wait_for_timeout(120); return
-            if q['type']=='input':
+            if q['type']=='kes':
+                K = await pg.evaluate("(()=>{const q=window.MY_APP.q;return {model:q.model,hedef:q.hedef,parca:q.parca}})()")
+                n, d = K['hedef']
+                if K['model']=='line':
+                    k = n if good else n+1
+                    await pg.click(f'[data-act=kes-nokta][data-v="{k}"]', force=True)
+                else:
+                    P = K['parca'] or d
+                    if not K['parca']:
+                        for _ in range(d-1): await pg.click('[data-act=kes-parca][data-v="1"]')
+                    b = n*P//d if good else P - n*P//d
+                    if b == n*P//d: b = max(1, b-1) if b > 1 else b+1
+                    for i in range(b): await pg.click(f'[data-act=kes-dilim][data-v="{i}"]')
+            elif q['type']=='input':
                 val = q['answer'].replace('.',',') if good else '9'
                 if val==q['answer']: val='8'
                 for ch in val: await pg.click(f'[data-act=key][data-v="{ch}"]')

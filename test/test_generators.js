@@ -1,5 +1,6 @@
 const { U } = require('../src/core.js');
-const { GEN, MIS } = require('../src/generators.js');
+const { GEN, MIS, KES_CHECK } = require('../src/generators.js');
+let kesN = 0;
 let errors = 0, total = 0; const samples = {};
 const strip = (s) => String(s).replace(/<[^>]+>/g, ' ');
 // bağımsız sözcük→sayı çözücü (U.words doğrulaması)
@@ -19,6 +20,22 @@ for (const [name, g] of Object.entries(GEN)) {
       if (q.pairs.length < 3 || new Set(A).size !== A.length || new Set(B).size !== B.length || !MIS[q.mis]) { console.log('BAD MATCH', name, lv, A, B); errors++; break; }
       continue;
     }
+    if (q.type === 'kes') {
+      kesN++; const [n, d] = q.hedef || [];
+      const bad = (m) => { console.log('BAD KES', name, lv, m, JSON.stringify(q)); errors++; };
+      if (!['pie', 'bar', 'line'].includes(q.model) || !(n >= 1 && d >= 2) || !q.cevap) { bad('alan'); break; }
+      if (q.model === 'line') {
+        if (n > d * q.ust || q.parca !== d) { bad('doğru'); break; }
+        if (!KES_CHECK(q, { konum: n }).ok) { bad('doğru cevap kabul edilmedi'); break; }
+        for (let k = 0; k <= d * q.ust; k++) { const r = KES_CHECK(q, { konum: k }); if (k !== n && (r.ok || !MIS[r.mis])) { bad('yanlış konum ' + k); break; } }
+      } else {
+        const P = q.parca || d; if (P < 2 || P > 12 || n >= d) { bad('parça'); break; }
+        const nb = n * P / d; if (!Number.isInteger(nb) || !KES_CHECK(q, { parca: P, boyali: nb }).ok) { bad('doğru cevap kabul edilmedi'); break; }
+        for (let pp = q.parca ? P : 1; pp <= (q.parca ? P : 12); pp++) for (let b = 0; b <= pp; b++) { const r = KES_CHECK(q, { parca: pp, boyali: b }); const want = q.denk ? b * d === n * pp : (pp === d && b === n); if (r.ok !== want || (!r.ok && !MIS[r.mis])) { bad(`değerlendirme ${pp}/${b}`); break; } }
+      }
+      if (r === 0) samples[name + '_kes_' + lv] = { p: strip(q.prompt).replace(/\s+/g, ' '), a: strip(q.cevap) };
+      continue;
+    }
     if (q.type === 'input') {
       if (q.answer === undefined || isNaN(parseFloat(String(q.answer).replace(',','.')))) { console.log('BAD ANSWER', name, lv, q.answer); errors++; break; }
       for (const m of q.inputMis||[]) { if (!MIS[m.mis]) { console.log('UNKNOWN MIS', name, m.mis); errors++; } }
@@ -32,6 +49,6 @@ for (const [name, g] of Object.entries(GEN)) {
   }
 }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);
-console.log('Beceri sayısı:', Object.keys(GEN).length);
+console.log('Beceri sayısı:', Object.keys(GEN).length, '· parmakla kesir sorusu:', kesN);
 for (const [k,v] of Object.entries(samples)) console.log(k, JSON.stringify(v));
 process.exit(errors?1:0);

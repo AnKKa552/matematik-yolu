@@ -403,7 +403,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .komsu{position:absolute;right:calc(100% + 26px);top:-34px;width:96px;background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;-webkit-tap-highlight-color:transparent;z-index:2}
 .komsu img{width:96px;height:auto;display:block;transform-origin:50% 92%;filter:drop-shadow(0 6px 8px rgba(20,30,90,.28));user-select:none;-webkit-user-drag:none}
 .komsu .kad{margin-top:2px;font-size:11px;font-weight:900;color:var(--muted);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:1px 8px;white-space:nowrap}
-.komsu .kbal{position:absolute;top:calc(100% + 8px);left:-14px;width:160px;background:var(--surface);color:var(--text);border:2px solid var(--line);border-radius:14px;padding:7px 10px;font-size:12.5px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 4px 0 var(--line);opacity:0;transform:translateY(-6px) scale(.9);transform-origin:30% 0;pointer-events:none;transition:opacity .2s,transform .2s}
+.komsu .kbal{position:absolute;top:calc(100% + 8px);left:-14px;width:160px;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:7px 10px;font-size:12.5px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 4px 0 var(--line);opacity:0;transform:translateY(-6px) scale(.9);transform-origin:30% 0;pointer-events:none;transition:opacity .2s,transform .2s}
 .komsu .kbal:after{content:'';position:absolute;left:56px;top:-9px;border:8px solid transparent;border-bottom-color:var(--line);border-top:0}
 .komsu .kbal.acik{opacity:1;transform:none}
 .komsu:after{content:'💬';position:absolute;top:-2px;right:-4px;font-size:16px;animation:float 1.8s ease-in-out infinite}
@@ -418,6 +418,29 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes kZipla{0%,55%,100%{transform:translateY(0) scaleY(1)}62%{transform:translateY(0) scaleY(.9)}75%{transform:translateY(-12px) scaleY(1.04)}88%{transform:translateY(0) scaleY(.95)}}
 @keyframes kUc{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
 @media (prefers-reduced-motion: reduce){.komsu img,.komsu:after{animation:none!important}}
+
+/* Parmakla kesir (type 'kes') */
+.kes{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0 4px}
+.kes-svg{width:100%;max-width:340px;height:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.kes-svg.pie{max-width:230px}
+.kes-svg .kd{fill:var(--surface);stroke:var(--brand);stroke-width:2.5;cursor:pointer;transition:fill .15s}
+.kes-svg .kd.on{fill:var(--pink,#FF5FA2)}
+.kes-svg .kd:active{opacity:.8}
+.kes-not{font-weight:800;color:var(--muted);min-height:28px;display:flex;align-items:center;gap:6px}
+.kes-fr{font-size:20px;color:var(--ink)}
+.kes-adim{display:flex;align-items:center;gap:14px}
+.kes-adim .btn{width:52px;height:52px;min-height:52px;padding:0;font-size:26px;flex:none}
+.kes-adim div{display:flex;flex-direction:column;align-items:center;min-width:56px;font-size:26px;font-weight:900;line-height:1}
+.kes-adim small{font-size:12px;color:var(--muted)}
+.kl-ana{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.kl-cizgi{stroke:var(--muted);stroke-width:2}
+.kl-cizgi.tam{stroke:var(--ink);stroke-width:3}
+.kl-yazi{font:900 17px Nunito,sans-serif;fill:var(--ink);text-anchor:middle}
+.kl-hedef{fill:transparent;cursor:pointer}
+.kl-pin circle,.kl-pin path{fill:var(--brand)}
+.kl-pin.dogru circle,.kl-pin.dogru path{fill:var(--ok)}
+.kl-pin.yanlis circle,.kl-pin.yanlis path{fill:var(--bad)}
+.kl-pin{animation:pop .3s ease-out;transform-box:fill-box;transform-origin:50% 100%}
 </style>
 </head>
 <body>
@@ -769,6 +792,10 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     ondalik_okunus: { t: 'Ondalık gösterimi yanlış okuma', fix: 'Virgülden sonra 1 basamak varsa "onda", 2 basamak varsa "yüzde" diye okunur: 4,25 → dört tam yüzde yirmi beş.' },
     yuzde_ondalik: { t: 'Yüzdeyi ondalığa yanlış çevirme', fix: '% işareti "yüzde", yani paydası 100 demektir: %5 = 5/100 = 0,05 (0,5 değil!).' },
     payda_buyuk: { t: '"Paydası büyük olan kesir büyüktür" sanma', fix: 'Payda bütünün kaç parçaya bölündüğünü gösterir. Parça sayısı arttıkça her parça KÜÇÜLÜR: 1/8 < 1/3.' },
+    bos_kisim: { t: 'Boyalı yerine boş kısmı sayma', fix: 'Kesrin payı, istenen (boyalı) parça sayısıdır. Boş kalan parçaları değil, boyadığın parçaları say.' },
+    pay_payda_ters: { t: 'Pay ile paydayı karıştırma', fix: 'Payda (alttaki sayı) bütünün kaç EŞ parçaya bölündüğünü, pay (üstteki sayı) bu parçalardan kaçının alındığını söyler.' },
+    kesir_model: { t: 'Bütünü ve parçaları karıştırma', fix: 'Önce bütünü paydadaki sayı kadar EŞ parçaya böl, sonra paydaki sayı kadar parçayı al. Parça sayısı ile alınan sayıyı ayrı ayrı say.' },
+    cizgi_sayma: { t: 'Sayı doğrusunda çizgileri sayma', fix: 'Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0\'dan başla; her atlama bir parçadır. 0 noktası sayılmaz.' },
     pay_payda_ayri: { t: 'Kesirleri karşılaştırırken sadece paya bakma', fix: 'Paydalar farklıysa önce paydaları eşitle (genişlet), sonra payları karşılaştır.' },
     uzun_buyuk: { t: '"Basamağı çok olan ondalık sayı büyüktür" sanma', fix: 'Ondalık sayıları karşılaştırırken önce tam kısma, sonra onda birler basamağına bak: 0,7 > 0,58 çünkü 7 onda > 5 onda.' },
     sifir_fark: { t: 'Sondaki sıfırın değeri değiştirdiğini sanma', fix: 'Ondalık kısmın sonuna eklenen sıfır değeri değiştirmez: 0,7 = 0,70 (7 onda = 70 yüzde).' },
@@ -1436,11 +1463,41 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   GRID.e_oruntu = [(lv) => { const m = ri(2, 5), c = ri(0, 6), f = (x) => m * x + c, xs = [1, 2, 3], q = pick([5, 6, 10]); return GQ('Örüntüyü takip et: Kurala göre eksik sayı hangisi?', [...xs.map(x => [`${x}. adım`, String(f(x))]), [`${q}. adım`, '?']], String(f(q)), [String(f(q) + m), String(m * q), String(f(q - 1))], [`Her adımda ${m} artıyor; kural: adım × ${m}${c ? ' + ' + c : ''}`, `${q} × ${m}${c ? ' + ' + c : ''} = ${f(q)}`], 'oruntu_baslangic'); }];
   GRID.f_denk = [(lv) => { const k = ri(2, 4), bs = [[1, 2], [1, 3], [1, 4]], d = pick([5, 6, 8]); return GQ('Örüntüyü takip et: Eksik kesir hangisi?', [...bs.map(([n, dd]) => [fr(n, dd), fr(n * k, dd * k)]), [fr(1, d), '?']], fr(k, d * k), [fr(1 + k, d + k), fr(k, d)], [`Her satırda pay ve payda ${k} ile çarpılmış.`, `1/${d} → ${k}/${d * k}`], 'denk_toplama'); }];
   GRID.e_us = [(lv) => { const e = pick([2, 3]), bs = e === 2 ? [2, 3, 4] : [1, 2, 3], q = e === 2 ? pick([5, 6, 7]) : 4; return GQ('Örüntüyü takip et: Eksik değer hangisi?', [...bs.map(b => [`${b}${e === 2 ? '²' : '³'}`, String(b ** e)]), [`${q}${e === 2 ? '²' : '³'}`, '?']], String(q ** e), [String(q * e), String(q ** e + q)], [`${q}${e === 2 ? '²' : '³'} = ${Array(e).fill(q).join(' × ')} = ${q ** e}`], 'us_carpim'); }];
+  /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster (type 'kes') ----------
+     model: 'pie' | 'bar' | 'line'. Öğrencinin cevabı {parca, boyali} ya da {konum}; denetim KES_CHECK ile kodla yapılır. */
+  const KQ = (o) => Q(Object.assign({ type: 'kes' }, o));
+  const KES = {};
+  KES.f_tur = [(lv) => {
+    if (lv === 1) { const d = ri(3, 8), n = ri(1, d - 1), model = pick(['pie', 'bar']);
+      return KQ({ model, prompt: `Şeklin ${fr(n, d)} kadarını boya. Parçalara dokun!`, hedef: [n, d], parca: d, cevap: fr(n, d), steps: [`Payda ${d}: şekil ${d} eş parçaya bölünmüş.`, `Pay ${n}: ${n} parçayı boya.`], hint: 'Pay kaç parça boyanacağını söyler.' }); }
+    if (lv === 2) { const d = ri(3, 8), n = ri(1, d - 1);
+      return KQ({ model: 'line', prompt: `${fr(n, d)} kesrini sayı doğrusunda göster. Doğru çizgiye dokun!`, hedef: [n, d], parca: d, ust: 1, cevap: fr(n, d), steps: [`0 ile 1 arası ${d} eş aralığa bölünmüş.`, `0'dan başla, ${n} aralık atla.`], hint: 'Çizgileri değil, aralıkları say.' }); }
+    const d = ri(2, 6), n = d + ri(1, d - 1);
+    return KQ({ model: 'line', prompt: `${fr(n, d)} kesrini sayı doğrusunda göster.`, hedef: [n, d], parca: d, ust: 2, cevap: `${fr(n, d)} = ${mixed(1, n - d, d)}`, steps: [`Her birlik ${d} eş aralığa bölünmüş.`, `${n} aralık atla: 1'i geçip ${n - d} aralık daha.`], hint: `${d} aralık = 1 bütün.` });
+  }];
+  KES.f_denk = [(lv) => {
+    const [n, d] = pick([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5]]);
+    if (lv === 3) { return KQ({ model: pick(['pie', 'bar']), prompt: `Önce dilim sayısını seç, sonra ${fr(n, d)} kadarını boya. Denk bir kesir de olur!`, hedef: [n, d], parca: null, denk: true, cevap: `${fr(n, d)} ya da ona denk bir kesir`, steps: [`${d} parçaya böl, ${n} tanesini boya.`, `Ya da ${d * 2} parçaya böl, ${n * 2} tanesini boya: ${fr(n * 2, d * 2)} = ${fr(n, d)}`], hint: 'Pay ve paydayı aynı sayıyla çarparsan denk kesir bulursun.' }); }
+    const k = lv === 1 ? 2 : pick([3, 4]), P = d * k; if (P > 12) return KES.f_denk[0](1);
+    return KQ({ model: 'bar', prompt: `Bu şerit ${P} eş parçaya bölünmüş. Şeridin ${fr(n, d)} kadarını boya.`, hedef: [n, d], parca: P, denk: true, cevap: `${fr(n * k, P)} (= ${fr(n, d)})`, steps: [`${fr(n, d)} kesrini paydası ${P} olacak şekilde genişlet: pay ve paydayı ${k} ile çarp.`, `${fr(n, d)} = ${fr(n * k, P)} → ${n * k} parça boya.`], hint: `Her ${d} parçalık grupta değil; ${P} parçanın ${n * k} tanesi.` });
+  }];
+  KES.f_ondalik = [(lv) => { const n = ri(1, 9); return KQ({ model: 'bar', prompt: `Şerit 10 eş parçaya bölünmüş. Şeridin ${fmtD(n / 10)} kadarını boya.`, hedef: [n, 10], parca: 10, cevap: `${fmtD(n / 10)} = ${fr(n, 10)}`, steps: [`${fmtD(n / 10)} = ${fr(n, 10)} (onda ${n})`, `10 parçanın ${n} tanesini boya.`], hint: '0,1 bir parça demektir.' }); }];
+  const KES_CHECK = (q, a) => {
+    const [n, d] = q.hedef;
+    if (q.model === 'line') { const k = a.konum; if (k === n) return { ok: true, mis: null }; return { ok: false, mis: Math.abs(k - n) === 1 ? 'cizgi_sayma' : (k === d - n ? 'bos_kisim' : 'kesir_model') }; }
+    const p = a.parca, b = a.boyali;
+    const ok = q.denk ? b * d === n * p : (p === d && b === n);
+    if (ok) return { ok: true, mis: null };
+    if (b * d === (d - n) * p) return { ok: false, mis: 'bos_kisim' };
+    if (b * n === d * p || (p === n && b > 0)) return { ok: false, mis: 'pay_payda_ters' };
+    return { ok: false, mis: 'kesir_model' };
+  };
+  for (const [id, list] of Object.entries(KES)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.25 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(MATCH)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(GRID)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
 
-  G.MY_GEN = GEN; G.MY_MIS = MIS;
-  if (typeof module !== 'undefined') module.exports = { GEN, MIS };
+  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK;
+  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* ============================================================
@@ -1758,7 +1815,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 (function (G) {
   'use strict';
   const isNode = typeof module !== 'undefined';
-  const { GEN, MIS } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS };
+  const { GEN, MIS, KES_CHECK } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES };
   const { SKILLS, SKILL, THEMES, FORMATS } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
@@ -1785,7 +1842,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
   /* ---------------- 1) BKT ---------------- */
   const P = { T: 0.07, S: 0.10 };
-  const guessOf = (q) => q.type === 'match' ? 0.1 : q.type === 'input' ? 0.15 : q.type === 'tf' ? 0.5 : (1 / Math.max(2, (q.options || []).length));
+  const guessOf = (q) => q.type === 'match' || q.type === 'kes' ? 0.1 : q.type === 'input' ? 0.15 : q.type === 'tf' ? 0.5 : (1 / Math.max(2, (q.options || []).length));
   E.bkt = (pL, correct, guess, hinted) => {
     const S = P.S, Gs = guess;
     let post = correct ? pL * (1 - S) / (pL * (1 - S) + (1 - pL) * Gs) : pL * S / (pL * S + (1 - pL) * (1 - Gs));
@@ -1823,7 +1880,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     else if (ctx.streak >= 3 && lv < 3 && Math.random() < 0.35) lv++;  // esnetme (yakın gelişim alanı)
     return lv;
   };
-  E.makeQ = (id, lv) => { const q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
+  E.makeQ = (id, lv, sade) => { let q = GEN[id](lv); for (let t = 0; sade && q.type === 'kes' && t < 20; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
 
   // Ders oturumu planı
   E.newSession = (st, mode, skillId, theme) => {
@@ -1844,7 +1901,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     let id = ses.skill;
     if (ses.mode === 'mistakes' && st.mistakes.length) { const m = st.mistakes[ses.i % st.mistakes.length]; const q = E.makeQ(m.skill, m.lv); q.replay = true; return q; }
     if (ses.mode === 'review' || ses.mode === 'mix') { const due = E.dueSkills(st); const pool = due.length ? due.map(d => d.id) : SKILLS.filter(s => st.skills[s.id].n > 0).map(s => s.id); id = pool.length ? pool[ses.i % pool.length] : SKILLS[0].id; }
-    if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1); return q; }
+    if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1, true); return q; }
     if (ses.mode === 'lesson' && Math.random() < 0.12) { const due = E.dueSkills(st).filter(d => d.id !== ses.skill); if (due.length) { const q = E.makeQ(due[0].id, E.levelFor(st, due[0].id)); q.review = true; return q; } }
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
@@ -1854,6 +1911,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
   /* ---------------- Cevap değerlendirme ---------------- */
   E.check = (q, ans) => {
+    if (q.type === 'kes') return KES_CHECK(q, ans);
     if (q.type === 'input') {
       const ok = U.numEq(ans, q.answer);
       let mis = null; if (!ok) { const hit = (q.inputMis || []).find(m => U.numEq(ans, m.v)); mis = hit ? hit.mis : 'genel'; }
@@ -2524,6 +2582,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     const s = SKILL[q.skill];
     let ans = '';
     if (q.type === 'match') ans = matchBoard(q);
+    else if (q.type === 'kes') ans = kesBoard(q);
     else if (q.type === 'input') ans = `<div class="inbox"><div class="val ${A.input ? '' : 'empty'}">${A.input ? esc(A.input) : '?'}</div>${q.unit ? `<div class="unit">${esc(q.unit)}</div>` : ''}</div><div class="pad">${['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '⌫'].map(k => `<button data-act="key" data-v="${k}" ${A.fb ? 'disabled' : ''}>${k}</button>`).join('')}</div>`;
     else {
       const cls = q.type === 'tf' ? 'tf' : q.type === 'cmp' ? 'cmp' : '';
@@ -2531,7 +2590,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
       ans = grid + cmp + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
-    const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : A.sel !== null;
+    const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
     const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
@@ -2539,6 +2598,42 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       <div class="qprompt">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
+  }
+
+  /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster ---------- */
+  function kesBoard(q) {
+    const K = A.kes, fb = A.fb, P = K.parca, b = K.on.filter(Boolean).length, [n, d] = q.hedef;
+    const dis = fb ? 'disabled' : '';
+    if (q.model === 'line') {
+      const N = d * q.ust, W = 320, x0 = 22, x1 = W - 22, dx = (x1 - x0) / N, y = 62;
+      let g = `<line x1="${x0 - 8}" y1="${y}" x2="${x1 + 8}" y2="${y}" class="kl-ana"/>`;
+      for (let k = 0; k <= N; k++) {
+        const x = x0 + k * dx, tam = k % d === 0, cls = fb && k === n ? 'dogru' : fb && k === K.konum && !fb.ok ? 'yanlis' : k === K.konum ? 'sec' : '';
+        g += `<line x1="${x}" y1="${y - (tam ? 16 : 10)}" x2="${x}" y2="${y + (tam ? 16 : 10)}" class="kl-cizgi ${tam ? 'tam' : ''}"/>`;
+        if (tam) g += `<text x="${x}" y="${y + 38}" class="kl-yazi">${k / d}</text>`;
+        if (cls) g += `<g class="kl-pin ${cls}"><circle cx="${x}" cy="${y - 30}" r="11"/><path d="M${x - 7},${y - 24} L${x},${y - 6} L${x + 7},${y - 24} Z"/></g>`;
+        g += `<rect x="${x - dx / 2}" y="${y - 46}" width="${dx}" height="92" class="kl-hedef" ${fb ? '' : `data-act="kes-nokta" data-v="${k}"`}><title>${k}. çizgi</title></rect>`;
+      }
+      return `<div class="kes"><svg class="kes-svg" viewBox="0 0 ${W} 112" role="group" aria-label="Sayı doğrusu: 0 ile ${q.ust} arası, her birlik ${d} eş aralık">${g}</svg>
+        <div class="kes-not">${K.konum === null ? 'Doğru çizgiye dokun 👆' : `Seçtiğin yer: 0'dan <b>${K.konum}</b> aralık sonra`}</div></div>`;
+    }
+    let shape = '';
+    if (q.model === 'pie') {
+      const R = 92, c = 100;
+      if (P === 1) shape = `<circle cx="${c}" cy="${c}" r="${R}" class="kd ${K.on[0] ? 'on' : ''}" ${dis ? '' : 'data-act="kes-dilim" data-v="0"'}/>`;
+      else for (let i = 0; i < P; i++) {
+        const a0 = (-90 + 360 * i / P) * Math.PI / 180, a1 = (-90 + 360 * (i + 1) / P) * Math.PI / 180;
+        shape += `<path d="M${c},${c} L${(c + R * Math.cos(a0)).toFixed(2)},${(c + R * Math.sin(a0)).toFixed(2)} A${R},${R} 0 ${P === 2 ? 0 : 0} 1 ${(c + R * Math.cos(a1)).toFixed(2)},${(c + R * Math.sin(a1)).toFixed(2)} Z" class="kd ${K.on[i] ? 'on' : ''}" ${dis ? '' : `data-act="kes-dilim" data-v="${i}"`}/>`;
+      }
+      shape = `<svg class="kes-svg pie" viewBox="0 0 200 200" role="group" aria-label="${P} dilimli daire, ${b} dilim boyalı">${shape}</svg>`;
+    } else {
+      const W = 320, w = (W - 8) / P;
+      for (let i = 0; i < P; i++) shape += `<rect x="${(4 + i * w).toFixed(2)}" y="6" width="${w.toFixed(2)}" height="70" rx="5" class="kd ${K.on[i] ? 'on' : ''}" ${dis ? '' : `data-act="kes-dilim" data-v="${i}"`}/>`;
+      shape = `<svg class="kes-svg bar" viewBox="0 0 ${W} 82" role="group" aria-label="${P} parçalı şerit, ${b} parça boyalı">${shape}</svg>`;
+    }
+    const step = q.parca ? '' : `<div class="kes-adim"><button class="btn ghost" data-act="kes-parca" data-v="-1" ${dis || P <= 1 ? 'disabled' : ''} aria-label="Dilim azalt">−</button><div><b>${P}</b><small>${q.model === 'pie' ? 'dilim' : 'parça'}</small></div><button class="btn ghost" data-act="kes-parca" data-v="1" ${dis || P >= 12 ? 'disabled' : ''} aria-label="Dilim artır">+</button></div>`;
+    const oku = q.denk || !q.parca ? `Boyadığın: <span class="kes-fr">${U.fr(b, P)}</span>` : `Boyalı parça: <b>${b}</b>`;
+    return `<div class="kes">${step}${shape}<div class="kes-not">${oku}</div></div>`;
   }
 
   /* ---------- Çiftleri eşleştir ---------- */
@@ -2573,7 +2668,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     const fb = A.fb, q = A.q;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
     if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div></div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
-    const right = q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
+    const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
@@ -2657,6 +2752,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (A.ses.mode !== 'speed' && A.ses.i >= A.ses.len && !A.ses.lastWrong) return finishSession();
     if (!A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
     A.q = E.nextQ(A.st, A.ses); A.sel = null; A.input = '';
+    A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
     A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
     if (A.q.rescue) setTimeout(() => piSay('telafi_soru'), 250);
@@ -2694,7 +2790,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   function checkAnswer() {
-    const q = A.q, ans = q.type === 'input' ? A.input : A.sel; if (ans === null || ans === '') return;
+    const q = A.q, ans = q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : A.sel; if (ans === null || ans === '') return;
     const res = E.check(q, ans), ms = Date.now() - A.t0, gain = E.record(A.st, A.ses, q, res, ms, A.hinted);
     A.fb = { ok: res.ok, mis: res.mis, gain }; save();
     if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis'); }
@@ -2737,7 +2833,10 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       case 'card-ok': A.ses.showCard = false; stopVoice(); nextQuestion(); break;
       case 'say-card': sayCard(el.dataset.s, v); break;
       case 'fmt-modal': A.modal = explainModal(A.q.skill, v); render(); sayCard(A.q.skill, v); break;
-      case 'say-q': speak(A.q.prompt + '. ' + (A.q.type === 'input' ? '' : A.q.type === 'cmp' ? `${A.q.cmp[0]} ile ${A.q.cmp[1]}` : A.q.options.map(o => o.t).join('. '))); break;
+      case 'say-q': speak(A.q.prompt + '. ' + (A.q.type === 'input' ? '' : A.q.type === 'cmp' ? `${A.q.cmp[0]} ile ${A.q.cmp[1]}` : (A.q.options || []).map(o => o.t).join('. '))); break;
+      case 'kes-dilim': if (A.fb || !A.kes) break; { const i = +v; A.kes.on[i] = !A.kes.on[i]; tone(A.kes.on[i] ? 620 + 30 * A.kes.on.filter(Boolean).length : 420, .09, 'triangle'); render(); } break;
+      case 'kes-parca': if (A.fb || !A.kes) break; { const P = Math.max(1, Math.min(12, A.kes.parca + +v)); A.kes = { parca: P, on: Array(P).fill(false), konum: null }; sfx.tap(); render(); } break;
+      case 'kes-nokta': if (A.fb || !A.kes) break; A.kes.konum = +v; tone(560 + 25 * +v, .08, 'triangle'); render(); break;
       case 'opt': if (A.fb) break; A.sel = +v; sfx.tap(); render(); break;
       case 'key': if (A.fb) break; sfx.tap(); if (v === '⌫') A.input = A.input.slice(0, -1); else if (A.input.length < 12) { if (v === ',' && (A.input.includes(',') || !A.input)) break; A.input += v; } render(); break;
       case 'hint': A.hinted = true; A.showHint = true; render(); piSay('ipucu'); break;
@@ -2778,7 +2877,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (A.view !== 'lesson' || !A.q || A.ses.showCard) return;
     if (A.fb && (e.key === 'Enter')) { document.querySelector('[data-act="next"]').click(); return; }
     if (A.q.type === 'input' && !A.fb) { if (/^[0-9]$/.test(e.key)) { A.input += e.key; render(); } else if (e.key === ',' || e.key === '.') { if (!A.input.includes(',') && A.input) { A.input += ','; render(); } } else if (e.key === 'Backspace') { A.input = A.input.slice(0, -1); render(); } else if (e.key === 'Enter') checkAnswer(); }
-    else if (!A.fb) { const n = +e.key; if (n >= 1 && n <= A.q.options.length) { A.sel = n - 1; render(); } else if (e.key === 'Enter') checkAnswer(); }
+    else if (!A.fb) { const n = +e.key; if (n >= 1 && n <= (A.q.options || []).length) { A.sel = n - 1; render(); } else if (e.key === 'Enter') checkAnswer(); }
   });
   if ('speechSynthesis' in window) try { speechSynthesis.onvoiceschanged = () => { }; speechSynthesis.getVoices(); } catch (e) { }
   try { const lr = E.rollWeek(A.st); if (lr) { save(); setTimeout(() => toast(`🏆 Haftalık lig bitti: ${lr.rank}. oldun!`), 800); } } catch (e) { }

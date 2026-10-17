@@ -279,6 +279,7 @@
     const s = SKILL[q.skill];
     let ans = '';
     if (q.type === 'match') ans = matchBoard(q);
+    else if (q.type === 'kes') ans = kesBoard(q);
     else if (q.type === 'input') ans = `<div class="inbox"><div class="val ${A.input ? '' : 'empty'}">${A.input ? esc(A.input) : '?'}</div>${q.unit ? `<div class="unit">${esc(q.unit)}</div>` : ''}</div><div class="pad">${['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '⌫'].map(k => `<button data-act="key" data-v="${k}" ${A.fb ? 'disabled' : ''}>${k}</button>`).join('')}</div>`;
     else {
       const cls = q.type === 'tf' ? 'tf' : q.type === 'cmp' ? 'cmp' : '';
@@ -286,7 +287,7 @@
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
       ans = grid + cmp + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
-    const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : A.sel !== null;
+    const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
     const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
@@ -294,6 +295,42 @@
       <div class="qprompt">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
+  }
+
+  /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster ---------- */
+  function kesBoard(q) {
+    const K = A.kes, fb = A.fb, P = K.parca, b = K.on.filter(Boolean).length, [n, d] = q.hedef;
+    const dis = fb ? 'disabled' : '';
+    if (q.model === 'line') {
+      const N = d * q.ust, W = 320, x0 = 22, x1 = W - 22, dx = (x1 - x0) / N, y = 62;
+      let g = `<line x1="${x0 - 8}" y1="${y}" x2="${x1 + 8}" y2="${y}" class="kl-ana"/>`;
+      for (let k = 0; k <= N; k++) {
+        const x = x0 + k * dx, tam = k % d === 0, cls = fb && k === n ? 'dogru' : fb && k === K.konum && !fb.ok ? 'yanlis' : k === K.konum ? 'sec' : '';
+        g += `<line x1="${x}" y1="${y - (tam ? 16 : 10)}" x2="${x}" y2="${y + (tam ? 16 : 10)}" class="kl-cizgi ${tam ? 'tam' : ''}"/>`;
+        if (tam) g += `<text x="${x}" y="${y + 38}" class="kl-yazi">${k / d}</text>`;
+        if (cls) g += `<g class="kl-pin ${cls}"><circle cx="${x}" cy="${y - 30}" r="11"/><path d="M${x - 7},${y - 24} L${x},${y - 6} L${x + 7},${y - 24} Z"/></g>`;
+        g += `<rect x="${x - dx / 2}" y="${y - 46}" width="${dx}" height="92" class="kl-hedef" ${fb ? '' : `data-act="kes-nokta" data-v="${k}"`}><title>${k}. çizgi</title></rect>`;
+      }
+      return `<div class="kes"><svg class="kes-svg" viewBox="0 0 ${W} 112" role="group" aria-label="Sayı doğrusu: 0 ile ${q.ust} arası, her birlik ${d} eş aralık">${g}</svg>
+        <div class="kes-not">${K.konum === null ? 'Doğru çizgiye dokun 👆' : `Seçtiğin yer: 0'dan <b>${K.konum}</b> aralık sonra`}</div></div>`;
+    }
+    let shape = '';
+    if (q.model === 'pie') {
+      const R = 92, c = 100;
+      if (P === 1) shape = `<circle cx="${c}" cy="${c}" r="${R}" class="kd ${K.on[0] ? 'on' : ''}" ${dis ? '' : 'data-act="kes-dilim" data-v="0"'}/>`;
+      else for (let i = 0; i < P; i++) {
+        const a0 = (-90 + 360 * i / P) * Math.PI / 180, a1 = (-90 + 360 * (i + 1) / P) * Math.PI / 180;
+        shape += `<path d="M${c},${c} L${(c + R * Math.cos(a0)).toFixed(2)},${(c + R * Math.sin(a0)).toFixed(2)} A${R},${R} 0 ${P === 2 ? 0 : 0} 1 ${(c + R * Math.cos(a1)).toFixed(2)},${(c + R * Math.sin(a1)).toFixed(2)} Z" class="kd ${K.on[i] ? 'on' : ''}" ${dis ? '' : `data-act="kes-dilim" data-v="${i}"`}/>`;
+      }
+      shape = `<svg class="kes-svg pie" viewBox="0 0 200 200" role="group" aria-label="${P} dilimli daire, ${b} dilim boyalı">${shape}</svg>`;
+    } else {
+      const W = 320, w = (W - 8) / P;
+      for (let i = 0; i < P; i++) shape += `<rect x="${(4 + i * w).toFixed(2)}" y="6" width="${w.toFixed(2)}" height="70" rx="5" class="kd ${K.on[i] ? 'on' : ''}" ${dis ? '' : `data-act="kes-dilim" data-v="${i}"`}/>`;
+      shape = `<svg class="kes-svg bar" viewBox="0 0 ${W} 82" role="group" aria-label="${P} parçalı şerit, ${b} parça boyalı">${shape}</svg>`;
+    }
+    const step = q.parca ? '' : `<div class="kes-adim"><button class="btn ghost" data-act="kes-parca" data-v="-1" ${dis || P <= 1 ? 'disabled' : ''} aria-label="Dilim azalt">−</button><div><b>${P}</b><small>${q.model === 'pie' ? 'dilim' : 'parça'}</small></div><button class="btn ghost" data-act="kes-parca" data-v="1" ${dis || P >= 12 ? 'disabled' : ''} aria-label="Dilim artır">+</button></div>`;
+    const oku = q.denk || !q.parca ? `Boyadığın: <span class="kes-fr">${U.fr(b, P)}</span>` : `Boyalı parça: <b>${b}</b>`;
+    return `<div class="kes">${step}${shape}<div class="kes-not">${oku}</div></div>`;
   }
 
   /* ---------- Çiftleri eşleştir ---------- */
@@ -328,7 +365,7 @@
     const fb = A.fb, q = A.q;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
     if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div></div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
-    const right = q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
+    const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
@@ -412,6 +449,7 @@
     if (A.ses.mode !== 'speed' && A.ses.i >= A.ses.len && !A.ses.lastWrong) return finishSession();
     if (!A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
     A.q = E.nextQ(A.st, A.ses); A.sel = null; A.input = '';
+    A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
     A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
     if (A.q.rescue) setTimeout(() => piSay('telafi_soru'), 250);
@@ -449,7 +487,7 @@
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   function checkAnswer() {
-    const q = A.q, ans = q.type === 'input' ? A.input : A.sel; if (ans === null || ans === '') return;
+    const q = A.q, ans = q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : A.sel; if (ans === null || ans === '') return;
     const res = E.check(q, ans), ms = Date.now() - A.t0, gain = E.record(A.st, A.ses, q, res, ms, A.hinted);
     A.fb = { ok: res.ok, mis: res.mis, gain }; save();
     if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis'); }
@@ -492,7 +530,10 @@
       case 'card-ok': A.ses.showCard = false; stopVoice(); nextQuestion(); break;
       case 'say-card': sayCard(el.dataset.s, v); break;
       case 'fmt-modal': A.modal = explainModal(A.q.skill, v); render(); sayCard(A.q.skill, v); break;
-      case 'say-q': speak(A.q.prompt + '. ' + (A.q.type === 'input' ? '' : A.q.type === 'cmp' ? `${A.q.cmp[0]} ile ${A.q.cmp[1]}` : A.q.options.map(o => o.t).join('. '))); break;
+      case 'say-q': speak(A.q.prompt + '. ' + (A.q.type === 'input' ? '' : A.q.type === 'cmp' ? `${A.q.cmp[0]} ile ${A.q.cmp[1]}` : (A.q.options || []).map(o => o.t).join('. '))); break;
+      case 'kes-dilim': if (A.fb || !A.kes) break; { const i = +v; A.kes.on[i] = !A.kes.on[i]; tone(A.kes.on[i] ? 620 + 30 * A.kes.on.filter(Boolean).length : 420, .09, 'triangle'); render(); } break;
+      case 'kes-parca': if (A.fb || !A.kes) break; { const P = Math.max(1, Math.min(12, A.kes.parca + +v)); A.kes = { parca: P, on: Array(P).fill(false), konum: null }; sfx.tap(); render(); } break;
+      case 'kes-nokta': if (A.fb || !A.kes) break; A.kes.konum = +v; tone(560 + 25 * +v, .08, 'triangle'); render(); break;
       case 'opt': if (A.fb) break; A.sel = +v; sfx.tap(); render(); break;
       case 'key': if (A.fb) break; sfx.tap(); if (v === '⌫') A.input = A.input.slice(0, -1); else if (A.input.length < 12) { if (v === ',' && (A.input.includes(',') || !A.input)) break; A.input += v; } render(); break;
       case 'hint': A.hinted = true; A.showHint = true; render(); piSay('ipucu'); break;
@@ -533,7 +574,7 @@
     if (A.view !== 'lesson' || !A.q || A.ses.showCard) return;
     if (A.fb && (e.key === 'Enter')) { document.querySelector('[data-act="next"]').click(); return; }
     if (A.q.type === 'input' && !A.fb) { if (/^[0-9]$/.test(e.key)) { A.input += e.key; render(); } else if (e.key === ',' || e.key === '.') { if (!A.input.includes(',') && A.input) { A.input += ','; render(); } } else if (e.key === 'Backspace') { A.input = A.input.slice(0, -1); render(); } else if (e.key === 'Enter') checkAnswer(); }
-    else if (!A.fb) { const n = +e.key; if (n >= 1 && n <= A.q.options.length) { A.sel = n - 1; render(); } else if (e.key === 'Enter') checkAnswer(); }
+    else if (!A.fb) { const n = +e.key; if (n >= 1 && n <= (A.q.options || []).length) { A.sel = n - 1; render(); } else if (e.key === 'Enter') checkAnswer(); }
   });
   if ('speechSynthesis' in window) try { speechSynthesis.onvoiceschanged = () => { }; speechSynthesis.getVoices(); } catch (e) { }
   try { const lr = E.rollWeek(A.st); if (lr) { save(); setTimeout(() => toast(`🏆 Haftalık lig bitti: ${lr.rank}. oldun!`), 800); } } catch (e) { }
