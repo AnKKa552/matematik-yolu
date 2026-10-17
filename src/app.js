@@ -124,11 +124,11 @@
   };
   const soruOku = () => {
     const q = A.q; if (!q || !A.st.settings.voice) return;
-    const yedek = q.prompt + '. ' + (q.type === 'input' || q.type === 'kes' || q.type === 'match' ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
+    const metin = q.okuma || q.prompt, yedek = metin + '. ' + (q.type === 'input' || q.type === 'kes' || q.type === 'match' ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
     if (!CL || !CL.soruDepo || !window.crypto || !crypto.subtle) return speak(yedek);
     stopVoice(); const tok = AUDIO.tok, pk = () => document.querySelectorAll('.pikonus');
     pk().forEach(e => e.classList.add('dusunuyor'));
-    zamanli(soruSesiAl(U.soruSesi(q.prompt)), 8000)
+    zamanli(soruSesiAl(U.soruSesi(metin)), 8000)
       .then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); })
       .catch(() => { if (tok === AUDIO.tok) say(null, yedek); })
       .finally(() => pk().forEach(e => e.classList.remove('dusunuyor')));
@@ -300,6 +300,7 @@
       <h2 class="sect">Pratik Merkezi</h2><div class="list">
       ${item('p-mistakes', '🕵️', '#FFE5E8', `Hatalarımı Çalış (${ms})`, ms ? 'Yanlış yaptığın soru tiplerini yeniden dene, yanılgıları kapat.' : 'Henüz hata yok. Harika!', !ms)}
       ${item('p-review', '⏰', '#E0F8EA', `Tekrar Zamanı (${due.length})`, due.length ? 'Unutma eğrine göre tazelenmesi gereken konular.' : 'Şimdilik her şey taze.', !any)}
+      ${item('p-atolye', '🧩', '#E0F2FE', 'Problem Atölyesi', 'Gerçek hayat problemlerini adım adım çöz: anla, planla, çöz, kontrol et.', false)}
       ${item('p-hata', '🔍', '#FFF4D6', 'Hata Avcısı', 'Arkadaşlarının çözümündeki hatayı bul, kim haklı sen karar ver.', false)}
       ${item('p-speed', '⚡', '#FFF0DB', 'Hızlı Yarış · 60 sn', `En iyi skorun: ${A.st.speedBest} doğru. Rekorunu kır!`, false)}
       ${item('p-mix', '🎲', '#E8E5FF', 'Karışık Pratik', 'Çalıştığın tüm konulardan karışık sorular.', !any)}
@@ -347,6 +348,7 @@
         <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">Doğruluk</span><b>%${Math.round(fp.acc * 100)}</b></div>
         <div class="card"><span class="muted sm">Hatadan dönüş gücü</span><b>${fp.resil === null ? '–' : '%' + Math.round(fp.resil * 100)}</b></div><div class="card"><span class="muted sm">İpucu kullanımı</span><b>%${Math.round(fp.hintRate * 100)}</b></div></div>
         <h3 style="font-size:15px;margin:14px 0 4px">Bana en iyi gelen anlatım</h3>${fbars}
+        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım</h3>${fp.problem.asamalar.map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100)}</div></div>`).join('')}` : ''}
         <h3 style="font-size:15px;margin:14px 0 4px">Kavram yanılgılarım</h3>${mis}</div>
       <h2 class="sect">Rozetler</h2><div class="badges">${E.BADGES.map(b => `<div class="badge ${A.st.badges.includes(b.id) ? '' : 'off'}" title="${esc(b.desc)}"><div class="i">${b.icon}</div><div class="n">${b.name}</div></div>`).join('')}</div>
       <h2 class="sect">Ayarlar</h2><div class="card list">
@@ -425,10 +427,10 @@
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
-    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
+    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${Math.floor(A.ses.i / (q.atolye.toplam || 5)) + 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
-      <div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${ans}</div>
+      ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
@@ -497,6 +499,12 @@
     render();
   }
 
+  // Problem Atölyesi: aşama şeridi (Anla → Planla → Çöz → Kontrol) + problem kartı (her adımda görünür)
+  function atolyePanel(q) {
+    const a = q.atolye, sira = ['anla', 'plan', 'coz', 'kontrol'], cur = sira.indexOf(a.asama), AS = E.ATOLYE.ASAMA;
+    return `<div class="atolye"><div class="aserit">${sira.map((k, i) => `<span class="${i === cur ? 'on' : i < cur ? 'bitti' : ''}"><b>${i < cur ? '✓' : i + 1}</b>${AS[k]}</span>`).join('')}</div>
+      <div class="abaglam ${a.asama === 'anla' ? '' : 'kucuk'}"><div class="abas">🧩 ${esc(a.baslik)}</div><div>${a.baglam}</div></div></div>`;
+  }
   // Hata Avcısı: hayali öğrencinin defteri (kim haklı / neden). Hatalı satır "neden"de baştan, "kim"de cevaptan sonra işaretlenir.
   function defterHTML(q) {
     return `<div class="defterler ${q.defter.length > 1 ? 'iki' : ''}">${q.defter.map(d => `<div class="defter"><div class="dad">✏️ ${esc(U.wk(d.ad, 'in'))} defteri</div><ol>${d.satirlar.map((x, i) => `<li class="${d.isaret === i || (A.fb && d.hata === i) ? 'isaret' : ''}">${x}</li>`).join('')}</ol></div>`).join('')}</div>`;
@@ -511,7 +519,7 @@
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}</div>${mascot('sad', 64)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && q.atolye.asama !== 'kontrol' ? '<div class="sub">Sorun değil! Doğru değerle bir sonraki adıma geçiyoruz.</div>' : ''}</div>${mascot('sad', 64)}</div>
       ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
       <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
@@ -735,6 +743,7 @@
       case 'p-mistakes': if (A.st.mistakes.length) startSession('mistakes', A.st.mistakes[0].skill); break;
       case 'p-review': startSession('review', (E.dueSkills(A.st)[0] || { id: SKILLS.find(s => A.st.skills[s.id].n > 0).id }).id); break;
       case 'p-speed': startSession('speed', null); break;
+      case 'p-atolye': startSession('atolye', null); break;
       case 'p-hata': startSession('hata', E.hataBecerileri(A.st)[0]); break;
       case 'p-mix': startSession('mix', SKILLS.find(s => A.st.skills[s.id].n > 0).id); break;
       case 'p-place': startSession('placement', null); break;

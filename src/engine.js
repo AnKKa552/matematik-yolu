@@ -9,7 +9,7 @@
 (function (G) {
   'use strict';
   const isNode = typeof module !== 'undefined';
-  const { GEN, MIS, KES_CHECK, HATA } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, HATA: G.MY_HATA };
+  const { GEN, MIS, KES_CHECK, HATA, ATOLYE } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, HATA: G.MY_HATA, ATOLYE: G.MY_ATOLYE };
   const { SKILLS, SKILL, THEMES, FORMATS } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
@@ -25,7 +25,7 @@
       v: 1, profile: null, skills, formats, mis: {}, mistakes: [], times: [], hints: { used: 0, q: 0 }, rescue: { tries: 0, ok: 0 },
       xp: 0, gems: 20, streak: 0, lastDay: null, freezes: 1, dailyGoal: 50, days: {}, week: { start: weekStart(), xp: 0 }, league: { tier: 0 },
       badges: [], sessions: [], speedBest: 0, themesTried: [], settings: { sound: true, voice: true }, placementDone: false,
-      quests: { day: null, prog: {}, claimed: [] }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
+      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, problem: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
     };
   }
   const E = {};
@@ -85,6 +85,11 @@
     const q = HATA.q(id, tur === 'neden' ? 3 : lv, tur); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q;
   };
 
+  // Problem Atölyesi: 2 problem (farklı şablon); çalıştığı temalardan, yoksa temel şablonlardan
+  E.atolyeBecerileri = (st) => { const cal = ATOLYE.ids.filter(id => st.skills[ATOLYE.skillOf(id)] && st.skills[ATOLYE.skillOf(id)].n > 0); return cal.length >= 2 ? cal : ['market', 'bahce', 'kumbara', 'terazi']; };
+  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap(id => ATOLYE.sorular(id)); };
+  E.ATOLYE = ATOLYE;
+
   // Ders oturumu planı
   E.newSession = (st, mode, skillId, theme) => {
     const med = E.medianTime(st);
@@ -96,8 +101,9 @@
     if (mode === 'exam') len = 10;
     if (mode === 'hazir') len = 5;
     if (mode === 'hata') len = 6;
+    let aq = null; if (mode === 'atolye') { aq = E.atolyePlan(st); len = aq.length; }
     const card = (mode === 'lesson' && st.skills[skillId].lessons === 0) || mode === 'learn';
-    return { mode, skill: skillId, len, i: 0, correct: 0, wrong: 0, streak: 0, best: 0, xp: 0, start: Date.now(), lastWrong: false, lastMis: null, queue: [], answered: [], format: card ? E.pickFormat(st) : null, formatTried: [], postCard: [], rescueOk: 0, rescueTry: 0, hintsUsed: 0, done: false, theme: theme || (skillId && SKILL[skillId] ? SKILL[skillId].theme : null), matches: 0 };
+    return { aq, mode, skill: skillId, len, i: 0, correct: 0, wrong: 0, streak: 0, best: 0, xp: 0, start: Date.now(), lastWrong: false, lastMis: null, queue: [], answered: [], format: card ? E.pickFormat(st) : null, formatTried: [], postCard: [], rescueOk: 0, rescueTry: 0, hintsUsed: 0, done: false, theme: theme || (skillId && SKILL[skillId] ? SKILL[skillId].theme : null), matches: 0 };
   };
   E.nextQ = (st, ses) => {
     // telafi: yanlıştan sonra aynı beceride bir alt seviye
@@ -108,6 +114,7 @@
     if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1, true); return q; }
     if (ses.mode === 'lesson' && Math.random() < 0.12) { const due = E.dueSkills(st).filter(d => d.id !== ses.skill); if (due.length) { const q = E.makeQ(due[0].id, E.levelFor(st, due[0].id)); q.review = true; return q; } }
     if (ses.mode === 'hata') return E.hataSorusu(st, ses);
+    if (ses.mode === 'atolye') { const q = ses.aq[Math.min(ses.i, ses.aq.length - 1)]; q.level = 2; q.uid = Math.random().toString(36).slice(2); return q; }
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
     if (ses.mode === 'hazir') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id).slice(0, 3); id = ids[ses.i % ids.length]; return E.makeQ(id, 1); }
@@ -129,6 +136,7 @@
     if (res.partial) hinted = true;
     sk.pL = E.bkt(sk.pL, res.ok, guessOf(q), hinted); sk.n++; if (res.ok) sk.ok++;
     if (q.type === 'match') ses.matches++;
+    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama]; a.n++; if (res.ok) a.ok++; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++; }
     // yarı ömür: aralıklı başarı → uzar
     const gap = sk.last ? (now - sk.last) / HOUR : 0;
     if (res.ok) sk.half = Math.min(24 * 60, sk.half * (gap > sk.half * 0.5 ? 2 : 1.15)); else sk.half = Math.max(6, sk.half / 2);
@@ -150,7 +158,7 @@
     if (res.ok && res.partial) { ses.correct++; gain = 5; }
     else if (res.ok) { ses.correct++; ses.streak++; ses.best = Math.max(ses.best, ses.streak); gain = q.rescue ? 15 : 10; if (ses.streak >= 5) gain += 5; }
     else { ses.wrong++; ses.streak = 0; }
-    ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !['placement', 'speed', 'exam', 'hazir'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
+    ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !['placement', 'speed', 'exam', 'hazir', 'atolye'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
     if (!q.rescue) ses.i++;
     return gain;
   };
@@ -217,10 +225,13 @@
     const resil = st.rescue.tries ? st.rescue.ok / st.rescue.tries : null;
     const attempted = SKILLS.filter(s => st.skills[s.id].n > 0);
     const strong = attempted.slice().sort((a, b) => E.eff(st.skills[b.id]) - E.eff(st.skills[a.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) >= 0.5);
-    const weak = attempted.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7);
+    const weak = attempted.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7 && !strong.includes(s));
     const misList = Object.entries(st.mis).filter(([k]) => k !== 'genel').map(([k, v]) => ({ id: k, ...v, t: MIS[k] ? MIS[k].t : k, active: v.n > v.fixed })).sort((a, b) => (b.n - b.fixed) - (a.n - a.fixed));
     const totalQ = attempted.reduce((a, s) => a + st.skills[s.id].n, 0), totalOk = attempted.reduce((a, s) => a + st.skills[s.id].ok, 0);
-    return { pace, med, formats: fr, bestFormat: best && best.n >= 2 ? best.f : null, hintRate, resil, strong, weak, misList, totalQ, acc: totalQ ? totalOk / totalQ : 0 };
+    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'coz', 'kontrol'].map(k => ({ k, ad: ATOLYE.ASAMA[k], n: (A_[k] || {}).n || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
+    const olculen = asamalar.filter(a => a.n >= 3), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
+    const problem = { asamalar, zayif: zayifAsama && zayifAsama.acc < 0.75 ? zayifAsama : null, sayi: A_.problem || 0 };
+    return { problem, pace, med, formats: fr, bestFormat: best && best.n >= 2 ? best.f : null, hintRate, resil, strong, weak, misList, totalQ, acc: totalQ ? totalOk / totalQ : 0 };
   };
 
   /* ---------------- Veli raporu metni ---------------- */
@@ -242,6 +253,12 @@
     if (act.length) L.push(`🧩 Üzerinde çalıştığımız kavram yanılgıları: ${act.map(m => m.t).join('; ')}`);
     const fixed = fp.misList.filter(m => !m.active && m.n > 0).slice(0, 3);
     if (fixed.length) L.push(`🌟 Düzelttiği yanılgılar: ${fixed.map(m => m.t).join('; ')}`);
+    if (fp.problem.sayi >= 2) {
+      L.push(`🧩 Problem çözme (${fp.problem.sayi} problem): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)}`).join(' · ')}`);
+      const z = fp.problem.zayif, coz = fp.problem.asamalar.find(a => a.k === 'coz');
+      if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) L.push(`   → Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`);
+      else if (z) L.push(`   → En çok "${z.ad}" adımında desteğe ihtiyacı var.`);
+    }
     if (fp.bestFormat) L.push(`🧠 En iyi öğrendiği anlatım biçimi: ${FORMATS[fp.bestFormat].name}`);
     L.push(`🧭 Çalışma tarzı: ${fp.pace}${fp.resil !== null ? `, hatadan sonra doğruya dönme oranı %${Math.round(fp.resil * 100)}` : ''}`);
     L.push('');
@@ -274,7 +291,7 @@
   };
   E.questTick = (st, ses, acc) => {
     E.quests(st); const P = st.quests.prog, add = (k, v) => { P[k] = (P[k] || 0) + v; };
-    add('xp', ses.xp); if (['lesson', 'learn', 'review', 'mistakes', 'mix', 'exam', 'hazir', 'hata'].includes(ses.mode)) add('ders', 1);
+    add('xp', ses.xp); if (['lesson', 'learn', 'review', 'mistakes', 'mix', 'exam', 'hazir', 'hata', 'atolye'].includes(ses.mode)) add('ders', 1);
     if (acc >= 0.9 && ses.answered.length >= 5) add('acc90', 1); if (ses.wrong === 0 && ses.answered.length >= 5) add('hatasiz', 1);
     add('telafi', ses.rescueOk || 0); if (ses.best >= 5) add('seri5', 1); add('eslestir', ses.matches || 0); if (ses.mode === 'review' || ses.mode === 'mistakes') add('tekrar', 1);
     const got = [];

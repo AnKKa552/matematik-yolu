@@ -556,3 +556,21 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .opt.right .adno{background:var(--ok);color:#fff} .opt.wrong .adno{background:var(--bad);color:#fff}
 .sheet .adno{width:22px;height:22px;font-size:12px;margin-right:4px;vertical-align:middle}
 .duz{margin-top:6px;font-weight:800;font-size:15px;background:var(--surface2);border-radius:12px;padding:8px 10px;line-height:1.5}
+
+/* ---------- Problem Atölyesi ---------- */
+.tag.atolye{background:#E0F2FE;color:#0369A1}
+:root[data-theme="dark"] .tag.atolye{background:#0C3A57;color:#7DD3FC}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tag.atolye{background:#0C3A57;color:#7DD3FC} }
+.atolye{margin:8px 0 6px}
+.aserit{display:flex;gap:4px;margin-bottom:8px}
+.aserit span{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:900;color:var(--muted);text-align:center;line-height:1.1}
+.aserit b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);border:2px solid var(--line);font-size:13px}
+.aserit span.on{color:var(--brand)} .aserit span.on b{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 0 4px var(--brand-t)}
+.aserit span.bitti{color:var(--ok-d)} .aserit span.bitti b{background:var(--ok);border-color:var(--ok);color:#fff}
+.abaglam{background:var(--surface);border:2px solid var(--line);border-left:5px solid var(--blue);border-radius:14px;padding:10px 12px;font-weight:700;font-size:16px;line-height:1.45}
+.abaglam.kucuk{font-size:14px;padding:8px 10px;color:var(--muted)}
+.abas{font-weight:900;font-size:13px;letter-spacing:.03em;color:var(--blue-d);margin-bottom:4px}
+.atab{border-collapse:collapse;margin:8px 0 2px;font-size:15px;min-width:180px}
+.atab th,.atab td{border:1.5px solid var(--line);padding:4px 12px;text-align:left}
+.atab th{background:var(--surface2);font-weight:900}
+.atab td:last-child{text-align:right;font-weight:900;color:var(--ink)}

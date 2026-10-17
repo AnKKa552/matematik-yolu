@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 28431,
+ "toplam_karakter": 28584,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1335,6 +1335,11 @@
    "key": "mis_hata_yeri",
    "grup": "yanilgi",
    "text": "Doğru bir adımı hatalı sanma. Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır."
+  },
+  {
+   "key": "mis_kalan_yok",
+   "grup": "yanilgi",
+   "text": "Bölmede kalanı hesaba katmama. Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır."
   }
  ]
 }

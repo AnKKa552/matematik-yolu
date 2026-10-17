@@ -1430,6 +1430,10 @@
     "hata_yeri": {
       "ad": "Doğru bir adımı hatalı sanma",
       "duzeltme": "Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır."
+    },
+    "kalan_yok": {
+      "ad": "Bölmede kalanı hesaba katmama",
+      "duzeltme": "Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır."
     }
   },
   "anlatim_bicimleri": {

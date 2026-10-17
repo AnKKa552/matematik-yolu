@@ -51,10 +51,11 @@ for (const [name, g] of Object.entries(GEN)) {
 
 // HATA AVCISI: senaryo bütünlüğü + adımlardaki her işlemin bağımsız hesabı + üç soru biçimi
 const { HATA } = require('../src/generators.js');
+const SKILLS_OK = (id) => id in GEN;
 { const NUM = '(?:\\d{1,3}(?: \\d{3})+|\\d+(?:,\\d+)?)';
   const RE = new RegExp(`(${NUM}(?:\\s*[+−×÷]\\s*${NUM})+)\\s*=\\s*(${NUM})(?![\\d,])`, 'g');
   const val = (t) => parseFloat(t.replace(/ /g, '').replace(',', '.'));
-  const hesap = (line) => { const L = strip(line); let m, bad = null; RE.lastIndex = 0;
+  const hesap = (line) => { const L = strip(line).replace(/[\u00a0\u202f\u2009]/g, ' '); let m, bad = null; RE.lastIndex = 0;
     while ((m = RE.exec(L))) { const ex = m[1].replace(new RegExp(NUM, 'g'), (x) => String(val(x))).replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
       const r = Function('return ' + ex)(); if (Math.abs(r - val(m[2])) > 1e-9) bad = m[0]; } return bad; };
   let hn = 0;
@@ -81,11 +82,38 @@ const { HATA } = require('../src/generators.js');
     if (r === 0 && lv === 3) samples['hata_' + id + '_' + tur] = { p: strip(q.prompt).replace(/\s+/g, ' ').slice(0, 150), a: strip(q.options.find(o => o.ok).t).replace(/\s+/g, ' ').trim() };
   }
   console.log('Hata Avcısı senaryosu:', hn, '· beceri:', HATA.ids.length);
+
+  // PROBLEM ATÖLYESİ: her şablon 400 kez; şık/sayı kuralları + adımlardaki her işlemin bağımsız hesabı + kontrol şıklarının doğruluğu
+  { const { ATOLYE } = require('../src/generators.js'); let an = 0;
+    for (const id of ATOLYE.ids) for (let r = 0; r < 400; r++) {
+      const L = ATOLYE.sorular(id), bad = (m, q) => { console.log('BAD ATÖLYE', id, m, q ? strip(q.prompt) : ''); errors++; };
+      if (L.length < 4 || L[0].atolye.asama !== 'anla' || L[L.length - 1].atolye.asama !== 'kontrol' || !SKILLS_OK(L[0].skill)) { bad('yapı'); break; }
+      let stop = false;
+      for (const q of L) { an++;
+        if (/undefined|NaN|Infinity/.test(strip(q.prompt) + JSON.stringify(q.options || '') + (q.answer || '') + JSON.stringify(q.steps) + strip(q.atolye.baglam))) { bad('metin', q); stop = true; break; }
+        for (const l of (q.steps || [])) { const b = hesap(l); if (b) { bad('adımda işlem hatası: ' + b, q); stop = true; } }
+        if (q.type === 'input') {
+          if (!(parseFloat(q.answer) >= 0)) { bad('cevap', q); stop = true; }
+          for (const m of q.inputMis) if (!MIS[m.mis] || String(m.v) === q.answer) { bad('inputMis', q); stop = true; }
+        } else {
+          const ok = q.options.filter(o => o.ok).length, texts = q.options.map(o => o.t);
+          if (ok !== 1 || q.options.length < 2 || new Set(texts).size !== texts.length || q.options.some(o => !o.ok && !MIS[o.mis])) { bad('şık', q); stop = true; }
+          if (q.atolye.asama === 'kontrol') { const b = hesap(q.options.find(o => o.ok).t); if (b) { bad('kontrol şıkkı yanlış hesap: ' + b, q); stop = true; } }
+        }
+        const m = U.soruSesi(q.okuma || q.prompt); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) { bad('ses metni (' + m.length + '): ' + m, q); stop = true; }
+        if (stop) break;
+      }
+      if (stop) break;
+      if (r === 0) samples['atolye_' + id] = { b: strip(L[0].atolye.baglam).replace(/\s+/g, ' ').slice(0, 200), adim: L.map(q => strip(q.prompt).replace(/\s+/g, ' ') + ' → ' + (q.type === 'input' ? q.answer : strip(q.options.find(o => o.ok).t).trim())).join(' | ') };
+    }
+    console.log('Problem Atölyesi soru adımı:', an, '· şablon:', ATOLYE.ids.length);
+  }
 }
 // Pi'nin soru okuması: her soru metni sunucunun izinli sözlüğünde olmalı (yoksa o soru robot sesle okunur)
 { const SZ = new Set(JSON.parse(require('fs').readFileSync(__dirname + '/../sunucu/supabase/functions/soru-sesi/sozluk.ts', 'utf8').match(/new Set\((\[.*\])\)/)[1]));
   const eksik = new Set(); let uzun = 0;
   for (const g of Object.values(GEN)) for (const lv of [1, 2, 3]) for (let r = 0; r < 200; r++) { const m = U.soruSesi(g(lv).prompt); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) uzun++; (m.toLocaleLowerCase('tr-TR').match(/[a-zçğıöşüâîû]+/g) || []).forEach(w => { if (!SZ.has(w)) eksik.add(w); }); }
+  { const { ATOLYE } = require('../src/generators.js'); for (const id of ATOLYE.ids) for (let r = 0; r < 100; r++) for (const q of ATOLYE.sorular(id)) (U.soruSesi(q.okuma || q.prompt).toLocaleLowerCase('tr-TR').match(/[a-zçğıöşüâîû]+/g) || []).forEach(w => { if (!SZ.has(w)) eksik.add(w); }); }
   if (eksik.size > 3 || uzun) { console.log('SORU SESİ SÖZLÜĞÜ ESKİ: node tools/soru_sozluk.js çalıştır ve soru-sesi fonksiyonunu yeniden yükle.', [...eksik].slice(0, 10), 'uygunsuz metin:', uzun); errors++; }
   else if (eksik.size) console.log('Uyarı: sözlükte olmayan nadir kelime(ler):', [...eksik]); }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);

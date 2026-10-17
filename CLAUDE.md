@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 72 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 73 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -52,6 +52,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 **Bizim Duolingo'da olmayan farkımız:**
 - **Kavram yanılgısı teşhisi** (yanlış şıkkın *nedeni* bilinir ve hedefli açıklama gelir).
 - **Hata Avcısı** (§5.1.2): çocuk başkasının çözümündeki hatayı bulur, kim haklı karar verir, hatanın sebebini söyler (muhakeme).
+- **Problem Atölyesi** (§5.1.3): çok adımlı problemi anla → planla → çöz → kontrol et aşamalarında çözer; veli raporu zorluğun hangi aşamada olduğunu söyler.
 - **Anlatım biçimi uyarlaması**: aynı konu 4 biçimde (Görsel model / Hikâye / Adım adım / Kısa ve net), sistem öğrenciye hangisinin işlediğini ölçerek seçer.
 - **Veli raporu**: güçlü/zayıf konu, aktif ve düzelmiş yanılgılar, en iyi anlatım biçimi, kitaptaki sayfaya yönlendiren öneri.
 - **Kitapla köprü**: her beceri öğrencinin kendi ders kitabındaki sayfayı gösterir.
@@ -137,7 +138,7 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 
 ### 4.6 Ders oturumu
 - Varsayılan 8 soru; cevap süresi ortancası 35 sn'yi aşarsa 6; ustalık > 0.7 ise 10.
-- Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2).
+- Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2), `atolye` (Problem Atölyesi, 2 problem × 5 adım, §5.1.3).
 
 ---
 
@@ -181,6 +182,19 @@ Maarif programının alan becerilerinden **matematiksel muhakeme** için: çocuk
 - Nerede: normal derste seviye 2–3'te soruların ~%15'i; Pratik Merkezi'nde **🔍 Hata Avcısı** modu (6 soru, biçimler sırayla bul/kim/bul/neden/bul/kim; çalışılmış becerilerden). Hız yarışında ve telafi sorusunda gelmez (`E.makeQ(id, lv, sade)`).
 - Test: `test_generators.js` her senaryoda adımlardaki **her işlemi bağımsız hesaplar**, önek eşitliğini, sonuçların farklılığını, üç biçimin şık kurallarını ve Pi'nin okuyabileceği metni denetler.
 - Yeni senaryo eklerken: önce `MIS`'te yanılgı olmalı; doğru ve hatalı çözümü aynı uzunlukta yaz; hatalı satır dışında aynı metni kullan; `node tools/soru_sozluk.js` → `soru-sesi` fonksiyonunu yeniden yükle.
+
+### 5.1.3 Problem Atölyesi — çok adımlı gerçek hayat problemleri (17.10.2026)
+Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular için. Kaynak `generators.js → PROB` (10 şablon, 7 temanın hepsi: kırtasiye alışverişi, okul gezisi, bahçeye tel, parke, kitap okuma tablosu, terazi, kumbara, pizza yarışı, renkli toplar, üçgen park).
+- Her problem 4 aşamaya bölünür ve sıradan soru nesnelerine çevrilir (`ATOLYE.sorular(id)` → `q.atolye = {sablon, asama, baslik, baglam, sira, toplam}`):
+  1. **Anla**: "Soruda ne isteniyor?" (yanlış şıklar: ara sonucu, toplamı ya da gereksiz bilgiyi istenen sanmak)
+  2. **Planla**: "Hangi yolla çözersin?" (yanlış planlar yanılgılara bağlı: ters işlem, çevre-alan, kalanı yok saymak…)
+  3. **Çöz**: 1–2 ara adım, sayı girişi; her yanlış sayı bir yanılgı
+  4. **Kontrol et**: "Hangi işlem cevabını doğrular?" (ters işlemle sağlama)
+- **Hata zincirlenmez:** sonraki adımın metni önceki adımın doğru değerini verir ("Toplam tutarı 130 TL bulduk…"). Atölyede telafi sorusu yoktur; yanlıştan sonra "Doğru değerle bir sonraki adıma geçiyoruz" denir.
+- Pi, ilk adımda problemin tamamını okur (`q.okuma`; tablo okunmaz, ekranda görünür).
+- **Ölçüm:** `st.atolye` aşama bazında doğruluk tutar. Profilde "Problem çözme adımlarım" çubukları; veli raporunda "🧩 Problem çözme: Anla %… · Planla %… · Çöz %… · Kontrol %…". Anlama/planlama, çözmeden 15 puan geride ise rapor "Hesaplamada değil, problemi anlamada zorlanıyor" der: satışın kalbi olan veli raporu için güçlü bir içgörü.
+- Nerede: Pratik Merkezi → **🧩 Problem Atölyesi** (2 problem, 10 adım; çalışılmış temalardan). Yeni yanılgı: `kalan_yok` (bölmede kalanı hesaba katmama).
+- Test: her şablon 400 kez üretilir; adım çözümlerindeki ve kontrol şıkkındaki her işlem bağımsız hesaplanır, şık/yanılgı kuralları ve Pi'nin okuyacağı metin denetlenir.
 
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
 | Kitap kalıbı (sayfa) | Bizim varyasyonumuz | Beceri |
@@ -273,7 +287,7 @@ CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
 data/mufredat.json        ← 7 tema, 35 beceri, 67 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (72) + Hata Avcısı senaryoları (SEN)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (73) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar
