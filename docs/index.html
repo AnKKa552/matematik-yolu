@@ -506,6 +506,41 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .gi-odul b{font-size:16px;color:var(--gem)}
 .gi-ay{display:flex;align-items:center;gap:10px}
 @media (prefers-reduced-motion: reduce){.skor .yay-dolu,.yildiz,.sandik,.sandik img,.gi-satir .qbar i,.gi-ay .qbar i{animation:none!important}.yildiz{transform:none}}
+
+/* Mini ders (karaoke): Pi'nin o an anlattığı parça parlar */
+.lcard .dp{transition:opacity .35s,background-color .35s,color .35s;border-radius:8px;padding:1px 2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.lcard.oynuyor .dp.gelecek{opacity:.32}
+.lcard .dp.simdi{background:var(--brand-t);color:var(--ink);box-shadow:0 0 0 3px var(--brand-t)}
+.lcard li.dp{padding:6px 8px;margin:4px 0;list-style-position:inside}
+.lcard li.dp.simdi{transform:translateX(4px);border-left:4px solid var(--brand)}
+.lcard li.dp.gecti::marker{color:var(--ok)}
+/* Şekiller çizilerek gelir */
+.visbox svg.ciz path:not(.dash),.visbox svg.ciz line:not(.dash),.visbox svg.ciz polyline:not(.dash),.visbox svg.ciz polygon:not(.dash),.visbox svg.ciz rect:not(.dash),.visbox svg.ciz circle:not(.dash),.visbox svg.ciz ellipse:not(.dash){stroke-dasharray:1;stroke-dashoffset:1;animation:cizgiCiz .7s ease-out var(--g,0s) forwards,dolguGel .5s ease-out calc(var(--g,0s) + .4s) both}
+.visbox svg.ciz text{opacity:0;animation:yaziGel .4s ease-out var(--g,0s) forwards}
+@keyframes cizgiCiz{to{stroke-dashoffset:0}}
+@keyframes dolguGel{from{fill-opacity:0}to{fill-opacity:1}}
+@keyframes yaziGel{to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.visbox svg.ciz *{animation:none!important;opacity:1!important}.visbox svg.ciz :not(.dash){stroke-dasharray:none!important}}
+.visbox svg.ciz .dash{opacity:0;animation:yaziGel .4s ease-out var(--g,0s) forwards}
+
+/* Adım adım canlanan ders sahneleri */
+.vis.ds .ds-tx{transition:fill .3s}
+.vis.ds .ds-buyuk{font-size:22px}
+.vis.ds .ds-parla{fill:var(--accent)}
+.vis.ds .ds-yesil{fill:var(--ok)}
+.vis.ds .ds-kirmizi{fill:var(--bad)}
+.vis.ds .ds-vurgu{stroke:var(--accent);stroke-width:7}
+.vis.ds .ds-pi{fill:var(--brand);stroke:#fff;stroke-width:3}
+.vis.ds .ds-bos{fill:none;stroke:var(--line);stroke-width:1.2}
+.vis.ds .ds-kare{fill:var(--brand-t);stroke:var(--brand);stroke-width:1.2;animation:dsKare .35s ease-out both}
+.vis.ds .ds-kutu{fill:var(--accent)}
+.vis.ds .ds-cizik{fill:var(--muted);text-decoration:line-through}
+.vis.ds .ds-ifade{font-size:28px}
+.vis.ds .ds-gel{animation:dsGel .45s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes dsKare{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes dsGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vis.ds rect,.vis.ds text{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion: reduce){.vis.ds *{animation:none!important}.vis.ds animateMotion{display:none}}
 </style>
 </head>
 <body>
@@ -2509,7 +2544,78 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       .catch(() => { if (tok === AUDIO.tok) say(null, yedek); })
       .finally(() => pk().forEach(e => e.classList.remove('dusunuyor')));
   };
-  const sayCard = (id, f) => say(`kart_${id}_${f}`, cardText(id, f));
+  /* ---------- Mini ders: Pi anlatır, anlattığı cümle/adım o anda parlar (karaoke) ----------
+     Kayıtlı kart sesi çalarken her parçanın başlama anı, metindeki payına göre sesin süresinden hesaplanır
+     (ek ses üretimi gerekmez). Ses yoksa ya da kapalıysa parçalar okuma hızında sırayla açılır. Şekiller çizilerek gelir. */
+  /* Adım adım canlanan sahneler: "Adım adım" kartında Pi hangi adımı anlatıyorsa şekil o adıma geçer.
+     Sayılar burada sabit örnektir ve elle doğrulanmıştır (8+4=12, 12×2=24; 5×3=15; (3+5)×2²−4=28; 15 702 436 018). */
+  const DS = (w, h, ic) => `<svg class="vis ds" viewBox="0 0 ${w} ${h}" role="img" aria-label="adım adım şekil">${ic}</svg>`;
+  const dsYazi = (x, y, t, k = '') => `<text x="${x}" y="${y}" text-anchor="middle" class="tx ds-tx ${k}">${t}</text>`;
+  const DERS_SAHNE = {
+    a_cevre: (i) => {
+      const R = 'M60,40 H240 V130 H60 Z', ust = i >= 1 ? 'ds-vurgu' : '', hepsi = i >= 2 ? 'ds-vurgu' : '';
+      return DS(300, 190, `<rect x="60" y="40" width="180" height="90" class="f2"/>
+        <path d="M60,40 H240" class="ln ${ust}"/><path d="M240,40 V130" class="ln ${ust}"/><path d="M240,130 H60" class="ln ${hepsi}"/><path d="M60,130 V40" class="ln ${hepsi}"/>
+        ${dsYazi(150, 30, '8 cm', i === 0 ? 'ds-parla' : '')}<text x="250" y="90" class="tx ds-tx ${i === 0 ? 'ds-parla' : ''}">4 cm</text>
+        ${i === 2 ? `<circle r="9" class="ds-pi"><animateMotion dur="2.4s" repeatCount="indefinite" path="${R}"/></circle>` : ''}
+        ${i === 1 ? dsYazi(150, 170, '8 + 4 = 12', 'ds-buyuk ds-gel') : i === 2 ? dsYazi(150, 170, '12 × 2 = 24', 'ds-buyuk ds-gel') : i >= 3 ? dsYazi(150, 170, 'Çevre = 24 cm', 'ds-buyuk ds-gel ds-yesil') : ''}`);
+    },
+    a_alan: (i) => {
+      let k = ''; for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) k += `<rect x="${60 + c * 36}" y="${30 + r * 36}" width="36" height="36" class="${i >= 2 ? 'ds-kare' : 'ds-bos'}" style="animation-delay:${(r * 5 + c) * 0.08}s"/>`;
+      return DS(300, 190, `${k}<rect x="60" y="30" width="180" height="108" class="ln"/>
+        <path d="M60,30 H240" class="ln ${i === 0 ? 'ds-vurgu' : ''}"/><path d="M60,30 V138" class="ln ${i === 1 ? 'ds-vurgu' : ''}"/>
+        ${dsYazi(150, 22, '5 cm', i === 0 ? 'ds-parla' : '')}<text x="10" y="90" class="tx ds-tx ${i === 1 ? 'ds-parla' : ''}">3 cm</text>
+        ${i === 2 ? dsYazi(150, 172, '5 × 3 = 15 kare', 'ds-buyuk ds-gel') : i >= 3 ? dsYazi(150, 172, 'Alan = 15 cm²', 'ds-buyuk ds-gel ds-yesil') : ''}`);
+    },
+    f_denk: (i) => {
+      const serit = (y, n, b, et) => { let r = ''; const w = 200 / n; for (let j = 0; j < n; j++) r += `<rect x="${50 + j * w}" y="${y}" width="${w}" height="34" class="${j < b ? 'f1' : 'f0'} ds-gel"/>`; return r + `<text x="262" y="${y + 23}" class="tx ds-tx">${et}</text>`; };
+      if (i === 0) return DS(320, 150, serit(20, 2, 1, '1/2') + dsYazi(150, 85, '× 2 ↓', 'ds-parla') + serit(98, 4, 2, '2/4'));
+      if (i === 1) return DS(320, 150, serit(20, 8, 4, '4/8') + dsYazi(150, 85, '÷ 2 ↓', 'ds-parla') + serit(98, 4, 2, '2/4'));
+      return DS(320, 170, serit(20, 2, 1, '1/2') + dsYazi(150, 85, '+1 eklersen…', 'ds-kirmizi') + serit(98, 3, 2, '2/3') + dsYazi(150, 160, 'Aynı değil! ✗', 'ds-buyuk ds-kirmizi ds-gel'));
+    },
+    e_oncelik: (i) => {
+      const satir = [['(3 + 5)', ' × 2² − 4'], ['8 × ', '2²', ' − 4'], ['', '8 × 4', ' − 4'], ['', '32 − 4']][Math.min(i, 3)];
+      const ifade = satir.length === 2 ? `<tspan class="ds-kutu">${satir[0]}</tspan>${satir[1]}` : `${satir[0]}<tspan class="ds-kutu">${satir[1]}</tspan>${satir[2]}`;
+      const etiket = ['1) Parantez', '2) Üslü ifade', '3) Çarpma, bölme', '4) Toplama, çıkarma'][Math.min(i, 3)];
+      return DS(300, 150, `${dsYazi(150, 30, etiket, 'ds-parla')}<text x="150" y="85" text-anchor="middle" class="tx ds-tx ds-ifade ds-gel">${ifade}</text>${i >= 3 ? dsYazi(150, 130, '= 28', 'ds-buyuk ds-yesil ds-gel') : ''}`);
+    },
+    n_okuma: (i) => {
+      const bol = ['15', '702', '436', '018'], ad = ['milyar', 'milyon', 'bin', '(birler)'], x = [52, 118, 184, 250];
+      if (i <= 2) return DS(300, 170, bol.map((b, k) => `<rect x="${x[k] - 30}" y="20" width="60" height="44" rx="10" class="ds-bolum c${k}" style="opacity:.25"/>${dsYazi(x[k], 50, b, 'ds-buyuk')}`).join('')
+        + (i >= 1 ? ad.map((a, k) => dsYazi(x[k], 88, a, 'ds-gel')).join('') : '')
+        + (i >= 2 ? `<text x="150" y="128" text-anchor="middle" class="tx ds-tx sm ds-gel">on beş milyar yedi yüz iki milyon</text><text x="150" y="150" text-anchor="middle" class="tx ds-tx sm ds-gel">dört yüz otuz altı bin on sekiz</text>` : ''));
+      if (i === 3) return DS(300, 150, dsYazi(150, 50, '5 <tspan class="ds-cizik">000</tspan> 120', 'ds-buyuk') + dsYazi(150, 85, 'bin bölüğü 000 → okunmaz', 'ds-parla') + dsYazi(150, 125, 'beş milyon yüz yirmi', 'ds-gel'));
+      return DS(300, 150, dsYazi(150, 45, 'yedi milyon altı', 'ds-gel') + dsYazi(150, 85, '↓', 'ds-parla') + dsYazi(150, 125, '7 <tspan class="ds-kutu">000 00</tspan>6', 'ds-buyuk ds-gel'));
+    },
+  };
+  const parcala = (html) => String(html).replace(/([.!?])\s+(?=[A-ZÇĞİÖŞÜ0-9<"(])/g, '$1\u0001').split('\u0001').map(x => `<span class="dp">${x}</span>`).join(' ');
+  const cizimHazirla = (kok) => (kok || document).querySelectorAll('.visbox.cizim svg').forEach(sv => {
+    let i = 0; sv.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse').forEach(el => { if (!el.classList.contains('dash')) el.setAttribute('pathLength', '1'); el.style.setProperty('--g', (0.15 + 0.12 * i++).toFixed(2) + 's'); });
+    sv.querySelectorAll('text').forEach((el, k) => el.style.setProperty('--g', (0.5 + 0.1 * k).toFixed(2) + 's')); sv.classList.add('ciz');
+  });
+  const sayCard = (id, f) => {
+    const kart = document.querySelector('.modal .lcard') || document.querySelector('.lcard');
+    const parts = kart ? [...kart.querySelectorAll('.dp')] : [];
+    if (!parts.length) return say(`kart_${id}_${f}`, cardText(id, f));
+    cizimHazirla(kart);
+    const agirlik = parts.map(p => Math.max(6, toSpeech(p.innerHTML).length)), top = agirlik.reduce((a, b) => a + b, 0);
+    const bas = agirlik.map((_, i) => agirlik.slice(0, i).reduce((a, b) => a + b, 0) / top);
+    const sahneKutu = kart.querySelector('.ders-sahne'), sahneFn = sahneKutu && DERS_SAHNE[sahneKutu.dataset.sahne];
+    let son = -2; const isaret = (i) => { if (i === son) return; son = i; if (sahneFn && i >= 0) sahneKutu.innerHTML = sahneFn(Math.min(i, parts.length - 1)); parts.forEach((p, k) => { p.classList.toggle('simdi', k === i); p.classList.toggle('gecti', k < i); p.classList.toggle('gelecek', k > i); }); const sp = parts[i]; if (sp && sp.scrollIntoView && i > 0) try { sp.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { } };
+    stopVoice(); const tok = AUDIO.tok; isaret(-1); kart.classList.add('oynuyor');
+    const bitir = () => { if (tok === AUDIO.tok) { isaret(parts.length); kart.classList.remove('oynuyor'); } };
+    // Sessiz yol: okuma hızı (~14 harf/sn), ağız ritimle oynar
+    const zamanla = () => { if (tok !== AUDIO.tok) return; let i = 0; const ilerle = () => { if (tok !== AUDIO.tok) return; if (i >= parts.length) return bitir(); isaret(i); const sure = Math.max(1400, agirlik[i] / 14 * 1000); i++; setTimeout(ilerle, sure); }; ilerle(); };
+    const key = `kart_${id}_${f}`;
+    const sesli = () => sesAl(key).then(u => {
+      if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a);
+      a.addEventListener('timeupdate', () => { if (tok !== AUDIO.tok || !a.duration) return; const t = a.currentTime / a.duration; let i = 0; while (i + 1 < bas.length && bas[i + 1] <= t) i++; isaret(i); });
+      a.addEventListener('ended', bitir, { once: true }); return a.play();
+    }).catch(zamanla);
+    if (!A.st.settings.voice) return zamanla();
+    if (AUDIO.durum === 'yukleniyor') AUDIO.hazir.then(() => (AUDIO.keys && AUDIO.keys.has(key) ? sesli() : zamanla()));
+    else if (AUDIO.keys && AUDIO.keys.has(key)) sesli(); else zamanla();
+  };
   const PI = window.MY_PI_LINES;
   const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
 
@@ -2695,13 +2801,13 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   function cardHTML(id, fmt, act = 'fmt') {
     const s = SKILL[id], c = s.cards[fmt];
     let body = '';
-    if (fmt === 'gorsel') body = `<p>${c.text}</p><div class="visbox">${c.vis()}</div>`;
-    if (fmt === 'hikaye') body = `<div class="row" style="align-items:flex-start">${mascot('happy', 56)}<p class="grow">${c}</p></div>`;
-    if (fmt === 'adim') body = `<ol>${c.map(x => `<li>${x}</li>`).join('')}</ol>`;
-    if (fmt === 'kural') body = `<div class="rule">${c}</div>`;
+    if (fmt === 'gorsel') body = `<p>${parcala(c.text)}</p><div class="visbox cizim">${c.vis()}</div>`;
+    if (fmt === 'hikaye') body = `<div class="row" style="align-items:flex-start">${mascot('happy', 56)}<p class="grow">${parcala(c)}</p></div>`;
+    if (fmt === 'adim') body = `${DERS_SAHNE[id] ? `<div class="visbox ders-sahne" data-sahne="${id}">${DERS_SAHNE[id](0)}</div>` : ''}<ol>${c.map(x => `<li class="dp">${x}</li>`).join('')}</ol>`;
+    if (fmt === 'kural') body = `<div class="rule">${parcala(c)}</div>`;
     const rec = E.formatRank(A.st)[0];
     return `<div class="lcard"><div class="ftabs">${Object.entries(FORMATS).map(([k, f]) => `<button class="chip ${k === fmt ? 'on' : ''}" data-act="${act}" data-v="${k}">${f.icon} ${f.name}${rec.f === k && rec.n >= 2 ? ' ★' : ''}</button>`).join('')}</div>
-      <div class="row" style="justify-content:space-between;margin-bottom:4px"><h3>${esc(s.title)}</h3><button class="chip" data-act="say-card" data-v="${fmt}" data-s="${id}">🔊 Dinle</button></div>${body}</div>`;
+      <div class="row" style="justify-content:space-between;margin-bottom:4px"><h3>${esc(s.title)}</h3><button class="chip" data-act="say-card" data-v="${fmt}" data-s="${id}">▶️ Pi anlatsın</button></div>${body}</div>`;
   }
   const explainModal = (id, f) => `<div class="scrim" data-act="close-modal"></div><div class="modal">${cardHTML(id, f, 'fmt-modal')}<button class="btn" data-act="close-modal">Tamam, anladım</button></div>`;
   const confirmModal = (title, body, yes, yesT, noT) => `<div class="scrim" data-act="close-modal"></div><div class="modal"><div class="row" style="align-items:flex-start">${mascot('think', 64)}<div class="grow"><h2 style="font-size:21px">${title}</h2><p class="muted" style="margin:6px 0 14px;font-weight:700">${body}</p></div></div><div class="list"><button class="btn" data-act="close-modal">${noT}</button><button class="btn ghost" style="color:var(--bad)" data-act="${yes}">${yesT}</button></div></div>`;
@@ -3071,7 +3177,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     try { if (CL.oturum && A.st.profile) { await CL.ogrenciHazirla(A.st.profile); const uzak = await CL.cek(A.st); if (uzak) { A.st = Object.assign(E.fresh(), uzak); E.save(A.st); toast('☁️ İlerlemen buluttan yüklendi'); } else CL.kaydet(A.st); await CL.ligYenile(); } } catch (e) { }
     render();
   });
-  window.MY_APP = A; window.MY_MASCOT = mascot; window.MY_APP_RENDER = render;
+  window.MY_APP = A; window.MY_MASCOT = mascot; window.MY_APP_RENDER = render; window.MY_DERS_SAHNE = DERS_SAHNE;
   render();
 })();
 </script>

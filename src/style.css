@@ -495,3 +495,38 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .gi-odul b{font-size:16px;color:var(--gem)}
 .gi-ay{display:flex;align-items:center;gap:10px}
 @media (prefers-reduced-motion: reduce){.skor .yay-dolu,.yildiz,.sandik,.sandik img,.gi-satir .qbar i,.gi-ay .qbar i{animation:none!important}.yildiz{transform:none}}
+
+/* Mini ders (karaoke): Pi'nin o an anlattığı parça parlar */
+.lcard .dp{transition:opacity .35s,background-color .35s,color .35s;border-radius:8px;padding:1px 2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.lcard.oynuyor .dp.gelecek{opacity:.32}
+.lcard .dp.simdi{background:var(--brand-t);color:var(--ink);box-shadow:0 0 0 3px var(--brand-t)}
+.lcard li.dp{padding:6px 8px;margin:4px 0;list-style-position:inside}
+.lcard li.dp.simdi{transform:translateX(4px);border-left:4px solid var(--brand)}
+.lcard li.dp.gecti::marker{color:var(--ok)}
+/* Şekiller çizilerek gelir */
+.visbox svg.ciz path:not(.dash),.visbox svg.ciz line:not(.dash),.visbox svg.ciz polyline:not(.dash),.visbox svg.ciz polygon:not(.dash),.visbox svg.ciz rect:not(.dash),.visbox svg.ciz circle:not(.dash),.visbox svg.ciz ellipse:not(.dash){stroke-dasharray:1;stroke-dashoffset:1;animation:cizgiCiz .7s ease-out var(--g,0s) forwards,dolguGel .5s ease-out calc(var(--g,0s) + .4s) both}
+.visbox svg.ciz text{opacity:0;animation:yaziGel .4s ease-out var(--g,0s) forwards}
+@keyframes cizgiCiz{to{stroke-dashoffset:0}}
+@keyframes dolguGel{from{fill-opacity:0}to{fill-opacity:1}}
+@keyframes yaziGel{to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.visbox svg.ciz *{animation:none!important;opacity:1!important}.visbox svg.ciz :not(.dash){stroke-dasharray:none!important}}
+.visbox svg.ciz .dash{opacity:0;animation:yaziGel .4s ease-out var(--g,0s) forwards}
+
+/* Adım adım canlanan ders sahneleri */
+.vis.ds .ds-tx{transition:fill .3s}
+.vis.ds .ds-buyuk{font-size:22px}
+.vis.ds .ds-parla{fill:var(--accent)}
+.vis.ds .ds-yesil{fill:var(--ok)}
+.vis.ds .ds-kirmizi{fill:var(--bad)}
+.vis.ds .ds-vurgu{stroke:var(--accent);stroke-width:7}
+.vis.ds .ds-pi{fill:var(--brand);stroke:#fff;stroke-width:3}
+.vis.ds .ds-bos{fill:none;stroke:var(--line);stroke-width:1.2}
+.vis.ds .ds-kare{fill:var(--brand-t);stroke:var(--brand);stroke-width:1.2;animation:dsKare .35s ease-out both}
+.vis.ds .ds-kutu{fill:var(--accent)}
+.vis.ds .ds-cizik{fill:var(--muted);text-decoration:line-through}
+.vis.ds .ds-ifade{font-size:28px}
+.vis.ds .ds-gel{animation:dsGel .45s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes dsKare{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes dsGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vis.ds rect,.vis.ds text{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion: reduce){.vis.ds *{animation:none!important}.vis.ds animateMotion{display:none}}
