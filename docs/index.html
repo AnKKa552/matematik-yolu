@@ -441,6 +441,30 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .kl-pin.dogru circle,.kl-pin.dogru path{fill:var(--ok)}
 .kl-pin.yanlis circle,.kl-pin.yanlis path{fill:var(--bad)}
 .kl-pin{animation:pop .3s ease-out;transform-box:fill-box;transform-origin:50% 100%}
+
+/* Harita manzarası: her temanın aydınlık 3B arka planı (koyu temada alacakaranlık tonu) */
+.path.harita{margin:12px -16px 0;padding:70px 16px 60px;min-height:calc(100vh - 290px);background:var(--fon) center top/cover no-repeat,linear-gradient(#BFE9FF,#E9FBF1);isolation:isolate}
+.path.harita:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,var(--bg) 0,rgba(255,255,255,0) 70px,rgba(255,255,255,0) calc(100% - 90px),var(--bg) 100%)}
+.path.harita .node-label{background:rgba(255,255,255,.92);color:#2A2660;padding:3px 10px;border-radius:12px;box-shadow:0 2px 0 rgba(30,27,75,.12)}
+.path.harita .node.locked{background:rgba(255,255,255,.9);box-shadow:0 7px 0 rgba(120,115,170,.55);color:#8E8AB8}
+.path.harita .komsu .kad{background:rgba(255,255,255,.92);color:#2A2660;border-color:rgba(255,255,255,.6)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)} }
+:root[data-theme="dark"] .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)}
+
+/* Konuşan Pi: soru balonunun yanında, ağzı sesle senkron */
+.qrow{display:flex;gap:6px;align-items:flex-start;margin:6px 0 12px}
+.qrow .qprompt{margin:0}
+.qprompt.balon{flex:1;position:relative;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:10px 12px;font-size:19.5px;box-shadow:0 3px 0 var(--line)}
+.qprompt.balon:before{content:'';position:absolute;left:-10px;top:22px;border:9px solid transparent;border-right-color:var(--line);border-left:0}
+.qprompt.balon:after{content:'';position:absolute;left:-6px;top:24px;border:7px solid transparent;border-right-color:var(--surface);border-left:0}
+.pikonus{position:relative;flex:none;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transform-origin:50% 100%;animation:piNefes 3.2s ease-in-out infinite}
+.pikonus img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;filter:drop-shadow(0 4px 6px rgba(20,30,90,.25));user-select:none;-webkit-user-drag:none}
+.pikonus[data-agiz="0"] .a0,.pikonus[data-agiz="1"] .a1,.pikonus[data-agiz="2"] .a2{opacity:1}
+.pikonus.konusuyor{animation:piKonus .5s ease-in-out infinite}
+.pikonus.yedek{display:none}
+@keyframes piNefes{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.015)}}
+@keyframes piKonus{0%,100%{transform:rotate(-1.5deg) translateY(0)}50%{transform:rotate(1.5deg) translateY(-2px)}}
+@media (prefers-reduced-motion: reduce){.pikonus,.pikonus.konusuyor{animation:none}}
 </style>
 </head>
 <body>
@@ -2339,7 +2363,37 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
   /* ---------------- Sesli anlatım (cihaz TTS; üretimde ElevenLabs) ---------------- */
   const toSpeech = U.toSpeech;
-  const ttsSpeak = (text) => { if (!('speechSynthesis' in window)) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'tr-TR'; u.rate = 0.95; u.pitch = 1.1; const v = speechSynthesis.getVoices().find(v => /^tr/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { } };
+  /* ---------- Konuşan Pi: ağız, sesin GERÇEK şiddetine göre açılıp kapanır (Web Audio analizi) ----------
+     Pi'nin kayıtlı sesleri (Damla) çalarken AnalyserNode ile ses yüksekliği ölçülür → 0 kapalı, 1 yarım, 2 açık.
+     Cihaz sesi (robot TTS) analiz edilemez; o konuşurken ağız doğal bir ritimle oynar. Hareketi azalt açıksa ağız oynamaz. */
+  const DUDAK = { ac: null, an: null, buf: null, raf: 0, sahte: 0, seviye: 0 };
+  const agizYaz = (v) => { if (v === DUDAK.seviye) return; DUDAK.seviye = v; document.querySelectorAll('.pikonus').forEach(e => { e.dataset.agiz = v; e.classList.toggle('konusuyor', v > 0 || !!DUDAK.aktif); }); };
+  const dudakDur = () => { cancelAnimationFrame(DUDAK.raf); clearInterval(DUDAK.sahte); DUDAK.sahte = 0; DUDAK.aktif = false; DUDAK.seviye = -1; agizYaz(0); };
+  const dudakBagla = (audio) => {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Ses bağlamı yalnız bir dokunuşla açılabilir; açık değilse sesi analize bağlamayız (yoksa ses kısılırdı), ritimli ağız oynar
+    if (!DUDAK.ac || DUDAK.ac.state !== 'running') return dudakSahte(audio);
+    try {
+      DUDAK.ac.createMediaElementSource(audio).connect(DUDAK.an);
+    } catch (e) { return dudakSahte(audio); }
+    dudakDur(); DUDAK.aktif = true;
+    const dongu = () => {
+      DUDAK.an.getByteTimeDomainData(DUDAK.buf); let t = 0; for (let i = 0; i < DUDAK.buf.length; i++) { const x = (DUDAK.buf[i] - 128) / 128; t += x * x; }
+      const rms = Math.sqrt(t / DUDAK.buf.length); agizYaz(rms > 0.11 ? 2 : rms > 0.035 ? 1 : 0);
+      if (!audio.paused && !audio.ended) DUDAK.raf = requestAnimationFrame(dongu); else dudakDur();
+    };
+    audio.addEventListener('playing', () => { cancelAnimationFrame(DUDAK.raf); DUDAK.raf = requestAnimationFrame(dongu); }, { once: true });
+    audio.addEventListener('ended', dudakDur, { once: true }); audio.addEventListener('pause', dudakDur, { once: true });
+  };
+  document.addEventListener('pointerdown', () => { try { if (!DUDAK.ac) { DUDAK.ac = new (window.AudioContext || window.webkitAudioContext)(); DUDAK.an = DUDAK.ac.createAnalyser(); DUDAK.an.fftSize = 512; DUDAK.an.smoothingTimeConstant = 0.55; DUDAK.an.connect(DUDAK.ac.destination); DUDAK.buf = new Uint8Array(DUDAK.an.fftSize); } if (DUDAK.ac.state === 'suspended') DUDAK.ac.resume(); } catch (e) { } }, { passive: true });
+  // Analiz yapılamayan durumda (robot ses ya da eski tarayıcı) doğal ritimli ağız hareketi
+  const dudakSahte = (audio) => {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    dudakDur(); DUDAK.aktif = true; let i = 0; const desen = [1, 2, 1, 0, 2, 1, 2, 0, 1, 2, 2, 1, 0];
+    DUDAK.sahte = setInterval(() => agizYaz(desen[i++ % desen.length]), 110);
+    if (audio) { audio.addEventListener('ended', dudakDur, { once: true }); audio.addEventListener('pause', dudakDur, { once: true }); }
+  };
+  const ttsSpeak = (text) => { if (!('speechSynthesis' in window)) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.onstart = () => dudakSahte(); u.onend = u.onerror = () => dudakDur(); u.lang = 'tr-TR'; u.rate = 0.95; u.pitch = 1.1; const v = speechSynthesis.getVoices().find(v => /^tr/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { } };
   // Pi'nin ElevenLabs sesleri: sunucudaki manifest + mp3'ler. Dosyalar fetch ile alınır, telefonda saklanır (Cache API)
   // ve blob olarak çalınır. Böylece çevrimdışı katman ve "range" istekleri sesi bozamaz; ikinci açılışta internetsiz çalar.
   const AUDIO = { keys: null, cur: null, tok: 0, blob: {}, durum: 'yukleniyor', base: (CL && CL.sesAdresi) || 'audio/' };
@@ -2360,9 +2414,9 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   const onYukle = () => AUDIO.hazir.then(() => { if (!AUDIO.keys) return; const l = [...AUDIO.keys].filter(k => k.startsWith('pi_') || k.startsWith('sfx_')); let n = 0; const tek = () => { if (n >= l.length) return; sesAl(l[n++]).catch(() => { }).finally(() => setTimeout(tek, 120)); }; tek(); tek(); });
   AUDIO.hazir.then(() => setTimeout(() => { try { if (A.view !== 'lesson' && A.tab === 'profil') render(); } catch (e) { } }, 0));
   document.addEventListener('pointerdown', function ilk() { document.removeEventListener('pointerdown', ilk); onYukle(); }, { once: true });
-  const sesCal = (key, tok) => sesAl(key).then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; return a.play(); });
+  const sesCal = (key, tok) => sesAl(key).then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); });
   ['ok', 'bad', 'win', 'fire', 'unstop', 'legend', 'grow', 'badge', 'swoosh'].forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { const key = 'sfx_' + k; if (A.st.settings.sound && AUDIO.keys && AUDIO.keys.has(key) && AUDIO.blob[key]) { try { const au = new Audio(AUDIO.blob[key]); au.volume = .7; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
-  const stopVoice = () => { AUDIO.tok++; try { if (AUDIO.cur) { AUDIO.cur.pause(); AUDIO.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } };
+  const stopVoice = () => { AUDIO.tok++; dudakDur(); try { if (AUDIO.cur) { AUDIO.cur.pause(); AUDIO.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } };
   // robot=false: Pi'nin sabit replikleri. Pi sesi çalamazsa robot ses yerine sessiz kalınır (karakter bozulmasın).
   const say = (key, html, robot = true) => {
     if (!A.st.settings.voice) return; stopVoice(); const tok = AUDIO.tok;
@@ -2396,6 +2450,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   // Görseller uygulamanın kendi 'img/' klasöründe (aynı adres: hızlı açılır, internetsiz de çalışır)
   const PI_GORSEL = 'img/';
   window.MY_MASCOT_SVG = mascotSvg;
+  // Konuşan Pi (büst): 3 ağız karesi üst üste; hangisinin görüneceğini data-agiz belirler
+  const piKonus = (w = 76, act = '') => `<button class="pikonus" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`;
   const mascot = (state = '', w = 110) => PI_GORSEL
     ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`
     : mascotSvg(state, w);
@@ -2453,7 +2509,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       <div class="row" style="margin:4px 0 10px">${mascot('', 64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
       <div class="themes">${THEMES.map(t => `<button class="chip ${t.id === A.theme ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${t.no}. Tema</button>`).join('')}</div>
       <div class="banner bg-${th.color}"><div class="sub">${th.no}. TEMA · ${done}/${sks.length} beceri</div><h2>${th.title}</h2><div class="sub" style="margin-top:4px">${th.goal}</div><span class="bk">📗 ${th.book}. Kitap · ${th.no}. Tema</span><div class="big">${th.icon}</div></div>
-      <div class="path">${nodes}<div class="node-wrap"><button class="node ${done === sks.length || A.st.trophies[th.id] ? '' : 'locked'}" style="${A.st.trophies[th.id] ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : done === sks.length ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="Tema sınavı">${A.st.trophies[th.id] ? '🏆' : '🎓'}</button><div class="node-label">${A.st.trophies[th.id] ? 'Kupa kazanıldı!' : 'Tema Sınavı'}</div></div></div>
+      <div class="path harita" style="--fon:url(img/fon_${th.id}.webp)">${nodes}<div class="node-wrap"><button class="node ${done === sks.length || A.st.trophies[th.id] ? '' : 'locked'}" style="${A.st.trophies[th.id] ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : done === sks.length ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="Tema sınavı">${A.st.trophies[th.id] ? '🏆' : '🎓'}</button><div class="node-label">${A.st.trophies[th.id] ? 'Kupa kazanıldı!' : 'Tema Sınavı'}</div></div></div>
     </div>${nav()}`;
   }
 
@@ -2576,7 +2632,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     const pct = ses.mode === 'speed' ? 100 * (1 - Math.max(0, ses.left) / 60) : Math.min(100, 100 * ses.i / ses.len);
     const head = `<div class="lhead"><button class="x" data-act="quit" aria-label="Çık">✕</button><div class="prog"><i style="width:${pct}%;${ses.mode === 'speed' ? 'background:var(--accent)' : ''}"></i></div>${ses.mode === 'speed' ? `<div class="timer">${Math.max(0, Math.ceil(ses.left))} sn</div>` : ses.mode === 'exam' ? `<div class="combo" style="color:var(--brand)">🏆 ${Math.min(ses.i + 1, ses.len)}/${ses.len}</div>` : ''}</div>${ses.streak >= 2 && ses.mode !== 'speed' ? `<div class="kombo ${ses.streak >= 5 ? 'hot' : ''}">⚡ KOMBO x${ses.streak}</div>` : ''}`;
     if (ses.showCard) {
-      return `<div class="lesson">${head}<div class="lbody"><div class="row" style="margin:0 0 6px">${mascot('', 60)}<div class="speech grow">Önce sana bu konuyu <b>${FORMATS[ses.format].name.toLocaleLowerCase('tr-TR')}</b> anlatayım. Olmazsa başka türlü anlatırım!</div></div>${cardHTML(ses.skill, ses.format)}</div>
+      return `<div class="lesson">${head}<div class="lbody"><div class="row" style="margin:0 0 6px">${piKonus(68)}<div class="speech grow">Önce sana bu konuyu <b>${FORMATS[ses.format].name.toLocaleLowerCase('tr-TR')}</b> anlatayım. Olmazsa başka türlü anlatırım!</div></div>${cardHTML(ses.skill, ses.format)}</div>
         <div class="lfoot"><button class="btn ghost" style="flex:1" data-act="other-fmt">🔄 Başka türlü</button><button class="btn" style="flex:1.3" data-act="card-ok">Anladım!</button></div></div>`;
     }
     const s = SKILL[q.skill];
@@ -2595,7 +2651,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
-      <div class="qprompt">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${ans}</div>
+      <div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
@@ -2762,7 +2818,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   /* ---------------- Bilim kurgu kutlama sahneleri (Higgsfield) ----------------
      Seride (3, 5, 8, sonra her 5) ve ders sonunda 2–3 sn'lik kısa sahne. Dokununca geçilir, bitince kendiliğinden kapanır.
      Sıradan doğru cevapta sahne YOK (ders temposu bozulmasın). Hareketi azalt açık cihazlarda hiç oynatılmaz. */
-  const SAHNE = { ates: { yazi: '🔥 3 Seri!' }, durdurulamaz: { yazi: 'DURDURULAMAZ!' }, efsane: { yazi: 'EFSANE!' }, bitti: { yazi: '' } };
+  const SAHNE = { telafi: { yazi: '💪 Hatandan öğrendin!' }, ates: { yazi: '🔥 3 Seri!' }, durdurulamaz: { yazi: 'DURDURULAMAZ!' }, efsane: { yazi: 'EFSANE!' }, bitti: { yazi: '' } };
   const sahneBlob = {};
   // MP4 (H.264) daha küçük ve telefonların hepsinde oynar; oynatamayan tarayıcıda WebM (VP9)
   const SAHNE_UZANTI = (() => { try { const v = document.createElement('video'); return v.canPlayType('video/mp4; codecs="avc1.4D401E"') ? '.mp4' : '.webm'; } catch (e) { return '.mp4'; } })();
@@ -2781,6 +2837,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   function celebrate(q, gain) {
     const st = A.ses.streak, b = document.querySelector('[data-act="check"]'), r = b ? b.getBoundingClientRect() : null;
     const word = q.rescue ? pick(PRAISE_RESCUE) : pick(PRAISE); A.fb.word = word;
+    // Telafi doğrusu: hatasını düzelten çocuğa aksiyonlu "güçlendin" sahnesi (oynatılamazsa eski filiz efekti)
+    if (q.rescue && A.ses.mode !== 'speed' && sahneOyna('telafi')) { sfx.grow(); if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch (e) { } setTimeout(() => say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false), 300); return; }
     const tier = window.MY_FX ? window.MY_FX.correct({ streak: st, rescue: q.rescue, xp: gain, word, origin: r ? { x: r.left + r.width / 2, y: r.top } : null }) : 'normal';
     ({ normal: sfx.ok, calm: sfx.ok, fire: sfx.fire, unstop: sfx.unstop, legend: sfx.legend, rescue: sfx.grow }[tier] || sfx.ok)();
     if (navigator.vibrate) try { navigator.vibrate(tier === 'normal' || tier === 'calm' ? 25 : [30, 40, 60]); } catch (e) { }

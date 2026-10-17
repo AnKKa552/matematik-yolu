@@ -430,3 +430,27 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .kl-pin.dogru circle,.kl-pin.dogru path{fill:var(--ok)}
 .kl-pin.yanlis circle,.kl-pin.yanlis path{fill:var(--bad)}
 .kl-pin{animation:pop .3s ease-out;transform-box:fill-box;transform-origin:50% 100%}
+
+/* Harita manzarası: her temanın aydınlık 3B arka planı (koyu temada alacakaranlık tonu) */
+.path.harita{margin:12px -16px 0;padding:70px 16px 60px;min-height:calc(100vh - 290px);background:var(--fon) center top/cover no-repeat,linear-gradient(#BFE9FF,#E9FBF1);isolation:isolate}
+.path.harita:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,var(--bg) 0,rgba(255,255,255,0) 70px,rgba(255,255,255,0) calc(100% - 90px),var(--bg) 100%)}
+.path.harita .node-label{background:rgba(255,255,255,.92);color:#2A2660;padding:3px 10px;border-radius:12px;box-shadow:0 2px 0 rgba(30,27,75,.12)}
+.path.harita .node.locked{background:rgba(255,255,255,.9);box-shadow:0 7px 0 rgba(120,115,170,.55);color:#8E8AB8}
+.path.harita .komsu .kad{background:rgba(255,255,255,.92);color:#2A2660;border-color:rgba(255,255,255,.6)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)} }
+:root[data-theme="dark"] .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)}
+
+/* Konuşan Pi: soru balonunun yanında, ağzı sesle senkron */
+.qrow{display:flex;gap:6px;align-items:flex-start;margin:6px 0 12px}
+.qrow .qprompt{margin:0}
+.qprompt.balon{flex:1;position:relative;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:10px 12px;font-size:19.5px;box-shadow:0 3px 0 var(--line)}
+.qprompt.balon:before{content:'';position:absolute;left:-10px;top:22px;border:9px solid transparent;border-right-color:var(--line);border-left:0}
+.qprompt.balon:after{content:'';position:absolute;left:-6px;top:24px;border:7px solid transparent;border-right-color:var(--surface);border-left:0}
+.pikonus{position:relative;flex:none;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transform-origin:50% 100%;animation:piNefes 3.2s ease-in-out infinite}
+.pikonus img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;filter:drop-shadow(0 4px 6px rgba(20,30,90,.25));user-select:none;-webkit-user-drag:none}
+.pikonus[data-agiz="0"] .a0,.pikonus[data-agiz="1"] .a1,.pikonus[data-agiz="2"] .a2{opacity:1}
+.pikonus.konusuyor{animation:piKonus .5s ease-in-out infinite}
+.pikonus.yedek{display:none}
+@keyframes piNefes{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.015)}}
+@keyframes piKonus{0%,100%{transform:rotate(-1.5deg) translateY(0)}50%{transform:rotate(1.5deg) translateY(-2px)}}
+@media (prefers-reduced-motion: reduce){.pikonus,.pikonus.konusuyor{animation:none}}
