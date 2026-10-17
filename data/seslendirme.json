@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 28282,
+ "toplam_karakter": 28431,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1330,6 +1330,11 @@
    "key": "mis_cizgi_sayma",
    "grup": "yanilgi",
    "text": "Sayı doğrusunda çizgileri sayma. Sayı doğrusunda çizgileri değil, aralıkları say. Sıfırdan başla, her atlama bir parçadır. Sıfır noktası sayılmaz."
+  },
+  {
+   "key": "mis_hata_yeri",
+   "grup": "yanilgi",
+   "text": "Doğru bir adımı hatalı sanma. Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır."
   }
  ]
 }

@@ -530,3 +530,29 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes dsGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .vis.ds rect,.vis.ds text{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion: reduce){.vis.ds *{animation:none!important}.vis.ds animateMotion{display:none}}
+
+/* ---------- Hata Avcısı: hayali öğrencinin defteri ---------- */
+.tag.hata{background:#FFF4D6;color:#B45309}
+:root[data-theme="dark"] .tag.hata{background:#4A3410;color:#FCD34D}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tag.hata{background:#4A3410;color:#FCD34D} }
+.hsoru{display:block;background:var(--surface2);border-radius:12px;padding:8px 10px;margin:0 0 6px;font-size:.95em}
+.hsoru + br{display:none}
+.dad{font-size:13px;font-weight:900;letter-spacing:.04em;color:var(--muted);margin:10px 2px 6px}
+.defterler{display:flex;flex-direction:column;gap:10px;margin:4px 0 14px}
+.defter{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:4px 12px 8px 16px;position:relative;overflow:hidden}
+.defter::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#FFB4B4;opacity:.8}
+.defter .dad{margin:6px 0 2px}
+.defter ol{list-style:none;margin:0;padding:0;counter-reset:ad}
+.defter li{counter-increment:ad;display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-bottom:1px dashed var(--line);font-weight:800;font-size:16px;border-radius:8px}
+.defter li:last-child{border-bottom:0}
+.defter li::before{content:counter(ad);flex:none;width:24px;height:24px;border-radius:50%;background:var(--brand-t);color:var(--brand);display:grid;place-items:center;font-size:13px;font-weight:900;margin-top:1px}
+.defter li.isaret{background:var(--bad-bg);text-decoration:underline wavy var(--bad);text-underline-offset:4px}
+.defter li.isaret::before{background:var(--bad);color:#fff}
+.opts.defter-sec{gap:8px}
+.opts.defter-sec .opt{font-size:16px;min-height:52px;padding:10px 12px;align-items:flex-start}
+.opts.defter-sec .opt:last-child{justify-content:center;border-style:dashed;margin-top:4px}
+.adno{flex:none;width:26px;height:26px;border-radius:50%;background:var(--brand-t);color:var(--brand);display:inline-grid;place-items:center;font-size:14px;font-weight:900}
+.adtx{flex:1}
+.opt.right .adno{background:var(--ok);color:#fff} .opt.wrong .adno{background:var(--bad);color:#fff}
+.sheet .adno{width:22px;height:22px;font-size:12px;margin-right:4px;vertical-align:middle}
+.duz{margin-top:6px;font-weight:800;font-size:15px;background:var(--surface2);border-radius:12px;padding:8px 10px;line-height:1.5}

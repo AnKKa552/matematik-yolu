@@ -300,6 +300,7 @@
       <h2 class="sect">Pratik Merkezi</h2><div class="list">
       ${item('p-mistakes', '🕵️', '#FFE5E8', `Hatalarımı Çalış (${ms})`, ms ? 'Yanlış yaptığın soru tiplerini yeniden dene, yanılgıları kapat.' : 'Henüz hata yok. Harika!', !ms)}
       ${item('p-review', '⏰', '#E0F8EA', `Tekrar Zamanı (${due.length})`, due.length ? 'Unutma eğrine göre tazelenmesi gereken konular.' : 'Şimdilik her şey taze.', !any)}
+      ${item('p-hata', '🔍', '#FFF4D6', 'Hata Avcısı', 'Arkadaşlarının çözümündeki hatayı bul, kim haklı sen karar ver.', false)}
       ${item('p-speed', '⚡', '#FFF0DB', 'Hızlı Yarış · 60 sn', `En iyi skorun: ${A.st.speedBest} doğru. Rekorunu kır!`, false)}
       ${item('p-mix', '🎲', '#E8E5FF', 'Karışık Pratik', 'Çalıştığın tüm konulardan karışık sorular.', !any)}
       ${item('p-place', '🧭', '#E3F1FF', 'Seviye Belirleme', '7 soruda her temadaki seviyeni yeniden ölç.', false)}
@@ -417,17 +418,17 @@
     else if (q.type === 'kes') ans = kesBoard(q);
     else if (q.type === 'input') ans = `<div class="inbox"><div class="val ${A.input ? '' : 'empty'}">${A.input ? esc(A.input) : '?'}</div>${q.unit ? `<div class="unit">${esc(q.unit)}</div>` : ''}</div><div class="pad">${['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '⌫'].map(k => `<button data-act="key" data-v="${k}" ${A.fb ? 'disabled' : ''}>${k}</button>`).join('')}</div>`;
     else {
-      const cls = q.type === 'tf' ? 'tf' : q.type === 'cmp' ? 'cmp' : '';
+      const cls = q.type === 'tf' || q.hata === 'kim' ? 'tf' : q.type === 'cmp' ? 'cmp' : q.hata === 'bul' ? 'defter-sec' : '';
       const cmp = q.type === 'cmp' ? `<div class="cmpline"><span>${q.cmp[0]}</span><span class="cmpbox">${A.sel !== null ? q.options[A.sel].t.replace('<', '&lt;').replace('>', '&gt;') : '?'}</span><span>${q.cmp[1]}</span></div>` : '';
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
-      ans = grid + cmp + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
+      ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
-    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
+    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
-      <div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${ans}</div>
+      <div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
@@ -496,16 +497,21 @@
     render();
   }
 
+  // Hata Avcısı: hayali öğrencinin defteri (kim haklı / neden). Hatalı satır "neden"de baştan, "kim"de cevaptan sonra işaretlenir.
+  function defterHTML(q) {
+    return `<div class="defterler ${q.defter.length > 1 ? 'iki' : ''}">${q.defter.map(d => `<div class="defter"><div class="dad">✏️ ${esc(U.wk(d.ad, 'in'))} defteri</div><ol>${d.satirlar.map((x, i) => `<li class="${d.isaret === i || (A.fb && d.hata === i) ? 'isaret' : ''}">${x}</li>`).join('')}</ol></div>`).join('')}</div>`;
+  }
+  const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   function feedbackSheet() {
     const fb = A.fb, q = A.q;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
-    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div></div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
+    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
     const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div></div>${mascot('sad', 64)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}</div>${mascot('sad', 64)}</div>
       ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
       <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
@@ -729,6 +735,7 @@
       case 'p-mistakes': if (A.st.mistakes.length) startSession('mistakes', A.st.mistakes[0].skill); break;
       case 'p-review': startSession('review', (E.dueSkills(A.st)[0] || { id: SKILLS.find(s => A.st.skills[s.id].n > 0).id }).id); break;
       case 'p-speed': startSession('speed', null); break;
+      case 'p-hata': startSession('hata', E.hataBecerileri(A.st)[0]); break;
       case 'p-mix': startSession('mix', SKILLS.find(s => A.st.skills[s.id].n > 0).id); break;
       case 'p-place': startSession('placement', null); break;
       case 'set-sound': A.st.settings.sound = el.checked; save(); break;

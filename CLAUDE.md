@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 71 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 72 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -51,6 +51,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 **Bizim Duolingo'da olmayan farkımız:**
 - **Kavram yanılgısı teşhisi** (yanlış şıkkın *nedeni* bilinir ve hedefli açıklama gelir).
+- **Hata Avcısı** (§5.1.2): çocuk başkasının çözümündeki hatayı bulur, kim haklı karar verir, hatanın sebebini söyler (muhakeme).
 - **Anlatım biçimi uyarlaması**: aynı konu 4 biçimde (Görsel model / Hikâye / Adım adım / Kısa ve net), sistem öğrenciye hangisinin işlediğini ölçerek seçer.
 - **Veli raporu**: güçlü/zayıf konu, aktif ve düzelmiş yanılgılar, en iyi anlatım biçimi, kitaptaki sayfaya yönlendiren öneri.
 - **Kitapla köprü**: her beceri öğrencinin kendi ders kitabındaki sayfayı gösterir.
@@ -136,7 +137,7 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 
 ### 4.6 Ders oturumu
 - Varsayılan 8 soru; cevap süresi ortancası 35 sn'yi aşarsa 6; ustalık > 0.7 ise 10.
-- Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı).
+- Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2).
 
 ---
 
@@ -169,6 +170,17 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 - Cevap `{parca, boyali}` ya da `{konum}` olarak gelir ve `KES_CHECK` ile **kodla** değerlendirilir. Açık uçlu olduğu için her yanlış durum bir yanılgıya bağlanır: tümleyeni boyamak → `bos_kisim`; ters kesir → `pay_payda_ters`; sayı doğrusunda bir eksik/fazla → `cizgi_sayma`; geri kalan her şey → `kesir_model`.
 - Nerede: `f_tur` (boya; sayı doğrusu 0–1; bileşik kesir 0–2), `f_denk` (12 parçalık şeritte 3/4 boya; kendin böl ve boya), `f_ondalik` (10 parçalık şeritte 0,7 boya). Bu becerilerde soruların %25'i. Hız yarışında gelmez (dokunmak zaman alır). BKT tahmin olasılığı 0,1.
 - Test: `test_generators.js` her `kes` sorusunda doğru cevabın kabulünü ve olası **bütün** yanlış durumların bilinen bir yanılgıya düştüğünü dener.
+
+### 5.1.2 Hata Avcısı — muhakeme soruları (17.10.2026)
+Maarif programının alan becerilerinden **matematiksel muhakeme** için: çocuk cevabı bulmakla kalmaz, başkasının çözümünü değerlendirir. Kaynak `generators.js → SEN` (21 beceri, 7 temanın hepsi).
+- **Senaryo** = problem + kodla kurulmuş doğru çözüm adımları (en fazla 3) + belgelenmiş bir yanılgıdan türetilmiş hatalı çözüm(ler) (`H(mis, at, satirlar, sonuc)`). Hatalı adım = sonucun bozulmaya başladığı **ilk** adım; ondan önceki satırlar doğru çözümle birebir aynıdır. Hatalı çözümün aritmetiği de doğrudur: yanılgı **kavramsaldır** (ör. "Tümler açıların toplamı 180°", ardından 180 − 35 = 145 doğru hesaplanır).
+- Bir senaryodan üç biçim türer (`HATA.q(id, lv, tur)`):
+  - **bul**: hayali öğrencinin defterindeki satırlar şık olur, artı "✅ Hata yok, hepsi doğru". Senaryoların %20'si hatasızdır (ezberle "hep bir hata var" denmesin). Doğru bir adımı seçmek → `hata_yeri`; hatalıyken "hata yok" demek → o senaryonun yanılgısı (çocuk hatayı görmüyorsa muhtemelen aynı yanılgıya sahiptir: teşhis değeri yüksek).
+  - **kim**: iki öğrenci farklı sonuç bulur, iki defter yan yana. Cevaptan sonra hatalı satır işaretlenir.
+  - **neden**: hatalı satır işaretli; şıklar yanılgı adlarıdır (biri gerçek, ikisi aynı konudan yakın yanılgı).
+- Nerede: normal derste seviye 2–3'te soruların ~%15'i; Pratik Merkezi'nde **🔍 Hata Avcısı** modu (6 soru, biçimler sırayla bul/kim/bul/neden/bul/kim; çalışılmış becerilerden). Hız yarışında ve telafi sorusunda gelmez (`E.makeQ(id, lv, sade)`).
+- Test: `test_generators.js` her senaryoda adımlardaki **her işlemi bağımsız hesaplar**, önek eşitliğini, sonuçların farklılığını, üç biçimin şık kurallarını ve Pi'nin okuyabileceği metni denetler.
+- Yeni senaryo eklerken: önce `MIS`'te yanılgı olmalı; doğru ve hatalı çözümü aynı uzunlukta yaz; hatalı satır dışında aynı metni kullan; `node tools/soru_sozluk.js` → `soru-sesi` fonksiyonunu yeniden yükle.
 
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
 | Kitap kalıbı (sayfa) | Bizim varyasyonumuz | Beceri |
@@ -261,7 +273,7 @@ CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
 data/mufredat.json        ← 7 tema, 35 beceri, 67 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (72) + Hata Avcısı senaryoları (SEN)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar

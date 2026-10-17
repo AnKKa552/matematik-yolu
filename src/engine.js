@@ -9,7 +9,7 @@
 (function (G) {
   'use strict';
   const isNode = typeof module !== 'undefined';
-  const { GEN, MIS, KES_CHECK } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES };
+  const { GEN, MIS, KES_CHECK, HATA } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, HATA: G.MY_HATA };
   const { SKILLS, SKILL, THEMES, FORMATS } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
@@ -74,7 +74,16 @@
     else if (ctx.streak >= 3 && lv < 3 && Math.random() < 0.35) lv++;  // esnetme (yakın gelişim alanı)
     return lv;
   };
-  E.makeQ = (id, lv, sade) => { let q = GEN[id](lv); for (let t = 0; sade && q.type === 'kes' && t < 20; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
+  // sade: true → hız yarışı (parmakla kesir ve Hata Avcısı gelmez); 'telafi' → Hata Avcısı gelmez (telafi sorusu sade olmalı)
+  E.makeQ = (id, lv, sade) => { const uygun = (q) => !(sade && q.hata) && !(sade === true && q.type === 'kes'); let q = GEN[id](lv); for (let t = 0; !uygun(q) && t < 30; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
+
+  // Hata Avcısı modu: çalıştığı becerilerden (yoksa ilk temalardan) muhakeme soruları; biçimler sırayla döner
+  E.hataBecerileri = (st) => { const cal = HATA.ids.filter(id => st.skills[id] && st.skills[id].n > 0); return cal.length >= 2 ? cal : HATA.ids.filter(id => ['a_cevre', 'g_ucgen', 'n_toplacikar', 'e_oncelik', 'f_karsilastir', 'g_cember'].includes(id)); };
+  E.hataSorusu = (st, ses) => {
+    const pool = E.hataBecerileri(st), id = pool[Math.floor(Math.random() * pool.length)];
+    const lv = Math.max(2, E.levelFor(st, id, { lastWrong: ses.lastWrong, streak: ses.streak })), tur = ['bul', 'kim', 'bul', 'neden', 'bul', 'kim'][ses.i % 6];
+    const q = HATA.q(id, tur === 'neden' ? 3 : lv, tur); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q;
+  };
 
   // Ders oturumu planı
   E.newSession = (st, mode, skillId, theme) => {
@@ -86,17 +95,19 @@
     if (mode === 'learn') len = 5;
     if (mode === 'exam') len = 10;
     if (mode === 'hazir') len = 5;
+    if (mode === 'hata') len = 6;
     const card = (mode === 'lesson' && st.skills[skillId].lessons === 0) || mode === 'learn';
     return { mode, skill: skillId, len, i: 0, correct: 0, wrong: 0, streak: 0, best: 0, xp: 0, start: Date.now(), lastWrong: false, lastMis: null, queue: [], answered: [], format: card ? E.pickFormat(st) : null, formatTried: [], postCard: [], rescueOk: 0, rescueTry: 0, hintsUsed: 0, done: false, theme: theme || (skillId && SKILL[skillId] ? SKILL[skillId].theme : null), matches: 0 };
   };
   E.nextQ = (st, ses) => {
     // telafi: yanlıştan sonra aynı beceride bir alt seviye
-    if (ses.lastWrong && ses.lastSkill) { const q = E.makeQ(ses.lastSkill, Math.max(1, ses.lastLevel - 1)); q.rescue = true; q.rescueOf = ses.lastMis; return q; }
+    if (ses.lastWrong && ses.lastSkill) { const q = E.makeQ(ses.lastSkill, Math.max(1, ses.lastLevel - 1), 'telafi'); q.rescue = true; q.rescueOf = ses.lastMis; return q; }
     let id = ses.skill;
     if (ses.mode === 'mistakes' && st.mistakes.length) { const m = st.mistakes[ses.i % st.mistakes.length]; const q = E.makeQ(m.skill, m.lv); q.replay = true; return q; }
     if (ses.mode === 'review' || ses.mode === 'mix') { const due = E.dueSkills(st); const pool = due.length ? due.map(d => d.id) : SKILLS.filter(s => st.skills[s.id].n > 0).map(s => s.id); id = pool.length ? pool[ses.i % pool.length] : SKILLS[0].id; }
     if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1, true); return q; }
     if (ses.mode === 'lesson' && Math.random() < 0.12) { const due = E.dueSkills(st).filter(d => d.id !== ses.skill); if (due.length) { const q = E.makeQ(due[0].id, E.levelFor(st, due[0].id)); q.review = true; return q; } }
+    if (ses.mode === 'hata') return E.hataSorusu(st, ses);
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
     if (ses.mode === 'hazir') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id).slice(0, 3); id = ids[ses.i % ids.length]; return E.makeQ(id, 1); }
@@ -263,7 +274,7 @@
   };
   E.questTick = (st, ses, acc) => {
     E.quests(st); const P = st.quests.prog, add = (k, v) => { P[k] = (P[k] || 0) + v; };
-    add('xp', ses.xp); if (['lesson', 'learn', 'review', 'mistakes', 'mix', 'exam', 'hazir'].includes(ses.mode)) add('ders', 1);
+    add('xp', ses.xp); if (['lesson', 'learn', 'review', 'mistakes', 'mix', 'exam', 'hazir', 'hata'].includes(ses.mode)) add('ders', 1);
     if (acc >= 0.9 && ses.answered.length >= 5) add('acc90', 1); if (ses.wrong === 0 && ses.answered.length >= 5) add('hatasiz', 1);
     add('telafi', ses.rescueOk || 0); if (ses.best >= 5) add('seri5', 1); add('eslestir', ses.matches || 0); if (ses.mode === 'review' || ses.mode === 'mistakes') add('tekrar', 1);
     const got = [];

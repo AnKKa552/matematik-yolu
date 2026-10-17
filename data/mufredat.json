@@ -1426,6 +1426,10 @@
     "cizgi_sayma": {
       "ad": "Sayı doğrusunda çizgileri sayma",
       "duzeltme": "Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0'dan başla; her atlama bir parçadır. 0 noktası sayılmaz."
+    },
+    "hata_yeri": {
+      "ad": "Doğru bir adımı hatalı sanma",
+      "duzeltme": "Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır."
     }
   },
   "anlatim_bicimleri": {

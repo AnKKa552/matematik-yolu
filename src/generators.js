@@ -89,6 +89,7 @@
     az_cok: { t: 'Az olası ile çok olasıyı karıştırma', fix: '1/2\'den küçük olasılıklar az olası, 1/2\'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır.' },
     sifir_basta: { t: 'En küçük sayıyı 0 ile başlatma', fix: 'Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0\'ı yaz.' },
     fiyat_okuma: { t: 'Fiyatı lira-kuruş olarak yanlış okuma', fix: 'Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş.' },
+    hata_yeri: { t: 'Doğru bir adımı hatalı sanma', fix: 'Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır.' },
     genel: { t: 'İşlem hatası', fix: 'Çözümü adım adım tekrar kontrol et.' },
   };
 
@@ -759,6 +760,209 @@
   for (const [id, list] of Object.entries(MATCH)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(GRID)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
 
-  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK;
-  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK };
+
+  /* =========================================================
+     HATA AVCISI — muhakeme soruları (Maarif: matematiksel muhakeme)
+     Her senaryo: bir problem + kodla kurulmuş DOĞRU çözüm adımları + belgelenmiş
+     yanılgılardan türetilmiş HATALI çözüm(ler). Bir senaryodan üç biçim türer:
+       bul   → hayali öğrencinin defterinde hatalı adımı bul (ya da "hata yok")
+       kim   → iki öğrenci farklı sonuç buldu: kim haklı?
+       neden → hatanın sebebi hangi yanılgı?
+     Hatalı adım = sonucun bozulmaya başladığı İLK adım (sonraki adımlar hatayı taşır).
+     ========================================================= */
+  const SEN = {};
+  const S = (soru, dogru, sonuc, hatalar, yakin) => ({ soru, dogru, sonuc, hatalar, yakin: yakin || [] });
+  const H = (mis, at, satirlar, sonuc) => ({ mis, at, satirlar, sonuc });
+  SEN.a_cevre = (lv) => {
+    let a, b; do { a = ri(5, lv === 3 ? 25 : 14); b = ri(3, a - 1); } while (a * b === 2 * (a + b));
+    const l0 = `Kenarlar: ${a}, ${b}, ${a}, ${b}`;
+    return S(`Uzun kenarı ${a} cm, kısa kenarı ${b} cm olan dikdörtgenin çevresi kaç cm?`, [l0, `${a} + ${b} = ${a + b}`, `Çevre = ${a + b} × 2 = ${2 * (a + b)} cm`], `${2 * (a + b)} cm`,
+      [H('cevre_yarim', 2, [l0, `${a} + ${b} = ${a + b}`, `Çevre = ${a + b} cm`], `${a + b} cm`), H('cevre_alan', 1, [l0, `${a} × ${b} = ${a * b}`, `Çevre = ${a * b} cm`], `${a * b} cm`)], ['ters_cevre', 'birim']);
+  };
+  SEN.a_alan = (lv) => {
+    let a, b; do { a = ri(4, lv === 3 ? 20 : 12); b = ri(2, a - 1); } while (a * b === 2 * (a + b));
+    const l0 = 'Alan = uzun kenar × kısa kenar', l1 = `Alan = ${a} × ${b}`;
+    return S(`Kenarları ${a} metre ve ${b} metre olan dikdörtgen bir odanın alanı kaç metrekaredir?`, [l0, l1, `Alan = ${a * b} m²`], `${a * b} m²`,
+      [H('cevre_alan', 0, ['Alan = kenarların toplamı', `Alan = ${a} + ${b} + ${a} + ${b}`, `Alan = ${2 * (a + b)} m²`], `${2 * (a + b)} m²`), H('birim', 2, [l0, l1, `Alan = ${a * b} m`], `${a * b} m`)], ['cevre_yarim', 'ters_cevre']);
+  };
+  SEN.a_cevre_alan = (lv) => {
+    if (Math.random() < 0.5) {
+      const k = ri(3, 15), P = 4 * k, l0 = 'Karenin 4 kenarı eşittir';
+      return S(`Çevresi ${P} cm olan karenin bir kenarı kaç cm?`, [l0, `Kenar = ${P} ÷ 4`, `Kenar = ${k} cm`], `${k} cm`, [H('ters_cevre', 1, [l0, `Kenar = ${P} ÷ 2`, `Kenar = ${2 * k} cm`], `${2 * k} cm`)], ['cevre_alan', 'cevre_yarim']);
+    }
+    const b = ri(3, 9), a = b + ri(2, 8), P = 2 * (a + b);
+    return S(`Çevresi ${P} cm, uzun kenarı ${a} cm olan dikdörtgenin kısa kenarı kaç cm?`, [`İki kenarın toplamı = ${P} ÷ 2 = ${a + b}`, `Kısa kenar = ${a + b} − ${a}`, `Kısa kenar = ${b} cm`], `${b} cm`,
+      [H('ters_cevre', 0, [`İki kenarın toplamı = ${P}`, `Kısa kenar = ${P} − ${a}`, `Kısa kenar = ${P - a} cm`], `${P - a} cm`)], ['cevre_alan', 'cevre_yarim']);
+  };
+  SEN.g_aci_iliski = (lv) => {
+    const x = ri(3, 17) * 5;
+    if (Math.random() < 0.5) return S(`${x} derecelik bir açının tümleri kaç derecedir?`, ['Tümler açıların toplamı 90°', `90 − ${x} = ${90 - x}`, `Tümleri ${90 - x}°`], `${90 - x}°`,
+      [H('tumler_butunler', 0, ['Tümler açıların toplamı 180°', `180 − ${x} = ${180 - x}`, `Tümleri ${180 - x}°`], `${180 - x}°`)], ['ters_aci', 'aci_tur']);
+    return S(`${x} derecelik bir açının bütünleri kaç derecedir?`, ['Bütünler açıların toplamı 180°', `180 − ${x} = ${180 - x}`, `Bütünleri ${180 - x}°`], `${180 - x}°`,
+      [H('tumler_butunler', 0, ['Bütünler açıların toplamı 90°', `90 − ${x} = ${90 - x}`, `Bütünleri ${90 - x}°`], `${90 - x}°`)], ['ters_aci', 'aci_tur']);
+  };
+  SEN.g_ucgen = (lv) => {
+    const a = ri(6, 16) * 5, b = ri(6, 16) * 5, l1 = `${a} + ${b} = ${a + b}`;
+    return S(`Bir üçgenin iki iç açısı ${a}° ve ${b}°. Üçüncü açı kaç derecedir?`, ['İç açıların toplamı 180°', l1, `180 − ${a + b} = ${180 - a - b}°`], `${180 - a - b}°`,
+      [H('ucgen_360', 0, ['İç açıların toplamı 360°', l1, `360 − ${a + b} = ${360 - a - b}°`], `${360 - a - b}°`)], ['ucgen_sinif', 'tumler_butunler', 'aci_tur']);
+  };
+  SEN.g_cember = (lv) => {
+    const r = 2 * ri(2, 10);
+    return S(`Yarıçapı ${r} cm olan çemberin çapı kaç cm?`, ['Çap, yarıçapın 2 katıdır', `Çap = 2 × ${r}`, `Çap = ${2 * r} cm`], `${2 * r} cm`,
+      [H('cap_yaricap', 0, ['Çap, yarıçapın yarısıdır', `Çap = ${r} ÷ 2`, `Çap = ${r / 2} cm`], `${r / 2} cm`)], ['dp_dogru', 'isin_dogru']);
+  };
+  SEN.n_toplacikar = (lv) => {
+    if (Math.random() < 0.5) {
+      const a1 = ri(2, 9), b1 = ri(10 - a1, 9), a10 = ri(1, 7), b10 = ri(0, 8 - a10), a100 = ri(1, 8), b100 = ri(1, 9 - a100);
+      const a = a100 * 100 + a10 * 10 + a1, b = b100 * 100 + b10 * 10 + b1, l0 = `Birler: ${a1} + ${b1} = ${a1 + b1} → ${a1 + b1 - 10} yaz, 1 elde`;
+      return S(`${a} + ${b} işlemini yap.`, [l0, `Onlar: ${a10} + ${b10} + 1 = ${a10 + b10 + 1}`, `Yüzler: ${a100} + ${b100} = ${a100 + b100} → Sonuç: ${a + b}`], String(a + b),
+        [H('elde_unutma', 1, [l0, `Onlar: ${a10} + ${b10} = ${a10 + b10}`, `Yüzler: ${a100} + ${b100} = ${a100 + b100} → Sonuç: ${a + b - 10}`], String(a + b - 10))], ['basamak_kayma', 'ters_islem']);
+    }
+    const a1 = ri(0, 7), b1 = ri(a1 + 1, 9), a10 = ri(2, 9), b10 = ri(0, a10 - 1), a100 = ri(3, 9), b100 = ri(1, a100 - 1);
+    const a = a100 * 100 + a10 * 10 + a1, b = b100 * 100 + b10 * 10 + b1, d = a - b, yz = `Yüzler: ${a100} − ${b100} = ${a100 - b100}`;
+    const l0 = `Birler: ${a1} − ${b1} olmaz, onluk boz: ${a1 + 10} − ${b1} = ${a1 + 10 - b1}`, ters = (a100 - b100) * 100 + (a10 - b10) * 10 + (b1 - a1);
+    return S(`${a} − ${b} işlemini yap.`, [l0, `Onlar: ${a10 - 1} − ${b10} = ${a10 - 1 - b10}`, `${yz} → Sonuç: ${d}`], String(d),
+      [H('elde_unutma', 1, [l0, `Onlar: ${a10} − ${b10} = ${a10 - b10}`, `${yz} → Sonuç: ${d + 10}`], String(d + 10)),
+       H('elde_unutma', 0, [`Birler: ${b1} − ${a1} = ${b1 - a1}`, `Onlar: ${a10} − ${b10} = ${a10 - b10}`, `${yz} → Sonuç: ${ters}`], String(ters))], ['basamak_kayma', 'ters_islem']);
+  };
+  SEN.n_carpbol = (lv) => {
+    const d1 = ri(2, 9), d2 = ri(2, 9), p = ri(1, 2), q = ri(1, lv === 3 ? 3 : 2), x = d1 * 10 ** p, y = d2 * 10 ** q, l0 = `Sıfırları ayır: ${d1} × ${d2} = ${d1 * d2}`, mx = Math.max(p, q);
+    return S(`${fmtN(x)} × ${fmtN(y)} işlemini kısa yoldan yap.`, [l0, `Ayırdığım sıfırlar: ${p} + ${q} = ${p + q} tane`, `Sonuç: ${fmtN(x * y)}`], fmtN(x * y),
+      [H('sifir_sayisi', 1, [l0, `Ayırdığım sıfırlar: ${mx} tane`, `Sonuç: ${fmtN(d1 * d2 * 10 ** mx)}`], fmtN(d1 * d2 * 10 ** mx))], ['kismi_carpim', 'elde_unutma']);
+  };
+  SEN.n_basamak = (lv) => {
+    const len = lv === 3 ? 6 : 5, ds = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, len), N = Number(ds.join('')), pos = ri(1, len - 2), dig = ds[len - 1 - pos], val = dig * 10 ** pos, l0 = `${dig} rakamı ${BAS[pos]} basamağında`;
+    return S(`${fmtN(N)} sayısında ${dig} rakamının basamak değeri kaçtır?`, [l0, `Basamak değeri = ${dig} × ${fmtN(10 ** pos)}`, `Sonuç: ${fmtN(val)}`], fmtN(val),
+      [H('basamak_kayma', 0, [`${dig} rakamı ${BAS[pos + 1]} basamağında`, `Basamak değeri = ${dig} × ${fmtN(10 ** (pos + 1))}`, `Sonuç: ${fmtN(val * 10)}`], fmtN(val * 10)),
+       H('basamak_deger', 1, [l0, 'Basamak değeri, rakamın kendisidir', `Sonuç: ${dig}`], String(dig))], ['sifir_atlama', 'boluk_kayma']);
+  };
+  SEN.n_okuma = (lv) => {
+    const M = ri(1, 9), T = ri(11, 99), u = ri(101, 999), N = M * 1e6 + T * 1e3 + u, bad = Number(`${M}${T}${u}`);
+    return S(`${U.cap(U.words(N))} sayısını rakamla yaz.`, [`Milyonlar bölüğü: ${M}`, `Binler bölüğü: ${String(T).padStart(3, '0')}`, `Sayı: ${fmtN(N)}`], fmtN(N),
+      [H('sifir_atlama', 1, [`Milyonlar bölüğü: ${M}`, `Binler bölüğü: ${T}`, `Sayı: ${fmtN(bad)}`], fmtN(bad))], ['boluk_kayma', 'basamak_deger']);
+  };
+  SEN.n_problem = (lv) => {
+    let s, e; do { s = ri(8, 17) * 60 + ri(5, 11) * 5; e = s + ri(5, lv === 3 ? 30 : 20) * 5; } while (e % 60 >= s % 60 || e % 60 === 0);
+    const sh = Math.floor(s / 60), sm = s % 60, eh = Math.floor(e / 60), em = e % 60, nh = (sh + 1) * 60;
+    const dec = eh * 100 + em - sh * 100 - sm, Hh = Math.floor(dec / 100), Mm = dec % 100;
+    return S(`Film saat ${U.tk(sh, sm, 'de')} başladı, ${U.tk(eh, em, 'de')} bitti. Film kaç dakika sürdü?`,
+      [`${hm(s)} → ${hm(nh)}: ${nh - s} dakika`, `${hm(nh)} → ${hm(e)}: ${e - nh} dakika`, `Toplam: ${nh - s} + ${e - nh} = ${e - s} dakika`], `${e - s} dakika`,
+      [H('saat_ondalik', 0, [`Saatleri sayı gibi çıkar: ${fmtD(eh + em / 100, 2)} − ${fmtD(sh + sm / 100, 2)}`, `${fmtD(dec / 100, 2)} → ${Hh} saat ${Mm} dakika`, `Toplam: ${Hh * 60 + Mm} dakika`], `${Hh * 60 + Mm} dakika`)], ['problem_adim', 'elde_unutma']);
+  };
+  SEN.f_denk = (lv) => {
+    const [n, d] = pick([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [3, 5]]), k = ri(2, 4), D = d * k, e = D - d;
+    return S(`${fr(n, d)} kesrine denk ve paydası ${D} olan kesir hangisidir?`, [`Payda ${d} → ${D}: ${k} ile çarpılmış`, `Pay da ${k} ile çarpılır: ${n} × ${k} = ${n * k}`, `Cevap: ${fr(n * k, D)}`], fr(n * k, D),
+      [H('denk_toplama', 0, [`Payda ${d} → ${D}: ${e} eklenmiş`, `Paya da ${e} eklenir: ${n} + ${e} = ${n + e}`, `Cevap: ${fr(n + e, D)}`], fr(n + e, D))], ['payda_buyuk', 'pay_payda_ters']);
+  };
+  SEN.f_karsilastir = (lv) => {
+    if (lv < 3 && Math.random() < 0.6) {
+      const n = ri(1, 3), a = ri(n + 1, 6), b = ri(a + 1, 12), l0 = `Payları eşit: ikisinde de ${n} parça`;
+      return S(`${fr(n, a)} ile ${fr(n, b)} kesirlerinden hangisi büyüktür?`, [l0, 'Paydası küçük olanın parçaları daha büyüktür', `Büyük olan: ${fr(n, a)}`], fr(n, a),
+        [H('payda_buyuk', 1, [l0, 'Paydası büyük olan kesir daha büyüktür', `Büyük olan: ${fr(n, b)}`], fr(n, b))], ['pay_payda_ayri', 'denk_toplama']);
+    }
+    let n1, d1, n2, d2; do { d1 = ri(3, 6); n1 = ri(1, d1 - 1); d2 = ri(d1 + 2, 10); n2 = ri(n1 + 1, d2 - 1); } while (n1 * d2 <= n2 * d1 || gcd(n1, d1) > 1 || gcd(n2, d2) > 1);
+    const L = d1 * d2 / gcd(d1, d2), A = n1 * L / d1, B = n2 * L / d2;
+    return S(`${fr(n1, d1)} ile ${fr(n2, d2)} kesirlerinden hangisi büyüktür?`, [`Paydaları eşitle: ${fr(n1, d1)} = ${fr(A, L)} ve ${fr(n2, d2)} = ${fr(B, L)}`, `${A} > ${B}`, `Büyük olan: ${fr(n1, d1)}`], fr(n1, d1),
+      [H('pay_payda_ayri', 0, [`Paylara bak: ${n2} > ${n1}`, 'Payı büyük olan kesir daha büyüktür', `Büyük olan: ${fr(n2, d2)}`], fr(n2, d2))], ['payda_buyuk', 'denk_toplama']);
+  };
+  SEN.f_ondalik_karsilastir = (lv) => {
+    const x = ri(3, 9), A = x * 10, B = A - ri(1, 9), a = fmtD(x / 10), b = fmtD(B / 100);
+    return S(`${a} ile ${b} sayılarından hangisi büyüktür?`, [`Basamak sayısını eşitle: ${a} = ${fmtD(A / 100, 2)}`, `${A} yüzde bir > ${B} yüzde bir`, `Büyük olan: ${a}`], a,
+      [H('uzun_buyuk', 0, [`${b} sayısının basamağı daha çok`, 'Basamağı çok olan sayı daha büyüktür', `Büyük olan: ${b}`], b)], ['sifir_fark', 'ondalik_basamak']);
+  };
+  SEN.f_yuzde = (lv) => {
+    const p = ri(2, 9), l0 = `%${p} = ${fr(p, 100)}`;
+    return S(`%${p} ondalık gösterimle nasıl yazılır?`, [l0, `${p}, yüzde birler basamağına yazılır`, `Sonuç: ${fmtD(p / 100)}`], fmtD(p / 100),
+      [H('yuzde_ondalik', 1, [l0, `${p}, virgülden hemen sonraya yazılır`, `Sonuç: ${fmtD(p / 10)}`], fmtD(p / 10))], ['ondalik_basamak', 'sifir_fark']);
+  };
+  SEN.s_tablo_sutun = (lv) => {
+    const [X, Y] = shuffle(pick(CATS).filter(c => !c.includes('.'))).slice(0, 2), a = ri(9, 25), b = ri(3, a - 2);
+    return S(`Sütun grafiğine göre ${a} kişi ${X.toLocaleLowerCase('tr-TR')}, ${b} kişi ${Y.toLocaleLowerCase('tr-TR')} seçmiş. ${X} seçenler, ${Y} seçenlerden kaç kişi fazladır?`, ['"Kaç kişi fazla" farkı sorar', `Fark = ${a} − ${b}`, `Sonuç: ${a - b} kişi`], `${a - b} kişi`,
+      [H('fark_toplam', 0, ['"Kaç kişi fazla" toplamı sorar', `Toplam = ${a} + ${b}`, `Sonuç: ${a + b} kişi`], `${a + b} kişi`)], ['grafik_okuma', 'asiri_genelleme']);
+  };
+  SEN.e_oncelik = (lv) => {
+    const b = ri(2, 9), c = ri(2, 9);
+    if (Math.random() < 0.6) {
+      const a = ri(2, 20);
+      return S(`${a} + ${b} × ${c} işleminin sonucu kaçtır?`, [`Önce çarpma: ${b} × ${c} = ${b * c}`, `Sonra toplama: ${a} + ${b * c}`, `Sonuç: ${a + b * c}`], String(a + b * c),
+        [H('oncelik_soldan', 0, [`Önce toplama: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c}`, `Sonuç: ${(a + b) * c}`], String((a + b) * c))], ['dagilma_eksik', 'ozellik_karis']);
+    }
+    const a = b * c + ri(5, 30);
+    return S(`${a} − ${b} × ${c} işleminin sonucu kaçtır?`, [`Önce çarpma: ${b} × ${c} = ${b * c}`, `Sonra çıkarma: ${a} − ${b * c}`, `Sonuç: ${a - b * c}`], String(a - b * c),
+      [H('oncelik_soldan', 0, [`Önce çıkarma: ${a} − ${b} = ${a - b}`, `Sonra çarpma: ${a - b} × ${c}`, `Sonuç: ${(a - b) * c}`], String((a - b) * c))], ['cikarma_degisme', 'ozellik_karis']);
+  };
+  SEN.e_us = (lv) => {
+    const b = ri(2, 20);
+    if (lv === 3 && Math.random() < 0.5) {
+      const a = ri(2, 5);
+      return S(`${a}³ + ${b} işleminin sonucu kaçtır?`, [`${a}³ = ${a} × ${a} × ${a} = ${a ** 3}`, `${a ** 3} + ${b}`, `Sonuç: ${a ** 3 + b}`], String(a ** 3 + b),
+        [H('us_carpim', 0, [`${a}³ = ${a} × 3 = ${3 * a}`, `${3 * a} + ${b}`, `Sonuç: ${3 * a + b}`], String(3 * a + b))], ['oncelik_soldan', 'ozellik_karis']);
+    }
+    const a = ri(3, 9);
+    return S(`${a}² + ${b} işleminin sonucu kaçtır?`, [`${a}² = ${a} × ${a} = ${a * a}`, `${a * a} + ${b}`, `Sonuç: ${a * a + b}`], String(a * a + b),
+      [H('us_carpim', 0, [`${a}² = ${a} × 2 = ${2 * a}`, `${2 * a} + ${b}`, `Sonuç: ${2 * a + b}`], String(2 * a + b))], ['oncelik_soldan', 'ozellik_karis']);
+  };
+  SEN.e_esitlik = (lv) => {
+    if (Math.random() < 0.5) {
+      const a = ri(5, 40), x = ri(5, 40), s = a + x;
+      return S(`▢ + ${a} = ${s} eşitliğinde kutuya hangi sayı gelmelidir?`, ['Bilinmeyen terim = toplam − diğer terim', `▢ = ${s} − ${a}`, `▢ = ${x}`], String(x),
+        [H('ters_islem', 0, ['Bilinmeyen terim = iki sayının toplamı', `▢ = ${s} + ${a}`, `▢ = ${s + a}`], String(s + a))], ['denge_bozma', 'esittir_sonuc']);
+    }
+    const a = ri(5, 20), b = ri(5, 20), c = ri(2, 15), L = a + b, l0 = `Sol taraf: ${a} + ${b} = ${L}`;
+    return S(`${a} + ${b} = ▢ + ${c} eşitliğinde kutuya hangi sayı gelmelidir?`, [l0, `Sağ taraf da ${L} olmalı: ▢ + ${c} = ${L}`, `▢ = ${L - c}`], String(L - c),
+      [H('esittir_sonuc', 1, [l0, 'Eşittirden sonra sonucu yazarım', `▢ = ${L}`], String(L))], ['denge_bozma', 'ters_islem']);
+  };
+  SEN.e_oruntu = (lv) => {
+    const m = ri(2, 6), c = ri(1, 6), t = (n) => m * n + c, N = pick([10, 12, 15, 20]), l0 = `Her adımda ${m} artıyor`;
+    return S(`${t(1)}, ${t(2)}, ${t(3)}, ${t(4)}, ... örüntüsünün ${N}. adımı kaçtır?`, [l0, `Kural: adım × ${m} + ${c}`, `${N}. adım: ${N} × ${m} + ${c} = ${t(N)}`], String(t(N)),
+      [H('oruntu_baslangic', 1, [l0, `Kural: adım × ${m}`, `${N}. adım: ${N} × ${m} = ${m * N}`], String(m * N))], ['oruntu_bir', 'algoritma_sira']);
+  };
+  SEN.p_spektrum = (lv) => {
+    const r = ri(2, 6), m = ri(r + 1, 9), l1 = `İstenen: ${r} kırmızı top`;
+    return S(`Torbada ${r} kırmızı, ${m} mavi top var. Torbadan rastgele çekilen topun kırmızı olma olasılığı kaçtır?`, [`Payda: tüm toplar, ${r} + ${m} = ${r + m}`, l1, `Olasılık = ${fr(r, r + m)}`], fr(r, r + m),
+      [H('olasilik_oran', 0, [`Payda: kırmızı olmayan toplar, ${m}`, l1, `Olasılık = ${fr(r, m)}`], fr(r, m))], ['olasilik_buyuk', 'az_cok']);
+  };
+
+  const ADIM = (i, s) => `<span class="adno">${i + 1}</span><span class="adtx">${s}</span>`;
+  const HATA_YOK = '✅ Hata yok, hepsi doğru';
+  const HSORU = (sc) => `<span class="hsoru">${sc.soru}</span><br>`;
+  const hataBul = (sc, ad) => {
+    const temiz = Math.random() < 0.2, h = pick(sc.hatalar), sat = temiz ? sc.dogru : h.satirlar;
+    const options = sat.map((s, i) => (!temiz && i === h.at) ? { t: ADIM(i, s), ok: true } : { t: ADIM(i, s), ok: false, mis: 'hata_yeri' });
+    options.push(temiz ? { t: HATA_YOK, ok: true } : { t: HATA_YOK, ok: false, mis: h.mis });
+    return Q({ hata: 'bul', ad, fixed: true, prompt: `${HSORU(sc)}<b>${ad}</b> böyle çözdü. Çözümde hatalı bir adım var mı?`, options,
+      hataAt: temiz ? null : h.at, duzeltme: temiz ? null : sc.dogru[h.at],
+      hint: 'Her adımı kendin yeniden hesapla. Sonucu bozan ilk adımı ara.',
+      steps: temiz ? ['Bu çözümde hata yok, her adım doğru.', `Doğru sonuç: ${sc.sonuc}`] : [`Hata ${h.at + 1}. adımda: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, `Doğru sonuç: ${sc.sonuc}`] });
+  };
+  const kimHakli = (sc, a1, a2) => {
+    const h = pick(sc.hatalar), ilkDogru = Math.random() < 0.5;
+    const [s1, s2] = ilkDogru ? [sc.sonuc, h.sonuc] : [h.sonuc, sc.sonuc], [d1, d2] = ilkDogru ? [sc.dogru, h.satirlar] : [h.satirlar, sc.dogru];
+    const options = [{ t: `${a1} haklı`, ok: ilkDogru, mis: ilkDogru ? undefined : h.mis }, { t: `${a2} haklı`, ok: !ilkDogru, mis: ilkDogru ? h.mis : undefined }];
+    const yanlisAd = ilkDogru ? a2 : a1;
+    return Q({ hata: 'kim', fixed: true, prompt: `${HSORU(sc)}<b>${a1}</b> ${s1}, <b>${a2}</b> ${s2} buldu. Kim haklı?`, options,
+      defter: [{ ad: a1, satirlar: d1, hata: ilkDogru ? null : h.at }, { ad: a2, satirlar: d2, hata: ilkDogru ? h.at : null }],
+      hint: 'Soruyu önce kendin çöz, sonra iki çözümü adım adım karşılaştır.',
+      steps: [`${U.wk(yanlisAd, 'in')} hatası ${h.at + 1}. adımda: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, `Doğru sonuç: ${sc.sonuc}`] });
+  };
+  const nedenQ = (sc, ad) => {
+    const h = pick(sc.hatalar), diger = shuffle([...new Set([...sc.hatalar.map(x => x.mis), ...sc.yakin])].filter(m => m !== h.mis && MIS[m].t !== MIS[h.mis].t)).slice(0, 2);
+    const options = shuffle([{ t: MIS[h.mis].t, ok: true }, ...diger.map(m => ({ t: MIS[m].t, ok: false, mis: h.mis }))]);
+    return Q({ hata: 'neden', prompt: `${HSORU(sc)}<b>${ad}</b> yanlış sonuç buldu. Hatasının sebebi ne?`, options,
+      defter: [{ ad, satirlar: h.satirlar, isaret: h.at }],
+      hint: 'İşaretli adıma bak: orada hangi kural unutulmuş?',
+      steps: [`İşaretli adım: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, MIS[h.mis].fix] });
+  };
+  // tur: 'bul' | 'kim' | 'neden' (verilmezse seviyeye göre seçilir)
+  const hataQ = (id, lv, tur) => {
+    const sc = SEN[id](lv), [a1, a2] = shuffle(NAMES).slice(0, 2);
+    tur = tur || (lv >= 3 ? pick(['bul', 'bul', 'kim', 'neden']) : pick(['bul', 'kim']));
+    return tur === 'bul' ? hataBul(sc, a1) : tur === 'kim' ? kimHakli(sc, a1, a2) : nedenQ(sc, a1);
+  };
+  // Normal derste (seviye 2–3) soruların ~%15'i Hata Avcısı biçiminde gelir
+  for (const id of Object.keys(SEN)) { const base = GEN[id]; GEN[id] = (lv) => (lv >= 2 && Math.random() < 0.15 ? hataQ(id, lv) : base(lv)); }
+  const HATA = { ids: Object.keys(SEN), q: hataQ, SEN };
+
+  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK; G.MY_HATA = HATA;
+  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK, HATA };
 })(typeof window !== 'undefined' ? window : globalThis);

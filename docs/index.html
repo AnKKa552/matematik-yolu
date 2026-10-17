@@ -541,6 +541,32 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes dsGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .vis.ds rect,.vis.ds text{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion: reduce){.vis.ds *{animation:none!important}.vis.ds animateMotion{display:none}}
+
+/* ---------- Hata Avcısı: hayali öğrencinin defteri ---------- */
+.tag.hata{background:#FFF4D6;color:#B45309}
+:root[data-theme="dark"] .tag.hata{background:#4A3410;color:#FCD34D}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tag.hata{background:#4A3410;color:#FCD34D} }
+.hsoru{display:block;background:var(--surface2);border-radius:12px;padding:8px 10px;margin:0 0 6px;font-size:.95em}
+.hsoru + br{display:none}
+.dad{font-size:13px;font-weight:900;letter-spacing:.04em;color:var(--muted);margin:10px 2px 6px}
+.defterler{display:flex;flex-direction:column;gap:10px;margin:4px 0 14px}
+.defter{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:4px 12px 8px 16px;position:relative;overflow:hidden}
+.defter::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#FFB4B4;opacity:.8}
+.defter .dad{margin:6px 0 2px}
+.defter ol{list-style:none;margin:0;padding:0;counter-reset:ad}
+.defter li{counter-increment:ad;display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-bottom:1px dashed var(--line);font-weight:800;font-size:16px;border-radius:8px}
+.defter li:last-child{border-bottom:0}
+.defter li::before{content:counter(ad);flex:none;width:24px;height:24px;border-radius:50%;background:var(--brand-t);color:var(--brand);display:grid;place-items:center;font-size:13px;font-weight:900;margin-top:1px}
+.defter li.isaret{background:var(--bad-bg);text-decoration:underline wavy var(--bad);text-underline-offset:4px}
+.defter li.isaret::before{background:var(--bad);color:#fff}
+.opts.defter-sec{gap:8px}
+.opts.defter-sec .opt{font-size:16px;min-height:52px;padding:10px 12px;align-items:flex-start}
+.opts.defter-sec .opt:last-child{justify-content:center;border-style:dashed;margin-top:4px}
+.adno{flex:none;width:26px;height:26px;border-radius:50%;background:var(--brand-t);color:var(--brand);display:inline-grid;place-items:center;font-size:14px;font-weight:900}
+.adtx{flex:1}
+.opt.right .adno{background:var(--ok);color:#fff} .opt.wrong .adno{background:var(--bad);color:#fff}
+.sheet .adno{width:22px;height:22px;font-size:12px;margin-right:4px;vertical-align:middle}
+.duz{margin-top:6px;font-weight:800;font-size:15px;background:var(--surface2);border-radius:12px;padding:8px 10px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -931,6 +957,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     az_cok: { t: 'Az olası ile çok olasıyı karıştırma', fix: '1/2\'den küçük olasılıklar az olası, 1/2\'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır.' },
     sifir_basta: { t: 'En küçük sayıyı 0 ile başlatma', fix: 'Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0\'ı yaz.' },
     fiyat_okuma: { t: 'Fiyatı lira-kuruş olarak yanlış okuma', fix: 'Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş.' },
+    hata_yeri: { t: 'Doğru bir adımı hatalı sanma', fix: 'Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır.' },
     genel: { t: 'İşlem hatası', fix: 'Çözümü adım adım tekrar kontrol et.' },
   };
 
@@ -1601,8 +1628,211 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   for (const [id, list] of Object.entries(MATCH)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(GRID)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
 
-  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK;
-  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK };
+
+  /* =========================================================
+     HATA AVCISI — muhakeme soruları (Maarif: matematiksel muhakeme)
+     Her senaryo: bir problem + kodla kurulmuş DOĞRU çözüm adımları + belgelenmiş
+     yanılgılardan türetilmiş HATALI çözüm(ler). Bir senaryodan üç biçim türer:
+       bul   → hayali öğrencinin defterinde hatalı adımı bul (ya da "hata yok")
+       kim   → iki öğrenci farklı sonuç buldu: kim haklı?
+       neden → hatanın sebebi hangi yanılgı?
+     Hatalı adım = sonucun bozulmaya başladığı İLK adım (sonraki adımlar hatayı taşır).
+     ========================================================= */
+  const SEN = {};
+  const S = (soru, dogru, sonuc, hatalar, yakin) => ({ soru, dogru, sonuc, hatalar, yakin: yakin || [] });
+  const H = (mis, at, satirlar, sonuc) => ({ mis, at, satirlar, sonuc });
+  SEN.a_cevre = (lv) => {
+    let a, b; do { a = ri(5, lv === 3 ? 25 : 14); b = ri(3, a - 1); } while (a * b === 2 * (a + b));
+    const l0 = `Kenarlar: ${a}, ${b}, ${a}, ${b}`;
+    return S(`Uzun kenarı ${a} cm, kısa kenarı ${b} cm olan dikdörtgenin çevresi kaç cm?`, [l0, `${a} + ${b} = ${a + b}`, `Çevre = ${a + b} × 2 = ${2 * (a + b)} cm`], `${2 * (a + b)} cm`,
+      [H('cevre_yarim', 2, [l0, `${a} + ${b} = ${a + b}`, `Çevre = ${a + b} cm`], `${a + b} cm`), H('cevre_alan', 1, [l0, `${a} × ${b} = ${a * b}`, `Çevre = ${a * b} cm`], `${a * b} cm`)], ['ters_cevre', 'birim']);
+  };
+  SEN.a_alan = (lv) => {
+    let a, b; do { a = ri(4, lv === 3 ? 20 : 12); b = ri(2, a - 1); } while (a * b === 2 * (a + b));
+    const l0 = 'Alan = uzun kenar × kısa kenar', l1 = `Alan = ${a} × ${b}`;
+    return S(`Kenarları ${a} metre ve ${b} metre olan dikdörtgen bir odanın alanı kaç metrekaredir?`, [l0, l1, `Alan = ${a * b} m²`], `${a * b} m²`,
+      [H('cevre_alan', 0, ['Alan = kenarların toplamı', `Alan = ${a} + ${b} + ${a} + ${b}`, `Alan = ${2 * (a + b)} m²`], `${2 * (a + b)} m²`), H('birim', 2, [l0, l1, `Alan = ${a * b} m`], `${a * b} m`)], ['cevre_yarim', 'ters_cevre']);
+  };
+  SEN.a_cevre_alan = (lv) => {
+    if (Math.random() < 0.5) {
+      const k = ri(3, 15), P = 4 * k, l0 = 'Karenin 4 kenarı eşittir';
+      return S(`Çevresi ${P} cm olan karenin bir kenarı kaç cm?`, [l0, `Kenar = ${P} ÷ 4`, `Kenar = ${k} cm`], `${k} cm`, [H('ters_cevre', 1, [l0, `Kenar = ${P} ÷ 2`, `Kenar = ${2 * k} cm`], `${2 * k} cm`)], ['cevre_alan', 'cevre_yarim']);
+    }
+    const b = ri(3, 9), a = b + ri(2, 8), P = 2 * (a + b);
+    return S(`Çevresi ${P} cm, uzun kenarı ${a} cm olan dikdörtgenin kısa kenarı kaç cm?`, [`İki kenarın toplamı = ${P} ÷ 2 = ${a + b}`, `Kısa kenar = ${a + b} − ${a}`, `Kısa kenar = ${b} cm`], `${b} cm`,
+      [H('ters_cevre', 0, [`İki kenarın toplamı = ${P}`, `Kısa kenar = ${P} − ${a}`, `Kısa kenar = ${P - a} cm`], `${P - a} cm`)], ['cevre_alan', 'cevre_yarim']);
+  };
+  SEN.g_aci_iliski = (lv) => {
+    const x = ri(3, 17) * 5;
+    if (Math.random() < 0.5) return S(`${x} derecelik bir açının tümleri kaç derecedir?`, ['Tümler açıların toplamı 90°', `90 − ${x} = ${90 - x}`, `Tümleri ${90 - x}°`], `${90 - x}°`,
+      [H('tumler_butunler', 0, ['Tümler açıların toplamı 180°', `180 − ${x} = ${180 - x}`, `Tümleri ${180 - x}°`], `${180 - x}°`)], ['ters_aci', 'aci_tur']);
+    return S(`${x} derecelik bir açının bütünleri kaç derecedir?`, ['Bütünler açıların toplamı 180°', `180 − ${x} = ${180 - x}`, `Bütünleri ${180 - x}°`], `${180 - x}°`,
+      [H('tumler_butunler', 0, ['Bütünler açıların toplamı 90°', `90 − ${x} = ${90 - x}`, `Bütünleri ${90 - x}°`], `${90 - x}°`)], ['ters_aci', 'aci_tur']);
+  };
+  SEN.g_ucgen = (lv) => {
+    const a = ri(6, 16) * 5, b = ri(6, 16) * 5, l1 = `${a} + ${b} = ${a + b}`;
+    return S(`Bir üçgenin iki iç açısı ${a}° ve ${b}°. Üçüncü açı kaç derecedir?`, ['İç açıların toplamı 180°', l1, `180 − ${a + b} = ${180 - a - b}°`], `${180 - a - b}°`,
+      [H('ucgen_360', 0, ['İç açıların toplamı 360°', l1, `360 − ${a + b} = ${360 - a - b}°`], `${360 - a - b}°`)], ['ucgen_sinif', 'tumler_butunler', 'aci_tur']);
+  };
+  SEN.g_cember = (lv) => {
+    const r = 2 * ri(2, 10);
+    return S(`Yarıçapı ${r} cm olan çemberin çapı kaç cm?`, ['Çap, yarıçapın 2 katıdır', `Çap = 2 × ${r}`, `Çap = ${2 * r} cm`], `${2 * r} cm`,
+      [H('cap_yaricap', 0, ['Çap, yarıçapın yarısıdır', `Çap = ${r} ÷ 2`, `Çap = ${r / 2} cm`], `${r / 2} cm`)], ['dp_dogru', 'isin_dogru']);
+  };
+  SEN.n_toplacikar = (lv) => {
+    if (Math.random() < 0.5) {
+      const a1 = ri(2, 9), b1 = ri(10 - a1, 9), a10 = ri(1, 7), b10 = ri(0, 8 - a10), a100 = ri(1, 8), b100 = ri(1, 9 - a100);
+      const a = a100 * 100 + a10 * 10 + a1, b = b100 * 100 + b10 * 10 + b1, l0 = `Birler: ${a1} + ${b1} = ${a1 + b1} → ${a1 + b1 - 10} yaz, 1 elde`;
+      return S(`${a} + ${b} işlemini yap.`, [l0, `Onlar: ${a10} + ${b10} + 1 = ${a10 + b10 + 1}`, `Yüzler: ${a100} + ${b100} = ${a100 + b100} → Sonuç: ${a + b}`], String(a + b),
+        [H('elde_unutma', 1, [l0, `Onlar: ${a10} + ${b10} = ${a10 + b10}`, `Yüzler: ${a100} + ${b100} = ${a100 + b100} → Sonuç: ${a + b - 10}`], String(a + b - 10))], ['basamak_kayma', 'ters_islem']);
+    }
+    const a1 = ri(0, 7), b1 = ri(a1 + 1, 9), a10 = ri(2, 9), b10 = ri(0, a10 - 1), a100 = ri(3, 9), b100 = ri(1, a100 - 1);
+    const a = a100 * 100 + a10 * 10 + a1, b = b100 * 100 + b10 * 10 + b1, d = a - b, yz = `Yüzler: ${a100} − ${b100} = ${a100 - b100}`;
+    const l0 = `Birler: ${a1} − ${b1} olmaz, onluk boz: ${a1 + 10} − ${b1} = ${a1 + 10 - b1}`, ters = (a100 - b100) * 100 + (a10 - b10) * 10 + (b1 - a1);
+    return S(`${a} − ${b} işlemini yap.`, [l0, `Onlar: ${a10 - 1} − ${b10} = ${a10 - 1 - b10}`, `${yz} → Sonuç: ${d}`], String(d),
+      [H('elde_unutma', 1, [l0, `Onlar: ${a10} − ${b10} = ${a10 - b10}`, `${yz} → Sonuç: ${d + 10}`], String(d + 10)),
+       H('elde_unutma', 0, [`Birler: ${b1} − ${a1} = ${b1 - a1}`, `Onlar: ${a10} − ${b10} = ${a10 - b10}`, `${yz} → Sonuç: ${ters}`], String(ters))], ['basamak_kayma', 'ters_islem']);
+  };
+  SEN.n_carpbol = (lv) => {
+    const d1 = ri(2, 9), d2 = ri(2, 9), p = ri(1, 2), q = ri(1, lv === 3 ? 3 : 2), x = d1 * 10 ** p, y = d2 * 10 ** q, l0 = `Sıfırları ayır: ${d1} × ${d2} = ${d1 * d2}`, mx = Math.max(p, q);
+    return S(`${fmtN(x)} × ${fmtN(y)} işlemini kısa yoldan yap.`, [l0, `Ayırdığım sıfırlar: ${p} + ${q} = ${p + q} tane`, `Sonuç: ${fmtN(x * y)}`], fmtN(x * y),
+      [H('sifir_sayisi', 1, [l0, `Ayırdığım sıfırlar: ${mx} tane`, `Sonuç: ${fmtN(d1 * d2 * 10 ** mx)}`], fmtN(d1 * d2 * 10 ** mx))], ['kismi_carpim', 'elde_unutma']);
+  };
+  SEN.n_basamak = (lv) => {
+    const len = lv === 3 ? 6 : 5, ds = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, len), N = Number(ds.join('')), pos = ri(1, len - 2), dig = ds[len - 1 - pos], val = dig * 10 ** pos, l0 = `${dig} rakamı ${BAS[pos]} basamağında`;
+    return S(`${fmtN(N)} sayısında ${dig} rakamının basamak değeri kaçtır?`, [l0, `Basamak değeri = ${dig} × ${fmtN(10 ** pos)}`, `Sonuç: ${fmtN(val)}`], fmtN(val),
+      [H('basamak_kayma', 0, [`${dig} rakamı ${BAS[pos + 1]} basamağında`, `Basamak değeri = ${dig} × ${fmtN(10 ** (pos + 1))}`, `Sonuç: ${fmtN(val * 10)}`], fmtN(val * 10)),
+       H('basamak_deger', 1, [l0, 'Basamak değeri, rakamın kendisidir', `Sonuç: ${dig}`], String(dig))], ['sifir_atlama', 'boluk_kayma']);
+  };
+  SEN.n_okuma = (lv) => {
+    const M = ri(1, 9), T = ri(11, 99), u = ri(101, 999), N = M * 1e6 + T * 1e3 + u, bad = Number(`${M}${T}${u}`);
+    return S(`${U.cap(U.words(N))} sayısını rakamla yaz.`, [`Milyonlar bölüğü: ${M}`, `Binler bölüğü: ${String(T).padStart(3, '0')}`, `Sayı: ${fmtN(N)}`], fmtN(N),
+      [H('sifir_atlama', 1, [`Milyonlar bölüğü: ${M}`, `Binler bölüğü: ${T}`, `Sayı: ${fmtN(bad)}`], fmtN(bad))], ['boluk_kayma', 'basamak_deger']);
+  };
+  SEN.n_problem = (lv) => {
+    let s, e; do { s = ri(8, 17) * 60 + ri(5, 11) * 5; e = s + ri(5, lv === 3 ? 30 : 20) * 5; } while (e % 60 >= s % 60 || e % 60 === 0);
+    const sh = Math.floor(s / 60), sm = s % 60, eh = Math.floor(e / 60), em = e % 60, nh = (sh + 1) * 60;
+    const dec = eh * 100 + em - sh * 100 - sm, Hh = Math.floor(dec / 100), Mm = dec % 100;
+    return S(`Film saat ${U.tk(sh, sm, 'de')} başladı, ${U.tk(eh, em, 'de')} bitti. Film kaç dakika sürdü?`,
+      [`${hm(s)} → ${hm(nh)}: ${nh - s} dakika`, `${hm(nh)} → ${hm(e)}: ${e - nh} dakika`, `Toplam: ${nh - s} + ${e - nh} = ${e - s} dakika`], `${e - s} dakika`,
+      [H('saat_ondalik', 0, [`Saatleri sayı gibi çıkar: ${fmtD(eh + em / 100, 2)} − ${fmtD(sh + sm / 100, 2)}`, `${fmtD(dec / 100, 2)} → ${Hh} saat ${Mm} dakika`, `Toplam: ${Hh * 60 + Mm} dakika`], `${Hh * 60 + Mm} dakika`)], ['problem_adim', 'elde_unutma']);
+  };
+  SEN.f_denk = (lv) => {
+    const [n, d] = pick([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [3, 5]]), k = ri(2, 4), D = d * k, e = D - d;
+    return S(`${fr(n, d)} kesrine denk ve paydası ${D} olan kesir hangisidir?`, [`Payda ${d} → ${D}: ${k} ile çarpılmış`, `Pay da ${k} ile çarpılır: ${n} × ${k} = ${n * k}`, `Cevap: ${fr(n * k, D)}`], fr(n * k, D),
+      [H('denk_toplama', 0, [`Payda ${d} → ${D}: ${e} eklenmiş`, `Paya da ${e} eklenir: ${n} + ${e} = ${n + e}`, `Cevap: ${fr(n + e, D)}`], fr(n + e, D))], ['payda_buyuk', 'pay_payda_ters']);
+  };
+  SEN.f_karsilastir = (lv) => {
+    if (lv < 3 && Math.random() < 0.6) {
+      const n = ri(1, 3), a = ri(n + 1, 6), b = ri(a + 1, 12), l0 = `Payları eşit: ikisinde de ${n} parça`;
+      return S(`${fr(n, a)} ile ${fr(n, b)} kesirlerinden hangisi büyüktür?`, [l0, 'Paydası küçük olanın parçaları daha büyüktür', `Büyük olan: ${fr(n, a)}`], fr(n, a),
+        [H('payda_buyuk', 1, [l0, 'Paydası büyük olan kesir daha büyüktür', `Büyük olan: ${fr(n, b)}`], fr(n, b))], ['pay_payda_ayri', 'denk_toplama']);
+    }
+    let n1, d1, n2, d2; do { d1 = ri(3, 6); n1 = ri(1, d1 - 1); d2 = ri(d1 + 2, 10); n2 = ri(n1 + 1, d2 - 1); } while (n1 * d2 <= n2 * d1 || gcd(n1, d1) > 1 || gcd(n2, d2) > 1);
+    const L = d1 * d2 / gcd(d1, d2), A = n1 * L / d1, B = n2 * L / d2;
+    return S(`${fr(n1, d1)} ile ${fr(n2, d2)} kesirlerinden hangisi büyüktür?`, [`Paydaları eşitle: ${fr(n1, d1)} = ${fr(A, L)} ve ${fr(n2, d2)} = ${fr(B, L)}`, `${A} > ${B}`, `Büyük olan: ${fr(n1, d1)}`], fr(n1, d1),
+      [H('pay_payda_ayri', 0, [`Paylara bak: ${n2} > ${n1}`, 'Payı büyük olan kesir daha büyüktür', `Büyük olan: ${fr(n2, d2)}`], fr(n2, d2))], ['payda_buyuk', 'denk_toplama']);
+  };
+  SEN.f_ondalik_karsilastir = (lv) => {
+    const x = ri(3, 9), A = x * 10, B = A - ri(1, 9), a = fmtD(x / 10), b = fmtD(B / 100);
+    return S(`${a} ile ${b} sayılarından hangisi büyüktür?`, [`Basamak sayısını eşitle: ${a} = ${fmtD(A / 100, 2)}`, `${A} yüzde bir > ${B} yüzde bir`, `Büyük olan: ${a}`], a,
+      [H('uzun_buyuk', 0, [`${b} sayısının basamağı daha çok`, 'Basamağı çok olan sayı daha büyüktür', `Büyük olan: ${b}`], b)], ['sifir_fark', 'ondalik_basamak']);
+  };
+  SEN.f_yuzde = (lv) => {
+    const p = ri(2, 9), l0 = `%${p} = ${fr(p, 100)}`;
+    return S(`%${p} ondalık gösterimle nasıl yazılır?`, [l0, `${p}, yüzde birler basamağına yazılır`, `Sonuç: ${fmtD(p / 100)}`], fmtD(p / 100),
+      [H('yuzde_ondalik', 1, [l0, `${p}, virgülden hemen sonraya yazılır`, `Sonuç: ${fmtD(p / 10)}`], fmtD(p / 10))], ['ondalik_basamak', 'sifir_fark']);
+  };
+  SEN.s_tablo_sutun = (lv) => {
+    const [X, Y] = shuffle(pick(CATS).filter(c => !c.includes('.'))).slice(0, 2), a = ri(9, 25), b = ri(3, a - 2);
+    return S(`Sütun grafiğine göre ${a} kişi ${X.toLocaleLowerCase('tr-TR')}, ${b} kişi ${Y.toLocaleLowerCase('tr-TR')} seçmiş. ${X} seçenler, ${Y} seçenlerden kaç kişi fazladır?`, ['"Kaç kişi fazla" farkı sorar', `Fark = ${a} − ${b}`, `Sonuç: ${a - b} kişi`], `${a - b} kişi`,
+      [H('fark_toplam', 0, ['"Kaç kişi fazla" toplamı sorar', `Toplam = ${a} + ${b}`, `Sonuç: ${a + b} kişi`], `${a + b} kişi`)], ['grafik_okuma', 'asiri_genelleme']);
+  };
+  SEN.e_oncelik = (lv) => {
+    const b = ri(2, 9), c = ri(2, 9);
+    if (Math.random() < 0.6) {
+      const a = ri(2, 20);
+      return S(`${a} + ${b} × ${c} işleminin sonucu kaçtır?`, [`Önce çarpma: ${b} × ${c} = ${b * c}`, `Sonra toplama: ${a} + ${b * c}`, `Sonuç: ${a + b * c}`], String(a + b * c),
+        [H('oncelik_soldan', 0, [`Önce toplama: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c}`, `Sonuç: ${(a + b) * c}`], String((a + b) * c))], ['dagilma_eksik', 'ozellik_karis']);
+    }
+    const a = b * c + ri(5, 30);
+    return S(`${a} − ${b} × ${c} işleminin sonucu kaçtır?`, [`Önce çarpma: ${b} × ${c} = ${b * c}`, `Sonra çıkarma: ${a} − ${b * c}`, `Sonuç: ${a - b * c}`], String(a - b * c),
+      [H('oncelik_soldan', 0, [`Önce çıkarma: ${a} − ${b} = ${a - b}`, `Sonra çarpma: ${a - b} × ${c}`, `Sonuç: ${(a - b) * c}`], String((a - b) * c))], ['cikarma_degisme', 'ozellik_karis']);
+  };
+  SEN.e_us = (lv) => {
+    const b = ri(2, 20);
+    if (lv === 3 && Math.random() < 0.5) {
+      const a = ri(2, 5);
+      return S(`${a}³ + ${b} işleminin sonucu kaçtır?`, [`${a}³ = ${a} × ${a} × ${a} = ${a ** 3}`, `${a ** 3} + ${b}`, `Sonuç: ${a ** 3 + b}`], String(a ** 3 + b),
+        [H('us_carpim', 0, [`${a}³ = ${a} × 3 = ${3 * a}`, `${3 * a} + ${b}`, `Sonuç: ${3 * a + b}`], String(3 * a + b))], ['oncelik_soldan', 'ozellik_karis']);
+    }
+    const a = ri(3, 9);
+    return S(`${a}² + ${b} işleminin sonucu kaçtır?`, [`${a}² = ${a} × ${a} = ${a * a}`, `${a * a} + ${b}`, `Sonuç: ${a * a + b}`], String(a * a + b),
+      [H('us_carpim', 0, [`${a}² = ${a} × 2 = ${2 * a}`, `${2 * a} + ${b}`, `Sonuç: ${2 * a + b}`], String(2 * a + b))], ['oncelik_soldan', 'ozellik_karis']);
+  };
+  SEN.e_esitlik = (lv) => {
+    if (Math.random() < 0.5) {
+      const a = ri(5, 40), x = ri(5, 40), s = a + x;
+      return S(`▢ + ${a} = ${s} eşitliğinde kutuya hangi sayı gelmelidir?`, ['Bilinmeyen terim = toplam − diğer terim', `▢ = ${s} − ${a}`, `▢ = ${x}`], String(x),
+        [H('ters_islem', 0, ['Bilinmeyen terim = iki sayının toplamı', `▢ = ${s} + ${a}`, `▢ = ${s + a}`], String(s + a))], ['denge_bozma', 'esittir_sonuc']);
+    }
+    const a = ri(5, 20), b = ri(5, 20), c = ri(2, 15), L = a + b, l0 = `Sol taraf: ${a} + ${b} = ${L}`;
+    return S(`${a} + ${b} = ▢ + ${c} eşitliğinde kutuya hangi sayı gelmelidir?`, [l0, `Sağ taraf da ${L} olmalı: ▢ + ${c} = ${L}`, `▢ = ${L - c}`], String(L - c),
+      [H('esittir_sonuc', 1, [l0, 'Eşittirden sonra sonucu yazarım', `▢ = ${L}`], String(L))], ['denge_bozma', 'ters_islem']);
+  };
+  SEN.e_oruntu = (lv) => {
+    const m = ri(2, 6), c = ri(1, 6), t = (n) => m * n + c, N = pick([10, 12, 15, 20]), l0 = `Her adımda ${m} artıyor`;
+    return S(`${t(1)}, ${t(2)}, ${t(3)}, ${t(4)}, ... örüntüsünün ${N}. adımı kaçtır?`, [l0, `Kural: adım × ${m} + ${c}`, `${N}. adım: ${N} × ${m} + ${c} = ${t(N)}`], String(t(N)),
+      [H('oruntu_baslangic', 1, [l0, `Kural: adım × ${m}`, `${N}. adım: ${N} × ${m} = ${m * N}`], String(m * N))], ['oruntu_bir', 'algoritma_sira']);
+  };
+  SEN.p_spektrum = (lv) => {
+    const r = ri(2, 6), m = ri(r + 1, 9), l1 = `İstenen: ${r} kırmızı top`;
+    return S(`Torbada ${r} kırmızı, ${m} mavi top var. Torbadan rastgele çekilen topun kırmızı olma olasılığı kaçtır?`, [`Payda: tüm toplar, ${r} + ${m} = ${r + m}`, l1, `Olasılık = ${fr(r, r + m)}`], fr(r, r + m),
+      [H('olasilik_oran', 0, [`Payda: kırmızı olmayan toplar, ${m}`, l1, `Olasılık = ${fr(r, m)}`], fr(r, m))], ['olasilik_buyuk', 'az_cok']);
+  };
+
+  const ADIM = (i, s) => `<span class="adno">${i + 1}</span><span class="adtx">${s}</span>`;
+  const HATA_YOK = '✅ Hata yok, hepsi doğru';
+  const HSORU = (sc) => `<span class="hsoru">${sc.soru}</span><br>`;
+  const hataBul = (sc, ad) => {
+    const temiz = Math.random() < 0.2, h = pick(sc.hatalar), sat = temiz ? sc.dogru : h.satirlar;
+    const options = sat.map((s, i) => (!temiz && i === h.at) ? { t: ADIM(i, s), ok: true } : { t: ADIM(i, s), ok: false, mis: 'hata_yeri' });
+    options.push(temiz ? { t: HATA_YOK, ok: true } : { t: HATA_YOK, ok: false, mis: h.mis });
+    return Q({ hata: 'bul', ad, fixed: true, prompt: `${HSORU(sc)}<b>${ad}</b> böyle çözdü. Çözümde hatalı bir adım var mı?`, options,
+      hataAt: temiz ? null : h.at, duzeltme: temiz ? null : sc.dogru[h.at],
+      hint: 'Her adımı kendin yeniden hesapla. Sonucu bozan ilk adımı ara.',
+      steps: temiz ? ['Bu çözümde hata yok, her adım doğru.', `Doğru sonuç: ${sc.sonuc}`] : [`Hata ${h.at + 1}. adımda: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, `Doğru sonuç: ${sc.sonuc}`] });
+  };
+  const kimHakli = (sc, a1, a2) => {
+    const h = pick(sc.hatalar), ilkDogru = Math.random() < 0.5;
+    const [s1, s2] = ilkDogru ? [sc.sonuc, h.sonuc] : [h.sonuc, sc.sonuc], [d1, d2] = ilkDogru ? [sc.dogru, h.satirlar] : [h.satirlar, sc.dogru];
+    const options = [{ t: `${a1} haklı`, ok: ilkDogru, mis: ilkDogru ? undefined : h.mis }, { t: `${a2} haklı`, ok: !ilkDogru, mis: ilkDogru ? h.mis : undefined }];
+    const yanlisAd = ilkDogru ? a2 : a1;
+    return Q({ hata: 'kim', fixed: true, prompt: `${HSORU(sc)}<b>${a1}</b> ${s1}, <b>${a2}</b> ${s2} buldu. Kim haklı?`, options,
+      defter: [{ ad: a1, satirlar: d1, hata: ilkDogru ? null : h.at }, { ad: a2, satirlar: d2, hata: ilkDogru ? h.at : null }],
+      hint: 'Soruyu önce kendin çöz, sonra iki çözümü adım adım karşılaştır.',
+      steps: [`${U.wk(yanlisAd, 'in')} hatası ${h.at + 1}. adımda: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, `Doğru sonuç: ${sc.sonuc}`] });
+  };
+  const nedenQ = (sc, ad) => {
+    const h = pick(sc.hatalar), diger = shuffle([...new Set([...sc.hatalar.map(x => x.mis), ...sc.yakin])].filter(m => m !== h.mis && MIS[m].t !== MIS[h.mis].t)).slice(0, 2);
+    const options = shuffle([{ t: MIS[h.mis].t, ok: true }, ...diger.map(m => ({ t: MIS[m].t, ok: false, mis: h.mis }))]);
+    return Q({ hata: 'neden', prompt: `${HSORU(sc)}<b>${ad}</b> yanlış sonuç buldu. Hatasının sebebi ne?`, options,
+      defter: [{ ad, satirlar: h.satirlar, isaret: h.at }],
+      hint: 'İşaretli adıma bak: orada hangi kural unutulmuş?',
+      steps: [`İşaretli adım: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, MIS[h.mis].fix] });
+  };
+  // tur: 'bul' | 'kim' | 'neden' (verilmezse seviyeye göre seçilir)
+  const hataQ = (id, lv, tur) => {
+    const sc = SEN[id](lv), [a1, a2] = shuffle(NAMES).slice(0, 2);
+    tur = tur || (lv >= 3 ? pick(['bul', 'bul', 'kim', 'neden']) : pick(['bul', 'kim']));
+    return tur === 'bul' ? hataBul(sc, a1) : tur === 'kim' ? kimHakli(sc, a1, a2) : nedenQ(sc, a1);
+  };
+  // Normal derste (seviye 2–3) soruların ~%15'i Hata Avcısı biçiminde gelir
+  for (const id of Object.keys(SEN)) { const base = GEN[id]; GEN[id] = (lv) => (lv >= 2 && Math.random() < 0.15 ? hataQ(id, lv) : base(lv)); }
+  const HATA = { ids: Object.keys(SEN), q: hataQ, SEN };
+
+  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK; G.MY_HATA = HATA;
+  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK, HATA };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* ============================================================
@@ -1920,7 +2150,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 (function (G) {
   'use strict';
   const isNode = typeof module !== 'undefined';
-  const { GEN, MIS, KES_CHECK } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES };
+  const { GEN, MIS, KES_CHECK, HATA } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, HATA: G.MY_HATA };
   const { SKILLS, SKILL, THEMES, FORMATS } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
@@ -1985,7 +2215,16 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     else if (ctx.streak >= 3 && lv < 3 && Math.random() < 0.35) lv++;  // esnetme (yakın gelişim alanı)
     return lv;
   };
-  E.makeQ = (id, lv, sade) => { let q = GEN[id](lv); for (let t = 0; sade && q.type === 'kes' && t < 20; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
+  // sade: true → hız yarışı (parmakla kesir ve Hata Avcısı gelmez); 'telafi' → Hata Avcısı gelmez (telafi sorusu sade olmalı)
+  E.makeQ = (id, lv, sade) => { const uygun = (q) => !(sade && q.hata) && !(sade === true && q.type === 'kes'); let q = GEN[id](lv); for (let t = 0; !uygun(q) && t < 30; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
+
+  // Hata Avcısı modu: çalıştığı becerilerden (yoksa ilk temalardan) muhakeme soruları; biçimler sırayla döner
+  E.hataBecerileri = (st) => { const cal = HATA.ids.filter(id => st.skills[id] && st.skills[id].n > 0); return cal.length >= 2 ? cal : HATA.ids.filter(id => ['a_cevre', 'g_ucgen', 'n_toplacikar', 'e_oncelik', 'f_karsilastir', 'g_cember'].includes(id)); };
+  E.hataSorusu = (st, ses) => {
+    const pool = E.hataBecerileri(st), id = pool[Math.floor(Math.random() * pool.length)];
+    const lv = Math.max(2, E.levelFor(st, id, { lastWrong: ses.lastWrong, streak: ses.streak })), tur = ['bul', 'kim', 'bul', 'neden', 'bul', 'kim'][ses.i % 6];
+    const q = HATA.q(id, tur === 'neden' ? 3 : lv, tur); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q;
+  };
 
   // Ders oturumu planı
   E.newSession = (st, mode, skillId, theme) => {
@@ -1997,17 +2236,19 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (mode === 'learn') len = 5;
     if (mode === 'exam') len = 10;
     if (mode === 'hazir') len = 5;
+    if (mode === 'hata') len = 6;
     const card = (mode === 'lesson' && st.skills[skillId].lessons === 0) || mode === 'learn';
     return { mode, skill: skillId, len, i: 0, correct: 0, wrong: 0, streak: 0, best: 0, xp: 0, start: Date.now(), lastWrong: false, lastMis: null, queue: [], answered: [], format: card ? E.pickFormat(st) : null, formatTried: [], postCard: [], rescueOk: 0, rescueTry: 0, hintsUsed: 0, done: false, theme: theme || (skillId && SKILL[skillId] ? SKILL[skillId].theme : null), matches: 0 };
   };
   E.nextQ = (st, ses) => {
     // telafi: yanlıştan sonra aynı beceride bir alt seviye
-    if (ses.lastWrong && ses.lastSkill) { const q = E.makeQ(ses.lastSkill, Math.max(1, ses.lastLevel - 1)); q.rescue = true; q.rescueOf = ses.lastMis; return q; }
+    if (ses.lastWrong && ses.lastSkill) { const q = E.makeQ(ses.lastSkill, Math.max(1, ses.lastLevel - 1), 'telafi'); q.rescue = true; q.rescueOf = ses.lastMis; return q; }
     let id = ses.skill;
     if (ses.mode === 'mistakes' && st.mistakes.length) { const m = st.mistakes[ses.i % st.mistakes.length]; const q = E.makeQ(m.skill, m.lv); q.replay = true; return q; }
     if (ses.mode === 'review' || ses.mode === 'mix') { const due = E.dueSkills(st); const pool = due.length ? due.map(d => d.id) : SKILLS.filter(s => st.skills[s.id].n > 0).map(s => s.id); id = pool.length ? pool[ses.i % pool.length] : SKILLS[0].id; }
     if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1, true); return q; }
     if (ses.mode === 'lesson' && Math.random() < 0.12) { const due = E.dueSkills(st).filter(d => d.id !== ses.skill); if (due.length) { const q = E.makeQ(due[0].id, E.levelFor(st, due[0].id)); q.review = true; return q; } }
+    if (ses.mode === 'hata') return E.hataSorusu(st, ses);
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
     if (ses.mode === 'hazir') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id).slice(0, 3); id = ids[ses.i % ids.length]; return E.makeQ(id, 1); }
@@ -2174,7 +2415,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   };
   E.questTick = (st, ses, acc) => {
     E.quests(st); const P = st.quests.prog, add = (k, v) => { P[k] = (P[k] || 0) + v; };
-    add('xp', ses.xp); if (['lesson', 'learn', 'review', 'mistakes', 'mix', 'exam', 'hazir'].includes(ses.mode)) add('ders', 1);
+    add('xp', ses.xp); if (['lesson', 'learn', 'review', 'mistakes', 'mix', 'exam', 'hazir', 'hata'].includes(ses.mode)) add('ders', 1);
     if (acc >= 0.9 && ses.answered.length >= 5) add('acc90', 1); if (ses.wrong === 0 && ses.answered.length >= 5) add('hatasiz', 1);
     add('telafi', ses.rescueOk || 0); if (ses.best >= 5) add('seri5', 1); add('eslestir', ses.matches || 0); if (ses.mode === 'review' || ses.mode === 'mistakes') add('tekrar', 1);
     const got = [];
@@ -2711,6 +2952,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       <h2 class="sect">Pratik Merkezi</h2><div class="list">
       ${item('p-mistakes', '🕵️', '#FFE5E8', `Hatalarımı Çalış (${ms})`, ms ? 'Yanlış yaptığın soru tiplerini yeniden dene, yanılgıları kapat.' : 'Henüz hata yok. Harika!', !ms)}
       ${item('p-review', '⏰', '#E0F8EA', `Tekrar Zamanı (${due.length})`, due.length ? 'Unutma eğrine göre tazelenmesi gereken konular.' : 'Şimdilik her şey taze.', !any)}
+      ${item('p-hata', '🔍', '#FFF4D6', 'Hata Avcısı', 'Arkadaşlarının çözümündeki hatayı bul, kim haklı sen karar ver.', false)}
       ${item('p-speed', '⚡', '#FFF0DB', 'Hızlı Yarış · 60 sn', `En iyi skorun: ${A.st.speedBest} doğru. Rekorunu kır!`, false)}
       ${item('p-mix', '🎲', '#E8E5FF', 'Karışık Pratik', 'Çalıştığın tüm konulardan karışık sorular.', !any)}
       ${item('p-place', '🧭', '#E3F1FF', 'Seviye Belirleme', '7 soruda her temadaki seviyeni yeniden ölç.', false)}
@@ -2828,17 +3070,17 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     else if (q.type === 'kes') ans = kesBoard(q);
     else if (q.type === 'input') ans = `<div class="inbox"><div class="val ${A.input ? '' : 'empty'}">${A.input ? esc(A.input) : '?'}</div>${q.unit ? `<div class="unit">${esc(q.unit)}</div>` : ''}</div><div class="pad">${['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '⌫'].map(k => `<button data-act="key" data-v="${k}" ${A.fb ? 'disabled' : ''}>${k}</button>`).join('')}</div>`;
     else {
-      const cls = q.type === 'tf' ? 'tf' : q.type === 'cmp' ? 'cmp' : '';
+      const cls = q.type === 'tf' || q.hata === 'kim' ? 'tf' : q.type === 'cmp' ? 'cmp' : q.hata === 'bul' ? 'defter-sec' : '';
       const cmp = q.type === 'cmp' ? `<div class="cmpline"><span>${q.cmp[0]}</span><span class="cmpbox">${A.sel !== null ? q.options[A.sel].t.replace('<', '&lt;').replace('>', '&gt;') : '?'}</span><span>${q.cmp[1]}</span></div>` : '';
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
-      ans = grid + cmp + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
+      ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
-    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
+    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
-      <div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${ans}</div>
+      <div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
@@ -2907,16 +3149,21 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     render();
   }
 
+  // Hata Avcısı: hayali öğrencinin defteri (kim haklı / neden). Hatalı satır "neden"de baştan, "kim"de cevaptan sonra işaretlenir.
+  function defterHTML(q) {
+    return `<div class="defterler ${q.defter.length > 1 ? 'iki' : ''}">${q.defter.map(d => `<div class="defter"><div class="dad">✏️ ${esc(U.wk(d.ad, 'in'))} defteri</div><ol>${d.satirlar.map((x, i) => `<li class="${d.isaret === i || (A.fb && d.hata === i) ? 'isaret' : ''}">${x}</li>`).join('')}</ol></div>`).join('')}</div>`;
+  }
+  const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   function feedbackSheet() {
     const fb = A.fb, q = A.q;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
-    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div></div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
+    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
     const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div></div>${mascot('sad', 64)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}</div>${mascot('sad', 64)}</div>
       ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
       <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
@@ -3140,6 +3387,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       case 'p-mistakes': if (A.st.mistakes.length) startSession('mistakes', A.st.mistakes[0].skill); break;
       case 'p-review': startSession('review', (E.dueSkills(A.st)[0] || { id: SKILLS.find(s => A.st.skills[s.id].n > 0).id }).id); break;
       case 'p-speed': startSession('speed', null); break;
+      case 'p-hata': startSession('hata', E.hataBecerileri(A.st)[0]); break;
       case 'p-mix': startSession('mix', SKILLS.find(s => A.st.skills[s.id].n > 0).id); break;
       case 'p-place': startSession('placement', null); break;
       case 'set-sound': A.st.settings.sound = el.checked; save(); break;

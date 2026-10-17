@@ -48,6 +48,40 @@ for (const [name, g] of Object.entries(GEN)) {
     if (r===0) samples[name+'_'+lv] = { p: strip(q.prompt).replace(/\s+/g,' ').slice(0,170), a: q.type==='input'? q.answer : strip(q.options.find(o=>o.ok).t).trim(), o: q.options? q.options.map(o=>strip(o.t).replace(/\s+/g,' ').trim()).join(' | '):'' };
   }
 }
+
+// HATA AVCISI: senaryo bütünlüğü + adımlardaki her işlemin bağımsız hesabı + üç soru biçimi
+const { HATA } = require('../src/generators.js');
+{ const NUM = '(?:\\d{1,3}(?: \\d{3})+|\\d+(?:,\\d+)?)';
+  const RE = new RegExp(`(${NUM}(?:\\s*[+−×÷]\\s*${NUM})+)\\s*=\\s*(${NUM})(?![\\d,])`, 'g');
+  const val = (t) => parseFloat(t.replace(/ /g, '').replace(',', '.'));
+  const hesap = (line) => { const L = strip(line); let m, bad = null; RE.lastIndex = 0;
+    while ((m = RE.exec(L))) { const ex = m[1].replace(new RegExp(NUM, 'g'), (x) => String(val(x))).replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+      const r = Function('return ' + ex)(); if (Math.abs(r - val(m[2])) > 1e-9) bad = m[0]; } return bad; };
+  let hn = 0;
+  for (const id of HATA.ids) for (const lv of [1, 2, 3]) for (let r = 0; r < 400; r++) {
+    const sc = HATA.SEN[id](lv); hn++;
+    const bad = (m) => { console.log('BAD HATA', id, lv, m, JSON.stringify(sc).slice(0, 400)); errors++; };
+    if (!sc.dogru.length || sc.dogru.length > 3 || !sc.hatalar.length || !sc.sonuc) { bad('yapı'); break; }
+    let stop = false;
+    for (const l of sc.dogru) { const b = hesap(l); if (b) { bad('doğru adımda işlem hatası: ' + b); stop = true; break; } }
+    for (const h of sc.hatalar) {
+      if (!MIS[h.mis] || h.satirlar.length !== sc.dogru.length || h.at < 0 || h.at >= sc.dogru.length) { bad('hatalı çözüm yapısı'); stop = true; break; }
+      for (let i = 0; i < h.at; i++) if (h.satirlar[i] !== sc.dogru[i]) { bad('hatalı adımdan önceki satır farklı'); stop = true; }
+      if (h.satirlar[h.at] === sc.dogru[h.at] || h.sonuc === sc.sonuc) { bad('hata görünmüyor / sonuç aynı'); stop = true; }
+      for (const l of h.satirlar) { const b = hesap(l); if (b) { bad('hatalı çözümde aritmetik bozuk (yanılgı kavramsal olmalı): ' + b); stop = true; } }
+    }
+    for (const m of sc.yakin) if (!MIS[m]) { bad('bilinmeyen yakın yanılgı ' + m); stop = true; }
+    if (/undefined|NaN|Infinity/.test(JSON.stringify(sc))) { bad('metin'); stop = true; }
+    if (stop) break;
+  }
+  for (const id of HATA.ids) for (const lv of [2, 3]) for (const tur of ['bul', 'kim', 'neden']) for (let r = 0; r < 150; r++) {
+    const q = HATA.q(id, lv, tur), ok = q.options.filter(o => o.ok).length, texts = q.options.map(o => o.t);
+    if (ok !== 1 || q.options.length < 2 || new Set(texts).size !== texts.length || q.options.some(o => !o.ok && !MIS[o.mis]) || /undefined|NaN/.test(strip(q.prompt) + texts.join() + JSON.stringify(q.steps) + JSON.stringify(q.defter || ''))) { console.log('BAD HATA Q', id, lv, tur, texts); errors++; break; }
+    const m = U.soruSesi(q.prompt); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) { console.log('HATA Q SES METNİ', id, tur, m.length, m); errors++; break; }
+    if (r === 0 && lv === 3) samples['hata_' + id + '_' + tur] = { p: strip(q.prompt).replace(/\s+/g, ' ').slice(0, 150), a: strip(q.options.find(o => o.ok).t).replace(/\s+/g, ' ').trim() };
+  }
+  console.log('Hata Avcısı senaryosu:', hn, '· beceri:', HATA.ids.length);
+}
 // Pi'nin soru okuması: her soru metni sunucunun izinli sözlüğünde olmalı (yoksa o soru robot sesle okunur)
 { const SZ = new Set(JSON.parse(require('fs').readFileSync(__dirname + '/../sunucu/supabase/functions/soru-sesi/sozluk.ts', 'utf8').match(/new Set\((\[.*\])\)/)[1]));
   const eksik = new Set(); let uzun = 0;
