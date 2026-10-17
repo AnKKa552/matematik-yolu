@@ -105,7 +105,30 @@
     const card = (mode === 'lesson' && st.skills[skillId].lessons === 0) || mode === 'learn';
     return { aq, mode, skill: skillId, len, i: 0, correct: 0, wrong: 0, streak: 0, best: 0, xp: 0, start: Date.now(), lastWrong: false, lastMis: null, queue: [], answered: [], format: card ? E.pickFormat(st) : null, formatTried: [], postCard: [], rescueOk: 0, rescueTry: 0, hintsUsed: 0, done: false, theme: theme || (skillId && SKILL[skillId] ? SKILL[skillId].theme : null), matches: 0 };
   };
+  /* Tekrar engeli (17.10.2026, proje sahibinin videosu: aynı soru üst üste 3 kez geldi):
+     - Bir derste AYNI soru (metin + şıklar/cevap + görsel) ikinci kez gelmez.
+     - Art arda iki soru aynı KALIPTA olmaz (yalnız sayı ya da harf değişmiş "4 nokta / 3 nokta" gibi), alternatif bulunabiliyorsa.
+     Üretici yeniden çağrılır; havuz gerçekten tükenmişse (çok dar seviyeler) en son çare olarak tekrar kabul edilir. */
+  const ozet = (t) => { let h = 0; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return h.toString(36); };
+  const soruAnahtari = (q) => String(q.prompt).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() + '|' + (q.visual ? ozet(String(q.visual)) : '') + '|' + (q.options ? q.options.map(o => o.t).sort().join('/') : (q.answer || '') + (q.hedef || '')) + '|' + JSON.stringify(q.cmp || q.grid || (q.pairs && q.pairs.map(x => x.a)) || q.defter || '');
+  const kalipAnahtari = (q) => String(q.prompt).replace(/<[^>]+>/g, ' ').replace(/\d+([.,]\d+)?/g, '#').replace(/\b[A-ZÇĞİÖŞÜ]\b/g, '@').replace(/[\s#@,]+/g, ' ').trim() + '|' + (q.type || '');
+  E.soruAnahtari = soruAnahtari; E.kalipAnahtari = kalipAnahtari;
   E.nextQ = (st, ses) => {
+    if (ses.mode === 'atolye' || ses.mode === 'placement') return E.nextQ0(st, ses);
+    const gorulen = ses.gorulen || (ses.gorulen = []);
+    let q = null, yedek = null;
+    for (let t = 0; t < 40; t++) {
+      const aday = E.nextQ0(st, ses), ak = soruAnahtari(aday);
+      if (gorulen.includes(ak)) continue;              // aynı soru: asla (havuz tükenmedikçe)
+      if (!yedek) yedek = aday;
+      if (t < 20 && ses.sonKalip && kalipAnahtari(aday) === ses.sonKalip) continue; // art arda aynı kalıp: önce başka kalıp ara
+      q = aday; break;
+    }
+    q = q || yedek || E.nextQ0(st, ses);
+    gorulen.push(soruAnahtari(q)); ses.sonKalip = kalipAnahtari(q);
+    return q;
+  };
+  E.nextQ0 = (st, ses) => {
     // telafi: yanlıştan sonra aynı beceride bir alt seviye
     if (ses.lastWrong && ses.lastSkill) { const q = E.makeQ(ses.lastSkill, Math.max(1, ses.lastLevel - 1), 'telafi'); q.rescue = true; q.rescueOf = ses.lastMis; return q; }
     let id = ses.skill;

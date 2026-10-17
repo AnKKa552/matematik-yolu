@@ -139,6 +139,7 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 
 ### 4.6 Ders oturumu
 - Varsayılan 8 soru; cevap süresi ortancası 35 sn'yi aşarsa 6; ustalık > 0.7 ise 10.
+- **Tekrar koruması (17.10.2026):** `E.nextQ`, asıl seçiciyi (`E.nextQ0`) en fazla 40 kez dener. Aynı oturumda birebir aynı soru (`E.soruAnahtari`: metin + görsel özeti + şıklar/cevap) **asla** tekrar gelmez; üst üste aynı kalıp (`E.kalipAnahtari`: sayılar ve harfler atılmış metin) ilk 20 denemede reddedilir. Atölye ve seviye belirleme muaf. Neden: dar havuzlu üreticiler (g_temel, g_cokgen, s_arastirma, g_dikme_paralel, p_olay…) aynı soruyu üst üste veriyordu (simülasyonda 4200 soruda 880 birebir tekrar → 0). Yeni üretici yazarken her seviyede en az ~10 farklı soru çıkabilmeli; `scratchpad/tekrar_olc.js` benzeri bir ölçümle kontrol et.
 - Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2), `atolye` (Problem Atölyesi, 2 problem × 6 adım, §5.1.3).
 
 ### 4.7 Üç kademeli kanıt (17.10.2026)

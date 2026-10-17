@@ -127,20 +127,28 @@
       const k = pick(['dp', 'isin', 'dogru']);
       const name = { dp: 'Doğru parçası', isin: 'Işın', dogru: 'Doğru', nokta: 'Nokta' };
       const wr = { dp: [['Doğru', 'dp_dogru'], ['Işın', 'isin_dogru']], isin: [['Doğru', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']], dogru: [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']] }[k];
-      return Q({ prompt: 'Şekildeki geometrik çizimin adı nedir?', visual: V.lineKind(k), options: mc(name[k], wr, [['Nokta', 'genel']]), steps: ['Uçlarına bak: iki uç noktası varsa doğru parçası,', 'bir başlangıç noktası ve tek ok varsa ışın,', 'iki yönde ok varsa doğrudur.'], hint: 'Okların sayısına bak!' });
+      const harf = pick([['A', 'B'], ['K', 'L'], ['M', 'N'], ['P', 'R'], ['C', 'D'], ['E', 'F']]);
+      return Q({ prompt: 'Şekildeki geometrik çizimin adı nedir?', visual: V.lineKind(k, harf), options: mc(name[k], wr, [['Nokta', 'genel']]), steps: ['Uçlarına bak: iki uç noktası varsa doğru parçası,', 'bir başlangıç noktası ve tek ok varsa ışın,', 'iki yönde ok varsa doğrudur.'], hint: 'Okların sayısına bak!' });
     }
     if (lv === 2) {
+      const [X, Y] = pick([['A', 'B'], ['K', 'L'], ['M', 'N'], ['P', 'R'], ['C', 'D'], ['E', 'F']]), XY = X + Y;
       const it = pick([
-        ['[AB] gösterimi neyi ifade eder?', 'AB doğru parçasını', [['AB ışınını', 'isin_dogru'], ['AB doğrusunu', 'dp_dogru'], ['AB uzunluğunu', 'dp_dogru']]],
-        ['[AB gösterimi neyi ifade eder?', 'A noktasından başlayan AB ışınını', [['AB doğru parçasını', 'isin_dogru'], ['AB doğrusunu', 'isin_dogru'], ['B noktasından başlayan ışını', 'isin_dogru']]],
-        ['|AB| gösterimi neyi ifade eder?', 'AB doğru parçasının uzunluğunu', [['AB doğrusunu', 'dp_dogru'], ['AB ışınını', 'isin_dogru'], ['A ile B noktalarını', 'genel']]],
-        ['Hangisi iki yönde de sınırsız uzar?', 'Doğru', [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru'], ['Nokta', 'genel']]],
+        [`[${XY}] gösterimi neyi ifade eder?`, `${XY} doğru parçasını`, [[`${XY} ışınını`, 'isin_dogru'], [`${XY} doğrusunu`, 'dp_dogru'], [`${XY} uzunluğunu`, 'dp_dogru']]],
+        [`[${XY} gösterimi neyi ifade eder?`, `${X} noktasından başlayan ${XY} ışınını`, [[`${XY} doğru parçasını`, 'isin_dogru'], [`${XY} doğrusunu`, 'isin_dogru'], [`${Y} noktasından başlayan ışını`, 'isin_dogru']]],
+        [`|${XY}| gösterimi neyi ifade eder?`, `${XY} doğru parçasının uzunluğunu`, [[`${XY} doğrusunu`, 'dp_dogru'], [`${XY} ışınını`, 'isin_dogru'], [`${X} ile ${Y} noktalarını`, 'dp_dogru']]],
+        ['Hangisi iki yönde de sınırsız uzar?', 'Doğru', [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru'], ['Nokta', 'dp_dogru']]],
         ['Hangisinin uzunluğu ölçülebilir?', 'Doğru parçası', [['Doğru', 'dp_dogru'], ['Işın', 'isin_dogru'], ['Hiçbiri', 'dp_dogru']]],
+        ['Hangisinin bir başlangıç noktası vardır ama bitiş noktası yoktur?', 'Işın', [['Doğru', 'isin_dogru'], ['Doğru parçası', 'isin_dogru'], ['Nokta', 'isin_dogru']]],
+        ['Hangisinin iki uç noktası vardır?', 'Doğru parçası', [['Işın', 'isin_dogru'], ['Doğru', 'dp_dogru'], ['Hiçbiri', 'dp_dogru']]],
       ]);
       return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['[AB]: iki uç noktalı doğru parçası.', '[AB: A\'dan başlayıp B yönünde sonsuza giden ışın.', '|AB|: doğru parçasının uzunluğu.'] });
     }
-    const n = pick([3, 4]), ans = n * (n - 1) / 2, labels = ['A', 'B', 'C', 'D'].slice(0, n).join(', ');
-    return Q({ type: 'input', prompt: `Bir doğru üzerinde sırasıyla ${labels} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?`, answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }], steps: n === 3 ? ['Yan yana olanlar: [AB], [BC] → 2 tane', 'Atlayan: [AC] → 1 tane', 'Toplam 3 doğru parçası.'] : ['Yan yana: [AB], [BC], [CD] → 3', 'Bir atlayan: [AC], [BD] → 2', 'İki atlayan: [AD] → 1', 'Toplam 6.'], hint: 'Sadece yan yana olanları sayma!' });
+    // Seviye 3: n nokta (3–6), farklı harfler ve bağlamlar; n·(n−1)/2 doğru parçası
+    const n = ri(3, 6), set = pick([['A', 'B', 'C', 'D', 'E', 'F'], ['K', 'L', 'M', 'N', 'O', 'P'], ['P', 'R', 'S', 'T', 'U', 'V']]).slice(0, n), ans = n * (n - 1) / 2;
+    const prompt = Math.random() < 0.5 ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Her iki durak arası bir doğru parçası sayılırsa kaç farklı doğru parçası oluşur?`;
+    const parcalar = Array.from({ length: n - 1 }, (_, i) => n - 1 - i);
+    return Q({ type: 'input', prompt, answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }, { v: n * (n - 1), mis: 'nokta_sayma' }],
+      steps: [`${set[0]} noktasından başlayanlar: ${n - 1} tane`, `${set[1]} noktasından başlayanlar: ${n - 2} tane (${set[1]}${set[0]} zaten sayıldı)`, `Toplam: ${parcalar.join(' + ')} = ${ans}`], hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
   };
   GEN.g_cember = (lv) => {
     if (lv === 1) {
@@ -161,18 +169,24 @@
     return Q({ type: 'input', prompt: `Çapı ${d} cm olan bir çemberle aynı merkezli ikinci bir çemberin yarıçapı, birinci çemberin yarıçapının yarısı kadardır. İkinci çemberin ÇAPI kaç cm'dir?`, answer: String(2 * r2), unit: 'cm', inputMis: [{ v: r2, mis: 'cap_yaricap' }, { v: d, mis: 'cap_yaricap' }], steps: [`1. çemberin yarıçapı: ${d} ÷ 2 = ${d / 2} cm`, `2. çemberin yarıçapı: ${d / 2} ÷ 2 = ${r2} cm`, `2. çemberin çapı: 2 × ${r2} = ${2 * r2} cm`] });
   };
   GEN.g_dikme_paralel = (lv) => {
-    const names = { dik: 'd ⊥ k (birbirine diktir)', paralel: 'd // k (paraleldir)', kesisen: 'Kesişir ama dik değildir' };
     if (lv === 1 || lv === 2) {
-      const rel = pick(['dik', 'paralel', 'kesisen']), rot = lv === 2 ? pick([20, 30, -25, 35]) : 0;
+      const [h1, h2] = pick([['d', 'k'], ['a', 'b'], ['m', 'n'], ['x', 'y']]);
+      const names = { dik: `${h1} ⊥ ${h2} (birbirine diktir)`, paralel: `${h1} // ${h2} (paraleldir)`, kesisen: 'Kesişir ama dik değildir' };
+      const rel = pick(['dik', 'paralel', 'kesisen']), rot = lv === 2 ? pick([20, 30, -25, 35, -40]) : pick([0, 90]);
       const wr = Object.keys(names).filter(k => k !== rel).map(k => [names[k], rel === 'dik' || k === 'dik' ? 'dik_yatay' : 'paralel_kesisen']);
-      return Q({ prompt: 'Şekildeki d ve k doğrularının durumu nedir?', visual: V.twoLines(rel, rot), options: mc(names[rel], wr, [['Çakışıktır', 'paralel_kesisen']]), steps: ['Köşede küçük kare (dik açı işareti) varsa doğrular diktir: ⊥', 'Hiç kesişmiyor ve arası hep aynıysa paraleldir: //', 'Kesişiyor ama dik açı yoksa sadece kesişen doğrulardır.'], hint: lv === 2 ? 'Şekil döndürülmüş olabilir; dik açı işaretini ara.' : '' });
+      return Q({ prompt: `Şekildeki ${h1} ve ${h2} doğrularının durumu nedir?`, visual: V.twoLines(rel, rot, [h1, h2], pick([50, 60, 125, 130])), options: mc(names[rel], wr, [['Çakışıktır', 'paralel_kesisen']]), steps: ['Köşede küçük kare (dik açı işareti) varsa doğrular diktir: ⊥', 'Hiç kesişmiyor ve arası hep aynıysa paraleldir: //', 'Kesişiyor ama dik açı yoksa sadece kesişen doğrulardır.'], hint: lv === 2 ? 'Şekil döndürülmüş olabilir; dik açı işaretine bak.' : 'Dik açı işareti var mı?' });
     }
+    const [x, y, z] = pick([['d', 'k', 'm'], ['a', 'b', 'c'], ['x', 'y', 'z'], ['e', 'f', 'g']]);
     const it = pick([
-      ['Aynı düzlemde d ⊥ k ve k ⊥ m ise d ile m doğruları için ne söylenebilir?', 'd // m (paraleldir)', [['d ⊥ m (diktir)', 'paralel_kesisen'], ['Kesişir', 'paralel_kesisen'], ['Bir şey söylenemez', 'paralel_kesisen']]],
-      ['"//" sembolü ne anlama gelir?', 'Paraleldir', [['Diktir', 'paralel_kesisen'], ['Kesişir', 'paralel_kesisen'], ['Eşittir', 'genel']]],
-      ['"⊥" sembolü ne anlama gelir?', 'Diktir', [['Paraleldir', 'paralel_kesisen'], ['Çakışıktır', 'genel'], ['Eşittir', 'genel']]],
+      [`Aynı düzlemde ${x} ⊥ ${y} ve ${y} ⊥ ${z} ise ${x} ile ${z} doğruları için ne söylenebilir?`, `${x} // ${z} (paraleldir)`, [[`${x} ⊥ ${z} (diktir)`, 'paralel_kesisen'], ['Kesişir ama dik değildir', 'paralel_kesisen'], ['Bir şey söylenemez', 'paralel_kesisen']]],
+      [`Aynı düzlemde ${x} // ${y} ve ${y} // ${z} ise ${x} ile ${z} doğruları için ne söylenebilir?`, `${x} // ${z} (paraleldir)`, [[`${x} ⊥ ${z} (diktir)`, 'paralel_kesisen'], ['Kesişir ama dik değildir', 'paralel_kesisen'], ['Bir şey söylenemez', 'paralel_kesisen']]],
+      [`Aynı düzlemde ${x} ⊥ ${y} ve ${y} // ${z} ise ${x} ile ${z} doğruları için ne söylenebilir?`, `${x} ⊥ ${z} (diktir)`, [[`${x} // ${z} (paraleldir)`, 'paralel_kesisen'], ['Hiç kesişmez', 'paralel_kesisen'], ['Bir şey söylenemez', 'dik_yatay']]],
+      ['"//" sembolü ne anlama gelir?', 'Paraleldir', [['Diktir', 'paralel_kesisen'], ['Kesişir', 'paralel_kesisen'], ['Çakışıktır', 'paralel_kesisen']]],
+      ['"⊥" sembolü ne anlama gelir?', 'Diktir', [['Paraleldir', 'paralel_kesisen'], ['Çakışıktır', 'dik_yatay'], ['Hiç kesişmez', 'paralel_kesisen']]],
+      ['Paralel iki doğru kaç noktada kesişir?', 'Hiçbir noktada', [['1 noktada', 'paralel_kesisen'], ['2 noktada', 'paralel_kesisen'], ['Sonsuz noktada', 'paralel_kesisen']]],
+      ['Kesişen iki farklı doğru kaç noktada kesişir?', '1 noktada', [['Hiçbir noktada', 'paralel_kesisen'], ['2 noktada', 'paralel_kesisen'], ['Sonsuz noktada', 'paralel_kesisen']]],
     ]);
-    return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Aynı doğruya dik olan iki doğru birbirine paraleldir.', '⊥ diklik, // paralellik sembolüdür.'] });
+    return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Aynı doğruya dik olan iki doğru birbirine paraleldir.', 'Paralel iki doğrudan birine dik olan doğru, diğerine de diktir.', '⊥ diklik, // paralellik sembolüdür. Paralel doğrular hiç kesişmez; kesişen iki doğru 1 noktada kesişir.'] });
   };
   const ACI_TUR = (d) => d < 90 ? 'Dar açı' : d === 90 ? 'Dik açı' : d < 180 ? 'Geniş açı' : d === 180 ? 'Doğru açı' : 'Tam açı';
   GEN.g_aci = (lv) => {
@@ -190,9 +204,9 @@
       return Q({ prompt: 'Şekildeki açının ölçüsü aşağıdakilerden hangisi olabilir? (Gözünle tahmin et: dar mı, geniş mi?)', visual: V.angle(d), options: mc(d + '°', [[(180 - d) + '°', 'iletki_ters'], [(d < 90 ? 90 + d : d - 60) + '°', 'aci_tur']], [[(d + 180) + '°', 'aci_tur']]), steps: [d < 90 ? 'Açı dik açıdan (köşe gibi) daha kapalı → dar açı, ölçüsü 90°\'den küçük.' : 'Açı dik açıdan daha açık → geniş açı, ölçüsü 90°\'den büyük.', `İletkinin doğru ölçeği ${d}° gösterir; ${180 - d}° diğer ölçektir.`] });
     }
     const it = pick([
-      () => { const k = ri(2, 3); return Q({ type: 'input', prompt: `${k} tane dik açının ölçüleri toplamı kaç derecedir?`, answer: String(90 * k), unit: '°', inputMis: [{ v: 180 * k, mis: 'aci_tur' }], steps: ['Bir dik açı 90°', `${k} × 90 = ${90 * k}°`] }); },
-      () => Q({ type: 'input', prompt: 'Bir tam açı kaç tane dik açıdan oluşur?', answer: '4', inputMis: [{ v: 2, mis: 'aci_tur' }], steps: ['Tam açı 360°, dik açı 90°', '360 ÷ 90 = 4'] }),
-      () => Q({ type: 'input', prompt: 'Bir doğru açı kaç tane dik açıdan oluşur?', answer: '2', inputMis: [{ v: 4, mis: 'aci_tur' }], steps: ['Doğru açı 180°', '180 ÷ 90 = 2'] }),
+      () => { const k = ri(2, 4); return Q({ type: 'input', prompt: `${k} tane dik açının ölçüleri toplamı kaç derecedir?`, answer: String(90 * k), unit: '°', inputMis: [{ v: 180 * k, mis: 'aci_tur' }], steps: ['Bir dik açı 90°', `${k} × 90 = ${90 * k}°`] }); },
+      () => { const d = pick([30, 45, 60, 90]), tam = Math.random() < 0.5, top = tam ? 360 : 180, yan = (tam ? 180 : 360) / d;
+        return Q({ type: 'input', prompt: `Bir ${tam ? 'tam' : 'doğru'} açı kaç tane ${d} derecelik açıdan oluşur?`, answer: String(top / d), inputMis: [{ v: yan, mis: 'aci_tur' }], steps: [`${tam ? 'Tam açı 360°' : 'Doğru açı 180°'}`, `${top} ÷ ${d} = ${top / d}`] }); },
     ]);
     return it();
   };
@@ -216,9 +230,18 @@
       return Q({ type: 'input', prompt: `Bir ${CG[n].toLocaleLowerCase('tr-TR')}in kaç ${{ 'kenar': 'kenarı', 'köşe': 'köşesi', 'iç açı': 'iç açısı' }[what]} vardır?`, visual: V.polygon(n), answer: String(n), inputMis: [{ v: n - 1, mis: 'cokgen_sayi' }, { v: n + 1, mis: 'cokgen_sayi' }], steps: ['Çokgenlerde kenar = köşe = iç açı sayısı.', `${CG[n]}: ${n}`] });
     }
     if (lv === 2) {
-      return Q({ prompt: 'Hangisi düzgün çokgenin tanımıdır?', options: mc('Bütün kenarları ve bütün iç açıları eşit olan çokgen', [['Sadece bütün kenarları eşit olan çokgen', 'duzgun_eksik'], ['Sadece bütün açıları eşit olan çokgen', 'duzgun_eksik'], ['Köşegeni olmayan çokgen', 'kosegen_kenar']]), steps: ['Düzgün = kenarlar eşit + açılar eşit (ikisi birden).', 'Örnek: Eşkenar dörtgenin kenarları eşittir ama açıları eşit olmayabilir; bu yüzden her zaman düzgün değildir. Kare düzgündür.'] });
+      const tip = pick(['tanim', 'tf', 'tf', 'cevre']);
+      if (tip === 'tanim') return Q({ prompt: 'Hangisi düzgün çokgenin tanımıdır?', options: mc('Bütün kenarları ve bütün iç açıları eşit olan çokgen', [['Sadece bütün kenarları eşit olan çokgen', 'duzgun_eksik'], ['Sadece bütün açıları eşit olan çokgen', 'duzgun_eksik'], ['Köşegeni olmayan çokgen', 'kosegen_kenar']]), steps: ['Düzgün = kenarlar eşit + açılar eşit (ikisi birden).', 'Örnek: Eşkenar üçgen, kare.'] });
+      if (tip === 'tf') { const [ad, dogru, neden] = pick([['Kare', true, 'Bütün kenarları ve bütün açıları eşittir.'], ['Eşkenar üçgen', true, 'Bütün kenarları ve bütün açıları eşittir.'], ['Dikdörtgen', false, 'Açıları eşit (90°) ama kenarları eşit değildir.'], ['Eşkenar dörtgen', false, 'Kenarları eşit ama açıları eşit değildir.']]);
+        return tfQ({ prompt: `${ad} düzgün bir çokgen midir?`, steps: ['Düzgün çokgen: bütün kenarlar VE bütün açılar eşit.', `${ad}: ${neden}`] }, dogru, 'duzgun_eksik'); }
+      const n = ri(5, 8), a = ri(3, 12);
+      return Q({ type: 'input', prompt: `Düzgün bir ${CG[n].toLocaleLowerCase('tr-TR')}in bir kenarı ${a} cm. Bu çokgenin çevresi kaç cm?`, visual: V.polygon(n), answer: String(n * a), unit: 'cm', inputMis: [{ v: a * (n - 1), mis: 'cokgen_sayi' }, { v: a + n, mis: 'cokgen_sayi' }], steps: ['Düzgün çokgende bütün kenarlar eşittir.', `${n} kenar × ${a} cm = ${n * a} cm`] });
     }
-    const n = ri(5, 8);
+    if (Math.random() < 0.5) {
+      const k = ri(1, 7), n = k + 3;
+      return Q({ type: 'input', prompt: `Bir köşesinden ${k} köşegen çizilebilen çokgen kaç kenarlıdır?`, answer: String(n), inputMis: [{ v: k + 1, mis: 'kosegen_kenar' }, { v: k, mis: 'kosegen_kenar' }], steps: ['Bir köşeden çizilen köşegen sayısı = kenar sayısı − 3', `Kenar sayısı = ${k} + 3 = ${n} (${CG[n].toLocaleLowerCase('tr-TR')})`] });
+    }
+    const n = ri(4, 10);
     return Q({ type: 'input', prompt: `Bir ${CG[n].toLocaleLowerCase('tr-TR')}in BİR köşesinden kaç köşegen çizilebilir?`, visual: V.polygon(n, true), answer: String(n - 3), inputMis: [{ v: n - 1, mis: 'kosegen_kenar' }, { v: n, mis: 'kosegen_kenar' }], steps: [`${n} köşe var.`, 'Köşenin kendisine ve iki komşusuna köşegen çizilmez → 3 köşe çıkar.', `${n} − 3 = ${n - 3}`] });
   };
   GEN.g_ucgen = (lv) => {
@@ -388,8 +411,17 @@
       const ok = ask === 'çevre' ? `${2 * (a + b)} cm` : `${a * b} cm²`, other = ask === 'çevre' ? `${a * b} cm` : `${2 * (a + b)} cm²`;
       return Q({ prompt: `${a} cm ve ${b} cm kenarlı bir dikdörtgen kartonun etrafına şerit yapıştırılacak${ask === 'alan' ? ' değil, ÜSTÜ tamamen kaplanacak' : ''}. Hangi ölçü gerekir?`, options: mc(ok, [[other, 'cevre_alan'], [ask === 'çevre' ? `${a + b} cm` : `${a + b} cm²`, ask === 'çevre' ? 'cevre_yarim' : 'cevre_alan']], [[ask === 'çevre' ? `${2 * (a + b)} cm²` : `${a * b} cm`, 'birim']]), steps: [ask === 'çevre' ? 'Etrafına şerit → çevre (uzunluk, cm)' : 'Üstünü kaplamak → alan (cm²)', ask === 'çevre' ? `2 × (${a} + ${b}) = ${2 * (a + b)} cm` : `${a} × ${b} = ${a * b} cm²`] });
     }
-    if (lv === 2) return tfQ({ prompt: 'Çevre uzunlukları eşit olan iki dikdörtgenin alanları da her zaman eşittir.', steps: ['Örnek: 5×1 ve 3×3 dikdörtgenlerinin çevresi 12 cm.', 'Alanları: 5 cm² ve 9 cm² → farklı!', 'Yani ifade YANLIŞ.'] }, false, 'cevre_alan_ayni');
-    const P = pick([16, 20, 24, 28, 32, 36]), s = P / 4, h = P / 2;
+    if (lv === 2) {
+      const tip = pick(['genel', 'genel2', 'sayi', 'sayi']);
+      if (tip === 'genel') return tfQ({ prompt: 'Çevre uzunlukları eşit olan iki dikdörtgenin alanları da her zaman eşittir.', steps: ['Örnek: 5×1 ve 3×3 dikdörtgenlerinin çevresi 12 cm.', 'Alanları: 5 cm² ve 9 cm² → farklı!', 'Yani ifade YANLIŞ.'] }, false, 'cevre_alan_ayni');
+      if (tip === 'genel2') return tfQ({ prompt: 'Alanları eşit olan iki dikdörtgenin çevreleri de her zaman eşittir.', steps: ['Örnek: 4×1 ve 2×2 dikdörtgenlerinin alanı 4 cm².', 'Çevreleri: 10 cm ve 8 cm → farklı!', 'Yani ifade YANLIŞ.'] }, false, 'cevre_alan_ayni');
+      const h = ri(6, 12), x = ri(1, Math.floor(h / 2) - 1), y = ri(x + 1, Math.floor(h / 2)), neAlan = Math.random() < 0.5;
+      return tfQ({ prompt: `${h - x} cm × ${x} cm ve ${h - y} cm × ${y} cm boyutlarındaki iki dikdörtgenin ${neAlan ? 'alanları' : 'çevreleri'} eşittir.`, steps: [`Çevreler: 2 × (${h - x} + ${x}) = ${2 * h} cm ve 2 × (${h - y} + ${y}) = ${2 * h} cm → eşit.`, `Alanlar: ${h - x} × ${x} = ${(h - x) * x} cm² ve ${h - y} × ${y} = ${(h - y) * y} cm² → farklı.`, 'Çevresi eşit dikdörtgenlerin alanı farklı olabilir.'] }, !neAlan, neAlan ? 'cevre_alan_ayni' : 'cevre_alan');
+    }
+    const P = pick([12, 16, 20, 24, 28, 32, 36, 40]), s = P / 4, h = P / 2;
+    if (Math.random() < 0.4) {
+      return Q({ prompt: `Kenar uzunlukları doğal sayı ve çevre uzunluğu ${P} cm olan dikdörtgenler arasında alanı EN KÜÇÜK olanın alanı kaç cm²'dir?`, options: mc(`${h - 1} cm²`, [[`${s * s} cm²`, 'cevre_alan_ayni'], [`${(h - 2) * 2} cm²`, 'cevre_alan_ayni']], [[`${P} cm²`, 'cevre_alan']]), steps: [`Uzun + kısa kenar = ${P} ÷ 2 = ${h}`, `Denemeler: ${h - 1}×1=${h - 1}, ${h - 2}×2=${(h - 2) * 2}, ..., ${s}×${s}=${s * s}`, `Kenarlar arasındaki fark en çok olunca alan en küçük: ${h - 1}×1 = ${h - 1} cm²`] });
+    }
     const alt = [[(h - 1) * 1, 'cevre_alan_ayni'], [(h - 2) * 2, 'cevre_alan_ayni'], [(h - 3) * 3, 'cevre_alan_ayni']];
     return Q({ prompt: `Kenar uzunlukları doğal sayı ve çevre uzunluğu ${P} cm olan dikdörtgenler arasında alanı EN BÜYÜK olanın alanı kaç cm²'dir?`, options: mc(`${s * s} cm²`, alt.map(([v, m]) => [`${v} cm²`, m]), [[`${P} cm²`, 'cevre_alan']]), steps: [`Uzun + kısa kenar = ${P} ÷ 2 = ${h}`, `Denemeler: ${h - 1}×1=${h - 1}, ${h - 2}×2=${(h - 2) * 2}, ..., ${s}×${s}=${s * s}`, `Kenarlar eşit olunca (kare) alan en büyük: ${s * s} cm²`] });
   };
@@ -484,20 +516,29 @@
   const CATS = [['Elma', 'Muz', 'Çilek', 'Kiraz', 'Erik'], ['Futbol', 'Voleybol', 'Basketbol', 'Yüzme', 'Tenis'], ['Kedi', 'Köpek', 'Kuş', 'Balık', 'Tavşan'], ['Roman', 'Masal', 'Şiir', 'Çizgi R.', 'Bilim']];
   GEN.s_arastirma = (lv) => {
     if (lv === 1) return Q({ prompt: 'Hangisi istatistiksel bir araştırma sorusu olmaya UYGUNDUR?', options: mc(pick(['5/A sınıfındaki öğrencilerin en sevdiği meyve hangisidir?', 'Okulumuzdaki öğrenciler okula hangi ulaşım aracıyla geliyor?', 'Mahallemizdeki ailelerin en çok tercih ettiği tatil yeri neresidir?']), [[pick(['Ayşe\'nin en sevdiği renk nedir?', 'Öğretmenimizin doğum günü ne zaman?']), 'soru_tek'], ['Bugün hangi gün?', 'soru_tek'], ['Türkiye\'nin başkenti neresidir?', 'soru_tek']]), steps: ['Araştırma sorusu bir GRUBA yöneltilir.', 'Birden çok farklı cevabı olabilir (değişkenlik vardır).'] });
+    const ADIMLAR = ['Araştırma sorusunu belirleme', 'Veri toplama ve analize hazırlama', 'Veri görselleştirme', 'Özetleme ve yorumlama'];
+    const adimSteps = ['1) Araştırma sorusunu belirleme', '2) Veri toplama ve analize hazırlama', '3) Veri görselleştirme', '4) Özetleme ve yorumlama'];
     if (lv === 2) {
-      const it = pick([
-        ['İstatistiksel araştırma sürecinin İLK adımı hangisidir?', 'Araştırma sorusunu belirleme'],
-        ['İstatistiksel araştırma sürecinin SON adımı hangisidir?', 'Özetleme ve yorumlama'],
-        ['"Veri toplama ve analize hazırlama" adımından hemen sonra hangi adım gelir?', 'Veri görselleştirme'],
-      ]);
-      const all = ['Araştırma sorusunu belirleme', 'Veri toplama ve analize hazırlama', 'Veri görselleştirme', 'Özetleme ve yorumlama'];
-      return Q({ prompt: it[0], options: mc(it[1], all.filter(x => x !== it[1]).map(x => [x, 'adim_sira'])), steps: ['1) Araştırma sorusunu belirleme', '2) Veri toplama ve analize hazırlama', '3) Veri görselleştirme', '4) Özetleme ve yorumlama'] });
+      if (Math.random() < 0.5) {
+        const i = ri(0, 3), yon = i === 0 ? 'sonra' : i === 3 ? 'önce' : pick(['önce', 'sonra']), dogru = ADIMLAR[yon === 'önce' ? i - 1 : i + 1];
+        const prompt = pick([true, false]) && (i === 0 || i === 3) ? `İstatistiksel araştırma sürecinin ${i === 0 ? 'İLK' : 'SON'} adımı hangisidir?` : `"${ADIMLAR[i]}" adımından hemen ${yon} hangi adım gelir?`;
+        const cevap = prompt.includes('İLK') ? ADIMLAR[0] : prompt.includes('SON') ? ADIMLAR[3] : dogru;
+        return Q({ prompt, options: mc(cevap, ADIMLAR.filter(x => x !== cevap).map(x => [x, 'adim_sira'])), steps: adimSteps });
+      }
+      const [konu, soru] = pick([['meyve', 'en sevdiği meyve'], ['spor', 'en çok yaptığı spor'], ['kitap türü', 'en çok okuduğu kitap türü'], ['renk', 'en sevdiği renk'], ['ulaşım aracı', 'okula geliş şekli']]);
+      const [ornek, k] = pick([[`"Sınıfımızdaki öğrencilerin ${soru} nedir?" sorusunu yazmak`, 0], [`Arkadaşlarımıza ${soru} hakkında anket yapıp cevapları sıklık tablosuna yazmak`, 1], [`Sıklık tablosundaki ${konu} verilerini sütun grafiğine dönüştürmek`, 2], [`Grafiğe bakarak "En çok seçilen ${konu} hangisi?" sorusunu cevaplamak`, 3]]);
+      return Q({ prompt: `${ornek} hangi araştırma adımına örnektir?`, options: mc(ADIMLAR[k], ADIMLAR.filter((_, j) => j !== k).map(x => [x, 'adim_sira'])), steps: adimSteps });
     }
+    const hazir = pick(['TÜİK\'in yayımladığı istatistikler', 'Meteorolojinin yayımladığı sıcaklık kayıtları', 'Okul kütüphanesinin kitap ödünç kayıtları', 'Gazetede yayımlanan nüfus bilgileri']);
+    const kendi = pick(['Sınıfta yaptığımız anket', 'Arkadaşlarımızla yaptığımız görüşme', 'Okul bahçesinde yaptığımız gözlem', 'Sınıfta yaptığımız ölçüm']);
     const it = pick([
-      ['Aşağıdakilerden hangisi HAZIR veri kaynağıdır?', 'TÜİK\'in yayımladığı istatistikler', [['Sınıfta yaptığımız anket', 'soru_tek'], ['Arkadaşlarımızla yaptığımız görüşme', 'soru_tek'], ['Okul bahçesinde yaptığımız gözlem', 'soru_tek']]],
+      ['Aşağıdakilerden hangisi HAZIR veri kaynağıdır?', hazir, [['Sınıfta yaptığımız anket', 'soru_tek'], ['Arkadaşlarımızla yaptığımız görüşme', 'soru_tek'], ['Okul bahçesinde yaptığımız gözlem', 'soru_tek']]],
+      ['Aşağıdakilerden hangisi verileri KENDİMİZİN topladığı bir yöntemdir?', kendi, [['TÜİK\'in yayımladığı istatistikler', 'soru_tek'], ['Meteorolojinin yayımladığı sıcaklık kayıtları', 'soru_tek'], ['Gazetede yayımlanan nüfus bilgileri', 'soru_tek']]],
       ['Anket hazırlarken hangisine DİKKAT EDİLMELİDİR?', 'Kişisel bilgilerin gizliliği korunmalıdır', [['Katılanların adres bilgisi mutlaka alınmalıdır', 'soru_tek'], ['Sorular tek bir kişiye göre hazırlanmalıdır', 'soru_tek'], ['Tanımadığımız kişilerin anketlerine hemen cevap vermeliyiz', 'soru_tek']]],
+      ['Bir anket sorusu nasıl olmalıdır?', 'Kısa, açık ve herkesin anlayacağı şekilde', [['Cevabı yönlendirecek şekilde', 'soru_tek'], ['Çok uzun ve karmaşık', 'soru_tek'], ['Katılanların kişisel bilgilerini soran', 'soru_tek']]],
+      ['Araştırma raporunda ankete katılanların adları yazılmalı mıdır?', 'Hayır, kişisel bilgiler gizli tutulur', [['Evet, herkesin adı yazılmalıdır', 'soru_tek'], ['Sadece en çok cevap verenin adı yazılır', 'soru_tek'], ['Sadece öğretmenin adı yazılır', 'soru_tek']]],
     ]);
-    return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Hazır veri: başkalarının topladığı ve yayımladığı veri (TÜİK, gazete, yıllık).', 'Kişisel bilgiler gizli tutulmalıdır.'] });
+    return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Hazır veri: başkalarının topladığı ve yayımladığı veri (TÜİK, gazete, kayıtlar).', 'Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız.', 'Kişisel bilgiler gizli tutulmalıdır.'] });
   };
   GEN.s_tablo_sutun = (lv) => {
     const u = lv === 3 ? 10 : 2, cats = pick(CATS).slice(0, 4), vals = cats.map(() => ri(1, 6) * u); while (new Set(vals).size < 4) vals[ri(0, 3)] = ri(1, 7) * u;
@@ -559,8 +600,14 @@
       const a = ri(12, 49), b = pick([11, 12, 21, 102, 13]), t = Math.floor(b / 10) * 10, o = b - t;
       return Q({ type: 'input', prompt: `${a} × ${b} = ${a} × ${t} + ${a} × .......   Boş yere hangi sayı gelmelidir?`, answer: String(o), inputMis: [{ v: b, mis: 'dagilma_eksik' }, { v: a * o, mis: 'dagilma_eksik' }], steps: [`${b} = ${t} + ${o}`, `${a} × (${t} + ${o}) = ${a} × ${t} + ${a} × ${o}`] });
     }
-    const it = pick([[`9 − 4 = 4 − 9`, false, 'cikarma_degisme'], [`20 ÷ 5 = 5 ÷ 20`, false, 'cikarma_degisme'], [`7 × 6 = 6 × 7`, true, 'ozellik_karis'], [`5 × (3 + 2) = 5 × 3 + 2`, false, 'dagilma_eksik'], [`4 × (10 + 3) = 4 × 10 + 4 × 3`, true, 'dagilma_eksik']]);
-    return tfQ({ prompt: `"${it[0]}" eşitliği doğru mudur?`, steps: [it[1] ? 'Evet, iki taraf da aynı sonucu verir.' : 'Hayır! İki tarafı ayrı ayrı hesapla, sonuçlar farklı çıkar.', 'Değişme özelliği sadece toplama ve çarpmada vardır; dağılmada her terim çarpılır.'] }, it[1], it[2]);
+    const a = ri(3, 9), b = ri(2, a - 1), c = ri(2, 9), x = b + c + ri(3, 20), bb = c + ri(1, 5);
+    const it = pick([
+      [`${a} − ${b} = ${b} − ${a}`, false, 'cikarma_degisme'], [`${a * b} ÷ ${b} = ${b} ÷ ${a * b}`, false, 'cikarma_degisme'],
+      [`${a} × ${b} = ${b} × ${a}`, true, 'ozellik_karis'], [`${a} + ${c} = ${c} + ${a}`, true, 'ozellik_karis'],
+      [`${a} × (${b} + ${c}) = ${a} × ${b} + ${c}`, false, 'dagilma_eksik'], [`${a} × (${b} + ${c}) = ${a} × ${b} + ${a} × ${c}`, true, 'dagilma_eksik'],
+      [`(${a} + ${b}) + ${c} = ${a} + (${b} + ${c})`, true, 'ozellik_karis'], [`(${x} − ${bb}) − ${c} = ${x} − (${bb} − ${c})`, false, 'cikarma_degisme'],
+    ]);
+    return tfQ({ prompt: `"${it[0]}" eşitliği doğru mudur?`, steps: [it[1] ? 'Evet, iki taraf da aynı sonucu verir.' : 'Hayır! İki tarafı ayrı ayrı hesapla, sonuçlar farklı çıkar.', 'Değişme ve birleşme özelliği sadece toplama ve çarpmada vardır; dağılmada parantezdeki her terim çarpılır.'] }, it[1], it[2]);
   };
   GEN.e_us = (lv) => {
     if (lv === 1) { const a = ri(2, 12); return Q({ type: 'input', prompt: `${a}² (${nk(a, 'in')} karesi) kaçtır?`, answer: String(a * a), inputMis: [{ v: 2 * a, mis: 'us_carpim' }, { v: a + 2, mis: 'us_carpim' }], steps: [`${a}² = ${a} × ${a}`, `= ${a * a}`] }); }
@@ -614,7 +661,16 @@
       const [e, t] = pick(OLAY), all = ['Kesin', 'İmkânsız', 'Mümkün'];
       return Q({ prompt: `"${e}" olayı hangisidir?`, options: mc(t, all.filter(x => x !== t).map(x => [x, 'olay_tur'])), steps: ['Mutlaka olacaksa → kesin (olasılık 1)', 'Asla olamazsa → imkânsız (olasılık 0)', 'Olabilir de olmayabilir de → mümkün'] });
     }
-    return Q({ prompt: 'Kesin bir olayın olasılık değeri kaçtır?', options: mc('1', [['0', 'olay_tur'], [fr(1, 2), 'olay_tur'], ['100', 'olasilik_buyuk']]), steps: ['Kesin olay → olasılık 1 (%100)', 'İmkânsız olay → 0 (%0)'] });
+    // Seviye 3: olayın olasılık DEĞERİ (0 ya da 1); bağlam ve sayılar değişir
+    const renk = pick(['kırmızı', 'mavi', 'yeşil', 'sarı']), diger = pick(['kırmızı', 'mavi', 'yeşil', 'sarı'].filter(r => r !== renk)), n = ri(3, 12);
+    const [olay, deger] = pick([
+      ['Kesin bir olay', '1'], ['İmkânsız bir olay', '0'],
+      [`Bir zar atıldığında ${ri(7, 12)} gelmesi`, '0'], ['Bir zar atıldığında 7 sayısından küçük bir sayı gelmesi', '1'], ['Bir zar atıldığında 0 gelmesi', '0'],
+      [`İçinde sadece ${n} ${renk} top olan torbadan ${renk} top çekilmesi`, '1'], [`İçinde sadece ${n} ${renk} top olan torbadan ${diger} top çekilmesi`, '0'],
+      [`Bir haftanın ${ri(8, 10)} gün olması`, '0'], ['Madenî para atıldığında yazı ya da tura gelmesi', '1'],
+    ]);
+    const tersi = deger === '1' ? '0' : '1', soru = olay.endsWith('olay') ? `${olay}ın olasılık değeri kaçtır?` : `"${olay}" olayının olasılık değeri kaçtır?`;
+    return Q({ prompt: soru, options: mc(deger, [[tersi, 'olay_tur'], [fr(1, 2), 'olay_tur'], [pick(['10', '100']), 'olasilik_buyuk']]), steps: ['Kesin olay → olasılık 1', 'İmkânsız olay → olasılık 0', 'Olasılık 0 ile 1 arasındadır; 1\'den büyük olamaz.'] });
   };
   GEN.p_spektrum = (lv) => {
     const n = pick([4, 6, 8]), k = ri(0, n), cols = shuffle(Array.from({ length: n }, (_, i) => i < k ? 'sb' : 'c0b'));

@@ -134,18 +134,19 @@
     return svg(300, 150, one(20, 60) + `<text x="50" y="148" class="tx sm" text-anchor="middle">1. açı</text>` + one(130, 150) + `<text x="200" y="148" class="tx sm" text-anchor="middle">2. açı</text>`, 'kol uzunlukları farklı iki açı');
   };
   // Doğru / ışın / doğru parçası
-  V.lineKind = (kind) => {
+  V.lineKind = (kind, harf) => {
+    const [h1, h2] = harf || ['A', 'B'];
     const y = 45; let s = '';
     const arrow = (x, dir) => `<path d="M${x},${y} l${-12 * dir},-7 l0,14 Z" class="dot"/>`;
-    if (kind === 'dp') s = `<line x1="50" y1="${y}" x2="230" y2="${y}" class="ln"/><circle cx="50" cy="${y}" r="5" class="dot"/><circle cx="230" cy="${y}" r="5" class="dot"/><text x="50" y="${y + 28}" class="tx" text-anchor="middle">A</text><text x="230" y="${y + 28}" class="tx" text-anchor="middle">B</text>`;
-    if (kind === 'isin') s = `<line x1="50" y1="${y}" x2="262" y2="${y}" class="ln"/>${arrow(270, 1)}<circle cx="50" cy="${y}" r="5" class="dot"/><circle cx="170" cy="${y}" r="5" class="dot"/><text x="50" y="${y + 28}" class="tx" text-anchor="middle">A</text><text x="170" y="${y + 28}" class="tx" text-anchor="middle">B</text>`;
-    if (kind === 'dogru') s = `<line x1="18" y1="${y}" x2="262" y2="${y}" class="ln"/>${arrow(10, -1)}${arrow(270, 1)}<circle cx="90" cy="${y}" r="5" class="dot"/><circle cx="190" cy="${y}" r="5" class="dot"/><text x="90" y="${y + 28}" class="tx" text-anchor="middle">A</text><text x="190" y="${y + 28}" class="tx" text-anchor="middle">B</text>`;
-    if (kind === 'nokta') s = `<circle cx="140" cy="${y}" r="6" class="dot"/><text x="140" y="${y + 30}" class="tx" text-anchor="middle">A</text>`;
+    if (kind === 'dp') s = `<line x1="50" y1="${y}" x2="230" y2="${y}" class="ln"/><circle cx="50" cy="${y}" r="5" class="dot"/><circle cx="230" cy="${y}" r="5" class="dot"/><text x="50" y="${y + 28}" class="tx" text-anchor="middle">${h1}</text><text x="230" y="${y + 28}" class="tx" text-anchor="middle">${h2}</text>`;
+    if (kind === 'isin') s = `<line x1="50" y1="${y}" x2="262" y2="${y}" class="ln"/>${arrow(270, 1)}<circle cx="50" cy="${y}" r="5" class="dot"/><circle cx="170" cy="${y}" r="5" class="dot"/><text x="50" y="${y + 28}" class="tx" text-anchor="middle">${h1}</text><text x="170" y="${y + 28}" class="tx" text-anchor="middle">${h2}</text>`;
+    if (kind === 'dogru') s = `<line x1="18" y1="${y}" x2="262" y2="${y}" class="ln"/>${arrow(10, -1)}${arrow(270, 1)}<circle cx="90" cy="${y}" r="5" class="dot"/><circle cx="190" cy="${y}" r="5" class="dot"/><text x="90" y="${y + 28}" class="tx" text-anchor="middle">${h1}</text><text x="190" y="${y + 28}" class="tx" text-anchor="middle">${h2}</text>`;
+    if (kind === 'nokta') s = `<circle cx="140" cy="${y}" r="6" class="dot"/><text x="140" y="${y + 30}" class="tx" text-anchor="middle">${h1}</text>`;
     return svg(280, 90, s, 'geometrik çizim');
   };
   // İki doğru: 'dik' | 'paralel' | 'kesisen'
-  V.twoLines = (rel, rot) => {
-    rot = rot || 0; const cx = 140, cy = 85, L = 120;
+  V.twoLines = (rel, rot, harf, kesAci) => {
+    rot = rot || 0; const [h1, h2] = harf || ['d', 'k']; const cx = 140, cy = 85, L = 120;
     const seg = (ang, ox = 0, oy = 0) => { const a = rad(ang); return `<line x1="${cx + ox - L * Math.cos(a)}" y1="${cy + oy - L * Math.sin(a)}" x2="${cx + ox + L * Math.cos(a)}" y2="${cy + oy + L * Math.sin(a)}" class="ln"/>`; };
     let s = '';
     if (rel === 'paralel') { const a = rad(rot + 90); s = seg(rot, 32 * Math.cos(a), 32 * Math.sin(a)) + seg(rot, -32 * Math.cos(a), -32 * Math.sin(a)); }
@@ -154,8 +155,8 @@
       const r = 16, a0 = rad(rot), a1 = rad(rot + 90), aq = rad(rot + 45);
       s += `<path d="M${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} L${cx + r * Math.SQRT2 * Math.cos(aq)},${cy + r * Math.SQRT2 * Math.sin(aq)} L${cx + r * Math.cos(a1)},${cy + r * Math.sin(a1)}" class="ln thin" fill="none"/>`;
     }
-    if (rel === 'kesisen') s = seg(rot) + seg(rot + 55);
-    s += `<text x="16" y="20" class="tx">d</text><text x="250" y="20" class="tx">k</text>`;
+    if (rel === 'kesisen') s = seg(rot) + seg(rot + (kesAci || 55));
+    s += `<text x="16" y="20" class="tx">${h1}</text><text x="250" y="20" class="tx">${h2}</text>`;
     return svg(280, 170, s, 'iki doğru');
   };
   // Düzgün çokgen
