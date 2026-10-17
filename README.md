@@ -32,7 +32,7 @@ Adres: `https://KULLANICI_ADIN.github.io/matematik-yolu/`
 ## Klasörler
 - `src/` kaynak kod (core, generators, curriculum, engine, app, style)
 - `data/mufredat.json` 7 tema, 35 beceri, 67 kavram yanılgısı, 140 anlatım kartı
-- `dist/` yayına hazır uygulama (`index.html` + `manifest.webmanifest` + `sw.js` + `icon.svg`)
+- `dist/` yayına hazır uygulama (`index.html` + `manifest.webmanifest` + `sw.js` + `img/simge2_*.png`)
 
 ## Pi'nin sesini üretme (ElevenLabs)
 En kolayı: `bash tools/sesleri_uret.sh` (anahtarı gizli sorar, kaydetmez). Elle:

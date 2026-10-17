@@ -10,7 +10,7 @@ frag = re.sub(r'<!doctype html>\s*<html[^>]*>\s*<head>\s*', '', frag)
 frag = re.sub(r'<meta charset[^>]*>\s*<meta name="viewport"[^>]*>\s*', '', frag)
 frag = frag.replace('</head>\n<body>\n','').replace('</body>\n</html>\n','')
 (D/'artifact.html').write_text(frag)
-pwa = '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="img/simge_192.png" type="image/png"><link rel="apple-touch-icon" href="img/simge_192.png">'
+pwa = '<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="img/simge2_192.png" type="image/png"><link rel="apple-touch-icon" href="img/simge2_192.png">'
 sw = "<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>"
 (D/'index.html').write_text(base.replace('<!--PWA-->', pwa + '<script src="config.js"></script>').replace('<!--SW-->', sw))
 cfg = D/'config.js'
@@ -26,7 +26,7 @@ for f in (S/'pwa').glob('*'):
 if (S/'pwa'/'img').exists(): shutil.copytree(S/'pwa'/'img', D/'img', dirs_exist_ok=True)
 # Yayın kopyası: GitHub Pages docs/ klasöründen yayınlar
 P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch()
-for f in ['index.html', 'config.js', 'sw.js', 'icon.svg', 'manifest.webmanifest']:
+for f in ['index.html', 'config.js', 'sw.js', 'manifest.webmanifest']:
     if (D/f).exists(): shutil.copy(D/f, P/f)
 if (D/'img').exists(): shutil.copytree(D/'img', P/'img', dirs_exist_ok=True)
 print('docs/ güncellendi')
