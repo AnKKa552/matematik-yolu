@@ -457,3 +457,41 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
 /* Pi soruyu okumaya hazırlanırken (ses ilk kez üretiliyor): küçük düşünme balonu */
 .pikonus.dusunuyor:after{content:'•••';position:absolute;top:-6px;right:-6px;background:var(--surface);color:var(--brand);border:2px solid var(--line);border-radius:12px;padding:0 6px;font-weight:900;font-size:13px;line-height:18px;animation:float 1s ease-in-out infinite}
+
+/* Ders sonu: yıldız/puan göstergesi */
+.skor{position:relative;width:240px;max-width:72vw;margin:6px 0 34px}
+.skor svg{width:100%;display:block;overflow:visible}
+.skor .yay-bos{fill:none;stroke:var(--line);stroke-width:16;stroke-linecap:round}
+.skor .yay-dolu{fill:none;stroke:var(--gold);stroke-width:16;stroke-linecap:round;animation:yayDol 1.1s cubic-bezier(.2,.8,.2,1) .2s both;filter:drop-shadow(0 0 6px rgba(255,197,49,.5))}
+@keyframes yayDol{from{stroke-dasharray:0 9999}}
+.skor .isaret{fill:var(--bg);stroke:var(--line);stroke-width:4}
+.skor .isaret.on{stroke:#9A6B00}
+.skor-ic{position:absolute;left:0;right:0;top:30%;text-align:center}
+.skor-et{font-weight:900;color:#E0A800;font-size:20px}
+.skor-sayi{font-weight:900;color:var(--gold);font-size:54px;line-height:1;text-shadow:0 2px 0 rgba(150,100,0,.25)}
+.yildizlar{position:absolute;left:0;right:0;bottom:-38px;display:flex;justify-content:center;gap:10px}
+.yildiz{font-size:44px;color:var(--line);line-height:1;transform:scale(.6);animation:yildizPop .45s cubic-bezier(.3,1.6,.5,1) both}
+.yildiz.on{color:var(--gold);text-shadow:0 3px 0 #C79400,0 0 14px rgba(255,197,49,.7)}
+@keyframes yildizPop{0%{transform:scale(0) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+/* Sandık ekranı */
+.sandik-ekran{background:radial-gradient(circle at 50% 40%,#9B7BFF,#5B3FD9 70%);color:#fff;justify-content:center}
+.sandik-ekran.acik{background:radial-gradient(circle at 50% 40%,#7FD3FF,#2E7BE0 70%)}
+.sandik-ust{margin-top:12vh;font-weight:900;letter-spacing:.12em;font-size:20px;opacity:.95}
+.sandik{border:0;background:none;padding:0;cursor:pointer;width:min(260px,70vw);-webkit-tap-highlight-color:transparent}
+.sandik img{width:100%;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.3))}
+.sandik-ekran:not(.acik) .sandik{animation:sandikSalla 1.6s ease-in-out infinite}
+.sandik-ekran.acik .sandik img{animation:sandikAc .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes sandikSalla{0%,60%,100%{transform:rotate(0) scale(1)}70%{transform:rotate(-6deg) scale(1.04)}80%{transform:rotate(6deg) scale(1.04)}90%{transform:rotate(-3deg)}}
+@keyframes sandikAc{0%{transform:scale(.7)}100%{transform:scale(1)}}
+.sandik-odul{font-size:46px;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.2);animation:yildizPop .5s both}
+.sandik-alt{font-weight:800;opacity:.92}
+/* Görev ilerlemesi */
+.gi{gap:4px;text-align:left}
+.gi-satir{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.gi-satir:last-child{border-bottom:0}
+.gi-satir .qbar i,.gi-ay .qbar i{width:var(--hedef);animation:giDol 1s cubic-bezier(.2,.8,.2,1) .3s both}
+@keyframes giDol{from{width:0}}
+.gi-odul{min-width:54px;text-align:center;font-size:22px}
+.gi-odul b{font-size:16px;color:var(--gem)}
+.gi-ay{display:flex;align-items:center;gap:10px}
+@media (prefers-reduced-motion: reduce){.skor .yay-dolu,.yildiz,.sandik,.sandik img,.gi-satir .qbar i,.gi-ay .qbar i{animation:none!important}.yildiz{transform:none}}

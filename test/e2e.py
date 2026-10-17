@@ -20,6 +20,13 @@ async def main():
         await pg.click('[data-act=motiv][data-v=yaris]'); await pg.screenshot(path=OUT+'03_motiv.png')
         await pg.click('[data-act=onb-finish]')
         # yerleştirme: 7 soru, rastgele cevap
+        async def bitir():
+            # Ders sonu artık birkaç adımlı: yıldız ekranı → sandık (dokunarak aç) → görevler
+            for _ in range(6):
+                await pg.evaluate("document.querySelectorAll('.sahne').forEach(e=>e.remove()); 0")
+                if not await pg.query_selector('.end'): return
+                if await pg.query_selector('[data-act=sandik-ac]:not([disabled])'): await pg.click('[data-act=sandik-ac]'); await pg.wait_for_timeout(250)
+                await pg.click('[data-act=end-ok]', force=True); await pg.wait_for_timeout(250)
         async def answer(correct_prob=0.6, shot=None):
             await pg.wait_for_function("!!document.querySelector('.qprompt') && !document.querySelector('.mid') && !document.querySelector('.sheet')", timeout=8000)
             q = await pg.evaluate("(()=>{const q=window.MY_APP.q;return {type:q.type,answer:q.answer,ok:(q.options||[]).findIndex(o=>o.ok),n:(q.options||[]).length}})()")
@@ -56,7 +63,7 @@ async def main():
         for i in range(7):
             await answer(0.6, 'p%d'%i if i in (0,3) else None)
         await pg.wait_for_timeout(400); await pg.screenshot(path=OUT+'04_placement_end.png')
-        await pg.click('[data-act=end-ok]'); await pg.wait_for_timeout(300)
+        await bitir(); await pg.wait_for_timeout(300)
         await pg.screenshot(path=OUT+'05_home.png', full_page=True)
         # bir ders: 4. tema kesirler
         await pg.click('[data-act=theme][data-v=t4]'); await pg.wait_for_timeout(200)
@@ -70,7 +77,7 @@ async def main():
         while await pg.evaluate("window.MY_APP.view")=='lesson' and n<30:
             await answer(0.6, 'l%d'%n if n<4 else None); n+=1
         await pg.wait_for_timeout(500); await pg.screenshot(path=OUT+'10_end.png')
-        await pg.click('[data-act=end-ok]')
+        await bitir()
         # her tema için birer ders (hata kontrolü)
         for t in ['t1','t2','t3','t5','t6','t7']:
             await pg.click(f'[data-act=theme][data-v={t}]'); 
@@ -82,7 +89,7 @@ async def main():
             n=0
             while await pg.evaluate("window.MY_APP.view")=='lesson' and n<30:
                 await answer(0.7, f'{t}_{n}' if n==0 else None); n+=1
-            await pg.click('[data-act=end-ok]')
+            await bitir()
         for tab in ['pratik','lig','profil','veli']:
             await pg.click(f'[data-act=tab][data-v={tab}]'); await pg.wait_for_timeout(200)
             await pg.screenshot(path=OUT+f'20_{tab}.png', full_page=True)
@@ -90,13 +97,13 @@ async def main():
         await pg.click('[data-act=tab][data-v=pratik]'); await pg.click('[data-act=p-mistakes]'); await pg.wait_for_timeout(1200)
         n=0
         while await pg.evaluate("window.MY_APP.view")=='lesson' and n<20: await answer(0.8); n+=1
-        await pg.click('[data-act=end-ok]')
+        await bitir()
         await pg.click('[data-act=tab][data-v=pratik]'); await pg.click('[data-act=p-speed]'); await pg.wait_for_timeout(200)
         await pg.screenshot(path=OUT+'21_speed.png')
         await pg.evaluate("window.MY_APP.ses.left=1"); await pg.wait_for_timeout(1300)
         await pg.screenshot(path=OUT+'22_speed_end.png')
         # karanlık mod
-        await pg.emulate_media(color_scheme='dark'); await pg.click('[data-act=end-ok]'); await pg.wait_for_timeout(200)
+        await pg.emulate_media(color_scheme='dark'); await bitir(); await pg.wait_for_timeout(200)
         await pg.click('[data-act=tab][data-v=yol]'); await pg.screenshot(path=OUT+'23_dark_home.png')
         st = await pg.evaluate("(()=>{const s=window.MY_APP.st;return {xp:s.xp,streak:s.streak,badges:s.badges,mis:Object.keys(s.mis).length,formats:s.formats,rescue:s.rescue}})()")
         print(json.dumps(st, ensure_ascii=False))

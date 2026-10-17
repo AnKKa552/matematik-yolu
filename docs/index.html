@@ -468,6 +468,44 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
 /* Pi soruyu okumaya hazırlanırken (ses ilk kez üretiliyor): küçük düşünme balonu */
 .pikonus.dusunuyor:after{content:'•••';position:absolute;top:-6px;right:-6px;background:var(--surface);color:var(--brand);border:2px solid var(--line);border-radius:12px;padding:0 6px;font-weight:900;font-size:13px;line-height:18px;animation:float 1s ease-in-out infinite}
+
+/* Ders sonu: yıldız/puan göstergesi */
+.skor{position:relative;width:240px;max-width:72vw;margin:6px 0 34px}
+.skor svg{width:100%;display:block;overflow:visible}
+.skor .yay-bos{fill:none;stroke:var(--line);stroke-width:16;stroke-linecap:round}
+.skor .yay-dolu{fill:none;stroke:var(--gold);stroke-width:16;stroke-linecap:round;animation:yayDol 1.1s cubic-bezier(.2,.8,.2,1) .2s both;filter:drop-shadow(0 0 6px rgba(255,197,49,.5))}
+@keyframes yayDol{from{stroke-dasharray:0 9999}}
+.skor .isaret{fill:var(--bg);stroke:var(--line);stroke-width:4}
+.skor .isaret.on{stroke:#9A6B00}
+.skor-ic{position:absolute;left:0;right:0;top:30%;text-align:center}
+.skor-et{font-weight:900;color:#E0A800;font-size:20px}
+.skor-sayi{font-weight:900;color:var(--gold);font-size:54px;line-height:1;text-shadow:0 2px 0 rgba(150,100,0,.25)}
+.yildizlar{position:absolute;left:0;right:0;bottom:-38px;display:flex;justify-content:center;gap:10px}
+.yildiz{font-size:44px;color:var(--line);line-height:1;transform:scale(.6);animation:yildizPop .45s cubic-bezier(.3,1.6,.5,1) both}
+.yildiz.on{color:var(--gold);text-shadow:0 3px 0 #C79400,0 0 14px rgba(255,197,49,.7)}
+@keyframes yildizPop{0%{transform:scale(0) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+/* Sandık ekranı */
+.sandik-ekran{background:radial-gradient(circle at 50% 40%,#9B7BFF,#5B3FD9 70%);color:#fff;justify-content:center}
+.sandik-ekran.acik{background:radial-gradient(circle at 50% 40%,#7FD3FF,#2E7BE0 70%)}
+.sandik-ust{margin-top:12vh;font-weight:900;letter-spacing:.12em;font-size:20px;opacity:.95}
+.sandik{border:0;background:none;padding:0;cursor:pointer;width:min(260px,70vw);-webkit-tap-highlight-color:transparent}
+.sandik img{width:100%;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.3))}
+.sandik-ekran:not(.acik) .sandik{animation:sandikSalla 1.6s ease-in-out infinite}
+.sandik-ekran.acik .sandik img{animation:sandikAc .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes sandikSalla{0%,60%,100%{transform:rotate(0) scale(1)}70%{transform:rotate(-6deg) scale(1.04)}80%{transform:rotate(6deg) scale(1.04)}90%{transform:rotate(-3deg)}}
+@keyframes sandikAc{0%{transform:scale(.7)}100%{transform:scale(1)}}
+.sandik-odul{font-size:46px;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.2);animation:yildizPop .5s both}
+.sandik-alt{font-weight:800;opacity:.92}
+/* Görev ilerlemesi */
+.gi{gap:4px;text-align:left}
+.gi-satir{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.gi-satir:last-child{border-bottom:0}
+.gi-satir .qbar i,.gi-ay .qbar i{width:var(--hedef);animation:giDol 1s cubic-bezier(.2,.8,.2,1) .3s both}
+@keyframes giDol{from{width:0}}
+.gi-odul{min-width:54px;text-align:center;font-size:22px}
+.gi-odul b{font-size:16px;color:var(--gem)}
+.gi-ay{display:flex;align-items:center;gap:10px}
+@media (prefers-reduced-motion: reduce){.skor .yay-dolu,.yildiz,.sandik,.sandik img,.gi-satir .qbar i,.gi-ay .qbar i{animation:none!important}.yildiz{transform:none}}
 </style>
 </head>
 <body>
@@ -2778,20 +2816,52 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
   }
 
+  /* ---------- Ders sonu ödül akışı: Yıldız/puan ekranı → sandık (dokunarak aç) → görev ilerlemesi ----------
+     Yıldızlar cezalandırmaz: dersi bitiren en az 1 yıldız alır; %70+ 2, %90+ 3 yıldız. */
+  const yildizSayisi = (acc) => acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1;
+  const endAdimlari = (r, ses) => ['skor', ...(r.gemsWon ? ['sandik'] : []), ...(r.quests && (r.quests.got.length || r.quests.monthDone) ? ['gorev'] : [])];
   function viewEnd() {
+    const adim = (A.endSteps || ['skor'])[A.endStep || 0];
+    if (adim === 'sandik') return viewSandik();
+    if (adim === 'gorev') return viewGorevIlerleme();
     const r = A.result, ses = A.ses, acc = Math.round(r.acc * 100), mins = Math.max(1, Math.round((Date.now() - ses.start) / 60000));
-    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : 'Az kaldı!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : acc >= 90 ? 'Muhteşem ders!' : acc >= 70 ? 'Ders tamam!' : 'Çalışmaya devam!';
-    const resc = ses.rescueTry ? `<div class="speech">🌱 ${ses.rescueTry} hatandan sonra <b>${ses.rescueOk}</b> kez doğruya döndün. Hata yapmak öğrenmenin parçası!</div>` : '';
-    return `<div class="end">${mascot('happy', 130)}<h1>${title}</h1>
+    const yildizli = !['placement', 'speed', 'hazir'].includes(ses.mode), ys = yildizSayisi(r.acc);
+    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : 'Az kaldı!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
+    const resc = ses.rescueTry ? `<div class="speech">💪 ${ses.rescueTry} hatandan sonra <b>${ses.rescueOk}</b> kez doğruya döndün. Hata yapmak öğrenmenin parçası!</div>` : '';
+    // Yay göstergesi: doğruluk oranı kadar dolar; 3 işaret = yıldız eşikleri (%0 bitirme, %70, %90)
+    const R = 92, C = 2 * Math.PI * R, yay = C * 0.75, dolu = yay * Math.max(0.04, r.acc);
+    const isaret = (t) => { const a = (135 + 270 * t) * Math.PI / 180; return `<circle cx="${110 + R * Math.cos(a)}" cy="${110 + R * Math.sin(a)}" r="9" class="isaret ${r.acc >= t ? 'on' : ''}"/>`; };
+    const gosterge = yildizli ? `<div class="skor"><svg viewBox="0 0 220 200" aria-hidden="true"><circle cx="110" cy="110" r="${R}" class="yay-bos" stroke-dasharray="${yay} ${C}" transform="rotate(135 110 110)"/><circle cx="110" cy="110" r="${R}" class="yay-dolu" style="--yay:${yay};--dolu:${dolu}" stroke-dasharray="${dolu} ${C}" transform="rotate(135 110 110)"/>${isaret(0.0001)}${isaret(0.7)}${isaret(0.9)}</svg>
+      <div class="skor-ic"><div class="skor-et">Puan</div><div class="skor-sayi" data-sayac="${ses.xp}">0</div></div>
+      <div class="yildizlar">${[1, 2, 3].map(i => `<span class="yildiz ${i <= ys ? 'on' : ''}" style="animation-delay:${0.9 + i * 0.35}s">★</span>`).join('')}</div></div>` : mascot('happy', 130);
+    return `<div class="end">${gosterge}<h1>${title}</h1>
       <div class="tiles"><div class="tile gold"><div class="h">XP</div><div class="v">⚡ ${ses.xp}</div></div><div class="tile okt"><div class="h">Doğruluk</div><div class="v">🎯 %${acc}</div></div><div class="tile bl"><div class="h">Süre</div><div class="v">⏱ ${mins} dk</div></div></div>
-      ${r.gemsWon ? `<div class="chest">🎁</div><b>Sandıktan ${r.gemsWon} 💎 çıktı!</b>` : ''}
       ${resc}${r.newBadges.map(b => `<div class="card row" style="width:100%"><div style="font-size:40px">${b.icon}</div><div style="text-align:left"><b>Yeni rozet: ${b.name}</b><div class="muted sm">${b.desc}</div></div></div>`).join('')}
       ${ses.mode === 'speed' && ses.correct >= A.st.speedBest ? '<div class="tag warm">🏅 Yeni rekor!</div>' : ''}
       ${r.trophy ? (r.trophy.pass ? `<div class="card row" style="width:100%;border-color:var(--gold)"><div style="font-size:44px">🏆</div><div style="text-align:left"><b>Tema sınavını geçtin! (%${acc})</b><div class="muted sm">Kupa senin. +50 💎</div></div></div>` : `<div class="speech">Sınav için %70 gerekiyor. Zorlandığın becerileri çalışıp tekrar dene, kupa seni bekliyor! 💪</div>`) : ''}
-      ${r.quests && r.quests.got.length ? r.quests.got.map(q => `<div class="card row" style="width:100%"><div style="font-size:34px">${q.ikon}</div><div style="text-align:left"><b>Görev tamamlandı: ${q.ad}</b><div class="muted sm">+${q.odul} 💎</div></div></div>`).join('') : ''}
-      ${r.quests && r.quests.monthDone ? '<div class="card row" style="width:100%;border-color:var(--accent)"><div style="font-size:40px">📅</div><b>Aylık görevi tamamladın! +100 💎</b></div>' : ''}
+      <div style="flex:1"></div><button class="btn" data-act="end-ok" style="max-width:420px">${(A.endSteps || []).length > 1 ? 'Devam' : 'Devam'}</button></div>`;
+  }
+  // Sandık: önce kapalı, çocuk dokununca açılır ve elmaslar çıkar (değişken ödül hissi; para ile satılmaz, elmas sadece seri koruyucuya gider)
+  function viewSandik() {
+    const r = A.result, acik = A.sandikAcik;
+    return `<div class="end sandik-ekran ${acik ? 'acik' : ''}">
+      <div class="sandik-ust">${acik ? 'Harika!' : (r.acc >= 0.9 ? 'EFSANE SANDIK' : r.acc >= 0.7 ? 'SÜPER SANDIK' : 'SANDIK')}</div>
+      <button class="sandik" data-act="sandik-ac" aria-label="Sandığı aç" ${acik ? 'disabled' : ''}><img src="img/sandik_${acik ? 'acik' : 'kapali'}.webp" alt="" draggable="false" onerror="this.outerHTML='<span style=&quot;font-size:120px&quot;>${acik ? '💎' : '🎁'}</span>'"></button>
+      ${acik ? `<div class="sandik-odul">+<span data-sayac="${r.gemsWon}">0</span> 💎</div><div class="sandik-alt">Elmaslarınla seri koruyucu alabilirsin.</div>` : '<div class="sandik-alt">Açmak için dokun!</div>'}
+      <div style="flex:1"></div>${acik ? '<button class="btn" data-act="end-ok" style="max-width:420px">Devam</button>' : ''}</div>`;
+  }
+  // Görev ilerlemesi: günlük görev çubukları dolar, biten görevin ödülü yazar
+  function viewGorevIlerleme() {
+    const r = A.result, Q = E.quests(A.st), got = new Set(r.quests.got.map(q => q.ad)), mo = Q.month;
+    const satir = (q) => `<div class="gi-satir ${q.ok ? 'tamam' : ''}"><div class="grow"><b>${q.ikon} ${esc(q.ad)}</b><div class="qbar"><i style="--hedef:${Math.round(100 * Math.min(1, q.v / q.hedef))}%"></i><span>${Math.min(q.v, q.hedef)} / ${q.hedef}</span></div></div><div class="gi-odul">${q.ok ? (got.has(q.ad) ? `<b>+${q.odul}💎</b>` : '✅') : `🎁<small>${q.odul}💎</small>`}</div></div>`;
+    return `<div class="end gorev-ekran"><h1>+${r.quests.got.length} Görev!</h1>
+      <div class="card list gi" style="width:100%">${Q.list.map(satir).join('')}</div>
+      <div class="card gi-ay" style="width:100%"><div class="grow" style="text-align:left"><b>📅 ${esc(mo.ad)}</b><div class="qbar"><i style="--hedef:${Math.min(100, Math.round(100 * mo.done / mo.hedef))}%"></i><span>${mo.done} / ${mo.hedef}</span></div></div>${r.quests.monthDone ? '<b>+100 💎</b>' : ''}</div>
       <div style="flex:1"></div><button class="btn" data-act="end-ok" style="max-width:420px">Devam</button></div>`;
   }
+  // Sayaçlar (puan ve elmas) 0'dan yukarı sayar
+  const sayacBaslat = () => document.querySelectorAll('[data-sayac]').forEach(el => { const hedef = +el.dataset.sayac, t0 = performance.now(), sure = 900; const adim = (t) => { const k = Math.min(1, (t - t0) / sure); el.textContent = Math.round(hedef * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(adim); }; requestAnimationFrame(adim); });
+
 
   /* ---------------- Karşılama / kayıt ---------------- */
   function viewOnboard() {
@@ -2876,7 +2946,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   const sahneBlob = {};
   // MP4 (H.264) daha küçük ve telefonların hepsinde oynar; oynatamayan tarayıcıda WebM (VP9)
   const SAHNE_UZANTI = (() => { try { const v = document.createElement('video'); return v.canPlayType('video/mp4; codecs="avc1.4D401E"') ? '.mp4' : '.webm'; } catch (e) { return '.mp4'; } })();
-  const sahneHazirla = () => Object.keys(SAHNE).forEach(k => { if (sahneBlob[k]) return; fetch('img/sahne_' + k + SAHNE_UZANTI).then(r => r.ok ? r.blob() : null).then(b => { if (b) sahneBlob[k] = URL.createObjectURL(b); }).catch(() => { }); });
+  const sahneHazirla = () => ['sandik_kapali', 'sandik_acik'].forEach(k => { const im = new Image(); im.src = 'img/' + k + '.webp'; }) || Object.keys(SAHNE).forEach(k => { if (sahneBlob[k]) return; fetch('img/sahne_' + k + SAHNE_UZANTI).then(r => r.ok ? r.blob() : null).then(b => { if (b) sahneBlob[k] = URL.createObjectURL(b); }).catch(() => { }); });
   const sahneOyna = (ad, bitince) => {
     const azalt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (azalt || !sahneBlob[ad]) { if (bitince) bitince(); return false; }
@@ -2914,7 +2984,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -2958,7 +3028,9 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       case 'explain-other': { const f = E.pickFormat(A.st, [E.formatRank(A.st)[0].f]); A.modal = explainModal(A.q.skill, f); render(); sayCard(A.q.skill, f); break; }
       case 'quit': A.modal = confirmModal('Dersten çıkmak istiyor musun?', 'Cevapladığın sorular kaydedildi, ama ders tamamlanmış sayılmayacak ve ders XP\'si verilmeyecek.', 'quit-yes', 'Çık', 'Derse devam'); render(); break;
       case 'quit-yes': clearInterval(A.timer); stopVoice(); A.modal = null; A.view = 'home'; A.ses = null; A.fb = null; render(); break;
-      case 'end-ok': document.querySelectorAll('#confetti').forEach(c => c.remove()); A.view = 'home'; A.ses = null; render(); window.scrollTo(0, 0); break;
+      case 'sandik-ac': if (A.sandikAcik) break; A.sandikAcik = true; sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80]); } catch (e) { } render(); confetti(); setTimeout(sayacBaslat, 50); break;
+      case 'end-ok': if (A.endSteps && A.endStep < A.endSteps.length - 1) { A.endStep++; sfx.tap(); render(); setTimeout(() => { sayacBaslat(); if (A.endSteps[A.endStep] === 'gorev') sfx.ok(); }, 60); break; }
+        document.querySelectorAll('#confetti').forEach(c => c.remove()); A.view = 'home'; A.ses = null; render(); window.scrollTo(0, 0); break;
       case 'p-mistakes': if (A.st.mistakes.length) startSession('mistakes', A.st.mistakes[0].skill); break;
       case 'p-review': startSession('review', (E.dueSkills(A.st)[0] || { id: SKILLS.find(s => A.st.skills[s.id].n > 0).id }).id); break;
       case 'p-speed': startSession('speed', null); break;
