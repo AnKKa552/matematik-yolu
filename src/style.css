@@ -605,3 +605,11 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .fx-banner.kartta .fx-word{font-size:34px}
 .fx-banner.kartta.rainbow .fx-word{font-size:40px}
 .kv .card small{display:block;font-size:11px;font-weight:800}
+
+/* Faz 2: tahmin, gerekçe, derinleştir */
+.sheet.tahc{background:var(--surface);border-top:4px solid var(--brand,#5B4BFF)}
+.tahk{margin-top:8px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--warn,#f59e0b) 14%,transparent);font-size:14px;line-height:1.35}
+.tahk.ok{background:var(--ok-bg)}
+.thnot{margin-top:6px;font-size:13px;font-weight:700;color:var(--muted);text-align:right}
+.kislem{margin:8px 0;padding:8px 12px;border-radius:12px;background:var(--surface2);font-weight:800;font-size:17px}
+.abaglam.derin{border-color:#f5b301;background:color-mix(in srgb,#f5b301 10%,var(--surface))}

@@ -1450,6 +1450,14 @@
     "baslangic_sira": {
       "ad": "Başlangıç anını 1. adım sanma",
       "duzeltme": "Başlangıç, hiç zaman geçmemiş andır (0. gün ya da 0. hafta); o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam = başlangıç + n × artış."
+    },
+    "kontrol_tekrar": {
+      "ad": "Kontrolü aynı yolu tekrarlayarak yapma",
+      "duzeltme": "Aynı yolu tekrarlarsan aynı hatayı yine yapabilirsin. Kontrolde cevaptan geriye gidilir: ters işlemle problemdeki bilinen bir sayıya ulaşılır."
+    },
+    "kontrol_yuzeysel": {
+      "ad": "Cevabın büyüklüğünü kontrol sanma",
+      "duzeltme": "Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin."
     }
   },
   "anlatim_bicimleri": {

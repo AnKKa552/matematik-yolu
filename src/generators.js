@@ -92,6 +92,8 @@
     sifir_basta: { t: 'En küçük sayıyı 0 ile başlatma', fix: 'Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0\'ı yaz.' },
     fiyat_okuma: { t: 'Fiyatı lira-kuruş olarak yanlış okuma', fix: 'Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş.' },
     istenen_verilen: { t: 'Verileni istenen sanma', fix: 'Problemde verilen sayıları ve sorulan şeyi ayır. Soru cümlesi (genellikle en sonda) neyin istendiğini söyler; istenen, problemde henüz yazmayan şeydir.' },
+    kontrol_tekrar: { t: 'Kontrolü aynı yolu tekrarlayarak yapma', fix: 'Aynı yolu tekrarlarsan aynı hatayı yine yapabilirsin. Kontrolde cevaptan geriye gidilir: ters işlemle problemdeki bilinen bir sayıya ulaşılır.' },
+    kontrol_yuzeysel: { t: 'Cevabın büyüklüğünü kontrol sanma', fix: 'Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin.' },
     ara_sonuc: { t: 'Ara sonucu cevap sanma', fix: 'Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et.' },
     kalan_yok: { t: 'Bölmede kalanı hesaba katmama', fix: 'Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır.' },
     hata_yeri: { t: 'Doğru bir adımı hatalı sanma', fix: 'Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır.' },
@@ -1050,7 +1052,8 @@
         { prompt: `Toplam tutarı ${top} TL bulduk. ${ad} kaç TL para üstü alır?`, answer: pu, unit: 'TL', ip: 'Ödenen para = alışveriş tutarı + para üstü. Buna göre para üstünü nasıl bulursun?',
           inputMis: [{ v: ver + top, mis: 'ters_islem', ac: `Ödenen para = alışveriş tutarı + para üstü. ${ver} = ${top} + para üstü olduğuna göre para üstü = ${ver} − ${top} olmalı.` }, { v: top, mis: 'ara_sonuc', ac: 'Bu alışverişin tutarı, para üstü değil. Kasaya verilen paradan bunu çıkarmalısın.' }],
           steps: ['Ödenen para = alışveriş tutarı + para üstü', `${ver} = ${top} + para üstü`, `Para üstü: ${ver} − ${top} = ${pu} TL`] }],
-      kontrol: [`Para üstünü ${pu} TL buldun. Hangi işlem bu cevabı doğrular?`, `${pu} + ${top} = ${ver}`, [[`${ver} + ${top} = ${ver + top}`, 'ters_islem', 'Bu işlem verilen paraya tutarı ekliyor; problemdeki hiçbir şeyi doğrulamaz.'], [`${pu} + ${nd * fd} = ${pu + nd * fd}`, 'problem_adim', 'Sadece defterlerin parasını ekledin. Para üstü ile TOPLAM tutar birlikte verilen paraya eşit olmalı.']], 'Para üstü ile ödenen tutarın toplamı, kasaya verilen paraya eşit olmalı.'] });
+      kontrol: [`Para üstünü ${pu} TL buldun. Hangi işlem bu cevabı doğrular?`, `${pu} + ${top} = ${ver}`, [[`${ver} + ${top} = ${ver + top}`, 'ters_islem', 'Bu işlem verilen paraya tutarı ekliyor; problemdeki hiçbir şeyi doğrulamaz.'], [`${pu} + ${nd * fd} = ${pu + nd * fd}`, 'problem_adim', 'Sadece defterlerin parasını ekledin. Para üstü ile TOPLAM tutar birlikte verilen paraya eşit olmalı.']], 'Para üstü ile ödenen tutarın toplamı, kasaya verilen paraya eşit olmalı.'],
+      derin: [`${ver} − ${nd} × ${fd} − ${nk} × ${fk}`, [[`${ver} − ${nd} × ${fd} + ${nk} × ${fk}`, 'ters_islem', 'Kalemlerin parası da kasaya verilen paradan ÇIKAR; eklenmez.'], [`${ver} − ${nd} − ${fd} − ${nk} − ${fk}`, 'problem_adim', 'Adetleri ve fiyatları ayrı ayrı çıkardın. Her ürünün parası adet × fiyattır.']]] });
   };
   PROB.bahce = () => {
     const a = ri(8, 25), b = ri(4, a - 2), k = ri(2, 4), c = 2 * (a + b), tel = k * c;
@@ -1064,7 +1067,8 @@
         { prompt: `Bahçenin çevresi ${c} m. ${k} sıra için kaç metre tel gerekir?`, answer: tel, unit: 'm', ip: `Bir sıra tel bir çevre kadardır. ${k} sıra kaç çevre eder?`,
           inputMis: [{ v: c + k, mis: 'problem_adim', ac: 'Sıra sayısını ekledin. Her sıra bir çevre kadar tel ister: çevreyi sıra sayısıyla çarp.' }, { v: k * (a + b), mis: 'cevre_yarim', ac: `Yarım çevreyi çarptın. Tam çevreyi (${c} m) kullanmalısın.` }],
           steps: ['Her sıra bir çevre kadar tel ister.', `${k} × ${c} = ${tel} m`] }],
-      kontrol: [`Tel uzunluğunu ${tel} m buldun. Hangi işlem bu cevabı doğrular?`, `${tel} ÷ ${k} = ${c}`, [[`${tel} × ${k} = ${tel * k}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${tel} − ${k} = ${tel - k}`, 'ters_islem', 'Sıra sayısını çıkarmak anlamlı değil. Toplam teli sıra sayısına bölersen bir sırayı bulursun.']], 'Toplam teli sıra sayısına bölersen bir sıranın uzunluğunu, yani çevreyi bulmalısın.'] });
+      kontrol: [`Tel uzunluğunu ${tel} m buldun. Hangi işlem bu cevabı doğrular?`, `${tel} ÷ ${k} = ${c}`, [[`${tel} × ${k} = ${tel * k}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${tel} − ${k} = ${tel - k}`, 'ters_islem', 'Sıra sayısını çıkarmak anlamlı değil. Toplam teli sıra sayısına bölersen bir sırayı bulursun.']], 'Toplam teli sıra sayısına bölersen bir sıranın uzunluğunu, yani çevreyi bulmalısın.'],
+      derin: [`2 × ${k} × (${a} + ${b})`, [[`${k} × (${a} + ${b})`, 'cevre_yarim', 'Parantezdeki iki kenar sadece yarım tur. Tam çevre için 2 ile de çarpmalısın.'], [`${k} × ${a} × ${b}`, 'cevre_alan', 'Kenarları çarpmak alanı verir. Tel için çevre gerekir.']]] });
   };
   PROB.parke = () => {
     let a, b; do { a = ri(3, 8); b = ri(2, a - 1); } while (a * b === 2 * (a + b));
@@ -1079,7 +1083,8 @@
         { prompt: `Odanın alanı ${alan} m². Parke için kaç TL ödenir?`, answer: tutar, unit: 'TL', ip: `Her bir metrekare ${f} TL. ${alan} metrekare için hangi işlemi yaparsın?`,
           inputMis: [{ v: 2 * (a + b) * f, mis: 'cevre_alan', ac: `Çevreyle fiyatı çarptın. Alanı (${alan} m²) kullanmalısın.` }, { v: alan + f, mis: 'problem_adim', ac: `Alanla fiyatı topladın. Her metrekare ${f} TL olduğu için çarpmalısın.` }],
           steps: [`Her metrekare ${f} TL.`, `${alan} × ${f} = ${fmtN(tutar)} TL`] }],
-      kontrol: [`Parkeye ${fmtN(tutar)} TL ödeneceğini buldun. Hangi işlem bu cevabı doğrular?`, `${fmtN(tutar)} ÷ ${f} = ${alan}`, [[`${fmtN(tutar)} × ${f} = ${fmtN(tutar * f)}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${fmtN(tutar)} − ${f} = ${fmtN(tutar - f)}`, 'ters_islem', 'Fiyatı çıkarmak anlamlı değil. Toplam parayı metrekare fiyatına bölersen alanı bulursun.']], 'Toplam parayı metrekare fiyatına bölersen odanın alanını bulmalısın.'] });
+      kontrol: [`Parkeye ${fmtN(tutar)} TL ödeneceğini buldun. Hangi işlem bu cevabı doğrular?`, `${fmtN(tutar)} ÷ ${f} = ${alan}`, [[`${fmtN(tutar)} × ${f} = ${fmtN(tutar * f)}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${fmtN(tutar)} − ${f} = ${fmtN(tutar - f)}`, 'ters_islem', 'Fiyatı çıkarmak anlamlı değil. Toplam parayı metrekare fiyatına bölersen alanı bulursun.']], 'Toplam parayı metrekare fiyatına bölersen odanın alanını bulmalısın.'],
+      derin: [`(${a} × ${f}) × ${b}`, [[`(${a} + ${b}) × ${f}`, 'cevre_alan', `Kenarları toplamak alanı vermez. Zemindeki metrekare sayısı ${a} × ${b}.`], [`${a} × ${b} + ${f}`, 'problem_adim', `Fiyatı eklemek yetmez. Her metrekare için ${f} TL ödenir; çarpmalısın.`]]] });
   };
   PROB.okuma = () => {
     const ad = pick(NAMES), gun = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'], v = shuffle(Array.from({ length: 33 }, (_, i) => i + 8)).slice(0, 5);
@@ -1107,7 +1112,8 @@
         { prompt: `Sol kefede ${sol} kg var. Terazi dengede olduğuna göre kutu kaç kg?`, answer: kutu, unit: 'kg', ip: `Kutu ile ${c} kg birlikte ${sol} kg ediyor. Kutu kaç kg olmalı?`,
           inputMis: [{ v: sol, mis: 'esittir_sonuc', ac: `Bu sol kefenin tamamı. Sağda kutunun yanında ${c} kg da var; onu çıkarmalısın.` }, { v: sol + c, mis: 'ters_islem', ac: `Ekledin. Kutu + ${c} = ${sol} olduğuna göre kutu = ${sol} − ${c} olmalı.` }],
           steps: [`Sağ kefe de ${sol} kg olmalı: ${c} + kutu = ${sol}`, `Kutu = ${sol} − ${c} = ${kutu} kg`] }],
-      kontrol: [`Kutuyu ${kutu} kg buldun. Hangi işlem bu cevabı doğrular?`, `${c} + ${kutu} = ${sol}`, [[`${kutu} + ${sol} = ${kutu + sol}`, 'denge_bozma', 'Kutuyu sol kefeye eklemek dengeyi kontrol etmez. Sağ kefedekileri topla, sol kefeye eşit mi bak.'], [`${a} + ${kutu} = ${a + kutu}`, 'denge_bozma', `Sağ kefede ${a} kg yok. Sağ kefede ${c} kg ve kutu var.`]], 'Sağ kefedeki ağırlıklar toplanınca sol kefedeki toplama eşit olmalı.'] });
+      kontrol: [`Kutuyu ${kutu} kg buldun. Hangi işlem bu cevabı doğrular?`, `${c} + ${kutu} = ${sol}`, [[`${kutu} + ${sol} = ${kutu + sol}`, 'denge_bozma', 'Kutuyu sol kefeye eklemek dengeyi kontrol etmez. Sağ kefedekileri topla, sol kefeye eşit mi bak.'], [`${a} + ${kutu} = ${a + kutu}`, 'denge_bozma', `Sağ kefede ${a} kg yok. Sağ kefede ${c} kg ve kutu var.`]], 'Sağ kefedeki ağırlıklar toplanınca sol kefedeki toplama eşit olmalı.'],
+      derin: [b >= c ? `${a} + (${b} − ${c})` : `${a} − (${c} − ${b})`, [[`${a} + ${b} + ${c}`, 'denge_bozma', `Bütün ağırlıkları toplamak dengeyi kullanmaz. Kutu ile ${c} kg birlikte sol kefeye eşit.`], [`${a} + ${b}`, 'esittir_sonuc', `Bu sol kefenin tamamı. Sağda kutunun yanında ${c} kg da var.`]]] });
   };
   PROB.kumbara = () => {
     // Örüntü: 0. hafta = başlangıç. n hafta sonra n kez artış olur → toplam = başlangıç + n × artış (ilk terim + (n − 1) × artış DEĞİL)
@@ -1123,7 +1129,8 @@
         { prompt: `Para her hafta ${d} TL artıyor. ${n} hafta sonra kumbarada kaç TL olur?`, answer: top, unit: 'TL', ip: 'Toplam = başlangıç + hafta sayısı × artış. Başlangıç tabloda 0. haftada yazıyor.',
           inputMis: [{ v: n * d, mis: 'baslangic_unutma', ac: `Bu sadece ${n} haftada eklenen para. Başta kumbarada olan ${s} TL'yi de eklemelisin.` }, { v: s + (n - 1) * d, mis: 'baslangic_sira', ac: `Başlangıç 0. hafta. ${n} hafta sonra ${n} kez artış olur: ${s} + ${n} × ${d}.` }],
           steps: ['Kural: toplam = başlangıç + hafta sayısı × artış', `${n} × ${d} = ${n * d}`, `${s} + ${n * d} = ${top} TL`] }],
-      kontrol: [`${top} TL buldun. Hangisi bu cevabı doğrular?`, `${top} − ${s} = ${n * d} ve ${n * d} ÷ ${d} = ${n} hafta`, [[`${top} + ${s} = ${top + s}`, 'ters_islem', 'Başlangıç parasını bir daha eklemek bir şey doğrulamaz. Sonuçtan başlangıcı ÇIKARIRSAN eklenen parayı bulursun.'], [`${top} − ${d} = ${top - d}`, 'ters_islem', 'Bir haftalık artışı çıkarmak sadece bir önceki haftayı verir; cevabı doğrulamaz.']], 'Sonuçtan başlangıcı çıkarırsan eklenen parayı bulursun; bunu haftalık artışa bölünce hafta sayısına ulaşmalısın.'] });
+      kontrol: [`${top} TL buldun. Hangisi bu cevabı doğrular?`, `${top} − ${s} = ${n * d} ve ${n * d} ÷ ${d} = ${n} hafta`, [[`${top} + ${s} = ${top + s}`, 'ters_islem', 'Başlangıç parasını bir daha eklemek bir şey doğrulamaz. Sonuçtan başlangıcı ÇIKARIRSAN eklenen parayı bulursun.'], [`${top} − ${d} = ${top - d}`, 'ters_islem', 'Bir haftalık artışı çıkarmak sadece bir önceki haftayı verir; cevabı doğrulamaz.']], 'Sonuçtan başlangıcı çıkarırsan eklenen parayı bulursun; bunu haftalık artışa bölünce hafta sayısına ulaşmalısın.'],
+      derin: [`${s + 3 * d} + ${n - 3} × ${d}`, [[`${s + 3 * d} + ${n} × ${d}`, 'problem_adim', `Tablodaki 3. haftadan devam edersen ${n} değil, ${n - 3} hafta daha artış eklenir.`], [`${n} × ${d}`, 'baslangic_unutma', `Başlangıçtaki ${s} TL unutulmuş.`]]] });
   };
   PROB.gezi = () => {
     let o, t, k; do { o = ri(40, 140); t = ri(2, 6); k = pick([14, 16, 18, 20, 25]); } while ((o + t) % k === 0);
@@ -1163,7 +1170,8 @@
         { prompt: `Bilinen iki açının toplamı ${90 + x}°. Üçüncü açı kaç derecedir?`, answer: u, unit: '°', ip: `Üç açının toplamı 180°. İkisi birlikte ${90 + x}°. Geriye ne kalır?`,
           inputMis: [{ v: 270 - x, mis: 'ucgen_360', ac: '360°\'den çıkardın. Üçgenin iç açılarının toplamı 180°.' }, { v: 90 + x, mis: 'ara_sonuc', ac: 'Bu iki açının toplamı. 180°\'den çıkararak üçüncü açıyı bul.' }],
           steps: ['Üçgenin iç açıları toplamı 180°.', `180 − ${90 + x} = ${u}°`] }],
-      kontrol: [`Üçüncü açıyı ${u}° buldun. Hangi işlem bu cevabı doğrular?`, `90 + ${x} + ${u} = 180`, [[`${u} + ${x} = 90`, 'problem_adim', 'Bu işlem doğru ama 90° açıyı hesaba katmıyor. Üç açının toplamı 180° olmalı.'], [`90 + ${x} = ${90 + x}`, 'problem_adim', 'Bu sadece iki açı. Üçüncüyü de ekleyip 180° bulmalısın.']], 'Üç açıyı toplayınca 180° bulmalısın.'] });
+      kontrol: [`Üçüncü açıyı ${u}° buldun. Hangi işlem bu cevabı doğrular?`, `90 + ${x} + ${u} = 180`, [[`${u} + ${x} = 90`, 'problem_adim', 'Bu işlem doğru ama 90° açıyı hesaba katmıyor. Üç açının toplamı 180° olmalı.'], [`90 + ${x} = ${90 + x}`, 'problem_adim', 'Bu sadece iki açı. Üçüncüyü de ekleyip 180° bulmalısın.']], 'Üç açıyı toplayınca 180° bulmalısın.'],
+      derin: [`90 − ${x}`, [[`180 − ${x}`, 'problem_adim', '90°\'lik açı unutulmuş. Üç açı birlikte 180° eder.'], [`360 − 90 − ${x}`, 'ucgen_360', 'Üçgenin iç açılarının toplamı 180°, 360° değil.']]] });
   };
   PROB.pizza = () => {
     const [a1, a2] = shuffle(NAMES).slice(0, 2); let b, k, n1, n2; do { b = pick([2, 3, 4]); k = b === 4 ? ri(2, 3) : ri(2, 4); n1 = ri(1, b - 1); n2 = ri(1, b * k - 1); } while (n2 === n1 * k);
@@ -1182,23 +1190,68 @@
           steps: ['Paydalar eşit: payı büyük olan büyüktür.', `${buyukK} > ${kucukK} → ${kazanan} daha çok yedi.`] }],
       kontrol: [`${kazanan} daha çok yedi dedin. Hangisi bu cevabı doğrular?`, `Paydalar eşitlenince ${buyukK} > ${kucukK} oluyor.`, [[`${b} < ${D} olduğu için paydası ${D} olan kesir daha büyüktür.`, 'payda_buyuk', 'Payda büyüdükçe dilimler küçülür; paydaya bakarak karar verilmez.'], ['Payı büyük olan kesir her zaman daha büyüktür.', 'pay_payda_ayri', 'Bu her zaman doğru değil; paydalar farklıysa yanılırsın. Önce paydaları eşitle.']], 'Paydaları eşit kesirlerde payı büyük olan daha büyüktür.'] });
   };
-  const ASAMA = { anla: 'Anla', plan: 'Planla', coz: 'Çöz', kontrol: 'Kontrol et', bagimsiz: 'Kendin dene' };
+  const ASAMA = { anla: 'Anla', plan: 'Planla', tahmin: 'Tahmin et', coz: 'Çöz', kontrol: 'Kontrol et', derin: 'Derinleştir', bagimsiz: 'Kendin dene' };
   const ASAMA_IP = {
     anla: 'Problemin son cümlesini oku. Sorulan şey problemde verilmiş bir sayı mı, yoksa bulmamız gereken yeni bir şey mi?',
     plan: 'Cevabı bulmadan önce hangi ara sonucu bilmen gerekiyor? O ara sonucu hangi işlem verir?',
     kontrol: 'Bulduğun cevaptan geriye doğru git: ters işlemle problemdeki bilinen bir sayıya ulaşabiliyor musun?',
+    tahmin: 'Sayıları yuvarla (örneğin 23 yerine 20 düşün) ve kafandan yaklaşık hesapla. Sonuç büyük mü çıkmalı, küçük mü?',
+    gerekce: 'Bu işlem, bulduğun cevaptan problemdeki hangi bilgiye geri dönüyor?',
+    derin: 'Her işlemi sırayla hesapla (önce parantez, sonra çarpma, sonra toplama ve çıkarma). Hangisi aynı sonucu veriyor?',
   };
+  const BIRIM = { TL: 'TL', m: 'metre', 'm²': 'metrekare', kg: 'kilogram', sayfa: 'sayfa', '°': 'derece', 'kişi': 'kişi', 'minibüs': 'minibüs', top: 'top' };
+  // Tahmin aralığının sınırı: iki değer arasındaki en "yuvarlak" sayı (önce 1000'lik, sonra 500'lük, 100'lük...)
+  // İki değerin ikisinden de yeterince uzak (aralığın en az 1/4'ü) olan en yuvarlak sayı; yoksa null.
+  const yuvarlakSinir = (lo, hi) => { const pay = (hi - lo) / 4;
+    for (const st of [1000, 500, 100, 50, 10, 5, 1]) { let en = null, enUz = -1; for (let m = Math.floor(lo / st) + 1; m * st < hi; m++) { const uz = Math.min(m * st - lo, hi - m * st); if (uz > enUz) { en = m * st; enUz = uz; } } if (en !== null && enUz >= pay) return en; }
+    return null; };
+  const denN = (n) => `${fmtN(n)}'${U.ek(U.lastWord(n), 'den')}`;
+  // Tahmin: yanlış aralıklar, son adımın yanılgılı sonuçlarına göre kurulur (rastgele aralık yok).
+  const tahminSorusu = (pr) => {
+    const son = pr.coz[pr.coz.length - 1]; if (son.options || typeof son.answer !== 'number' || !BIRIM[son.unit]) return null;
+    const ans = son.answer, uzak = (x, y) => Math.abs(x - y) >= Math.max(3, 0.3 * Math.min(x, y));
+    // Cevaptan ve birbirinden yeterince uzak yanılgılı sonuçlar; önce cevaba en yakınlar (her iki yandan birer, sonra aynı yandan)
+    const aday = son.inputMis.filter(m => m.v > 0 && uzak(m.v, ans)).sort((x, y) => Math.abs(x.v - ans) - Math.abs(y.v - ans));
+    const sec = [];
+    for (const yan of [-1, 1]) { const m = aday.find(x => Math.sign(x.v - ans) === yan); if (m) sec.push(m); }
+    for (const m of aday) if (sec.length < 2 && !sec.includes(m) && sec.every(x => uzak(x.v, m.v))) sec.push(m);
+    if (!sec.length) return null;
+    const noktalar = [...sec.map(m => ({ v: m.v, m })), { v: ans }].sort((x, y) => x.v - y.v);
+    const sinir = noktalar.slice(1).map((x, i) => yuvarlakSinir(noktalar[i].v, x.v));
+    if (sinir.some(x => x === null)) return null;
+    const metin = (i) => i === 0 ? `${denN(sinir[0])} az` : i === noktalar.length - 1 ? `${denN(sinir[i - 1])} fazla` : `${fmtN(sinir[i - 1])} ile ${fmtN(sinir[i])} arası`;
+    const neden = (m) => `Sonuç bu aralıkta çıkıyorsa büyük ihtimalle şu oldu: ${m.ac}`;
+    const okMetin = metin(noktalar.findIndex(x => !x.m));
+    return { prompt: `Hesaplamadan önce tahmin et: cevap kaç ${BIRIM[son.unit]} çıkar?`, fixed: true, tahminDeger: ans,
+      options: noktalar.map((x, i) => x.m ? { t: metin(i), ok: false, mis: x.m.mis, ac: neden(x.m) } : { t: metin(i), ok: true }),
+      ip: ASAMA_IP.tahmin, hint: ASAMA_IP.tahmin, steps: ['Sayıları yuvarlayıp kafadan yaklaşık hesaplarız; tam sonuç gerekmez.', `Tam cevap ${fmtN(ans)} ${son.unit}: «${okMetin}».`] };
+  };
+  // Gerekçe: kontrol işlemi verilir, çocuk bu işlemin cevabı NEDEN doğruladığını seçer (açıklama becerisi).
+  const kucukBas = (t) => t.charAt(0).toLocaleLowerCase('tr-TR') + t.slice(1);
+  const GEREKCE_YANLIS = [
+    ['Çünkü bulduğum sonucu aynı yolla bir kez daha hesapladım.', 'kontrol_tekrar', 'Bu işlem aynı yolu tekrarlamıyor; cevaptan geriye gidiyor. Aynı yolu tekrarlamak aynı hatayı tekrar ettirebilir.'],
+    ['Çünkü sonuç makul bir büyüklükte; bu kadarı yeter.', 'kontrol_yuzeysel', 'Büyüklüğe bakmak tahmin için iyidir ama cevabı kanıtlamaz. Kontrol işlemi problemdeki bir bilgiye tam olarak ulaşmalı.']];
+  const gerekceSorusu = (pr) => ({ prompt: `Kontrol için şu işlemi yaptın:<div class="kislem">${pr.kontrol[1]}</div>Bu işlem cevabı neden doğrular?`, okuma: 'Kontrol için yaptığın işlem ekranda. Bu işlem cevabı neden doğrular?',
+    options: mc('Çünkü ' + kucukBas(pr.kontrol[3]), GEREKCE_YANLIS), ip: ASAMA_IP.gerekce, hint: ASAMA_IP.gerekce, steps: [pr.kontrol[3]], kontrolNeden: pr.kontrol[3] });
+  // Derinleştir: aynı problemin başka bir çözüm yolu. Sadece ilk denemede çözen çocuğa gelir (motor karar verir).
+  const derinSorusu = (pr) => { const son = pr.coz[pr.coz.length - 1], ad = pick(NAMES);
+    return { prompt: `${ad} bu problemi başka bir yolla çözmek istiyor. Hangi işlem de aynı cevabı (${fmtN(son.answer)}) verir?`, options: mc(pr.derin[0], pr.derin[1]),
+      ip: ASAMA_IP.derin, hint: ASAMA_IP.derin, derinCevap: son.answer, steps: [`${pr.derin[0]} işlemi de ${fmtN(son.answer)} verir.`, 'Bir problemin birden çok doğru çözüm yolu olabilir; hepsi aynı cevaba ulaşır.'] }; };
   // Bir problemi sıralı soru nesnelerine çevirir (her biri sıradan bir mc/input sorusu + q.atolye bilgisi).
   // Sonda "Kendin dene": aynı türde, YENİ sayılarla, iskelesiz tek soru → öğrenmenin bağımsız kanıtı.
   const tabloSiz = (b) => b.replace(/<table[\s\S]*<\/table>/, '');
-  const atolyeSorulari = (id) => {
+  const atolyeSorulari = (id, sec = {}) => {
     const pr = PROB[id](), pid = Math.random().toString(36).slice(2), list = [];
     const ek = (asama, o, b) => list.push(Q(Object.assign({ atolye: { pid, sablon: id, asama, baslik: (b || pr).baslik, baglam: (b || pr).baglam }, skill: pr.skill }, o)));
     ek('anla', { prompt: 'Soruda ne isteniyor?', okuma: `${tabloSiz(pr.baglam)} Soruda ne isteniyor?`, options: mc(pr.anla[0], pr.anla[1]), ip: ASAMA_IP.anla, steps: [`İstenen: ${pr.anla[0]}`, 'Soru cümlesi genellikle problemin en sonundadır.'], hint: ASAMA_IP.anla });
     ek('plan', { prompt: 'Bu problemi hangi yolla çözersin?', options: mc(pr.plan[0], pr.plan[1]), ip: ASAMA_IP.plan, steps: [`Doğru yol: ${pr.plan[0]}`], hint: ASAMA_IP.plan });
+    const th = tahminSorusu(pr); if (th) ek('tahmin', th);
     pr.coz.forEach((c, i) => ek('coz', c.options ? { prompt: `${i + 1}. adım: ${c.prompt}`, options: c.options, fixed: c.fixed, ip: c.ip, steps: c.steps, hint: c.ip } :
       { type: 'input', prompt: `${i + 1}. adım: ${c.prompt}`, answer: String(c.answer), unit: c.unit, inputMis: c.inputMis.filter(m => m.v !== c.answer), ip: c.ip, steps: c.steps, hint: c.ip }));
-    ek('kontrol', { prompt: pr.kontrol[0], options: mc(pr.kontrol[1], pr.kontrol[2]), ip: ASAMA_IP.kontrol, steps: [pr.kontrol[3]], hint: ASAMA_IP.kontrol, kontrolNeden: pr.kontrol[3] });
+    const gerekce = sec.gerekce === undefined ? Math.random() < 0.5 : sec.gerekce;
+    if (gerekce) ek('kontrol', Object.assign(gerekceSorusu(pr), { gerekce: true }));
+    else ek('kontrol', { prompt: pr.kontrol[0], options: mc(pr.kontrol[1], pr.kontrol[2]), ip: ASAMA_IP.kontrol, steps: [pr.kontrol[3]], hint: ASAMA_IP.kontrol, kontrolNeden: pr.kontrol[3] });
+    if (pr.derin && sec.derin !== false) ek('derin', derinSorusu(pr));
     // Kendin dene
     let p2 = PROB[id](); for (let t = 0; t < 8 && tabloSiz(p2.baglam) === tabloSiz(pr.baglam); t++) p2 = PROB[id]();
     const son = p2.coz[p2.coz.length - 1], ara = p2.coz[0], tumAdimlar = p2.coz.flatMap(c => c.steps), ipB = `Az önceki yolu izle: ${p2.plan[0]}`;
@@ -1209,7 +1262,7 @@
       if (!son.options && ara !== son && ara.answer !== son.answer && !yan.some(m => m.v === ara.answer)) yan.push({ v: ara.answer, mis: 'ara_sonuc', ac: 'Bu bir ara sonuç. Problem bir adım daha istiyor; soru cümlesine dönüp bak.' });
       ek('bagimsiz', Object.assign(tekBasina, { type: 'input', answer: String(son.answer), unit: son.unit, inputMis: yan }), p2);
     }
-    list.forEach((q, i) => { q.atolye.sira = i; q.atolye.toplam = list.length; });
+    list.forEach((q, i) => { q.atolye.sira = i; q.atolye.toplam = list.length; q.atolye.no = sec.no || 1; q.atolye.sonCoz = q.atolye.asama === 'coz' && list[i + 1].atolye.asama !== 'coz'; });
     return list;
   };
   const ATOLYE = { ids: Object.keys(PROB), skillOf: (id) => ({ market: 'n_problem', bahce: 'a_cevre', parke: 'a_alan', okuma: 's_tablo_sutun', terazi: 'e_esitlik', kumbara: 'e_oruntu', gezi: 'n_carpbol', torba: 'p_spektrum', ucgen: 'g_ucgen', pizza: 'f_karsilastir' })[id], sorular: atolyeSorulari, ASAMA, PROB };

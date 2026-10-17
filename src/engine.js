@@ -25,7 +25,7 @@
       v: 1, profile: null, skills, formats, mis: {}, mistakes: [], times: [], hints: { used: 0, q: 0 }, rescue: { tries: 0, ok: 0 },
       xp: 0, gems: 20, streak: 0, lastDay: null, freezes: 1, dailyGoal: 50, days: {}, week: { start: weekStart(), xp: 0 }, league: { tier: 0 },
       badges: [], sessions: [], speedBest: 0, themesTried: [], settings: { sound: true, voice: true }, placementDone: false,
-      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, bagimsiz: { n: 0, ok: 0 }, problem: 0 }, kanit: { ilk: 0, ipucu: 0, cozum: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
+      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, tahmin: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, derin: { n: 0, ok: 0 }, bagimsiz: { n: 0, ok: 0 }, problem: 0 }, kanit: { ilk: 0, ipucu: 0, cozum: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
     };
   }
   const E = {};
@@ -87,7 +87,7 @@
 
   // Problem Atölyesi: 2 problem (farklı şablon); çalıştığı temalardan, yoksa temel şablonlardan
   E.atolyeBecerileri = (st) => { const cal = ATOLYE.ids.filter(id => st.skills[ATOLYE.skillOf(id)] && st.skills[ATOLYE.skillOf(id)].n > 0); return cal.length >= 2 ? cal : ['market', 'bahce', 'kumbara', 'terazi']; };
-  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap(id => ATOLYE.sorular(id)); };
+  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap((id, i) => ATOLYE.sorular(id, { gerekce: i === 1, no: i + 1 })); }; // 2. problemin kontrolü gerekçe sorusu
   E.ATOLYE = ATOLYE;
 
   // Ders oturumu planı
@@ -137,7 +137,12 @@
     if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1, true); return q; }
     if (ses.mode === 'lesson' && Math.random() < 0.12) { const due = E.dueSkills(st).filter(d => d.id !== ses.skill); if (due.length) { const q = E.makeQ(due[0].id, E.levelFor(st, due[0].id)); q.review = true; return q; } }
     if (ses.mode === 'hata') return E.hataSorusu(st, ses);
-    if (ses.mode === 'atolye') { const q = ses.aq[Math.min(ses.i, ses.aq.length - 1)]; q.level = 2; q.uid = Math.random().toString(36).slice(2); return q; }
+    if (ses.mode === 'atolye') {
+      // Derinleştir yalnızca bu problemin çözüm adımlarını ilk denemede yapan çocuğa gelir (zorlanan çocuğu yormaz)
+      let q = ses.aq[Math.min(ses.i, ses.aq.length - 1)];
+      while (q.atolye.asama === 'derin' && !(ses.atolyeCoz && (ses.atolyeCoz[q.atolye.pid] || []).length && ses.atolyeCoz[q.atolye.pid].every(k => k === 'ilk'))) { ses.aq.splice(ses.i, 1); ses.len = ses.aq.length; q = ses.aq[Math.min(ses.i, ses.aq.length - 1)]; }
+      q.level = 2; q.uid = Math.random().toString(36).slice(2); return q;
+    }
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
     if (ses.mode === 'hazir') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id).slice(0, 3); id = ids[ses.i % ids.length]; return E.makeQ(id, 1); }
@@ -167,13 +172,22 @@
   // kanit: 'ilk' (ilk denemede, ipucusuz doğru) · 'ipucu' (ipucuyla ya da ikinci denemede doğru) · 'cozum' (çözüm gösterildi)
   E.record = (st, ses, q, res, ms, hinted, kanit) => {
     kanit = kanit || (res.ok ? (hinted ? 'ipucu' : 'ilk') : 'cozum');
-    const sk = st.skills[q.skill], now = Date.now();
+    const sk = st.skills[q.skill], now = Date.now(), tahmin = !!(q.atolye && q.atolye.asama === 'tahmin');
+    // Tahmin bir kestirimdir, cevap değil: ustalığa, yanılgı defterine, seriye ve ders doğruluğuna girmez.
+    // Sadece atölye ölçümüne yazılır; çocuk problemi çözünce tahminiyle karşılaştırılır.
+    if (tahmin) {
+      if (st.atolye) { const a = st.atolye.tahmin || (st.atolye.tahmin = { n: 0, ok: 0 }); a.n++; if (res.ok) a.ok++; }
+      (ses.tahmin || (ses.tahmin = {}))[q.atolye.pid] = { t: res.secilen, ok: res.ok, dogru: (q.options.find(o => o.ok) || {}).t };
+      ses.xp += 2; ses.i++; return 2;
+    }
     if (res.partial || kanit === 'ipucu') hinted = true;
-    sk.pL = E.bkt(sk.pL, res.ok, guessOf(q), hinted); sk.n++; if (res.ok) sk.ok++;
+    // Tahmin bir kestirimdir: beceri ustalığına ve yanılgı defterine yazılmaz, sadece atölye ölçümüne girer
+    if (!tahmin) { sk.pL = E.bkt(sk.pL, res.ok, guessOf(q), hinted); sk.n++; if (res.ok) sk.ok++; }
     if (q.type === 'match') ses.matches++;
     sk.kanit = sk.kanit || { ilk: 0, ipucu: 0, cozum: 0 }; sk.kanit[kanit]++;
     st.kanit = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }; st.kanit[kanit]++;
-    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama] || (st.atolye[q.atolye.asama] = { n: 0, ok: 0 }); a.n++; if (kanit === 'ilk') a.ok++; if (kanit === 'ipucu') a.ip = (a.ip || 0) + 1; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++; }
+    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama] || (st.atolye[q.atolye.asama] = { n: 0, ok: 0 }); a.n++; if (kanit === 'ilk') a.ok++; if (kanit === 'ipucu') a.ip = (a.ip || 0) + 1; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++;
+      if (q.atolye.asama === 'coz') { const c = ses.atolyeCoz || (ses.atolyeCoz = {}); (c[q.atolye.pid] || (c[q.atolye.pid] = [])).push(kanit); } }
     // yarı ömür: aralıklı başarı → uzar
     const gap = sk.last ? (now - sk.last) / HOUR : 0;
     if (res.ok) sk.half = Math.min(24 * 60, sk.half * (gap > sk.half * 0.5 ? 2 : 1.15)); else sk.half = Math.max(6, sk.half / 2);
@@ -181,7 +195,7 @@
     if (ses.mode !== 'placement' && ses.mode !== 'speed') st.times = st.times.concat(ms).slice(-60);
     st.hints.q++; if (hinted) { st.hints.used++; ses.hintsUsed++; }
     // yanılgı defteri
-    if (!res.ok) E.yanilgiNotu(st, q, res.mis);
+    if (!res.ok && !tahmin) E.yanilgiNotu(st, q, res.mis);
     if (q.rescue) { st.rescue.tries++; ses.rescueTry++; if (res.ok) { st.rescue.ok++; ses.rescueOk++; if (q.rescueOf && st.mis[q.rescueOf]) st.mis[q.rescueOf].fixed++; } }
     if (q.replay && res.ok) { const i = st.mistakes.findIndex(m => m.skill === q.skill); if (i >= 0) { const m = st.mistakes[i]; if (st.mis[m.mis]) st.mis[m.mis].fixed++; st.mistakes.splice(i, 1); } }
     // anlatım biçimi ödülü: kart sonrası ilk 3 soru
@@ -263,8 +277,8 @@
     const weak = attempted.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7 && !strong.includes(s));
     const misList = Object.entries(st.mis).filter(([k]) => k !== 'genel').map(([k, v]) => ({ id: k, ...v, t: MIS[k] ? MIS[k].t : k, active: v.n > v.fixed, kesin: (v.q ? v.q.length : v.n) >= 2 })).sort((a, b) => (b.n - b.fixed) - (a.n - a.fixed));
     const totalQ = attempted.reduce((a, s) => a + st.skills[s.id].n, 0), totalOk = attempted.reduce((a, s) => a + st.skills[s.id].ok, 0);
-    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'coz', 'kontrol'].map(k => ({ k, ad: ATOLYE.ASAMA[k], n: (A_[k] || {}).n || 0, ok: (A_[k] || {}).ok || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
-    const olculen = asamalar.filter(a => a.n >= 3), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
+    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'tahmin', 'coz', 'kontrol', 'derin'].map(k => ({ k, ad: ATOLYE.ASAMA[k], ek: k === 'tahmin' || k === 'derin', n: (A_[k] || {}).n || 0, ok: (A_[k] || {}).ok || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
+    const olculen = asamalar.filter(a => a.n >= 3 && !a.ek), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
     const problem = { asamalar, zayif: zayifAsama && zayifAsama.acc < 0.75 ? zayifAsama : null, sayi: A_.problem || 0 };
     const K = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }, kn = K.ilk + K.ipucu + K.cozum;
     const kanit = kn ? { n: kn, ilk: K.ilk / kn, ipucu: K.ipucu / kn, cozum: K.cozum / kn } : null;

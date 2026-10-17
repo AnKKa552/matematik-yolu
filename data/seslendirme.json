@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 29448,
+ "toplam_karakter": 30407,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1350,6 +1350,16 @@
    "key": "mis_ara_sonuc",
    "grup": "yanilgi",
    "text": "Ara sonucu cevap sanma. Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et."
+  },
+  {
+   "key": "mis_kontrol_tekrar",
+   "grup": "yanilgi",
+   "text": "Kontrolü aynı yolu tekrarlayarak yapma. Aynı yolu tekrarlarsan aynı hatayı yine yapabilirsin. Kontrolde cevaptan geriye gidilir: ters işlemle problemdeki bilinen bir sayıya ulaşılır."
+  },
+  {
+   "key": "mis_kontrol_yuzeysel",
+   "grup": "yanilgi",
+   "text": "Cevabın büyüklüğünü kontrol sanma. Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin."
   },
   {
    "key": "pi_tekrar_dene_1",

@@ -616,6 +616,14 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .fx-banner.kartta .fx-word{font-size:34px}
 .fx-banner.kartta.rainbow .fx-word{font-size:40px}
 .kv .card small{display:block;font-size:11px;font-weight:800}
+
+/* Faz 2: tahmin, gerekçe, derinleştir */
+.sheet.tahc{background:var(--surface);border-top:4px solid var(--brand,#5B4BFF)}
+.tahk{margin-top:8px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--warn,#f59e0b) 14%,transparent);font-size:14px;line-height:1.35}
+.tahk.ok{background:var(--ok-bg)}
+.thnot{margin-top:6px;font-size:13px;font-weight:700;color:var(--muted);text-align:right}
+.kislem{margin:8px 0;padding:8px 12px;border-radius:12px;background:var(--surface2);font-weight:800;font-size:17px}
+.abaglam.derin{border-color:#f5b301;background:color-mix(in srgb,#f5b301 10%,var(--surface))}
 </style>
 </head>
 <body>
@@ -1011,6 +1019,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     sifir_basta: { t: 'En küçük sayıyı 0 ile başlatma', fix: 'Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0\'ı yaz.' },
     fiyat_okuma: { t: 'Fiyatı lira-kuruş olarak yanlış okuma', fix: 'Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş.' },
     istenen_verilen: { t: 'Verileni istenen sanma', fix: 'Problemde verilen sayıları ve sorulan şeyi ayır. Soru cümlesi (genellikle en sonda) neyin istendiğini söyler; istenen, problemde henüz yazmayan şeydir.' },
+    kontrol_tekrar: { t: 'Kontrolü aynı yolu tekrarlayarak yapma', fix: 'Aynı yolu tekrarlarsan aynı hatayı yine yapabilirsin. Kontrolde cevaptan geriye gidilir: ters işlemle problemdeki bilinen bir sayıya ulaşılır.' },
+    kontrol_yuzeysel: { t: 'Cevabın büyüklüğünü kontrol sanma', fix: 'Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin.' },
     ara_sonuc: { t: 'Ara sonucu cevap sanma', fix: 'Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et.' },
     kalan_yok: { t: 'Bölmede kalanı hesaba katmama', fix: 'Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır.' },
     hata_yeri: { t: 'Doğru bir adımı hatalı sanma', fix: 'Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır.' },
@@ -1969,7 +1979,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         { prompt: `Toplam tutarı ${top} TL bulduk. ${ad} kaç TL para üstü alır?`, answer: pu, unit: 'TL', ip: 'Ödenen para = alışveriş tutarı + para üstü. Buna göre para üstünü nasıl bulursun?',
           inputMis: [{ v: ver + top, mis: 'ters_islem', ac: `Ödenen para = alışveriş tutarı + para üstü. ${ver} = ${top} + para üstü olduğuna göre para üstü = ${ver} − ${top} olmalı.` }, { v: top, mis: 'ara_sonuc', ac: 'Bu alışverişin tutarı, para üstü değil. Kasaya verilen paradan bunu çıkarmalısın.' }],
           steps: ['Ödenen para = alışveriş tutarı + para üstü', `${ver} = ${top} + para üstü`, `Para üstü: ${ver} − ${top} = ${pu} TL`] }],
-      kontrol: [`Para üstünü ${pu} TL buldun. Hangi işlem bu cevabı doğrular?`, `${pu} + ${top} = ${ver}`, [[`${ver} + ${top} = ${ver + top}`, 'ters_islem', 'Bu işlem verilen paraya tutarı ekliyor; problemdeki hiçbir şeyi doğrulamaz.'], [`${pu} + ${nd * fd} = ${pu + nd * fd}`, 'problem_adim', 'Sadece defterlerin parasını ekledin. Para üstü ile TOPLAM tutar birlikte verilen paraya eşit olmalı.']], 'Para üstü ile ödenen tutarın toplamı, kasaya verilen paraya eşit olmalı.'] });
+      kontrol: [`Para üstünü ${pu} TL buldun. Hangi işlem bu cevabı doğrular?`, `${pu} + ${top} = ${ver}`, [[`${ver} + ${top} = ${ver + top}`, 'ters_islem', 'Bu işlem verilen paraya tutarı ekliyor; problemdeki hiçbir şeyi doğrulamaz.'], [`${pu} + ${nd * fd} = ${pu + nd * fd}`, 'problem_adim', 'Sadece defterlerin parasını ekledin. Para üstü ile TOPLAM tutar birlikte verilen paraya eşit olmalı.']], 'Para üstü ile ödenen tutarın toplamı, kasaya verilen paraya eşit olmalı.'],
+      derin: [`${ver} − ${nd} × ${fd} − ${nk} × ${fk}`, [[`${ver} − ${nd} × ${fd} + ${nk} × ${fk}`, 'ters_islem', 'Kalemlerin parası da kasaya verilen paradan ÇIKAR; eklenmez.'], [`${ver} − ${nd} − ${fd} − ${nk} − ${fk}`, 'problem_adim', 'Adetleri ve fiyatları ayrı ayrı çıkardın. Her ürünün parası adet × fiyattır.']]] });
   };
   PROB.bahce = () => {
     const a = ri(8, 25), b = ri(4, a - 2), k = ri(2, 4), c = 2 * (a + b), tel = k * c;
@@ -1983,7 +1994,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         { prompt: `Bahçenin çevresi ${c} m. ${k} sıra için kaç metre tel gerekir?`, answer: tel, unit: 'm', ip: `Bir sıra tel bir çevre kadardır. ${k} sıra kaç çevre eder?`,
           inputMis: [{ v: c + k, mis: 'problem_adim', ac: 'Sıra sayısını ekledin. Her sıra bir çevre kadar tel ister: çevreyi sıra sayısıyla çarp.' }, { v: k * (a + b), mis: 'cevre_yarim', ac: `Yarım çevreyi çarptın. Tam çevreyi (${c} m) kullanmalısın.` }],
           steps: ['Her sıra bir çevre kadar tel ister.', `${k} × ${c} = ${tel} m`] }],
-      kontrol: [`Tel uzunluğunu ${tel} m buldun. Hangi işlem bu cevabı doğrular?`, `${tel} ÷ ${k} = ${c}`, [[`${tel} × ${k} = ${tel * k}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${tel} − ${k} = ${tel - k}`, 'ters_islem', 'Sıra sayısını çıkarmak anlamlı değil. Toplam teli sıra sayısına bölersen bir sırayı bulursun.']], 'Toplam teli sıra sayısına bölersen bir sıranın uzunluğunu, yani çevreyi bulmalısın.'] });
+      kontrol: [`Tel uzunluğunu ${tel} m buldun. Hangi işlem bu cevabı doğrular?`, `${tel} ÷ ${k} = ${c}`, [[`${tel} × ${k} = ${tel * k}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${tel} − ${k} = ${tel - k}`, 'ters_islem', 'Sıra sayısını çıkarmak anlamlı değil. Toplam teli sıra sayısına bölersen bir sırayı bulursun.']], 'Toplam teli sıra sayısına bölersen bir sıranın uzunluğunu, yani çevreyi bulmalısın.'],
+      derin: [`2 × ${k} × (${a} + ${b})`, [[`${k} × (${a} + ${b})`, 'cevre_yarim', 'Parantezdeki iki kenar sadece yarım tur. Tam çevre için 2 ile de çarpmalısın.'], [`${k} × ${a} × ${b}`, 'cevre_alan', 'Kenarları çarpmak alanı verir. Tel için çevre gerekir.']]] });
   };
   PROB.parke = () => {
     let a, b; do { a = ri(3, 8); b = ri(2, a - 1); } while (a * b === 2 * (a + b));
@@ -1998,7 +2010,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         { prompt: `Odanın alanı ${alan} m². Parke için kaç TL ödenir?`, answer: tutar, unit: 'TL', ip: `Her bir metrekare ${f} TL. ${alan} metrekare için hangi işlemi yaparsın?`,
           inputMis: [{ v: 2 * (a + b) * f, mis: 'cevre_alan', ac: `Çevreyle fiyatı çarptın. Alanı (${alan} m²) kullanmalısın.` }, { v: alan + f, mis: 'problem_adim', ac: `Alanla fiyatı topladın. Her metrekare ${f} TL olduğu için çarpmalısın.` }],
           steps: [`Her metrekare ${f} TL.`, `${alan} × ${f} = ${fmtN(tutar)} TL`] }],
-      kontrol: [`Parkeye ${fmtN(tutar)} TL ödeneceğini buldun. Hangi işlem bu cevabı doğrular?`, `${fmtN(tutar)} ÷ ${f} = ${alan}`, [[`${fmtN(tutar)} × ${f} = ${fmtN(tutar * f)}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${fmtN(tutar)} − ${f} = ${fmtN(tutar - f)}`, 'ters_islem', 'Fiyatı çıkarmak anlamlı değil. Toplam parayı metrekare fiyatına bölersen alanı bulursun.']], 'Toplam parayı metrekare fiyatına bölersen odanın alanını bulmalısın.'] });
+      kontrol: [`Parkeye ${fmtN(tutar)} TL ödeneceğini buldun. Hangi işlem bu cevabı doğrular?`, `${fmtN(tutar)} ÷ ${f} = ${alan}`, [[`${fmtN(tutar)} × ${f} = ${fmtN(tutar * f)}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${fmtN(tutar)} − ${f} = ${fmtN(tutar - f)}`, 'ters_islem', 'Fiyatı çıkarmak anlamlı değil. Toplam parayı metrekare fiyatına bölersen alanı bulursun.']], 'Toplam parayı metrekare fiyatına bölersen odanın alanını bulmalısın.'],
+      derin: [`(${a} × ${f}) × ${b}`, [[`(${a} + ${b}) × ${f}`, 'cevre_alan', `Kenarları toplamak alanı vermez. Zemindeki metrekare sayısı ${a} × ${b}.`], [`${a} × ${b} + ${f}`, 'problem_adim', `Fiyatı eklemek yetmez. Her metrekare için ${f} TL ödenir; çarpmalısın.`]]] });
   };
   PROB.okuma = () => {
     const ad = pick(NAMES), gun = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'], v = shuffle(Array.from({ length: 33 }, (_, i) => i + 8)).slice(0, 5);
@@ -2026,7 +2039,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         { prompt: `Sol kefede ${sol} kg var. Terazi dengede olduğuna göre kutu kaç kg?`, answer: kutu, unit: 'kg', ip: `Kutu ile ${c} kg birlikte ${sol} kg ediyor. Kutu kaç kg olmalı?`,
           inputMis: [{ v: sol, mis: 'esittir_sonuc', ac: `Bu sol kefenin tamamı. Sağda kutunun yanında ${c} kg da var; onu çıkarmalısın.` }, { v: sol + c, mis: 'ters_islem', ac: `Ekledin. Kutu + ${c} = ${sol} olduğuna göre kutu = ${sol} − ${c} olmalı.` }],
           steps: [`Sağ kefe de ${sol} kg olmalı: ${c} + kutu = ${sol}`, `Kutu = ${sol} − ${c} = ${kutu} kg`] }],
-      kontrol: [`Kutuyu ${kutu} kg buldun. Hangi işlem bu cevabı doğrular?`, `${c} + ${kutu} = ${sol}`, [[`${kutu} + ${sol} = ${kutu + sol}`, 'denge_bozma', 'Kutuyu sol kefeye eklemek dengeyi kontrol etmez. Sağ kefedekileri topla, sol kefeye eşit mi bak.'], [`${a} + ${kutu} = ${a + kutu}`, 'denge_bozma', `Sağ kefede ${a} kg yok. Sağ kefede ${c} kg ve kutu var.`]], 'Sağ kefedeki ağırlıklar toplanınca sol kefedeki toplama eşit olmalı.'] });
+      kontrol: [`Kutuyu ${kutu} kg buldun. Hangi işlem bu cevabı doğrular?`, `${c} + ${kutu} = ${sol}`, [[`${kutu} + ${sol} = ${kutu + sol}`, 'denge_bozma', 'Kutuyu sol kefeye eklemek dengeyi kontrol etmez. Sağ kefedekileri topla, sol kefeye eşit mi bak.'], [`${a} + ${kutu} = ${a + kutu}`, 'denge_bozma', `Sağ kefede ${a} kg yok. Sağ kefede ${c} kg ve kutu var.`]], 'Sağ kefedeki ağırlıklar toplanınca sol kefedeki toplama eşit olmalı.'],
+      derin: [b >= c ? `${a} + (${b} − ${c})` : `${a} − (${c} − ${b})`, [[`${a} + ${b} + ${c}`, 'denge_bozma', `Bütün ağırlıkları toplamak dengeyi kullanmaz. Kutu ile ${c} kg birlikte sol kefeye eşit.`], [`${a} + ${b}`, 'esittir_sonuc', `Bu sol kefenin tamamı. Sağda kutunun yanında ${c} kg da var.`]]] });
   };
   PROB.kumbara = () => {
     // Örüntü: 0. hafta = başlangıç. n hafta sonra n kez artış olur → toplam = başlangıç + n × artış (ilk terim + (n − 1) × artış DEĞİL)
@@ -2042,7 +2056,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         { prompt: `Para her hafta ${d} TL artıyor. ${n} hafta sonra kumbarada kaç TL olur?`, answer: top, unit: 'TL', ip: 'Toplam = başlangıç + hafta sayısı × artış. Başlangıç tabloda 0. haftada yazıyor.',
           inputMis: [{ v: n * d, mis: 'baslangic_unutma', ac: `Bu sadece ${n} haftada eklenen para. Başta kumbarada olan ${s} TL'yi de eklemelisin.` }, { v: s + (n - 1) * d, mis: 'baslangic_sira', ac: `Başlangıç 0. hafta. ${n} hafta sonra ${n} kez artış olur: ${s} + ${n} × ${d}.` }],
           steps: ['Kural: toplam = başlangıç + hafta sayısı × artış', `${n} × ${d} = ${n * d}`, `${s} + ${n * d} = ${top} TL`] }],
-      kontrol: [`${top} TL buldun. Hangisi bu cevabı doğrular?`, `${top} − ${s} = ${n * d} ve ${n * d} ÷ ${d} = ${n} hafta`, [[`${top} + ${s} = ${top + s}`, 'ters_islem', 'Başlangıç parasını bir daha eklemek bir şey doğrulamaz. Sonuçtan başlangıcı ÇIKARIRSAN eklenen parayı bulursun.'], [`${top} − ${d} = ${top - d}`, 'ters_islem', 'Bir haftalık artışı çıkarmak sadece bir önceki haftayı verir; cevabı doğrulamaz.']], 'Sonuçtan başlangıcı çıkarırsan eklenen parayı bulursun; bunu haftalık artışa bölünce hafta sayısına ulaşmalısın.'] });
+      kontrol: [`${top} TL buldun. Hangisi bu cevabı doğrular?`, `${top} − ${s} = ${n * d} ve ${n * d} ÷ ${d} = ${n} hafta`, [[`${top} + ${s} = ${top + s}`, 'ters_islem', 'Başlangıç parasını bir daha eklemek bir şey doğrulamaz. Sonuçtan başlangıcı ÇIKARIRSAN eklenen parayı bulursun.'], [`${top} − ${d} = ${top - d}`, 'ters_islem', 'Bir haftalık artışı çıkarmak sadece bir önceki haftayı verir; cevabı doğrulamaz.']], 'Sonuçtan başlangıcı çıkarırsan eklenen parayı bulursun; bunu haftalık artışa bölünce hafta sayısına ulaşmalısın.'],
+      derin: [`${s + 3 * d} + ${n - 3} × ${d}`, [[`${s + 3 * d} + ${n} × ${d}`, 'problem_adim', `Tablodaki 3. haftadan devam edersen ${n} değil, ${n - 3} hafta daha artış eklenir.`], [`${n} × ${d}`, 'baslangic_unutma', `Başlangıçtaki ${s} TL unutulmuş.`]]] });
   };
   PROB.gezi = () => {
     let o, t, k; do { o = ri(40, 140); t = ri(2, 6); k = pick([14, 16, 18, 20, 25]); } while ((o + t) % k === 0);
@@ -2082,7 +2097,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         { prompt: `Bilinen iki açının toplamı ${90 + x}°. Üçüncü açı kaç derecedir?`, answer: u, unit: '°', ip: `Üç açının toplamı 180°. İkisi birlikte ${90 + x}°. Geriye ne kalır?`,
           inputMis: [{ v: 270 - x, mis: 'ucgen_360', ac: '360°\'den çıkardın. Üçgenin iç açılarının toplamı 180°.' }, { v: 90 + x, mis: 'ara_sonuc', ac: 'Bu iki açının toplamı. 180°\'den çıkararak üçüncü açıyı bul.' }],
           steps: ['Üçgenin iç açıları toplamı 180°.', `180 − ${90 + x} = ${u}°`] }],
-      kontrol: [`Üçüncü açıyı ${u}° buldun. Hangi işlem bu cevabı doğrular?`, `90 + ${x} + ${u} = 180`, [[`${u} + ${x} = 90`, 'problem_adim', 'Bu işlem doğru ama 90° açıyı hesaba katmıyor. Üç açının toplamı 180° olmalı.'], [`90 + ${x} = ${90 + x}`, 'problem_adim', 'Bu sadece iki açı. Üçüncüyü de ekleyip 180° bulmalısın.']], 'Üç açıyı toplayınca 180° bulmalısın.'] });
+      kontrol: [`Üçüncü açıyı ${u}° buldun. Hangi işlem bu cevabı doğrular?`, `90 + ${x} + ${u} = 180`, [[`${u} + ${x} = 90`, 'problem_adim', 'Bu işlem doğru ama 90° açıyı hesaba katmıyor. Üç açının toplamı 180° olmalı.'], [`90 + ${x} = ${90 + x}`, 'problem_adim', 'Bu sadece iki açı. Üçüncüyü de ekleyip 180° bulmalısın.']], 'Üç açıyı toplayınca 180° bulmalısın.'],
+      derin: [`90 − ${x}`, [[`180 − ${x}`, 'problem_adim', '90°\'lik açı unutulmuş. Üç açı birlikte 180° eder.'], [`360 − 90 − ${x}`, 'ucgen_360', 'Üçgenin iç açılarının toplamı 180°, 360° değil.']]] });
   };
   PROB.pizza = () => {
     const [a1, a2] = shuffle(NAMES).slice(0, 2); let b, k, n1, n2; do { b = pick([2, 3, 4]); k = b === 4 ? ri(2, 3) : ri(2, 4); n1 = ri(1, b - 1); n2 = ri(1, b * k - 1); } while (n2 === n1 * k);
@@ -2101,23 +2117,68 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
           steps: ['Paydalar eşit: payı büyük olan büyüktür.', `${buyukK} > ${kucukK} → ${kazanan} daha çok yedi.`] }],
       kontrol: [`${kazanan} daha çok yedi dedin. Hangisi bu cevabı doğrular?`, `Paydalar eşitlenince ${buyukK} > ${kucukK} oluyor.`, [[`${b} < ${D} olduğu için paydası ${D} olan kesir daha büyüktür.`, 'payda_buyuk', 'Payda büyüdükçe dilimler küçülür; paydaya bakarak karar verilmez.'], ['Payı büyük olan kesir her zaman daha büyüktür.', 'pay_payda_ayri', 'Bu her zaman doğru değil; paydalar farklıysa yanılırsın. Önce paydaları eşitle.']], 'Paydaları eşit kesirlerde payı büyük olan daha büyüktür.'] });
   };
-  const ASAMA = { anla: 'Anla', plan: 'Planla', coz: 'Çöz', kontrol: 'Kontrol et', bagimsiz: 'Kendin dene' };
+  const ASAMA = { anla: 'Anla', plan: 'Planla', tahmin: 'Tahmin et', coz: 'Çöz', kontrol: 'Kontrol et', derin: 'Derinleştir', bagimsiz: 'Kendin dene' };
   const ASAMA_IP = {
     anla: 'Problemin son cümlesini oku. Sorulan şey problemde verilmiş bir sayı mı, yoksa bulmamız gereken yeni bir şey mi?',
     plan: 'Cevabı bulmadan önce hangi ara sonucu bilmen gerekiyor? O ara sonucu hangi işlem verir?',
     kontrol: 'Bulduğun cevaptan geriye doğru git: ters işlemle problemdeki bilinen bir sayıya ulaşabiliyor musun?',
+    tahmin: 'Sayıları yuvarla (örneğin 23 yerine 20 düşün) ve kafandan yaklaşık hesapla. Sonuç büyük mü çıkmalı, küçük mü?',
+    gerekce: 'Bu işlem, bulduğun cevaptan problemdeki hangi bilgiye geri dönüyor?',
+    derin: 'Her işlemi sırayla hesapla (önce parantez, sonra çarpma, sonra toplama ve çıkarma). Hangisi aynı sonucu veriyor?',
   };
+  const BIRIM = { TL: 'TL', m: 'metre', 'm²': 'metrekare', kg: 'kilogram', sayfa: 'sayfa', '°': 'derece', 'kişi': 'kişi', 'minibüs': 'minibüs', top: 'top' };
+  // Tahmin aralığının sınırı: iki değer arasındaki en "yuvarlak" sayı (önce 1000'lik, sonra 500'lük, 100'lük...)
+  // İki değerin ikisinden de yeterince uzak (aralığın en az 1/4'ü) olan en yuvarlak sayı; yoksa null.
+  const yuvarlakSinir = (lo, hi) => { const pay = (hi - lo) / 4;
+    for (const st of [1000, 500, 100, 50, 10, 5, 1]) { let en = null, enUz = -1; for (let m = Math.floor(lo / st) + 1; m * st < hi; m++) { const uz = Math.min(m * st - lo, hi - m * st); if (uz > enUz) { en = m * st; enUz = uz; } } if (en !== null && enUz >= pay) return en; }
+    return null; };
+  const denN = (n) => `${fmtN(n)}'${U.ek(U.lastWord(n), 'den')}`;
+  // Tahmin: yanlış aralıklar, son adımın yanılgılı sonuçlarına göre kurulur (rastgele aralık yok).
+  const tahminSorusu = (pr) => {
+    const son = pr.coz[pr.coz.length - 1]; if (son.options || typeof son.answer !== 'number' || !BIRIM[son.unit]) return null;
+    const ans = son.answer, uzak = (x, y) => Math.abs(x - y) >= Math.max(3, 0.3 * Math.min(x, y));
+    // Cevaptan ve birbirinden yeterince uzak yanılgılı sonuçlar; önce cevaba en yakınlar (her iki yandan birer, sonra aynı yandan)
+    const aday = son.inputMis.filter(m => m.v > 0 && uzak(m.v, ans)).sort((x, y) => Math.abs(x.v - ans) - Math.abs(y.v - ans));
+    const sec = [];
+    for (const yan of [-1, 1]) { const m = aday.find(x => Math.sign(x.v - ans) === yan); if (m) sec.push(m); }
+    for (const m of aday) if (sec.length < 2 && !sec.includes(m) && sec.every(x => uzak(x.v, m.v))) sec.push(m);
+    if (!sec.length) return null;
+    const noktalar = [...sec.map(m => ({ v: m.v, m })), { v: ans }].sort((x, y) => x.v - y.v);
+    const sinir = noktalar.slice(1).map((x, i) => yuvarlakSinir(noktalar[i].v, x.v));
+    if (sinir.some(x => x === null)) return null;
+    const metin = (i) => i === 0 ? `${denN(sinir[0])} az` : i === noktalar.length - 1 ? `${denN(sinir[i - 1])} fazla` : `${fmtN(sinir[i - 1])} ile ${fmtN(sinir[i])} arası`;
+    const neden = (m) => `Sonuç bu aralıkta çıkıyorsa büyük ihtimalle şu oldu: ${m.ac}`;
+    const okMetin = metin(noktalar.findIndex(x => !x.m));
+    return { prompt: `Hesaplamadan önce tahmin et: cevap kaç ${BIRIM[son.unit]} çıkar?`, fixed: true, tahminDeger: ans,
+      options: noktalar.map((x, i) => x.m ? { t: metin(i), ok: false, mis: x.m.mis, ac: neden(x.m) } : { t: metin(i), ok: true }),
+      ip: ASAMA_IP.tahmin, hint: ASAMA_IP.tahmin, steps: ['Sayıları yuvarlayıp kafadan yaklaşık hesaplarız; tam sonuç gerekmez.', `Tam cevap ${fmtN(ans)} ${son.unit}: «${okMetin}».`] };
+  };
+  // Gerekçe: kontrol işlemi verilir, çocuk bu işlemin cevabı NEDEN doğruladığını seçer (açıklama becerisi).
+  const kucukBas = (t) => t.charAt(0).toLocaleLowerCase('tr-TR') + t.slice(1);
+  const GEREKCE_YANLIS = [
+    ['Çünkü bulduğum sonucu aynı yolla bir kez daha hesapladım.', 'kontrol_tekrar', 'Bu işlem aynı yolu tekrarlamıyor; cevaptan geriye gidiyor. Aynı yolu tekrarlamak aynı hatayı tekrar ettirebilir.'],
+    ['Çünkü sonuç makul bir büyüklükte; bu kadarı yeter.', 'kontrol_yuzeysel', 'Büyüklüğe bakmak tahmin için iyidir ama cevabı kanıtlamaz. Kontrol işlemi problemdeki bir bilgiye tam olarak ulaşmalı.']];
+  const gerekceSorusu = (pr) => ({ prompt: `Kontrol için şu işlemi yaptın:<div class="kislem">${pr.kontrol[1]}</div>Bu işlem cevabı neden doğrular?`, okuma: 'Kontrol için yaptığın işlem ekranda. Bu işlem cevabı neden doğrular?',
+    options: mc('Çünkü ' + kucukBas(pr.kontrol[3]), GEREKCE_YANLIS), ip: ASAMA_IP.gerekce, hint: ASAMA_IP.gerekce, steps: [pr.kontrol[3]], kontrolNeden: pr.kontrol[3] });
+  // Derinleştir: aynı problemin başka bir çözüm yolu. Sadece ilk denemede çözen çocuğa gelir (motor karar verir).
+  const derinSorusu = (pr) => { const son = pr.coz[pr.coz.length - 1], ad = pick(NAMES);
+    return { prompt: `${ad} bu problemi başka bir yolla çözmek istiyor. Hangi işlem de aynı cevabı (${fmtN(son.answer)}) verir?`, options: mc(pr.derin[0], pr.derin[1]),
+      ip: ASAMA_IP.derin, hint: ASAMA_IP.derin, derinCevap: son.answer, steps: [`${pr.derin[0]} işlemi de ${fmtN(son.answer)} verir.`, 'Bir problemin birden çok doğru çözüm yolu olabilir; hepsi aynı cevaba ulaşır.'] }; };
   // Bir problemi sıralı soru nesnelerine çevirir (her biri sıradan bir mc/input sorusu + q.atolye bilgisi).
   // Sonda "Kendin dene": aynı türde, YENİ sayılarla, iskelesiz tek soru → öğrenmenin bağımsız kanıtı.
   const tabloSiz = (b) => b.replace(/<table[\s\S]*<\/table>/, '');
-  const atolyeSorulari = (id) => {
+  const atolyeSorulari = (id, sec = {}) => {
     const pr = PROB[id](), pid = Math.random().toString(36).slice(2), list = [];
     const ek = (asama, o, b) => list.push(Q(Object.assign({ atolye: { pid, sablon: id, asama, baslik: (b || pr).baslik, baglam: (b || pr).baglam }, skill: pr.skill }, o)));
     ek('anla', { prompt: 'Soruda ne isteniyor?', okuma: `${tabloSiz(pr.baglam)} Soruda ne isteniyor?`, options: mc(pr.anla[0], pr.anla[1]), ip: ASAMA_IP.anla, steps: [`İstenen: ${pr.anla[0]}`, 'Soru cümlesi genellikle problemin en sonundadır.'], hint: ASAMA_IP.anla });
     ek('plan', { prompt: 'Bu problemi hangi yolla çözersin?', options: mc(pr.plan[0], pr.plan[1]), ip: ASAMA_IP.plan, steps: [`Doğru yol: ${pr.plan[0]}`], hint: ASAMA_IP.plan });
+    const th = tahminSorusu(pr); if (th) ek('tahmin', th);
     pr.coz.forEach((c, i) => ek('coz', c.options ? { prompt: `${i + 1}. adım: ${c.prompt}`, options: c.options, fixed: c.fixed, ip: c.ip, steps: c.steps, hint: c.ip } :
       { type: 'input', prompt: `${i + 1}. adım: ${c.prompt}`, answer: String(c.answer), unit: c.unit, inputMis: c.inputMis.filter(m => m.v !== c.answer), ip: c.ip, steps: c.steps, hint: c.ip }));
-    ek('kontrol', { prompt: pr.kontrol[0], options: mc(pr.kontrol[1], pr.kontrol[2]), ip: ASAMA_IP.kontrol, steps: [pr.kontrol[3]], hint: ASAMA_IP.kontrol, kontrolNeden: pr.kontrol[3] });
+    const gerekce = sec.gerekce === undefined ? Math.random() < 0.5 : sec.gerekce;
+    if (gerekce) ek('kontrol', Object.assign(gerekceSorusu(pr), { gerekce: true }));
+    else ek('kontrol', { prompt: pr.kontrol[0], options: mc(pr.kontrol[1], pr.kontrol[2]), ip: ASAMA_IP.kontrol, steps: [pr.kontrol[3]], hint: ASAMA_IP.kontrol, kontrolNeden: pr.kontrol[3] });
+    if (pr.derin && sec.derin !== false) ek('derin', derinSorusu(pr));
     // Kendin dene
     let p2 = PROB[id](); for (let t = 0; t < 8 && tabloSiz(p2.baglam) === tabloSiz(pr.baglam); t++) p2 = PROB[id]();
     const son = p2.coz[p2.coz.length - 1], ara = p2.coz[0], tumAdimlar = p2.coz.flatMap(c => c.steps), ipB = `Az önceki yolu izle: ${p2.plan[0]}`;
@@ -2128,7 +2189,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       if (!son.options && ara !== son && ara.answer !== son.answer && !yan.some(m => m.v === ara.answer)) yan.push({ v: ara.answer, mis: 'ara_sonuc', ac: 'Bu bir ara sonuç. Problem bir adım daha istiyor; soru cümlesine dönüp bak.' });
       ek('bagimsiz', Object.assign(tekBasina, { type: 'input', answer: String(son.answer), unit: son.unit, inputMis: yan }), p2);
     }
-    list.forEach((q, i) => { q.atolye.sira = i; q.atolye.toplam = list.length; });
+    list.forEach((q, i) => { q.atolye.sira = i; q.atolye.toplam = list.length; q.atolye.no = sec.no || 1; q.atolye.sonCoz = q.atolye.asama === 'coz' && list[i + 1].atolye.asama !== 'coz'; });
     return list;
   };
   const ATOLYE = { ids: Object.keys(PROB), skillOf: (id) => ({ market: 'n_problem', bahce: 'a_cevre', parke: 'a_alan', okuma: 's_tablo_sutun', terazi: 'e_esitlik', kumbara: 'e_oruntu', gezi: 'n_carpbol', torba: 'p_spektrum', ucgen: 'g_ucgen', pizza: 'f_karsilastir' })[id], sorular: atolyeSorulari, ASAMA, PROB };
@@ -2468,7 +2529,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       v: 1, profile: null, skills, formats, mis: {}, mistakes: [], times: [], hints: { used: 0, q: 0 }, rescue: { tries: 0, ok: 0 },
       xp: 0, gems: 20, streak: 0, lastDay: null, freezes: 1, dailyGoal: 50, days: {}, week: { start: weekStart(), xp: 0 }, league: { tier: 0 },
       badges: [], sessions: [], speedBest: 0, themesTried: [], settings: { sound: true, voice: true }, placementDone: false,
-      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, bagimsiz: { n: 0, ok: 0 }, problem: 0 }, kanit: { ilk: 0, ipucu: 0, cozum: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
+      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, tahmin: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, derin: { n: 0, ok: 0 }, bagimsiz: { n: 0, ok: 0 }, problem: 0 }, kanit: { ilk: 0, ipucu: 0, cozum: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
     };
   }
   const E = {};
@@ -2530,7 +2591,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
   // Problem Atölyesi: 2 problem (farklı şablon); çalıştığı temalardan, yoksa temel şablonlardan
   E.atolyeBecerileri = (st) => { const cal = ATOLYE.ids.filter(id => st.skills[ATOLYE.skillOf(id)] && st.skills[ATOLYE.skillOf(id)].n > 0); return cal.length >= 2 ? cal : ['market', 'bahce', 'kumbara', 'terazi']; };
-  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap(id => ATOLYE.sorular(id)); };
+  E.atolyePlan = (st, adet = 2) => { const pool = E.atolyeBecerileri(st).slice().sort(() => Math.random() - 0.5).slice(0, adet); return pool.flatMap((id, i) => ATOLYE.sorular(id, { gerekce: i === 1, no: i + 1 })); }; // 2. problemin kontrolü gerekçe sorusu
   E.ATOLYE = ATOLYE;
 
   // Ders oturumu planı
@@ -2580,7 +2641,12 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (ses.mode === 'speed') { const pool = SKILLS.filter(s => E.eff(st.skills[s.id]) >= 0.3).map(s => s.id); id = pool.length ? pool[Math.floor(Math.random() * pool.length)] : ['n_karsilastir', 'e_oncelik', 'f_karsilastir', 'a_cevre'][Math.floor(Math.random() * 4)]; const q = E.makeQ(id, 1, true); return q; }
     if (ses.mode === 'lesson' && Math.random() < 0.12) { const due = E.dueSkills(st).filter(d => d.id !== ses.skill); if (due.length) { const q = E.makeQ(due[0].id, E.levelFor(st, due[0].id)); q.review = true; return q; } }
     if (ses.mode === 'hata') return E.hataSorusu(st, ses);
-    if (ses.mode === 'atolye') { const q = ses.aq[Math.min(ses.i, ses.aq.length - 1)]; q.level = 2; q.uid = Math.random().toString(36).slice(2); return q; }
+    if (ses.mode === 'atolye') {
+      // Derinleştir yalnızca bu problemin çözüm adımlarını ilk denemede yapan çocuğa gelir (zorlanan çocuğu yormaz)
+      let q = ses.aq[Math.min(ses.i, ses.aq.length - 1)];
+      while (q.atolye.asama === 'derin' && !(ses.atolyeCoz && (ses.atolyeCoz[q.atolye.pid] || []).length && ses.atolyeCoz[q.atolye.pid].every(k => k === 'ilk'))) { ses.aq.splice(ses.i, 1); ses.len = ses.aq.length; q = ses.aq[Math.min(ses.i, ses.aq.length - 1)]; }
+      q.level = 2; q.uid = Math.random().toString(36).slice(2); return q;
+    }
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
     if (ses.mode === 'hazir') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id).slice(0, 3); id = ids[ses.i % ids.length]; return E.makeQ(id, 1); }
@@ -2610,13 +2676,22 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   // kanit: 'ilk' (ilk denemede, ipucusuz doğru) · 'ipucu' (ipucuyla ya da ikinci denemede doğru) · 'cozum' (çözüm gösterildi)
   E.record = (st, ses, q, res, ms, hinted, kanit) => {
     kanit = kanit || (res.ok ? (hinted ? 'ipucu' : 'ilk') : 'cozum');
-    const sk = st.skills[q.skill], now = Date.now();
+    const sk = st.skills[q.skill], now = Date.now(), tahmin = !!(q.atolye && q.atolye.asama === 'tahmin');
+    // Tahmin bir kestirimdir, cevap değil: ustalığa, yanılgı defterine, seriye ve ders doğruluğuna girmez.
+    // Sadece atölye ölçümüne yazılır; çocuk problemi çözünce tahminiyle karşılaştırılır.
+    if (tahmin) {
+      if (st.atolye) { const a = st.atolye.tahmin || (st.atolye.tahmin = { n: 0, ok: 0 }); a.n++; if (res.ok) a.ok++; }
+      (ses.tahmin || (ses.tahmin = {}))[q.atolye.pid] = { t: res.secilen, ok: res.ok, dogru: (q.options.find(o => o.ok) || {}).t };
+      ses.xp += 2; ses.i++; return 2;
+    }
     if (res.partial || kanit === 'ipucu') hinted = true;
-    sk.pL = E.bkt(sk.pL, res.ok, guessOf(q), hinted); sk.n++; if (res.ok) sk.ok++;
+    // Tahmin bir kestirimdir: beceri ustalığına ve yanılgı defterine yazılmaz, sadece atölye ölçümüne girer
+    if (!tahmin) { sk.pL = E.bkt(sk.pL, res.ok, guessOf(q), hinted); sk.n++; if (res.ok) sk.ok++; }
     if (q.type === 'match') ses.matches++;
     sk.kanit = sk.kanit || { ilk: 0, ipucu: 0, cozum: 0 }; sk.kanit[kanit]++;
     st.kanit = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }; st.kanit[kanit]++;
-    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama] || (st.atolye[q.atolye.asama] = { n: 0, ok: 0 }); a.n++; if (kanit === 'ilk') a.ok++; if (kanit === 'ipucu') a.ip = (a.ip || 0) + 1; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++; }
+    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama] || (st.atolye[q.atolye.asama] = { n: 0, ok: 0 }); a.n++; if (kanit === 'ilk') a.ok++; if (kanit === 'ipucu') a.ip = (a.ip || 0) + 1; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++;
+      if (q.atolye.asama === 'coz') { const c = ses.atolyeCoz || (ses.atolyeCoz = {}); (c[q.atolye.pid] || (c[q.atolye.pid] = [])).push(kanit); } }
     // yarı ömür: aralıklı başarı → uzar
     const gap = sk.last ? (now - sk.last) / HOUR : 0;
     if (res.ok) sk.half = Math.min(24 * 60, sk.half * (gap > sk.half * 0.5 ? 2 : 1.15)); else sk.half = Math.max(6, sk.half / 2);
@@ -2624,7 +2699,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (ses.mode !== 'placement' && ses.mode !== 'speed') st.times = st.times.concat(ms).slice(-60);
     st.hints.q++; if (hinted) { st.hints.used++; ses.hintsUsed++; }
     // yanılgı defteri
-    if (!res.ok) E.yanilgiNotu(st, q, res.mis);
+    if (!res.ok && !tahmin) E.yanilgiNotu(st, q, res.mis);
     if (q.rescue) { st.rescue.tries++; ses.rescueTry++; if (res.ok) { st.rescue.ok++; ses.rescueOk++; if (q.rescueOf && st.mis[q.rescueOf]) st.mis[q.rescueOf].fixed++; } }
     if (q.replay && res.ok) { const i = st.mistakes.findIndex(m => m.skill === q.skill); if (i >= 0) { const m = st.mistakes[i]; if (st.mis[m.mis]) st.mis[m.mis].fixed++; st.mistakes.splice(i, 1); } }
     // anlatım biçimi ödülü: kart sonrası ilk 3 soru
@@ -2706,8 +2781,8 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     const weak = attempted.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7 && !strong.includes(s));
     const misList = Object.entries(st.mis).filter(([k]) => k !== 'genel').map(([k, v]) => ({ id: k, ...v, t: MIS[k] ? MIS[k].t : k, active: v.n > v.fixed, kesin: (v.q ? v.q.length : v.n) >= 2 })).sort((a, b) => (b.n - b.fixed) - (a.n - a.fixed));
     const totalQ = attempted.reduce((a, s) => a + st.skills[s.id].n, 0), totalOk = attempted.reduce((a, s) => a + st.skills[s.id].ok, 0);
-    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'coz', 'kontrol'].map(k => ({ k, ad: ATOLYE.ASAMA[k], n: (A_[k] || {}).n || 0, ok: (A_[k] || {}).ok || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
-    const olculen = asamalar.filter(a => a.n >= 3), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
+    const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'tahmin', 'coz', 'kontrol', 'derin'].map(k => ({ k, ad: ATOLYE.ASAMA[k], ek: k === 'tahmin' || k === 'derin', n: (A_[k] || {}).n || 0, ok: (A_[k] || {}).ok || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
+    const olculen = asamalar.filter(a => a.n >= 3 && !a.ek), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
     const problem = { asamalar, zayif: zayifAsama && zayifAsama.acc < 0.75 ? zayifAsama : null, sayi: A_.problem || 0 };
     const K = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }, kn = K.ilk + K.ipucu + K.cozum;
     const kanit = kn ? { n: kn, ilk: K.ilk / kn, ipucu: K.ipucu / kn, cozum: K.cozum / kn } : null;
@@ -3379,7 +3454,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
         <div class="card"><span class="muted sm">Hatadan dönüş gücü</span><b>${fp.resil === null ? '–' : '%' + Math.round(fp.resil * 100)}</b></div><div class="card"><span class="muted sm">İpucu kullanımı</span><b>%${Math.round(fp.hintRate * 100)}</b></div></div>
         <h3 style="font-size:15px;margin:14px 0 4px">Cevaplarım nasıl geldi?</h3>${kbar}
         <h3 style="font-size:15px;margin:14px 0 4px">Bana en iyi gelen anlatım</h3>${fbars}
-        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım <span class="muted sm">(ilk denemede)</span></h3>${fp.problem.asamalar.some(a => a.n && a.n < 5) ? '<div class="muted sm">Ön değerlendirme: henüz az veri var, sayılar çözdükçe netleşir.</div>' : ''}${fp.problem.asamalar.concat(fp.problem.bagimsiz ? [{ ad: '🎯 Kendin dene', acc: fp.problem.bagimsiz.acc, ok: fp.problem.bagimsiz.ok, n: fp.problem.bagimsiz.n }] : []).map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:74px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100) + ` <small class="muted">${a.ok}/${a.n}</small>`}</div></div>`).join('')}` : ''}
+        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım <span class="muted sm">(ilk denemede)</span></h3>${fp.problem.asamalar.some(a => a.n && a.n < 5) ? '<div class="muted sm">Ön değerlendirme: henüz az veri var, sayılar çözdükçe netleşir.</div>' : ''}${fp.problem.asamalar.filter(a => !a.ek || a.n).concat(fp.problem.bagimsiz ? [{ ad: '🎯 Kendin dene', acc: fp.problem.bagimsiz.acc, ok: fp.problem.bagimsiz.ok, n: fp.problem.bagimsiz.n }] : []).map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:74px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100) + ` <small class="muted">${a.ok}/${a.n}</small>`}</div></div>`).join('')}` : ''}
         <h3 style="font-size:15px;margin:14px 0 4px">Kavram yanılgılarım</h3>${mis}${nasil}</div>
       <h2 class="sect">Rozetler</h2><div class="badges">${E.BADGES.map(b => `<div class="badge ${A.st.badges.includes(b.id) ? '' : 'off'}" title="${esc(b.desc)}"><div class="i">${b.icon}</div><div class="n">${b.name}</div></div>`).join('')}</div>
       <h2 class="sect">Ayarlar</h2><div class="card list">
@@ -3454,11 +3529,11 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       const cls = q.type === 'tf' || q.hata === 'kim' ? 'tf' : q.type === 'cmp' ? 'cmp' : q.hata === 'bul' ? 'defter-sec' : '';
       const cmp = q.type === 'cmp' ? `<div class="cmpline"><span>${q.cmp[0]}</span><span class="cmpbox">${A.sel !== null ? q.options[A.sel].t.replace('<', '&lt;').replace('>', '&gt;') : '?'}</span><span>${q.cmp[1]}</span></div>` : '';
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
-      ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; const el = (A.elenen || []).includes(i); if (el && !(A.fb && o.ok)) c = 'elendi'; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb || el ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
+      ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb && A.fb.tahmin) { if (i === A.sel) c = 'sel'; } else if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; const el = (A.elenen || []).includes(i); if (el && !(A.fb && o.ok)) c = 'elendi'; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb || el ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
-    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${Math.floor(A.ses.i / (q.atolye.toplam || 5)) + 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
+    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
       ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
@@ -3532,9 +3607,12 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 
   // Problem Atölyesi: aşama şeridi (Anla → Planla → Çöz → Kontrol) + problem kartı (her adımda görünür)
   function atolyePanel(q) {
-    const a = q.atolye, sira = ['anla', 'plan', 'coz', 'kontrol', 'bagimsiz'], cur = sira.indexOf(a.asama), AS = E.ATOLYE.ASAMA, bag = a.asama === 'bagimsiz';
-    return `<div class="atolye"><div class="aserit">${sira.map((k, i) => `<span class="${i === cur ? 'on' : i < cur ? 'bitti' : ''} ${k === 'bagimsiz' ? 'hedef' : ''}"><b>${i < cur ? '✓' : k === 'bagimsiz' ? '🎯' : i + 1}</b>${AS[k]}</span>`).join('')}</div>
-      <div class="abaglam ${a.asama === 'anla' || bag ? '' : 'kucuk'} ${bag ? 'yeni' : ''}"><div class="abas">${bag ? '🎯 Yeni problem · Tek başına' : '🧩 ' + esc(a.baslik)}</div><div>${a.baglam}</div></div></div>`;
+    // Şeritte 5 durak: tahmin "Planla"nın, derinleştir "Kontrol et"in içinde gösterilir (dar ekranda sığsın)
+    const a = q.atolye, sira = ['anla', 'plan', 'coz', 'kontrol', 'bagimsiz'], durak = { tahmin: 'plan', derin: 'kontrol' }[a.asama] || a.asama, cur = sira.indexOf(durak), AS = E.ATOLYE.ASAMA, bag = a.asama === 'bagimsiz';
+    const th = A.ses && A.ses.tahmin && A.ses.tahmin[a.pid], thNot = th && ['coz', 'kontrol'].includes(a.asama) ? `<div class="thnot">📝 Tahminin: «${th.t}»</div>` : '';
+    const bas = bag ? '🎯 Yeni problem · Tek başına' : a.asama === 'derin' ? '🌟 Derinleştir · Başka bir yol' : '🧩 ' + esc(a.baslik);
+    return `<div class="atolye"><div class="aserit">${sira.map((k, i) => `<span class="${i === cur ? 'on' : i < cur ? 'bitti' : ''} ${k === 'bagimsiz' ? 'hedef' : ''}"><b>${i < cur ? '✓' : k === 'bagimsiz' ? '🎯' : i + 1}</b>${i === cur ? AS[a.asama] : AS[k]}</span>`).join('')}</div>
+      <div class="abaglam ${a.asama === 'anla' || bag ? '' : 'kucuk'} ${bag ? 'yeni' : ''} ${a.asama === 'derin' ? 'derin' : ''}"><div class="abas">${bas}</div><div>${a.baglam}</div></div>${thNot}</div>`;
   }
   // Hata Avcısı: hayali öğrencinin defteri (kim haklı / neden). Hatalı satır "neden"de baştan, "kim"de cevaptan sonra işaretlenir.
   function defterHTML(q) {
@@ -3551,16 +3629,22 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (res.mis && res.mis !== 'genel' && MIS[res.mis]) return MIS[res.mis].fix;
     return q.hint || 'Soruyu bir daha, yavaşça oku. Hangi bilgiyi kullanman gerekiyor?';
   }
+  // Çözümün son adımından sonra: tahmin tuttu mu?
+  function tahminKarsilastir(q) {
+    const th = q.atolye && q.atolye.sonCoz && A.ses.tahmin && A.ses.tahmin[q.atolye.pid]; if (!th) return '';
+    return th.ok ? `<div class="tahk ok">🎯 Tahminin tuttu! <b>«${th.t}»</b></div>` : `<div class="tahk">📏 Tahminin <b>«${th.t}»</b> idi; cevap <b>«${th.dogru}»</b> aralığında. Bir dahaki sefere sayıları yuvarlayıp kafandan hesapla.</div>`;
+  }
   function feedbackSheet() {
     const fb = A.fb, q = A.q;
+    if (fb.tahmin) return `<div class="sheet tahc"><div class="row"><div class="grow"><h3>📝 Tahminini not ettim!</h3><div class="ans">«${fb.secilen}» · +${fb.gain} XP</div><div class="sub">Şimdi adım adım çöz. Sonunda tahmininle karşılaştıracağız.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Çözmeye başla</button></div>`;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
-    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.kanit === 'ipucu' && A.deneme === 2 ? 'İpucuyla buldun!' : (fb.word || pick(PRAISE))}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
+    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.kanit === 'ipucu' && A.deneme === 2 ? 'İpucuyla buldun!' : (fb.word || pick(PRAISE))}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}${tahminKarsilastir(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
     const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}</div>${mascot('sad', 64)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'derin', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}${tahminKarsilastir(q)}</div>${mascot('sad', 64)}</div>
       ${fb.ac ? `<div class="mis baglamli"><b>🧭 Neden olmadı?</b><div style="margin-top:4px">${fb.ac}</div></div>` : ''}
       ${fb.mis !== 'genel' ? `<div class="mis ${fb.ac ? 'kural' : ''}"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${fb.ac ? 'Genel kural: ' : ''}${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
@@ -3725,6 +3809,11 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   function checkAnswer() {
     const q = A.q, ans = q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : A.sel; if (ans === null || ans === '') return;
     const res = E.check(q, ans), ms = Date.now() - A.t0;
+    // Tahmin: doğru/yanlış denmez, not edilir; çocuk çözünce tahminiyle karşılaştırılır
+    if (q.atolye && q.atolye.asama === 'tahmin') {
+      res.secilen = q.options[ans].t; const gain = E.record(A.st, A.ses, q, res, ms, false);
+      A.fb = { tahmin: true, secilen: res.secilen, gain }; save(); sfx.tap(); render(); return;
+    }
     // İkinci şans: cevabı söylemeden hedefli ipucu, bir yeniden deneme
     if (!res.ok && (A.deneme || 1) === 1 && E.ikinciSansUygun(A.ses, q)) {
       E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;

@@ -55,6 +55,8 @@ const SKILLS_OK = (id) => id in GEN;
 { const NUM = '(?:\\d{1,3}(?: \\d{3})+|\\d+(?:,\\d+)?)';
   const RE = new RegExp(`(${NUM}(?:\\s*[+−×÷]\\s*${NUM})+)\\s*=\\s*(${NUM})(?![\\d,])`, 'g');
   const val = (t) => parseFloat(t.replace(/ /g, '').replace(',', '.'));
+  // Parantezli ifade değerlendirici (yalnız sayı, + − × ÷ ve parantez)
+  const ifade = (t) => { const x = strip(t).replace(/[\u00a0\u202f\u2009]/g, ' ').replace(/(\d) (?=\d{3}\b)/g, '$1').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-'); return /^[\d\s+\-*/().]+$/.test(x) ? Function('return ' + x)() : null; };
   const hesap = (line) => { const L = strip(line).replace(/[\u00a0\u202f\u2009]/g, ' '); let m, bad = null; RE.lastIndex = 0;
     while ((m = RE.exec(L))) { const ex = m[1].replace(new RegExp(NUM, 'g'), (x) => String(val(x))).replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
       const r = Function('return ' + ex)(); if (Math.abs(r - val(m[2])) > 1e-9) bad = m[0]; } return bad; };
@@ -87,7 +89,8 @@ const SKILLS_OK = (id) => id in GEN;
   { const { ATOLYE } = require('../src/generators.js'); let an = 0;
     for (const id of ATOLYE.ids) for (let r = 0; r < 400; r++) {
       const L = ATOLYE.sorular(id), bad = (m, q) => { console.log('BAD ATÖLYE', id, m, q ? strip(q.prompt) : ''); errors++; };
-      if (L.length < 5 || L[0].atolye.asama !== 'anla' || L[L.length - 2].atolye.asama !== 'kontrol' || L[L.length - 1].atolye.asama !== 'bagimsiz' || !SKILLS_OK(L[0].skill)) { bad('yapı'); break; }
+      const sonIki = L[L.length - 2].atolye.asama, kIdx = L.findIndex(q => q.atolye.asama === 'kontrol');
+      if (L.length < 5 || L[0].atolye.asama !== 'anla' || !['kontrol', 'derin'].includes(sonIki) || kIdx < 0 || L[L.length - 1].atolye.asama !== 'bagimsiz' || !SKILLS_OK(L[0].skill) || L.filter(q => q.atolye.sonCoz).length !== 1) { bad('yapı'); break; }
       let stop = false;
       for (const q of L) { an++;
         if (/undefined|NaN|Infinity/.test(strip(q.prompt) + JSON.stringify(q.options || '') + (q.answer || '') + JSON.stringify(q.steps) + strip(q.atolye.baglam))) { bad('metin', q); stop = true; break; }
@@ -102,7 +105,14 @@ const SKILLS_OK = (id) => id in GEN;
         } else {
           const ok = q.options.filter(o => o.ok).length, texts = q.options.map(o => o.t);
           if (ok !== 1 || q.options.length < 2 || new Set(texts).size !== texts.length || q.options.some(o => !o.ok && !MIS[o.mis])) { bad('şık', q); stop = true; }
-          if (q.atolye.asama === 'kontrol') { const b = hesap(q.options.find(o => o.ok).t); if (b) { bad('kontrol şıkkı yanlış hesap: ' + b, q); stop = true; } }
+          if (q.atolye.asama === 'kontrol' && !q.gerekce) { const b = hesap(q.options.find(o => o.ok).t); if (b) { bad('kontrol şıkkı yanlış hesap: ' + b, q); stop = true; } }
+          if (q.atolye.asama === 'kontrol' && q.gerekce) { const b = hesap(strip(q.prompt)); if (b) { bad('gerekçedeki kontrol işlemi yanlış: ' + b, q); stop = true; } }
+          // Derinleştir: doğru işlem cevabı vermeli, yanılgılı işlemler vermemeli (her ifade bağımsız hesaplanır)
+          if (q.atolye.asama === 'derin') for (const o of q.options) { const v = ifade(o.t); if (v === null || (o.ok ? Math.abs(v - q.derinCevap) > 1e-9 : Math.abs(v - q.derinCevap) < 1e-9)) { bad('derinleştir ifadesi: ' + o.t + ' = ' + v, q); stop = true; } }
+          // Tahmin: doğru aralık cevabı içermeli, yanlış aralıklar içermemeli; sınırlar sıralı
+          if (q.atolye.asama === 'tahmin') { const v = q.tahminDeger; for (const o of q.options) { const t = o.t.replace(/\u00a0|\u202f/g, ' '), sayi = (t.match(/\d{1,3}(?: \d{3})*|\d+/g) || []).map(x => +x.replace(/ /g, ''));
+              const icinde = /arası/.test(t) ? v > sayi[0] && v < sayi[1] : / az$/.test(t) ? v < sayi[0] : v > sayi[0];
+              if (icinde !== !!o.ok || (/arası/.test(t) && !(sayi[0] < sayi[1]))) { bad('tahmin aralığı: ' + t + ' / cevap ' + v, q); stop = true; } } }
         }
         const m = U.soruSesi(q.okuma || q.prompt); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) { bad('ses metni (' + m.length + '): ' + m, q); stop = true; }
         if (stop) break;
