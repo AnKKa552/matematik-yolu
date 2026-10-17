@@ -1,6 +1,9 @@
-import asyncio, json, random
+import asyncio, json, random, os, pathlib
 from playwright.async_api import async_playwright
-OUT='test/shots/'
+OUT=str(pathlib.Path(__file__).resolve().parent / 'shots') + '/'
+os.makedirs(OUT, exist_ok=True)
+# Depodaki GÜNCEL derlemeyi aç (eskiden sabit bir yol vardı ve eski bir kopyayı test ediyordu)
+APP=(pathlib.Path(__file__).resolve().parent.parent / 'dist' / 'index.html').as_uri()
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
@@ -9,7 +12,7 @@ async def main():
         errs=[]
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e)))
         pg.on('console', lambda m: errs.append('CONSOLE '+m.text) if m.type=='error' and 'fonts' not in m.text else None)
-        await pg.goto('file:///home/claude/app/dist/index.html'); await pg.wait_for_timeout(600)
+        await pg.goto(APP); await pg.wait_for_timeout(600)
         await pg.evaluate("window.MY_APP.st.settings.voice=false; window.MY_APP.st.settings.sound=false")
         await pg.screenshot(path=OUT+'01_welcome.png')
         await pg.click('[data-act=onb-next]')
@@ -58,6 +61,20 @@ async def main():
                 await pg.click(f'[data-act=opt][data-v="{idx}"]')
             if shot: await pg.screenshot(path=OUT+shot+'_q.png')
             await pg.click('[data-act=check]'); await pg.wait_for_timeout(250)
+            # İkinci şans: ipucu kutusu çıktıysa bir kez daha dene (yarı yarıya doğru)
+            if await pg.query_selector('.ikinci') and not await pg.query_selector('.sheet'):
+                q2 = await pg.evaluate("(()=>{const q=window.MY_APP.q;return {type:q.type,answer:q.answer,ok:(q.options||[]).findIndex(o=>o.ok),n:(q.options||[]).length,el:window.MY_APP.elenen||[]}})()")
+                good2 = random.random() < 0.5
+                if q2['type']=='input':
+                    v2 = q2['answer'].replace('.',',') if good2 else '7'
+                    if v2 == q2['answer']: v2 = '6'
+                    for ch in v2: await pg.click(f'[data-act=key][data-v="{ch}"]')
+                elif q2['type']=='kes':
+                    pass
+                else:
+                    cand = [i for i in range(q2['n']) if i not in q2['el'] and (i == q2['ok'] if good2 else i != q2['ok'])] or [q2['ok']]
+                    await pg.click(f'[data-act=opt][data-v="{cand[0]}"]')
+                await pg.click('[data-act=check]', force=True); await pg.wait_for_timeout(250)
             if shot: await pg.screenshot(path=OUT+shot+'_fb.png')
             await pg.click('[data-act=next]'); await pg.wait_for_timeout(120)
         for i in range(7):

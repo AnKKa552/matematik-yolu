@@ -25,7 +25,7 @@
       v: 1, profile: null, skills, formats, mis: {}, mistakes: [], times: [], hints: { used: 0, q: 0 }, rescue: { tries: 0, ok: 0 },
       xp: 0, gems: 20, streak: 0, lastDay: null, freezes: 1, dailyGoal: 50, days: {}, week: { start: weekStart(), xp: 0 }, league: { tier: 0 },
       badges: [], sessions: [], speedBest: 0, themesTried: [], settings: { sound: true, voice: true }, placementDone: false,
-      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, problem: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
+      quests: { day: null, prog: {}, claimed: [] }, atolye: { anla: { n: 0, ok: 0 }, plan: { n: 0, ok: 0 }, coz: { n: 0, ok: 0 }, kontrol: { n: 0, ok: 0 }, bagimsiz: { n: 0, ok: 0 }, problem: 0 }, kanit: { ilk: 0, ipucu: 0, cozum: 0 }, month: { key: null, done: 0, claimed: false }, trophies: {}, tasks: {}, top3: 0,
     };
   }
   const E = {};
@@ -126,17 +126,30 @@
     if (q.type === 'kes') return KES_CHECK(q, ans);
     if (q.type === 'input') {
       const ok = U.numEq(ans, q.answer);
-      let mis = null; if (!ok) { const hit = (q.inputMis || []).find(m => U.numEq(ans, m.v)); mis = hit ? hit.mis : 'genel'; }
-      return { ok, mis };
+      let mis = null, hit = null; if (!ok) { hit = (q.inputMis || []).find(m => U.numEq(ans, m.v)); mis = hit ? hit.mis : 'genel'; }
+      return { ok, mis, ac: hit && hit.ac, ip: hit && hit.ip };
     }
-    const o = q.options[ans]; return { ok: !!(o && o.ok), mis: o && !o.ok ? (o.mis || 'genel') : null };
+    const o = q.options[ans]; return { ok: !!(o && o.ok), mis: o && !o.ok ? (o.mis || 'genel') : null, ac: o && !o.ok ? o.ac : undefined, ip: o && !o.ok ? o.ip : undefined };
   };
-  E.record = (st, ses, q, res, ms, hinted) => {
+  /* İkinci şans: yanlıştan sonra cevabı vermeyen ipucu + bir yeniden deneme.
+     Yok: hız yarışı, seviye belirleme, sınav, hazır mıyız (ölçme anları); eşleştirme; iki şıklı sorular (ikinci denemede cevap belli olur). */
+  E.ikinciSansUygun = (ses, q) => !['speed', 'placement', 'exam', 'hazir'].includes(ses.mode) && q.type !== 'match' && q.type !== 'tf' && !(q.options && q.type !== 'input' && q.type !== 'kes' && q.options.length < 3);
+  // İlk denemedeki yanılgı da veridir: deftere yazılır (ustalık hesabı son denemede yapılır)
+  E.yanilgiNotu = (st, q, mis) => {
+    if (!mis) return; const now = Date.now();
+    const m = st.mis[mis] || (st.mis[mis] = { n: 0, fixed: 0, skill: q.skill, last: 0 }); m.n++; m.last = now; m.skill = q.skill;
+    st.mistakes = st.mistakes.filter(x => !(x.skill === q.skill && x.mis === mis)); st.mistakes.unshift({ skill: q.skill, lv: q.level, mis, at: now }); st.mistakes = st.mistakes.slice(0, 30);
+  };
+  // kanit: 'ilk' (ilk denemede, ipucusuz doğru) · 'ipucu' (ipucuyla ya da ikinci denemede doğru) · 'cozum' (çözüm gösterildi)
+  E.record = (st, ses, q, res, ms, hinted, kanit) => {
+    kanit = kanit || (res.ok ? (hinted ? 'ipucu' : 'ilk') : 'cozum');
     const sk = st.skills[q.skill], now = Date.now();
-    if (res.partial) hinted = true;
+    if (res.partial || kanit === 'ipucu') hinted = true;
     sk.pL = E.bkt(sk.pL, res.ok, guessOf(q), hinted); sk.n++; if (res.ok) sk.ok++;
     if (q.type === 'match') ses.matches++;
-    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama]; a.n++; if (res.ok) a.ok++; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++; }
+    sk.kanit = sk.kanit || { ilk: 0, ipucu: 0, cozum: 0 }; sk.kanit[kanit]++;
+    st.kanit = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }; st.kanit[kanit]++;
+    if (q.atolye && st.atolye) { const a = st.atolye[q.atolye.asama] || (st.atolye[q.atolye.asama] = { n: 0, ok: 0 }); a.n++; if (kanit === 'ilk') a.ok++; if (kanit === 'ipucu') a.ip = (a.ip || 0) + 1; if (q.atolye.sira === q.atolye.toplam - 1) st.atolye.problem++; }
     // yarı ömür: aralıklı başarı → uzar
     const gap = sk.last ? (now - sk.last) / HOUR : 0;
     if (res.ok) sk.half = Math.min(24 * 60, sk.half * (gap > sk.half * 0.5 ? 2 : 1.15)); else sk.half = Math.max(6, sk.half / 2);
@@ -144,18 +157,16 @@
     if (ses.mode !== 'placement' && ses.mode !== 'speed') st.times = st.times.concat(ms).slice(-60);
     st.hints.q++; if (hinted) { st.hints.used++; ses.hintsUsed++; }
     // yanılgı defteri
-    if (!res.ok) {
-      const m = st.mis[res.mis] || (st.mis[res.mis] = { n: 0, fixed: 0, skill: q.skill, last: 0 }); m.n++; m.last = now; m.skill = q.skill;
-      st.mistakes = st.mistakes.filter(x => !(x.skill === q.skill && x.mis === res.mis)); st.mistakes.unshift({ skill: q.skill, lv: q.level, mis: res.mis, at: now }); st.mistakes = st.mistakes.slice(0, 30);
-    }
+    if (!res.ok) E.yanilgiNotu(st, q, res.mis);
     if (q.rescue) { st.rescue.tries++; ses.rescueTry++; if (res.ok) { st.rescue.ok++; ses.rescueOk++; if (q.rescueOf && st.mis[q.rescueOf]) st.mis[q.rescueOf].fixed++; } }
     if (q.replay && res.ok) { const i = st.mistakes.findIndex(m => m.skill === q.skill); if (i >= 0) { const m = st.mistakes[i]; if (st.mis[m.mis]) st.mis[m.mis].fixed++; st.mistakes.splice(i, 1); } }
     // anlatım biçimi ödülü: kart sonrası ilk 3 soru
     if (ses.format && ses.postCard.length < 3 && !q.rescue) { ses.postCard.push(res.ok ? 1 : 0); if (ses.postCard.length === 3) E.rewardFormat(st, ses.format, ses.postCard.reduce((a, b) => a + b, 0) >= 2 ? 1 : 0); }
     // oturum
-    ses.answered.push({ skill: q.skill, ok: res.ok, mis: res.mis, ms, rescue: !!q.rescue, level: q.level, type: q.type, hint: !!hinted, partial: !!res.partial });
+    ses.answered.push({ kanit, skill: q.skill, ok: res.ok, mis: res.mis, ms, rescue: !!q.rescue, level: q.level, type: q.type, hint: !!hinted, partial: !!res.partial });
     let gain = 0;
     if (res.ok && res.partial) { ses.correct++; gain = 5; }
+    else if (res.ok && kanit === 'ipucu' && !q.rescue) { ses.correct++; gain = 5; }
     else if (res.ok) { ses.correct++; ses.streak++; ses.best = Math.max(ses.best, ses.streak); gain = q.rescue ? 15 : 10; if (ses.streak >= 5) gain += 5; }
     else { ses.wrong++; ses.streak = 0; }
     ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !['placement', 'speed', 'exam', 'hazir', 'atolye'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
@@ -166,7 +177,7 @@
 
   /* ---------------- Oturum sonu, seri, rozet ---------------- */
   E.finish = (st, ses) => {
-    const acc = ses.answered.length ? ses.answered.filter(a => a.ok).length / ses.answered.length : 0;
+    const acc = ses.answered.length ? ses.answered.reduce((t, a) => t + (a.ok ? (a.kanit === 'ipucu' ? 0.5 : 1) : 0), 0) / ses.answered.length : 0;
     if (ses.mode !== 'placement') { ses.xp += 15; if (ses.wrong === 0 && ses.answered.length >= 5) ses.xp += 10; }
     const d = today();
     if (st.lastDay !== d) {
@@ -231,7 +242,12 @@
     const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'coz', 'kontrol'].map(k => ({ k, ad: ATOLYE.ASAMA[k], n: (A_[k] || {}).n || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
     const olculen = asamalar.filter(a => a.n >= 3), zayifAsama = olculen.length >= 3 ? olculen.slice().sort((a, b) => a.acc - b.acc)[0] : null;
     const problem = { asamalar, zayif: zayifAsama && zayifAsama.acc < 0.75 ? zayifAsama : null, sayi: A_.problem || 0 };
-    return { problem, pace, med, formats: fr, bestFormat: best && best.n >= 2 ? best.f : null, hintRate, resil, strong, weak, misList, totalQ, acc: totalQ ? totalOk / totalQ : 0 };
+    const K = st.kanit || { ilk: 0, ipucu: 0, cozum: 0 }, kn = K.ilk + K.ipucu + K.cozum;
+    const kanit = kn ? { n: kn, ilk: K.ilk / kn, ipucu: K.ipucu / kn, cozum: K.cozum / kn } : null;
+    const ilkAcc = kn >= 5 ? K.ilk / kn : null;
+    const bagimsiz = (A_.bagimsiz && A_.bagimsiz.n) ? { n: A_.bagimsiz.n, acc: A_.bagimsiz.ok / A_.bagimsiz.n } : null;
+    problem.bagimsiz = bagimsiz;
+    return { kanit, ilkAcc, problem, pace, med, formats: fr, bestFormat: best && best.n >= 2 ? best.f : null, hintRate, resil, strong, weak, misList, totalQ, acc: totalQ ? totalOk / totalQ : 0 };
   };
 
   /* ---------------- Veli raporu metni ---------------- */
@@ -253,14 +269,17 @@
     if (act.length) L.push(`🧩 Üzerinde çalıştığımız kavram yanılgıları: ${act.map(m => m.t).join('; ')}`);
     const fixed = fp.misList.filter(m => !m.active && m.n > 0).slice(0, 3);
     if (fixed.length) L.push(`🌟 Düzelttiği yanılgılar: ${fixed.map(m => m.t).join('; ')}`);
+    if (fp.kanit && fp.kanit.n >= 5) L.push(`🧾 Cevapların: ilk denemede doğru %${Math.round(fp.kanit.ilk * 100)} · ipucuyla doğru %${Math.round(fp.kanit.ipucu * 100)} · çözüm gösterildi %${Math.round(fp.kanit.cozum * 100)}`);
     if (fp.problem.sayi >= 2) {
-      L.push(`🧩 Problem çözme (${fp.problem.sayi} problem): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)}`).join(' · ')}`);
+      L.push(`🧩 Problem çözme (${fp.problem.sayi} problem, ilk denemede doğru): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)}`).join(' · ')}`);
       const z = fp.problem.zayif, coz = fp.problem.asamalar.find(a => a.k === 'coz');
       if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) L.push(`   → Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`);
       else if (z) L.push(`   → En çok "${z.ad}" adımında desteğe ihtiyacı var.`);
+      if (fp.problem.bagimsiz) L.push(`   → Benzer yeni problemi tek başına çözme: ${fp.problem.bagimsiz.n} denemede %${Math.round(fp.problem.bagimsiz.acc * 100)} ilk denemede doğru (öğrenmenin en güçlü kanıtı).`);
     }
     if (fp.bestFormat) L.push(`🧠 En iyi öğrendiği anlatım biçimi: ${FORMATS[fp.bestFormat].name}`);
     L.push(`🧭 Çalışma tarzı: ${fp.pace}${fp.resil !== null ? `, hatadan sonra doğruya dönme oranı %${Math.round(fp.resil * 100)}` : ''}`);
+    L.push('ℹ️ Yüzdeler ilk denemedeki cevaplardan hesaplanır; ipucuyla ya da ikinci denemede bulunan cevaplar ayrı sayılır. XP çalışmayı, ustalık ise öğrenmeyi gösterir.');
     L.push('');
     const tip = fp.weak.length ? `Bu hafta evde "${fp.weak[0].title}" konusunu günlük hayattan bir örnekle konuşmanız (ör. market fişi, saat, ölçme) çok faydalı olur.` : 'Harika gidiyor! Günde 10-15 dakikalık düzenli çalışmayı sürdürmesini destekleyin.';
     L.push(`👨‍👩‍👧 Öneri: ${tip}`);

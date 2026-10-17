@@ -574,3 +574,26 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .atab th,.atab td{border:1.5px solid var(--line);padding:4px 12px;text-align:left}
 .atab th{background:var(--surface2);font-weight:900}
 .atab td:last-child{text-align:right;font-weight:900;color:var(--ink)}
+
+/* ---------- İkinci şans ve bağlamlı geri bildirim ---------- */
+.ikinci{background:#FFF7E0;border:2px solid #FFD166;border-radius:16px;padding:10px 12px;margin:2px 0 12px;font-weight:700;font-size:15px;animation:ikinciGel .35s ease-out}
+.ikinci b{color:#B45309;font-size:16px} .ikinci div{margin-top:4px}
+:root[data-theme="dark"] .ikinci{background:#3A2D0B;border-color:#8A6514} :root[data-theme="dark"] .ikinci b{color:#FCD34D}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ikinci{background:#3A2D0B;border-color:#8A6514} :root:not([data-theme="light"]) .ikinci b{color:#FCD34D} }
+@keyframes ikinciGel{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){ .ikinci{animation:none} }
+.opt.elendi{opacity:.45;text-decoration:line-through;border-style:dashed;box-shadow:none}
+.mis.baglamli{border-left:4px solid var(--blue)}
+.mis.kural{font-size:14px;opacity:.9}
+/* Kanıt kademeleri */
+.kanitbar{display:flex;height:14px;border-radius:8px;overflow:hidden;background:var(--surface2);margin:6px 0}
+.kanitbar i{display:block;height:100%}
+.k1{background:var(--ok)} .k2{background:var(--gold)} .k3{background:var(--bad)}
+.kanitlej{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted);font-weight:700}
+.kanitlej b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
+.nasil{margin-top:14px;font-size:14px;color:var(--muted)}
+.nasil summary{cursor:pointer;font-weight:800;color:var(--ink)}
+.nasil ul{margin:8px 0 0;padding-left:18px} .nasil li{margin:4px 0}
+.aserit span.hedef b{border-style:dashed}
+.aserit span.hedef.on b{background:var(--accent);border-color:var(--accent);border-style:solid;box-shadow:0 0 0 4px #FFE7C2}
+.abaglam.yeni{border-left-color:var(--accent)} .abaglam.yeni .abas{color:var(--accent-d)}

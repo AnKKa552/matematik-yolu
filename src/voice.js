@@ -12,6 +12,7 @@
     telafi_soru: ['Şimdi benzer ama biraz daha kolay bir soru geliyor. Sen yaparsın!', 'Hadi bir daha deneyelim, bu sefer olacak!'],
     yonlendir: ['Takıldın mı? Ampule dokunursan sana ipucu veririm.', 'Acele etme, düşünmek de öğrenmektir.', 'Soruyu bir daha oku, bazen cevap orada saklıdır.'],
     ipucu: ['Bak, sana küçük bir ipucu.', 'İşte bir ipucu, gerisi sende!'],
+    tekrar_dene: ['Az kaldı! İpucuna bak, bir daha dene.', 'Bir daha düşün, sana bir ipucu bıraktım.'],
     ders_basla: ['Hadi başlayalım!', 'Bugün beynini çalıştırma zamanı!', 'Hazır mısın? Başlıyoruz!'],
     yari: ['Yarıyı geçtin, harika gidiyorsun!', 'Yarı yoldayız, devam!'],
     hosgeldin_geri: ['Tekrar hoş geldin! Kaldığımız yerden devam edelim mi?', 'Seni özledim! Hadi biraz matematik yapalım.', 'Yine geldin, süpersin! Bugün ne öğreniyoruz?'],

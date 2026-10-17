@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 73 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 75 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -120,8 +120,9 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 - Son cevap yanlışsa bir seviye aşağı. Arka arkaya 3 doğruda %35 olasılıkla bir seviye yukarı ("esnetme").
 - Hedef: öğrencinin ders içi doğruluğu kabaca %70–85 bandında kalsın. Çok kolay sıkar, çok zor kırar.
 
-### 4.3 Hata döngüsü (hatadan öğrenme)
-1. Yanlış cevap → geri bildirim sayfası: doğru cevap + **yanılgı adı ve düzeltme açıklaması** + adım adım çözüm.
+### 4.3 Hata döngüsü (hatadan öğrenme) — 17.10.2026'da ikinci şansla güncellendi
+0. **İkinci şans:** ilk yanlışta cevap SÖYLENMEZ. "🤔 Bir daha düşün!" kutusunda hedefli ipucu çıkar (öncelik: şıkka özel ipucu → sorunun/atölye adımının ipucu → gözlenen yanılgının kuralı); seçilen yanlış şık üstü çizili ve kapalıdır. Çocuk bir kez daha dener. İkinci denemede doğru = "İpucuyla buldun!", +5 XP, ustalığa zayıf kanıt (ipucu gibi), seri bozulmaz ama büyümez; dersin yıldız hesabında yarım sayılır. İlk denemedeki yanılgı yine deftere yazılır (`E.yanilgiNotu`). **İkinci şans yok:** hız yarışı, seviye belirleme, tema sınavı, hazır mıyız (ölçme anları), eşleştirme ve iki şıklı sorular (kim haklı, doğru/yanlış; ikinci denemede cevap belli olur).
+1. İkinci yanlış → geri bildirim sayfası: doğru cevap + **"🧭 Neden olmadı?"** (o şıkka/sayıya özel açıklama, `ac`) + genel kural (yanılgı adı ve düzeltme, 🔊) + adım adım çözüm.
 2. "Başka anlat" → konunun başka bir biçimdeki anlatım kartı (bandit en iyi biçim dışından seçer).
 3. "Anladım" → **telafi sorusu**: aynı beceri, bir alt seviye. Ders sayacı ilerlemez; telafi ders bitmeden mutlaka gelir.
 4. Yanılgı defterine yazılır; aynı yanılgıda telafi veya "Hatalarım" tekrarı doğru yapılınca "düzeldi" sayılır.
@@ -138,7 +139,11 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 
 ### 4.6 Ders oturumu
 - Varsayılan 8 soru; cevap süresi ortancası 35 sn'yi aşarsa 6; ustalık > 0.7 ise 10.
-- Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2), `atolye` (Problem Atölyesi, 2 problem × 5 adım, §5.1.3).
+- Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2), `atolye` (Problem Atölyesi, 2 problem × 6 adım, §5.1.3).
+
+### 4.7 Üç kademeli kanıt (17.10.2026)
+Her cevap `kanit` ile kaydedilir: **ilk** (ipucusuz ilk denemede doğru) · **ipucu** (💡 ipucuyla ya da ikinci denemede doğru) · **cozum** (çözüm gösterildi). Beceri (`sk.kanit`), toplam (`st.kanit`) ve atölye aşaması bazında tutulur. Profilde "Cevaplarım nasıl geldi?" çubuğu, veli raporunda "🧾 Cevapların: ilk denemede doğru %… · ipucuyla %… · çözüm gösterildi %…" satırı. "Doğruluk" artık **ilk denemede doğru** oranıdır. XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır (rapor bunu açıkça yazar).
+- **Dürüst gösterge kuralı:** ölçülmemiş bir şey sayı gibi gösterilmez. Anlatım biçimi en az 2 kart sonrası ölçülmüş sayılır, öncesinde "henüz ölçülmedi". Profilde "ℹ️ Bu sayılar nasıl hesaplanıyor?" açıklaması var.
 
 ---
 
@@ -190,10 +195,12 @@ Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular içi
   2. **Planla**: "Hangi yolla çözersin?" (yanlış planlar yanılgılara bağlı: ters işlem, çevre-alan, kalanı yok saymak…)
   3. **Çöz**: 1–2 ara adım, sayı girişi; her yanlış sayı bir yanılgı
   4. **Kontrol et**: "Hangi işlem cevabını doğrular?" (ters işlemle sağlama)
-- **Hata zincirlenmez:** sonraki adımın metni önceki adımın doğru değerini verir ("Toplam tutarı 130 TL bulduk…"). Atölyede telafi sorusu yoktur; yanlıştan sonra "Doğru değerle bir sonraki adıma geçiyoruz" denir.
+- **Hata zincirlenmez:** sonraki adımın metni önceki adımın doğru değerini verir ("Toplam tutarı 130 TL bulduk…"). Her adımda önce ikinci şans (ipucu + yeniden deneme) vardır; ikinci yanlışta açıklamalı çözüm ve "Doğru değerle bir sonraki adıma geçiyoruz".
+- **Bağlama özel geri bildirim:** her yanlış şık ve yanlış sayı kendi açıklamasını taşır (`[metin, yanılgı, açıklama]`, `inputMis: {v, mis, ac}`). Örnek: para üstünde toplama yapan çocuğa "Ödenen para = alışveriş tutarı + para üstü; para üstü = 200 − 130". "Anla" adımındaki yanlışlar iki yeni yanılgıya bağlıdır: `istenen_verilen` (verileni istenen sanma), `ara_sonuc` (ara sonucu cevap sanma). Test, her yanlışın açıklaması ve her adımın ipucu olduğunu, ipucunun cevabı söylemediğini denetler.
+- **5. Kendin dene (bağımsız kanıt):** her problemin sonunda aynı türde, **yeni sayılarla**, iskelesiz tek soru (ara adım yok). İkinci şansı var ama "doğru değerle devam" yok. Öğrenmenin en güçlü kanıtı olarak ayrı ölçülür (`st.atolye.bagimsiz`), profilde 🎯 çubuğu, raporda ayrı satır.
 - Pi, ilk adımda problemin tamamını okur (`q.okuma`; tablo okunmaz, ekranda görünür).
 - **Ölçüm:** `st.atolye` aşama bazında doğruluk tutar. Profilde "Problem çözme adımlarım" çubukları; veli raporunda "🧩 Problem çözme: Anla %… · Planla %… · Çöz %… · Kontrol %…". Anlama/planlama, çözmeden 15 puan geride ise rapor "Hesaplamada değil, problemi anlamada zorlanıyor" der: satışın kalbi olan veli raporu için güçlü bir içgörü.
-- Nerede: Pratik Merkezi → **🧩 Problem Atölyesi** (2 problem, 10 adım; çalışılmış temalardan). Yeni yanılgı: `kalan_yok` (bölmede kalanı hesaba katmama).
+- Nerede: Pratik Merkezi → **🧩 Problem Atölyesi** (2 problem × 6 adım; çalışılmış temalardan). Yeni yanılgı: `kalan_yok` (bölmede kalanı hesaba katmama).
 - Test: her şablon 400 kez üretilir; adım çözümlerindeki ve kontrol şıkkındaki her işlem bağımsız hesaplanır, şık/yanılgı kuralları ve Pi'nin okuyacağı metin denetlenir.
 
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
@@ -287,7 +294,7 @@ CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
 data/mufredat.json        ← 7 tema, 35 beceri, 67 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (73) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (75) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar
@@ -353,7 +360,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `python3 build.py` → (mümkünse) `python3 test/e2e.py`.
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `python3 build.py` → (mümkünse) `python3 test/e2e.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.

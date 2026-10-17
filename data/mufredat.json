@@ -1434,6 +1434,14 @@
     "kalan_yok": {
       "ad": "Bölmede kalanı hesaba katmama",
       "duzeltme": "Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır."
+    },
+    "istenen_verilen": {
+      "ad": "Verileni istenen sanma",
+      "duzeltme": "Problemde verilen sayıları ve sorulan şeyi ayır. Soru cümlesi (genellikle en sonda) neyin istendiğini söyler; istenen, problemde henüz yazmayan şeydir."
+    },
+    "ara_sonuc": {
+      "ad": "Ara sonucu cevap sanma",
+      "duzeltme": "Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et."
     }
   },
   "anlatim_bicimleri": {

@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 28584,
+ "toplam_karakter": 28967,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1340,6 +1340,26 @@
    "key": "mis_kalan_yok",
    "grup": "yanilgi",
    "text": "Bölmede kalanı hesaba katmama. Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır."
+  },
+  {
+   "key": "mis_istenen_verilen",
+   "grup": "yanilgi",
+   "text": "Verileni istenen sanma. Problemde verilen sayıları ve sorulan şeyi ayır. Soru cümlesi (genellikle en sonda) neyin istendiğini söyler; istenen, problemde henüz yazmayan şeydir."
+  },
+  {
+   "key": "mis_ara_sonuc",
+   "grup": "yanilgi",
+   "text": "Ara sonucu cevap sanma. Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et."
+  },
+  {
+   "key": "pi_tekrar_dene_1",
+   "grup": "pi",
+   "text": "Az kaldı! İpucuna bak, bir daha dene."
+  },
+  {
+   "key": "pi_tekrar_dene_2",
+   "grup": "pi",
+   "text": "Bir daha düşün, sana bir ipucu bıraktım."
   }
  ]
 }

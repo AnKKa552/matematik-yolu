@@ -87,10 +87,14 @@ const SKILLS_OK = (id) => id in GEN;
   { const { ATOLYE } = require('../src/generators.js'); let an = 0;
     for (const id of ATOLYE.ids) for (let r = 0; r < 400; r++) {
       const L = ATOLYE.sorular(id), bad = (m, q) => { console.log('BAD ATÖLYE', id, m, q ? strip(q.prompt) : ''); errors++; };
-      if (L.length < 4 || L[0].atolye.asama !== 'anla' || L[L.length - 1].atolye.asama !== 'kontrol' || !SKILLS_OK(L[0].skill)) { bad('yapı'); break; }
+      if (L.length < 5 || L[0].atolye.asama !== 'anla' || L[L.length - 2].atolye.asama !== 'kontrol' || L[L.length - 1].atolye.asama !== 'bagimsiz' || !SKILLS_OK(L[0].skill)) { bad('yapı'); break; }
       let stop = false;
       for (const q of L) { an++;
         if (/undefined|NaN|Infinity/.test(strip(q.prompt) + JSON.stringify(q.options || '') + (q.answer || '') + JSON.stringify(q.steps) + strip(q.atolye.baglam))) { bad('metin', q); stop = true; break; }
+        if (!q.ip || /undefined|NaN/.test(q.ip)) { bad('ipucu yok', q); stop = true; break; }
+        const yanlislar = q.type === 'input' ? q.inputMis : q.options.filter(o => !o.ok);
+        if (yanlislar.some(w => !w.ac || /undefined|NaN|Infinity/.test(w.ac))) { bad('yanlışın kendi açıklaması yok', q); stop = true; break; }
+        if (q.type === 'input' && (q.ip.match(/\d+/g) || []).includes(q.answer) && !((strip(q.prompt) + ' ' + strip(q.atolye.baglam)).match(/\d+/g) || []).includes(q.answer)) { bad('ipucu cevabı söylüyor: ' + q.ip, q); stop = true; break; }
         for (const l of (q.steps || [])) { const b = hesap(l); if (b) { bad('adımda işlem hatası: ' + b, q); stop = true; } }
         if (q.type === 'input') {
           if (!(parseFloat(q.answer) >= 0)) { bad('cevap', q); stop = true; }

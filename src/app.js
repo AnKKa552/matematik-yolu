@@ -340,16 +340,27 @@
 
   function viewProfile() {
     const fp = E.fingerprint(A.st), p = A.st.profile || {};
-    const fbars = fp.formats.map(f => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${FORMATS[f.f].icon} ${FORMATS[f.f].name}</b></div><div class="bar grow"><i style="width:${Math.round(f.m * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">%${Math.round(f.m * 100)}</div></div>`).join('');
+    // Ölçülmemiş göstergeyi sayı gibi göstermiyoruz: anlatım biçimi en az 2 karttan sonra görünür
+    const fbars = fp.formats.map(f => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${FORMATS[f.f].icon} ${FORMATS[f.f].name}</b></div>${f.n >= 2 ? `<div class="bar grow"><i style="width:${Math.round(f.m * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">%${Math.round(f.m * 100)}</div>` : '<div class="grow muted sm">henüz ölçülmedi</div>'}</div>`).join('');
+    const K = fp.kanit, kbar = K && K.n >= 5 ? `<div class="kanitbar"><i class="k1" style="width:${K.ilk * 100}%"></i><i class="k2" style="width:${K.ipucu * 100}%"></i><i class="k3" style="width:${K.cozum * 100}%"></i></div><div class="kanitlej sm"><span><b class="k1"></b>İlk denemede doğru %${Math.round(K.ilk * 100)}</span><span><b class="k2"></b>İpucuyla doğru %${Math.round(K.ipucu * 100)}</span><span><b class="k3"></b>Çözüm gösterildi %${Math.round(K.cozum * 100)}</span></div>` : '<div class="muted sm">En az 5 cevaptan sonra görünür.</div>';
+    const nasil = `<details class="nasil"><summary>ℹ️ Bu sayılar nasıl hesaplanıyor?</summary><ul>
+      <li><b>Çalışma tarzı:</b> son 60 cevabın süresinin ortancası. 9 saniyeden kısaysa "hızlı karar veren", 22 saniyeye kadar "dengeli", daha uzunsa "derin düşünen". En az 5 cevap gerekir.</li>
+      <li><b>İlk denemede doğru:</b> ipucu almadan, ilk denemede doğru verilen cevapların oranı. İpucuyla ya da ikinci denemede bulunanlar ayrı sayılır.</li>
+      <li><b>Hatadan dönüş gücü:</b> yanlıştan sonra gelen benzer (telafi) sorularda doğru oranı.</li>
+      <li><b>İpucu kullanımı:</b> 💡 ipucuna bakılan soruların oranı.</li>
+      <li><b>Anlatım:</b> bir anlatım kartından sonraki ilk 3 sorudan en az 2'sinin doğru olma oranı. En az 2 kart gösterilince ölçülmüş sayılır.</li>
+      <li><b>Problem adımları:</b> atölyede her adımın ilk denemede doğru oranı. "Kendin dene", benzer yeni problemi tek başına çözmektir.</li>
+      <li>XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır.</li></ul></details>`;
     const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${m.active ? 'warm' : 'ok'}">${m.active ? 'çalışılıyor' : 'düzeldi ✓'}</span></div>`).join('') || '<div class="muted sm">Henüz kavram yanılgısı tespit edilmedi.</div>';
     return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${mascot('happy', 70)}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
       <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Tema kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
-        <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">Doğruluk</span><b>%${Math.round(fp.acc * 100)}</b></div>
+        <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">İlk denemede doğru</span><b>${fp.ilkAcc === null ? '–' : '%' + Math.round(fp.ilkAcc * 100)}</b></div>
         <div class="card"><span class="muted sm">Hatadan dönüş gücü</span><b>${fp.resil === null ? '–' : '%' + Math.round(fp.resil * 100)}</b></div><div class="card"><span class="muted sm">İpucu kullanımı</span><b>%${Math.round(fp.hintRate * 100)}</b></div></div>
+        <h3 style="font-size:15px;margin:14px 0 4px">Cevaplarım nasıl geldi?</h3>${kbar}
         <h3 style="font-size:15px;margin:14px 0 4px">Bana en iyi gelen anlatım</h3>${fbars}
-        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım</h3>${fp.problem.asamalar.map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100)}</div></div>`).join('')}` : ''}
-        <h3 style="font-size:15px;margin:14px 0 4px">Kavram yanılgılarım</h3>${mis}</div>
+        ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım <span class="muted sm">(ilk denemede)</span></h3>${fp.problem.asamalar.concat(fp.problem.bagimsiz ? [{ ad: '🎯 Kendin dene', acc: fp.problem.bagimsiz.acc }] : []).map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:38px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100)}</div></div>`).join('')}` : ''}
+        <h3 style="font-size:15px;margin:14px 0 4px">Kavram yanılgılarım</h3>${mis}${nasil}</div>
       <h2 class="sect">Rozetler</h2><div class="badges">${E.BADGES.map(b => `<div class="badge ${A.st.badges.includes(b.id) ? '' : 'off'}" title="${esc(b.desc)}"><div class="i">${b.icon}</div><div class="n">${b.name}</div></div>`).join('')}</div>
       <h2 class="sect">Ayarlar</h2><div class="card list">
         <label class="check"><input type="checkbox" data-act="set-sound" ${A.st.settings.sound ? 'checked' : ''}> Ses efektleri</label>
@@ -423,14 +434,14 @@
       const cls = q.type === 'tf' || q.hata === 'kim' ? 'tf' : q.type === 'cmp' ? 'cmp' : q.hata === 'bul' ? 'defter-sec' : '';
       const cmp = q.type === 'cmp' ? `<div class="cmpline"><span>${q.cmp[0]}</span><span class="cmpbox">${A.sel !== null ? q.options[A.sel].t.replace('<', '&lt;').replace('>', '&gt;') : '?'}</span><span>${q.cmp[1]}</span></div>` : '';
       const grid = q.grid ? `<div class="pgrid">${q.grid.map(r => `<div class="pcell">${r[0]}</div><div class="pcell ${r[1] === '?' ? 'miss' : ''}">${r[1] === '?' ? (A.sel !== null ? q.options[A.sel].t : '?') : r[1]}</div>`).join('')}</div>` : '';
-      ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
+      ans = grid + cmp + (q.hata === 'bul' ? `<div class="dad">✏️ ${esc(U.wk(q.ad, 'in'))} defteri</div>` : '') + `<div class="opts ${cls} ${q.cards ? 'cards' : ''}">${q.options.map((o, i) => { let c = ''; if (A.fb) { if (o.ok) c = 'right'; else if (i === A.sel) c = 'wrong'; } else if (i === A.sel) c = 'sel'; const t = q.type === 'cmp' ? o.t.replace('<', '&lt;').replace('>', '&gt;') : o.t; const el = (A.elenen || []).includes(i); if (el && !(A.fb && o.ok)) c = 'elendi'; return `<button class="opt ${c}" data-act="opt" data-v="${i}" ${A.fb || el ? 'disabled' : ''}>${q.type === 'mc' && !q.hata ? `<span class="k">${i + 1}</span>` : ''}<span>${t}</span></button>`; }).join('')}</div>`;
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
     const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${Math.floor(A.ses.i / (q.atolye.toplam || 5)) + 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
-      ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${ans}</div>
+      ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
@@ -501,26 +512,34 @@
 
   // Problem Atölyesi: aşama şeridi (Anla → Planla → Çöz → Kontrol) + problem kartı (her adımda görünür)
   function atolyePanel(q) {
-    const a = q.atolye, sira = ['anla', 'plan', 'coz', 'kontrol'], cur = sira.indexOf(a.asama), AS = E.ATOLYE.ASAMA;
-    return `<div class="atolye"><div class="aserit">${sira.map((k, i) => `<span class="${i === cur ? 'on' : i < cur ? 'bitti' : ''}"><b>${i < cur ? '✓' : i + 1}</b>${AS[k]}</span>`).join('')}</div>
-      <div class="abaglam ${a.asama === 'anla' ? '' : 'kucuk'}"><div class="abas">🧩 ${esc(a.baslik)}</div><div>${a.baglam}</div></div></div>`;
+    const a = q.atolye, sira = ['anla', 'plan', 'coz', 'kontrol', 'bagimsiz'], cur = sira.indexOf(a.asama), AS = E.ATOLYE.ASAMA, bag = a.asama === 'bagimsiz';
+    return `<div class="atolye"><div class="aserit">${sira.map((k, i) => `<span class="${i === cur ? 'on' : i < cur ? 'bitti' : ''} ${k === 'bagimsiz' ? 'hedef' : ''}"><b>${i < cur ? '✓' : k === 'bagimsiz' ? '🎯' : i + 1}</b>${AS[k]}</span>`).join('')}</div>
+      <div class="abaglam ${a.asama === 'anla' || bag ? '' : 'kucuk'} ${bag ? 'yeni' : ''}"><div class="abas">${bag ? '🎯 Yeni problem · Tek başına' : '🧩 ' + esc(a.baslik)}</div><div>${a.baglam}</div></div></div>`;
   }
   // Hata Avcısı: hayali öğrencinin defteri (kim haklı / neden). Hatalı satır "neden"de baştan, "kim"de cevaptan sonra işaretlenir.
   function defterHTML(q) {
     return `<div class="defterler ${q.defter.length > 1 ? 'iki' : ''}">${q.defter.map(d => `<div class="defter"><div class="dad">✏️ ${esc(U.wk(d.ad, 'in'))} defteri</div><ol>${d.satirlar.map((x, i) => `<li class="${d.isaret === i || (A.fb && d.hata === i) ? 'isaret' : ''}">${x}</li>`).join('')}</ol></div>`).join('')}</div>`;
   }
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
+  // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
+  function ikinciIpucu(q, res) {
+    if (res.ip) return res.ip;
+    if (q.ip) return q.ip;
+    if (res.mis && res.mis !== 'genel' && MIS[res.mis]) return MIS[res.mis].fix;
+    return q.hint || 'Soruyu bir daha, yavaşça oku. Hangi bilgiyi kullanman gerekiyor?';
+  }
   function feedbackSheet() {
     const fb = A.fb, q = A.q;
     if (fb.ok && fb.partial) return `<div class="sheet partc"><div class="row"><div class="grow"><h3>🙂 İyi, ama tam olmadı!</h3><div class="ans">1 eşleştirmede takıldın · +${fb.gain} XP</div></div>${mascot('think', 64)}</div><button class="btn warn" data-act="next">Devam</button></div>`;
-    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.word || pick(PRAISE)}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
+    if (fb.ok) return `<div class="sheet okc"><div class="row"><div class="grow"><h3>✅ ${fb.kanit === 'ipucu' && A.deneme === 2 ? 'İpucuyla buldun!' : (fb.word || pick(PRAISE))}</h3><div class="ans">+${fb.gain} XP${A.ses.streak >= 3 ? ` · 🔥 ${A.ses.streak} seri doğru` : ''}</div>${hataNotu(q)}</div>${mascot('happy', 70)}</div><button class="btn ok" data-act="next">Devam</button></div>`;
     const right = q.type === 'kes' ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && q.atolye.asama !== 'kontrol' ? '<div class="sub">Sorun değil! Doğru değerle bir sonraki adıma geçiyoruz.</div>' : ''}</div>${mascot('sad', 64)}</div>
-      ${fb.mis !== 'genel' ? `<div class="mis"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Sorun değil! Doğru değerle bir sonraki adıma geçiyoruz.</div>' : ''}</div>${mascot('sad', 64)}</div>
+      ${fb.ac ? `<div class="mis baglamli"><b>🧭 Neden olmadı?</b><div style="margin-top:4px">${fb.ac}</div></div>` : ''}
+      ${fb.mis !== 'genel' ? `<div class="mis ${fb.ac ? 'kural' : ''}"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${fb.ac ? 'Genel kural: ' : ''}${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
       <div class="row"><button class="btn ghost" style="flex:1" data-act="explain-other">🔄 Başka anlat</button><button class="btn" style="flex:1.3" data-act="next">Anladım</button></div></div>`;
   }
@@ -642,7 +661,7 @@
     if (!A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
     A.q = E.nextQ(A.st, A.ses); A.sel = null; A.input = '';
     A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
-    A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.t0 = Date.now(); render();
+    A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.deneme = 1; A.elenen = []; A.ikinci = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
     if (A.q.rescue) setTimeout(() => piSay('telafi_soru'), 250);
     idleKur();
@@ -682,8 +701,19 @@
   }
   function checkAnswer() {
     const q = A.q, ans = q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : A.sel; if (ans === null || ans === '') return;
-    const res = E.check(q, ans), ms = Date.now() - A.t0, gain = E.record(A.st, A.ses, q, res, ms, A.hinted);
-    A.fb = { ok: res.ok, mis: res.mis, gain }; save();
+    const res = E.check(q, ans), ms = Date.now() - A.t0;
+    // İkinci şans: cevabı söylemeden hedefli ipucu, bir yeniden deneme
+    if (!res.ok && (A.deneme || 1) === 1 && E.ikinciSansUygun(A.ses, q)) {
+      E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;
+      const once = q.type === 'input' ? A.input.replace('.', ',') : null;
+      if (q.type !== 'input' && q.type !== 'kes') { A.elenen.push(A.sel); A.sel = null; } else if (q.type === 'input') A.input = '';
+      A.ikinci = { ipucu: ikinciIpucu(q, res), once }; save();
+      sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(60); } catch (e) { }
+      piSay('tekrar_dene'); render(); const s = document.querySelector('.ikinci'); if (s) s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); idleKur(); return;
+    }
+    const kanit = res.ok ? ((A.deneme === 2 || A.hinted) ? 'ipucu' : 'ilk') : 'cozum';
+    const gain = E.record(A.st, A.ses, q, res, ms, A.hinted || A.deneme === 2, kanit);
+    A.fb = { ok: res.ok, mis: res.mis, ac: res.ac, gain, kanit }; save();
     if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis'); }
     if (A.ses.mode === 'speed') { A.fb = null; render(); const lb = document.getElementById('lbody'); if (!res.ok) toast(`Doğrusu: ${q.type === 'input' ? esc(q.answer) : q.type === 'cmp' ? esc(q.options.find(o => o.ok).t) : q.options.find(o => o.ok).t}`); A.ses.lastWrong = false; return nextQuestion(); }
     render();
@@ -729,7 +759,7 @@
       case 'kes-dilim': if (A.fb || !A.kes) break; { const i = +v; A.kes.on[i] = !A.kes.on[i]; tone(A.kes.on[i] ? 620 + 30 * A.kes.on.filter(Boolean).length : 420, .09, 'triangle'); render(); } break;
       case 'kes-parca': if (A.fb || !A.kes) break; { const P = Math.max(1, Math.min(12, A.kes.parca + +v)); A.kes = { parca: P, on: Array(P).fill(false), konum: null }; sfx.tap(); render(); } break;
       case 'kes-nokta': if (A.fb || !A.kes) break; A.kes.konum = +v; tone(560 + 25 * +v, .08, 'triangle'); render(); break;
-      case 'opt': if (A.fb) break; A.sel = +v; sfx.tap(); render(); break;
+      case 'opt': if (A.fb || (A.elenen || []).includes(+v)) break; A.sel = +v; sfx.tap(); render(); break;
       case 'key': if (A.fb) break; sfx.tap(); if (v === '⌫') A.input = A.input.slice(0, -1); else if (A.input.length < 12) { if (v === ',' && (A.input.includes(',') || !A.input)) break; A.input += v; } render(); break;
       case 'hint': A.hinted = true; A.showHint = true; render(); piSay('ipucu'); break;
       case 'check': checkAnswer(); break;
