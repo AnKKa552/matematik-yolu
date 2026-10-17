@@ -101,6 +101,38 @@
     if (key && AUDIO.durum === 'yukleniyor') AUDIO.hazir.then(calis); else calis();
   };
   const speak = (html) => say(null, html);
+  /* ---------- Pi soruyu kendi sesiyle okur (Damla) ----------
+     Metin U.soruSesi ile hazırlanır, SHA-256 özetiyle depoda aranır (telefonda da saklanır). Yoksa soru-sesi fonksiyonu
+     bir kez üretir. Sunucu reddederse (sözlük/kota) ya da 8 sn içinde gelmezse robot sese düşülür; çocuk sessiz kalmaz. */
+  const SORU_DEPO = 'pi-soru-sesleri-v1';
+  const ozet32 = async (s) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+  const zamanli = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('zaman aşımı')), ms))]);
+  const soruSesiAl = async (metin) => {
+    const url = CL.soruDepo + (await ozet32(metin)) + '.mp3';
+    if (AUDIO.blob[url]) return AUDIO.blob[url];
+    let depo = null, res = null; try { depo = await caches.open(SORU_DEPO); res = await depo.match(url); } catch (e) { }
+    if (!res) {
+      res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) {
+        const r = await fetch(CL.soruSesiAdresi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metin }) });
+        if (!r.ok) throw new Error('soru sesi: ' + r.status);
+        res = await fetch(url, { mode: 'cors' }); if (!res.ok) throw new Error('soru sesi yok');
+      }
+      if (depo) depo.put(url, res.clone()).catch(() => { });
+    }
+    return (AUDIO.blob[url] = URL.createObjectURL(await res.blob()));
+  };
+  const soruOku = () => {
+    const q = A.q; if (!q || !A.st.settings.voice) return;
+    const yedek = q.prompt + '. ' + (q.type === 'input' || q.type === 'kes' || q.type === 'match' ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
+    if (!CL || !CL.soruDepo || !window.crypto || !crypto.subtle) return speak(yedek);
+    stopVoice(); const tok = AUDIO.tok, pk = () => document.querySelectorAll('.pikonus');
+    pk().forEach(e => e.classList.add('dusunuyor'));
+    zamanli(soruSesiAl(U.soruSesi(q.prompt)), 8000)
+      .then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); })
+      .catch(() => { if (tok === AUDIO.tok) say(null, yedek); })
+      .finally(() => pk().forEach(e => e.classList.remove('dusunuyor')));
+  };
   const sayCard = (id, f) => say(`kart_${id}_${f}`, cardText(id, f));
   const PI = window.MY_PI_LINES;
   const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
@@ -576,7 +608,7 @@
       case 'card-ok': A.ses.showCard = false; stopVoice(); nextQuestion(); break;
       case 'say-card': sayCard(el.dataset.s, v); break;
       case 'fmt-modal': A.modal = explainModal(A.q.skill, v); render(); sayCard(A.q.skill, v); break;
-      case 'say-q': speak(A.q.prompt + '. ' + (A.q.type === 'input' ? '' : A.q.type === 'cmp' ? `${A.q.cmp[0]} ile ${A.q.cmp[1]}` : (A.q.options || []).map(o => o.t).join('. '))); break;
+      case 'say-q': soruOku(); break;
       case 'kes-dilim': if (A.fb || !A.kes) break; { const i = +v; A.kes.on[i] = !A.kes.on[i]; tone(A.kes.on[i] ? 620 + 30 * A.kes.on.filter(Boolean).length : 420, .09, 'triangle'); render(); } break;
       case 'kes-parca': if (A.fb || !A.kes) break; { const P = Math.max(1, Math.min(12, A.kes.parca + +v)); A.kes = { parca: P, on: Array(P).fill(false), konum: null }; sfx.tap(); render(); } break;
       case 'kes-nokta': if (A.fb || !A.kes) break; A.kes.konum = +v; tone(560 + 25 * +v, .08, 'triangle'); render(); break;

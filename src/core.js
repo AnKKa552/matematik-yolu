@@ -75,6 +75,10 @@
       .replace(/%(\d+)/g, 'yüzde $1').replace(/²/g, ' kare').replace(/³/g, ' küp').replace(/°/g, ' derece').replace(/\.{3,}/g, ' boşluk ').replace(/⊥/g, ' diktir ').replace(/\/\//g, ' paraleldir ').replace(/[▲]/g, ' üçgen ').replace(/\s+/g, ' ');
     return s.trim();
   };
+  // Pi'nin soru okuması için: toSpeech + birimlerin açık okunuşu (cm → santimetre). Sunucu (soru-sesi) aynı metni bekler.
+  U.soruSesi = (html) => U.toSpeech(html)
+    .replace(/\bcm\b'?/g, 'santimetre').replace(/\bmm\b'?/g, 'milimetre').replace(/\bkm\b'?/g, 'kilometre').replace(/(\d) ?m\b'?/g, '$1 metre')
+    .replace(/\bkg\b'?/g, 'kilogram').replace(/\bTL'd[iı]r/g, 'liradır').replace(/\bTL'l[iı]k/g, 'liralık').replace(/\bTL'y[ea]/g, 'liraya').replace(/\bTL's[iı]/g, 'lirası').replace(/\bTL'n[iı]n/g, 'liranın').replace(/\bTL\b'?/g, 'lira').replace(/eşittir \?/g, 'eşittir kaç?').replace(/\d*▢[▢\s\d]*/g, ' kutulu ').replace(/\(([^()]*\d[^()]*)\)/g, ' parantez aç, $1 parantez kapa, ').replace(/\(([^()]*)\)/g, ', $1, ').replace(/→/g, ', ').replace(/[\[\]|]/g, ' ').replace(/\s+/g, ' ').trim();
   U.cap = (s) => s.charAt(0).toLocaleUpperCase('tr-TR') + s.slice(1);
 
   /* =================== SVG GÖRSELLER =================== */

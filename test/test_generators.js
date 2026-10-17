@@ -48,6 +48,12 @@ for (const [name, g] of Object.entries(GEN)) {
     if (r===0) samples[name+'_'+lv] = { p: strip(q.prompt).replace(/\s+/g,' ').slice(0,170), a: q.type==='input'? q.answer : strip(q.options.find(o=>o.ok).t).trim(), o: q.options? q.options.map(o=>strip(o.t).replace(/\s+/g,' ').trim()).join(' | '):'' };
   }
 }
+// Pi'nin soru okuması: her soru metni sunucunun izinli sözlüğünde olmalı (yoksa o soru robot sesle okunur)
+{ const SZ = new Set(JSON.parse(require('fs').readFileSync(__dirname + '/../sunucu/supabase/functions/soru-sesi/sozluk.ts', 'utf8').match(/new Set\((\[.*\])\)/)[1]));
+  const eksik = new Set(); let uzun = 0;
+  for (const g of Object.values(GEN)) for (const lv of [1, 2, 3]) for (let r = 0; r < 200; r++) { const m = U.soruSesi(g(lv).prompt); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) uzun++; (m.toLocaleLowerCase('tr-TR').match(/[a-zçğıöşüâîû]+/g) || []).forEach(w => { if (!SZ.has(w)) eksik.add(w); }); }
+  if (eksik.size > 3 || uzun) { console.log('SORU SESİ SÖZLÜĞÜ ESKİ: node tools/soru_sozluk.js çalıştır ve soru-sesi fonksiyonunu yeniden yükle.', [...eksik].slice(0, 10), 'uygunsuz metin:', uzun); errors++; }
+  else if (eksik.size) console.log('Uyarı: sözlükte olmayan nadir kelime(ler):', [...eksik]); }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);
 console.log('Beceri sayısı:', Object.keys(GEN).length, '· parmakla kesir sorusu:', kesN);
 for (const [k,v] of Object.entries(samples)) console.log(k, JSON.stringify(v));

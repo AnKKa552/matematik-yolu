@@ -465,6 +465,9 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes piNefes{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.015)}}
 @keyframes piKonus{0%,100%{transform:rotate(-1.5deg) translateY(0)}50%{transform:rotate(1.5deg) translateY(-2px)}}
 @media (prefers-reduced-motion: reduce){.pikonus,.pikonus.konusuyor{animation:none}}
+
+/* Pi soruyu okumaya hazırlanırken (ses ilk kez üretiliyor): küçük düşünme balonu */
+.pikonus.dusunuyor:after{content:'•••';position:absolute;top:-6px;right:-6px;background:var(--surface);color:var(--brand);border:2px solid var(--line);border-radius:12px;padding:0 6px;font-weight:900;font-size:13px;line-height:18px;animation:float 1s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -546,6 +549,10 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       .replace(/%(\d+)/g, 'yüzde $1').replace(/²/g, ' kare').replace(/³/g, ' küp').replace(/°/g, ' derece').replace(/\.{3,}/g, ' boşluk ').replace(/⊥/g, ' diktir ').replace(/\/\//g, ' paraleldir ').replace(/[▲]/g, ' üçgen ').replace(/\s+/g, ' ');
     return s.trim();
   };
+  // Pi'nin soru okuması için: toSpeech + birimlerin açık okunuşu (cm → santimetre). Sunucu (soru-sesi) aynı metni bekler.
+  U.soruSesi = (html) => U.toSpeech(html)
+    .replace(/\bcm\b'?/g, 'santimetre').replace(/\bmm\b'?/g, 'milimetre').replace(/\bkm\b'?/g, 'kilometre').replace(/(\d) ?m\b'?/g, '$1 metre')
+    .replace(/\bkg\b'?/g, 'kilogram').replace(/\bTL'd[iı]r/g, 'liradır').replace(/\bTL'l[iı]k/g, 'liralık').replace(/\bTL'y[ea]/g, 'liraya').replace(/\bTL's[iı]/g, 'lirası').replace(/\bTL'n[iı]n/g, 'liranın').replace(/\bTL\b'?/g, 'lira').replace(/eşittir \?/g, 'eşittir kaç?').replace(/\d*▢[▢\s\d]*/g, ' kutulu ').replace(/\(([^()]*\d[^()]*)\)/g, ' parantez aç, $1 parantez kapa, ').replace(/\(([^()]*)\)/g, ', $1, ').replace(/→/g, ', ').replace(/[\[\]|]/g, ' ').replace(/\s+/g, ' ').trim();
   U.cap = (s) => s.charAt(0).toLocaleUpperCase('tr-TR') + s.slice(1);
 
   /* =================== SVG GÖRSELLER =================== */
@@ -2265,6 +2272,9 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
   // Ses sürümü klasörü: 'damla/' (ElevenLabs Damla sesi, eleven_v4, 128 kbps). Eski Gamze sesleri kökte duruyor.
   C.sesAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/sesler/damla/` : 'audio/';
   // Pi'nin görselleri (Higgsfield ile üretildi, 'gorseller' deposu)
+  // Pi'nin soru okuması: önce depodaki hazır ses (soru/<özet>.mp3), yoksa soru-sesi fonksiyonu üretir
+  C.soruDepo = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/sesler/soru/` : null;
+  C.soruSesiAdresi = C.ayarli ? `${cfg.supabaseUrl}/functions/v1/soru-sesi` : null;
   C.gorselAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/gorseller/` : null;
   let sb = null, kayitZaman = null;
   const yukle = () => new Promise((ok, no) => { if (G.supabase) return ok(); const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
@@ -2429,6 +2439,38 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
     if (key && AUDIO.durum === 'yukleniyor') AUDIO.hazir.then(calis); else calis();
   };
   const speak = (html) => say(null, html);
+  /* ---------- Pi soruyu kendi sesiyle okur (Damla) ----------
+     Metin U.soruSesi ile hazırlanır, SHA-256 özetiyle depoda aranır (telefonda da saklanır). Yoksa soru-sesi fonksiyonu
+     bir kez üretir. Sunucu reddederse (sözlük/kota) ya da 8 sn içinde gelmezse robot sese düşülür; çocuk sessiz kalmaz. */
+  const SORU_DEPO = 'pi-soru-sesleri-v1';
+  const ozet32 = async (s) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+  const zamanli = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('zaman aşımı')), ms))]);
+  const soruSesiAl = async (metin) => {
+    const url = CL.soruDepo + (await ozet32(metin)) + '.mp3';
+    if (AUDIO.blob[url]) return AUDIO.blob[url];
+    let depo = null, res = null; try { depo = await caches.open(SORU_DEPO); res = await depo.match(url); } catch (e) { }
+    if (!res) {
+      res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) {
+        const r = await fetch(CL.soruSesiAdresi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metin }) });
+        if (!r.ok) throw new Error('soru sesi: ' + r.status);
+        res = await fetch(url, { mode: 'cors' }); if (!res.ok) throw new Error('soru sesi yok');
+      }
+      if (depo) depo.put(url, res.clone()).catch(() => { });
+    }
+    return (AUDIO.blob[url] = URL.createObjectURL(await res.blob()));
+  };
+  const soruOku = () => {
+    const q = A.q; if (!q || !A.st.settings.voice) return;
+    const yedek = q.prompt + '. ' + (q.type === 'input' || q.type === 'kes' || q.type === 'match' ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
+    if (!CL || !CL.soruDepo || !window.crypto || !crypto.subtle) return speak(yedek);
+    stopVoice(); const tok = AUDIO.tok, pk = () => document.querySelectorAll('.pikonus');
+    pk().forEach(e => e.classList.add('dusunuyor'));
+    zamanli(soruSesiAl(U.soruSesi(q.prompt)), 8000)
+      .then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); })
+      .catch(() => { if (tok === AUDIO.tok) say(null, yedek); })
+      .finally(() => pk().forEach(e => e.classList.remove('dusunuyor')));
+  };
   const sayCard = (id, f) => say(`kart_${id}_${f}`, cardText(id, f));
   const PI = window.MY_PI_LINES;
   const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
@@ -2904,7 +2946,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
       case 'card-ok': A.ses.showCard = false; stopVoice(); nextQuestion(); break;
       case 'say-card': sayCard(el.dataset.s, v); break;
       case 'fmt-modal': A.modal = explainModal(A.q.skill, v); render(); sayCard(A.q.skill, v); break;
-      case 'say-q': speak(A.q.prompt + '. ' + (A.q.type === 'input' ? '' : A.q.type === 'cmp' ? `${A.q.cmp[0]} ile ${A.q.cmp[1]}` : (A.q.options || []).map(o => o.t).join('. '))); break;
+      case 'say-q': soruOku(); break;
       case 'kes-dilim': if (A.fb || !A.kes) break; { const i = +v; A.kes.on[i] = !A.kes.on[i]; tone(A.kes.on[i] ? 620 + 30 * A.kes.on.filter(Boolean).length : 420, .09, 'triangle'); render(); } break;
       case 'kes-parca': if (A.fb || !A.kes) break; { const P = Math.max(1, Math.min(12, A.kes.parca + +v)); A.kes = { parca: P, on: Array(P).fill(false), konum: null }; sfx.tap(); render(); } break;
       case 'kes-nokta': if (A.fb || !A.kes) break; A.kes.konum = +v; tone(560 + 25 * +v, .08, 'triangle'); render(); break;

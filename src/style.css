@@ -454,3 +454,6 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes piNefes{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.015)}}
 @keyframes piKonus{0%,100%{transform:rotate(-1.5deg) translateY(0)}50%{transform:rotate(1.5deg) translateY(-2px)}}
 @media (prefers-reduced-motion: reduce){.pikonus,.pikonus.konusuyor{animation:none}}
+
+/* Pi soruyu okumaya hazırlanırken (ses ilk kez üretiliyor): küçük düşünme balonu */
+.pikonus.dusunuyor:after{content:'•••';position:absolute;top:-6px;right:-6px;background:var(--surface);color:var(--brand);border:2px solid var(--line);border-radius:12px;padding:0 6px;font-weight:900;font-size:13px;line-height:18px;animation:float 1s ease-in-out infinite}

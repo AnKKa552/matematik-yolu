@@ -13,6 +13,9 @@
   // Ses sürümü klasörü: 'damla/' (ElevenLabs Damla sesi, eleven_v4, 128 kbps). Eski Gamze sesleri kökte duruyor.
   C.sesAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/sesler/damla/` : 'audio/';
   // Pi'nin görselleri (Higgsfield ile üretildi, 'gorseller' deposu)
+  // Pi'nin soru okuması: önce depodaki hazır ses (soru/<özet>.mp3), yoksa soru-sesi fonksiyonu üretir
+  C.soruDepo = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/sesler/soru/` : null;
+  C.soruSesiAdresi = C.ayarli ? `${cfg.supabaseUrl}/functions/v1/soru-sesi` : null;
   C.gorselAdresi = C.ayarli ? `${cfg.supabaseUrl}/storage/v1/object/public/gorseller/` : null;
   let sb = null, kayitZaman = null;
   const yukle = () => new Promise((ok, no) => { if (G.supabase) return ok(); const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
