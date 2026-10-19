@@ -295,14 +295,14 @@
       ],
       "anlatim": {
         "gorsel": "Çokgende kenar = köşe = iç açı sayısı. Köşegen, yan yana olmayan iki köşeyi birleştirir.",
-        "hikaye": "Arılar peteklerini düzgün altıgen yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir köşeden köşegen çizmek istersen kendine ve iki komşuna çizemezsin, geriye 6 − 3 = 3 köşe kalır.",
+        "hikaye": "Arılar peteklerini düzgün altıgen yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir kenarı 1 cm olan petek gözünün bütün kenarlarının uzunlukları toplamı 6 × 1 = 6 cm olur.",
         "adim": [
           "Kenarları say → çokgenin adı (5 → beşgen).",
           "Köşe ve iç açı sayısı kenar sayısına eşittir.",
-          "Bir köşeden köşegen: köşe sayısı − 3.",
+          "Köşegen, yan yana olmayan iki köşeyi birleştirir; kenar ise yan yana iki köşeyi.",
           "Düzgün çokgen: kenarlar eşit + açılar eşit."
         ],
-        "kural": "n kenarlı çokgen: n köşe, n iç açı; bir köşeden (n − 3) köşegen."
+        "kural": "n kenarlı çokgen: n köşe, n iç açı. Düzgün çokgende bütün kenarlar ve bütün açılar eşittir."
       }
     },
     {
@@ -614,7 +614,8 @@
         "cevre_yarim",
         "cevre_alan",
         "birim",
-        "cevre_alan_ayni"
+        "cevre_alan_ayni",
+        "kare_cevre"
       ],
       "anlatim": {
         "gorsel": "Aynı çevreyle farklı alanlar olabilir! Kenarlar birbirine yaklaştıkça alan büyür.",
@@ -754,7 +755,8 @@
       ],
       "yanilgilar": [
         "pay_payda_ayri",
-        "payda_buyuk"
+        "payda_buyuk",
+        "esit_payda"
       ],
       "anlatim": {
         "gorsel": "Paydalar eşitse payı büyük olan büyüktür. Paylar eşitse paydası küçük olan büyüktür (parçalar daha büyük).",
@@ -784,7 +786,8 @@
       "yanilgilar": [
         "uzun_buyuk",
         "sifir_fark",
-        "yuzde_ondalik"
+        "yuzde_ondalik",
+        "tam_kisim"
       ],
       "anlatim": {
         "gorsel": "Sayı doğrusunda sağdaki sayı daha büyüktür. 0,7 = 0,70 > 0,58.",
@@ -812,7 +815,9 @@
       ],
       "yanilgilar": [
         "soru_tek",
-        "adim_sira"
+        "adim_sira",
+        "veri_kaynak",
+        "anket_kural"
       ],
       "anlatim": {
         "gorsel": "Araştırma 4 adımdır: Soru → Veri → Grafik → Yorum .",
@@ -1016,7 +1021,7 @@
       ],
       "anlatim": {
         "gorsel": "Sıra: Parantez → Üs → Çarpma/Bölme → Toplama/Çıkarma",
-        "hikaye": "Mert 3 paket kalem (her biri 4 tane) ve 2 tane tek kalem aldı. \"3 × 4 + 2\" yazdı. Soldan sağa yapsa 3 × 6 = 18 bulurdu ama gerçekte 12 + 2 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!",
+        "hikaye": "Mert 2 tane tek kalem ve 3 paket kalem (her pakette 4 tane) aldı. \"2 + 3 × 4\" yazdı. Soldan sağa yapsa 5 × 4 = 20 bulurdu ama gerçekte 2 + 12 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!",
         "adim": [
           "Önce parantez içini yap.",
           "Sonra üslü ifadeleri (kare, küp) hesapla.",
@@ -1070,7 +1075,8 @@
       ],
       "yanilgilar": [
         "algoritma_sira",
-        "dongu_sayma"
+        "dongu_sayma",
+        "karar_dongu"
       ],
       "anlatim": {
         "gorsel": "Algoritma = sıralı adımlar. Akış şemasında oklar sırayı, karar kutuları \"evet/hayır\" yollarını gösterir.",
@@ -1133,9 +1139,9 @@
         "gorsel": "Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa az olası , fazlaysa çok olası .",
         "hikaye": "Doğum günü çarkında 4 dilimin 3'ü mavi. Duru \"Mavi gelme ihtimali yüksek!\" dedi. Haklıydı: 3/4, yarıdan fazla, yani çok olası .",
         "adim": [
-          "İstenen durumları say.",
-          "Tüm durumları say.",
-          "Olasılık = istenen / tüm.",
+          "Kaç dilim mavi, say (parça).",
+          "Bütün dilimleri say (bütün).",
+          "Mavi dilimler bütünün kaçta kaçı? Bu kesir olasılığı gösterir.",
           "1/2 ile karşılaştır: az mı, eşit mi, çok mu?"
         ],
         "kural": "Olasılık 0 ile 1 arasındadır; asla 1'den büyük olamaz."
@@ -1401,7 +1407,7 @@
     },
     "olasilik_oran": {
       "ad": "Olasılık kesrini yanlış kurma",
-      "duzeltme": "Olasılık = istenen durum sayısı / tüm durumların sayısı. Paydaya tüm dilimleri yaz."
+      "duzeltme": "Kesri parça-bütün ilişkisiyle kur: pay, istediğin renkteki dilim ya da top sayısı; payda, bütün dilimlerin ya da topların sayısı."
     },
     "az_cok": {
       "ad": "Az olası ile çok olasıyı karıştırma",
@@ -1474,6 +1480,38 @@
     "tahmin_tam": {
       "ad": "Tahmin yerine tam sonucu hesaplama",
       "duzeltme": "Tahmin istenince önce sayıları istenen basamağa yuvarlarsın, sonra yuvarlanmış sayılarla işlem yaparsın. Tam sonuç tahmin değildir."
+    },
+    "kare_cevre": {
+      "ad": "Karenin çevresini 2'ye bölerek kenarı bulma",
+      "duzeltme": "Karenin 4 kenarı eşittir. Bir kenar = çevre ÷ 4."
+    },
+    "tam_kisim": {
+      "ad": "Ondalık sayılarda önce virgülden sonrasına bakma",
+      "duzeltme": "Önce tam kısma (virgülün soluna) bakılır. 225,11 > 224,91 çünkü 225 > 224; kuruş kısmına sadece tam kısımlar eşitse bakılır."
+    },
+    "veri_kaynak": {
+      "ad": "Hazır veri ile kendi topladığımız veriyi karıştırma",
+      "duzeltme": "Hazır veri, başkalarının toplayıp yayımladığı veridir (TÜİK, kayıtlar, gazete). Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız."
+    },
+    "anket_kural": {
+      "ad": "Anket hazırlama kurallarını karıştırma",
+      "duzeltme": "Anket soruları kısa, açık ve yönlendirmesiz olur. Katılanların adı ve kişisel bilgileri gizli tutulur."
+    },
+    "karar_dongu": {
+      "ad": "Karar adımında \"Hayır\" cevabının nereye gittiğini karıştırma",
+      "duzeltme": "Karar kutusunda cevap \"Hayır\" ise ok hangi adımı gösteriyorsa oraya dönülür. Koşul sağlanana kadar o adım tekrarlanır (döngü)."
+    },
+    "sifir_basta": {
+      "ad": "En küçük sayıyı 0 ile başlatma",
+      "duzeltme": "Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0'ı yaz."
+    },
+    "fiyat_okuma": {
+      "ad": "Fiyatı lira-kuruş olarak yanlış okuma",
+      "duzeltme": "Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş."
+    },
+    "esit_payda": {
+      "ad": "Paydaları eşit kesirleri karşılaştıramama",
+      "duzeltme": "Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: 8/12 > 3/12."
     }
   },
   "anlatim_bicimleri": {

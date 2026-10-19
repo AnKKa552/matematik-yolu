@@ -55,9 +55,9 @@
     }),
     S('g_cokgen', 't1', 'Çokgenler', '57–69', {
       gorsel: { text: 'Çokgende <b>kenar = köşe = iç açı</b> sayısı. Köşegen, yan yana olmayan iki köşeyi birleştirir.', vis: () => V.polygon(6, true) },
-      hikaye: 'Arılar peteklerini <b>düzgün altıgen</b> yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir köşeden köşegen çizmek istersen kendine ve iki komşuna çizemezsin, geriye 6 − 3 = 3 köşe kalır.',
-      adim: ['Kenarları say → çokgenin adı (5 → beşgen).', 'Köşe ve iç açı sayısı kenar sayısına eşittir.', 'Bir köşeden köşegen: köşe sayısı − 3.', 'Düzgün çokgen: kenarlar eşit + açılar eşit.'],
-      kural: 'n kenarlı çokgen: n köşe, n iç açı; bir köşeden (n − 3) köşegen.',
+      hikaye: 'Arılar peteklerini <b>düzgün altıgen</b> yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir kenarı 1 cm olan petek gözünün bütün kenarlarının uzunlukları toplamı 6 × 1 = 6 cm olur.',
+      adim: ['Kenarları say → çokgenin adı (5 → beşgen).', 'Köşe ve iç açı sayısı kenar sayısına eşittir.', 'Köşegen, yan yana olmayan iki köşeyi birleştirir; kenar ise yan yana iki köşeyi.', 'Düzgün çokgen: kenarlar eşit + açılar eşit.'],
+      kural: 'n kenarlı çokgen: n köşe, n iç açı. Düzgün çokgende bütün kenarlar ve bütün açılar eşittir.',
     }),
     S('g_ucgen', 't1', 'Üçgenler', '70–85', {
       gorsel: { text: 'Üçgenin üç iç açısını yan yana koyarsan bir <b>doğru açı</b> (180°) oluşur.', vis: () => V.angle(180, { label: '60°+50°+70°' }) },
@@ -210,7 +210,7 @@
     }),
     S('e_oncelik', 't6', 'İşlem Önceliği', '133–136', {
       gorsel: { text: 'Sıra: <b>Parantez → Üs → Çarpma/Bölme → Toplama/Çıkarma</b>', vis: () => '<div class="steps4"><span>( )</span><span>x²</span><span>× ÷</span><span>+ −</span></div>' },
-      hikaye: 'Mert 3 paket kalem (her biri 4 tane) ve 2 tane tek kalem aldı. "3 × 4 + 2" yazdı. Soldan sağa yapsa 3 × 6 = 18 bulurdu ama gerçekte 12 + 2 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!',
+      hikaye: 'Mert 2 tane tek kalem ve 3 paket kalem (her pakette 4 tane) aldı. "2 + 3 × 4" yazdı. Soldan sağa yapsa 5 × 4 = 20 bulurdu ama gerçekte 2 + 12 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!',
       adim: ['Önce parantez içini yap.', 'Sonra üslü ifadeleri (kare, küp) hesapla.', 'Sonra çarpma ve bölmeyi soldan sağa yap.', 'En son toplama ve çıkarmayı soldan sağa yap.'],
       kural: '2 + 3 × 4 = 14 (20 değil!)',
     }),
@@ -236,7 +236,7 @@
     S('p_spektrum', 't7', 'Olasılık Spektrumu', '170–178', {
       gorsel: { text: 'Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa <b>az olası</b>, fazlaysa <b>çok olası</b>.', vis: () => V.spinner(['sb', 'c0b', 'sb', 'sb']) },
       hikaye: 'Doğum günü çarkında 4 dilimin 3\'ü mavi. Duru "Mavi gelme ihtimali yüksek!" dedi. Haklıydı: 3/4, yarıdan fazla, yani <b>çok olası</b>.',
-      adim: ['İstenen durumları say.', 'Tüm durumları say.', 'Olasılık = istenen / tüm.', '1/2 ile karşılaştır: az mı, eşit mi, çok mu?'],
+      adim: ['Kaç dilim mavi, say (parça).', 'Bütün dilimleri say (bütün).', 'Mavi dilimler bütünün kaçta kaçı? Bu kesir olasılığı gösterir.', '1/2 ile karşılaştır: az mı, eşit mi, çok mu?'],
       kural: 'Olasılık 0 ile 1 arasındadır; asla 1\'den büyük olamaz.',
     }),
   ];

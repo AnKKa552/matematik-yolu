@@ -1031,6 +1031,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     cevre_yarim: { t: 'Çevreyi hesaplarken sadece iki kenarı toplama', fix: 'Çevre, şeklin etrafındaki TÜM kenarların toplamıdır. Dikdörtgenin 4 kenarı vardır: Çevre = 2 × (uzun kenar + kısa kenar).' },
     cevre_alan: { t: 'Çevre ile alanı karıştırma', fix: 'Çevre bir uzunluktur (etrafını dolaşmak, cm). Alan ise yüzeyin kapladığı yerdir (içini kaplamak, cm²).' },
     birim: { t: 'Alan birimini yanlış yazma', fix: 'Alan birim karelerle ölçülür: cm², m². Uzunluk birimi (cm, m) alan için kullanılmaz.' },
+    kare_cevre: { t: 'Karenin çevresini 2\'ye bölerek kenarı bulma', fix: 'Karenin 4 kenarı eşittir. Bir kenar = çevre ÷ 4.' },
     ters_cevre: { t: 'Çevreden kenar bulurken yarıya bölmeyi unutma', fix: 'Çevre = 2 × (a + b) olduğu için önce çevreyi 2\'ye böl (a + b), sonra bilinen kenarı çıkar.' },
     cevre_alan_ayni: { t: '"Çevreleri eşitse alanları da eşittir" sanma', fix: 'Aynı çevreye sahip dikdörtgenlerin alanları farklı olabilir. Kenarlar birbirine yaklaştıkça alan büyür; en büyük alan kareye aittir.' },
     // Kesirler
@@ -1047,9 +1048,13 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     cizgi_sayma: { t: 'Sayı doğrusunda çizgileri sayma', fix: 'Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0\'dan başla; her atlama bir parçadır. 0 noktası sayılmaz.' },
     pay_payda_ayri: { t: 'Kesirleri karşılaştırırken sadece paya bakma', fix: 'Paydalar farklıysa önce paydaları eşitle (genişlet), sonra payları karşılaştır.' },
     uzun_buyuk: { t: '"Basamağı çok olan ondalık sayı büyüktür" sanma', fix: 'Ondalık sayıları karşılaştırırken önce tam kısma, sonra onda birler basamağına bak: 0,7 > 0,58 çünkü 7 onda > 5 onda.' },
+    tam_kisim: { t: 'Ondalık sayılarda önce virgülden sonrasına bakma', fix: 'Önce tam kısma (virgülün soluna) bakılır. 225,11 > 224,91 çünkü 225 > 224; kuruş kısmına sadece tam kısımlar eşitse bakılır.' },
+    esit_payda: { t: 'Paydaları eşit kesirleri karşılaştıramama', fix: 'Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: 8/12 > 3/12.' },
     sifir_fark: { t: 'Sondaki sıfırın değeri değiştirdiğini sanma', fix: 'Ondalık kısmın sonuna eklenen sıfır değeri değiştirmez: 0,7 = 0,70 (7 onda = 70 yüzde).' },
     // İstatistik
     soru_tek: { t: 'Araştırma sorusunu tek kişiye/tek cevaba yönlendirme', fix: 'İstatistiksel araştırma sorusu bir GRUBA sorulur ve birden çok farklı cevabı olabilir.' },
+    veri_kaynak: { t: 'Hazır veri ile kendi topladığımız veriyi karıştırma', fix: 'Hazır veri, başkalarının toplayıp yayımladığı veridir (TÜİK, kayıtlar, gazete). Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız.' },
+    anket_kural: { t: 'Anket hazırlama kurallarını karıştırma', fix: 'Anket soruları kısa, açık ve yönlendirmesiz olur. Katılanların adı ve kişisel bilgileri gizli tutulur.' },
     adim_sira: { t: 'Araştırma adımlarının sırasını karıştırma', fix: 'Sıra: 1) Araştırma sorusunu belirle 2) Veri topla 3) Görselleştir 4) Özetle ve yorumla.' },
     grafik_okuma: { t: 'Grafikten yanlış değer okuma', fix: 'Sütunun tepesinden sola doğru düz bir çizgi çekip eksendeki değeri oku. Hangi kategoriye baktığını kontrol et.' },
     fark_toplam: { t: '"Fark" sorulduğunda toplama yapma', fix: '"Kaç fazla / fark" soruları çıkarma ister; "toplam / hepsi" soruları toplama ister.' },
@@ -1069,11 +1074,12 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     baslangic_unutma: { t: 'Başlangıçtaki miktarı eklememe', fix: 'Başta var olan miktar sonuca eklenir: toplam = başlangıç + geçen süre × her seferki artış.' },
     baslangic_sira: { t: 'Başlangıç anını 1. adım sanma', fix: 'Başlangıç, hiç zaman geçmemiş andır (0. gün ya da 0. hafta); o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam = başlangıç + n × artış.' },
     algoritma_sira: { t: 'Algoritma adımlarını sırasız uygulama', fix: 'Algoritma adımları yazıldığı sırayla, tek tek uygulanır. Her adımdan sonra elindeki sayıyı not et.' },
+    karar_dongu: { t: 'Karar adımında "Hayır" cevabının nereye gittiğini karıştırma', fix: 'Karar kutusunda cevap "Hayır" ise ok hangi adımı gösteriyorsa oraya dönülür. Koşul sağlanana kadar o adım tekrarlanır (döngü).' },
     dongu_sayma: { t: 'Döngü tekrarlarını yanlış sayma', fix: 'Döngünün her turunda değeri yaz ve koşulu kontrol et. Kaç kez tekrar ettiğini tek tek işaretle.' },
     // Olasılık
     olay_tur: { t: 'Kesin, imkânsız ve mümkün olayları karıştırma', fix: 'Kesin olay mutlaka olur (olasılık 1), imkânsız olay asla olmaz (0). Arada kalanlar mümkün olaylardır.' },
     olasilik_buyuk: { t: 'Olasılığın 1\'den büyük olabileceğini sanma', fix: 'Olasılık her zaman 0 ile 1 arasındadır (%0 ile %100). İstenen durum sayısı tüm durumlardan fazla olamaz.' },
-    olasilik_oran: { t: 'Olasılık kesrini yanlış kurma', fix: 'Olasılık = istenen durum sayısı / tüm durumların sayısı. Paydaya tüm dilimleri yaz.' },
+    olasilik_oran: { t: 'Olasılık kesrini yanlış kurma', fix: 'Kesri parça-bütün ilişkisiyle kur: pay, istediğin renkteki dilim ya da top sayısı; payda, bütün dilimlerin ya da topların sayısı.' },
     az_cok: { t: 'Az olası ile çok olasıyı karıştırma', fix: '1/2\'den küçük olasılıklar az olası, 1/2\'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır.' },
     sifir_basta: { t: 'En küçük sayıyı 0 ile başlatma', fix: 'Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0\'ı yaz.' },
     fiyat_okuma: { t: 'Fiyatı lira-kuruş olarak yanlış okuma', fix: 'Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş.' },
@@ -1101,7 +1107,11 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   }
   // Sayısal yakın yanlışlar (dolgu için)
   const near = (v, f = (x) => fmtN(x)) => [[f(v + ri(1, 3) * (v > 50 ? 10 : 1)), 'genel'], [f(Math.max(0, v - ri(1, 3) * (v > 50 ? 10 : 1))), 'genel'], [f(v + 1), 'genel'], [f(Math.max(0, v - 1)), 'genel']];
-  const Q = (o) => Object.assign({ type: 'mc', hint: '', steps: [] }, o);
+  // Sayı girişinde yanılgılı değer doğru cevapla aynıysa (ör. yarım dilimde "toplam ÷ dilim sayısı" = cevap) ya da
+  // başka bir yanılgıyla çakışıyorsa atılır: doğru cevap yanılgı sayılmasın, teşhis belirsiz kalmasın.
+  const Q = (o) => { const q = Object.assign({ type: 'mc', hint: '', steps: [] }, o);
+    if (q.inputMis && q.answer !== undefined) { const goruldu = new Set([String(q.answer)]); q.inputMis = q.inputMis.filter(m => { const k = String(m.v); if (goruldu.has(k)) return false; goruldu.add(k); return true; }); }
+    return q; };
   const cmpQ = (o, rel, misMap) => {
     // rel: '<' | '>' | '='
     const all = ['<', '=', '>'];
@@ -1216,6 +1226,9 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     if (askTers) return Q({ type: 'input', prompt: `Kesişen iki doğrunun oluşturduğu açılardan biri ${a}°'dir. Bu açının TERS açısı kaç derecedir?`, visual: V.crossAngles(a, [a + '°', '', '?', '']), answer: String(a), unit: '°', inputMis: [{ v: 180 - a, mis: 'ters_aci' }], steps: ['Ters açılar karşı karşıyadır ve ölçüleri eşittir.', `Cevap: ${a}°`] });
     return Q({ type: 'input', prompt: `Kesişen iki doğrudan oluşan ${a}°'lik açının yanındaki (komşu) açı kaç derecedir?`, visual: V.crossAngles(a, [a + '°', '?', '', '']), answer: String(180 - a), unit: '°', inputMis: [{ v: a, mis: 'ters_aci' }, { v: 90 - a, mis: 'tumler_butunler' }], steps: ['Bir doğru üzerindeki komşu açılar doğru açıyı (180°) oluşturur.', `180 − ${a} = ${180 - a}°`] });
   };
+  // Program sınırı (MAT.5.4, 2024): "Alan çalışmalarında dikdörtgenlerin alanı en fazla 36 birim kare olmalıdır."
+  // Kenarlar farklı (kare değil) ve çevre ≠ alan (yanılgılı cevap doğruyla çakışmasın).
+  const dikKenar = (enAz = 3) => { let a, b; do { a = ri(enAz, 18); b = ri(2, a - 1); } while (a * b > 36 || a * b === 2 * (a + b)); return [a, b]; };
   const CG = { 3: 'Üçgen', 4: 'Dörtgen', 5: 'Beşgen', 6: 'Altıgen', 7: 'Yedigen', 8: 'Sekizgen', 9: 'Dokuzgen', 10: 'Ongen' };
   GEN.g_cokgen = (lv) => {
     if (lv === 1) {
@@ -1230,12 +1243,12 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       const n = ri(5, 8), a = ri(3, 12);
       return Q({ type: 'input', prompt: `Düzgün bir ${CG[n].toLocaleLowerCase('tr-TR')}in bir kenarı ${a} cm. Bu çokgenin çevresi kaç cm?`, visual: V.polygon(n), answer: String(n * a), unit: 'cm', inputMis: [{ v: a * (n - 1), mis: 'cokgen_sayi' }, { v: a + n, mis: 'cokgen_sayi' }], steps: ['Düzgün çokgende bütün kenarlar eşittir.', `${n} kenar × ${a} cm = ${n * a} cm`] });
     }
-    if (Math.random() < 0.5) {
-      const k = ri(1, 7), n = k + 3;
-      return Q({ type: 'input', prompt: `Bir köşesinden ${k} köşegen çizilebilen çokgen kaç kenarlıdır?`, answer: String(n), inputMis: [{ v: k + 1, mis: 'kosegen_kenar' }, { v: k, mis: 'kosegen_kenar' }], steps: ['Bir köşeden çizilen köşegen sayısı = kenar sayısı − 3', `Kenar sayısı = ${k} + 3 = ${n} (${CG[n].toLocaleLowerCase('tr-TR')})`] });
-    }
-    const n = ri(4, 10);
-    return Q({ type: 'input', prompt: `Bir ${CG[n].toLocaleLowerCase('tr-TR')}in BİR köşesinden kaç köşegen çizilebilir?`, visual: V.polygon(n, true), answer: String(n - 3), inputMis: [{ v: n - 1, mis: 'kosegen_kenar' }, { v: n, mis: 'kosegen_kenar' }], steps: [`${n} köşe var.`, 'Köşenin kendisine ve iki komşusuna köşegen çizilmez → 3 köşe çıkar.', `${n} − 3 = ${n - 3}`] });
+    // Program sınırı (MAT.5.3, 2024): "Çokgenlerde köşegen sayısına değinilmez." Köşegen yalnız tanımıyla sorulur.
+    if (Math.random() < 0.4) return Q({ prompt: 'Bir çokgende yan yana OLMAYAN iki köşeyi birleştiren doğru parçasına ne denir?', visual: V.polygon(ri(5, 6), true), options: mc('Köşegen', [['Kenar', 'kosegen_kenar'], ['Çap', 'cember_parca'], ['Işın', 'isin_dogru']]), steps: ['Kenar: yan yana iki köşeyi birleştirir.', 'Köşegen: yan yana olmayan iki köşeyi birleştirir.'] });
+    // Düzgün çokgen: bütün kenarların toplamından bir kenarı bul (kenarlar eşit)
+    const n = ri(5, 8), a = ri(3, 9), top = n * a;
+    const yanlis = [top / 4, top / (n - 1), top / (n + 1)].filter(v => Number.isInteger(v) && v !== a);
+    return Q({ type: 'input', prompt: `Düzgün bir ${CG[n].toLocaleLowerCase('tr-TR')}in bütün kenarlarının uzunlukları toplamı ${top} cm. Bir kenarı kaç cm?`, visual: V.polygon(n), answer: String(a), unit: 'cm', inputMis: yanlis.slice(0, 2).map(v => ({ v, mis: 'cokgen_sayi' })), hint: `${CG[n]} kaç kenarlı? Düzgün çokgende kenarlar eşit.`, steps: [`${CG[n]}: ${n} kenar, hepsi eşit.`, `Bir kenar = ${top} ÷ ${n} = ${a} cm`] });
   };
   GEN.g_ucgen = (lv) => {
     if (lv === 1) {
@@ -1337,7 +1350,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     if (lv === 1) {
       const a = pick([12, 15, 25, 32, 45, 64, 75, 80]), z = pick([10, 100, 1000]), m = pick([2, 3, 4, 5]) * z, ans = a * m;
       const zeros = String(m).length - 1;
-      return Q({ prompt: `${a} × ${fmtN(m)} işleminin sonucu kaçtır?`, options: mc(fmtN(ans), [[fmtN(ans / 10), 'sifir_sayisi'], [fmtN(ans * 10), 'sifir_sayisi'], [fmtN(a * (m / z) + z), 'sifir_sayisi']]), steps: [`Sıfırları ayır: ${a} × ${m / z} ve ${zeros} sıfır`, `${a} × ${m / z} = ${a * m / z}`, `Sona ${zeros} sıfır ekle → ${fmtN(ans)}`] });
+      return Q({ prompt: `${a} × ${fmtN(m)} işleminin sonucu kaçtır?`, options: mc(fmtN(ans), [[fmtN(ans / 10), 'sifir_sayisi'], [fmtN(ans * 10), 'sifir_sayisi'], [fmtN(z === 10 ? ans * 100 : ans / z), 'sifir_sayisi']]), steps: [`Sıfırları ayır: ${a} × ${m / z} ve ${zeros} sıfır`, `${a} × ${m / z} = ${a * m / z}`, `Sona ${zeros} sıfır ekle → ${fmtN(ans)}`] });
     }
     if (lv === 2) {
       const it = pick(['bol', 'carpan']);
@@ -1388,19 +1401,19 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   };
   GEN.a_alan = (lv) => {
     if (lv === 1) {
-      const a = ri(3, 9), b = ri(2, Math.min(6, a - 1)); // eşit kenar = kare; "dikdörtgen" denen soruda kenarlar farklı
+      const [a, b] = dikKenar(3); // eşit kenar = kare; "dikdörtgen" denen soruda kenarlar farklı; alan ≤ 36
       return Q({ type: 'input', prompt: 'Şekildeki dikdörtgenin alanı kaç birimkaredir?', visual: V.rect(a, b, '', true), answer: String(a * b), unit: 'birimkare', inputMis: [{ v: 2 * (a + b), mis: 'cevre_alan' }, { v: a + b, mis: 'cevre_alan' }], steps: [`Bir sırada ${a} kare, ${b} sıra var.`, `${a} × ${b} = ${a * b} birimkare`] });
     }
     if (lv === 2) {
-      const a = ri(5, 20), b = ri(3, Math.min(12, a - 1)), u = pick(['cm', 'm']);
+      const [a, b] = dikKenar(4), u = pick(['cm', 'm']);
       return Q({ prompt: `Kenar uzunlukları ${a} ${u} ve ${b} ${u} olan dikdörtgenin alanı nedir?`, visual: V.rect(a, b, u), options: mc(`${a * b} ${u}²`, [[`${a * b} ${u}`, 'birim'], [`${2 * (a + b)} ${u}²`, 'cevre_alan'], [`${2 * (a + b)} ${u}`, 'cevre_alan']], [[`${a + b} ${u}²`, 'cevre_alan'], [`${a * b + a} ${u}²`, 'genel']]), steps: ['Alan = uzun kenar × kısa kenar', `A = ${a} × ${b} = ${a * b} ${u}²`, 'Alan birimi kare birimdir (²).'] });
     }
-    const a = ri(4, 15), b = ri(3, 12);
+    const [a, b] = Math.random() < 0.5 ? dikKenar(4) : dikKenar(4).reverse();
     return Q({ type: 'input', prompt: `Alanı ${a * b} m² olan dikdörtgen biçimindeki bir bahçenin bir kenarı ${a} m'dir. Diğer kenarı kaç m'dir?`, answer: String(b), unit: 'm', inputMis: [{ v: a * b - a, mis: 'cevre_alan' }, { v: a * b / 2 - a, mis: 'cevre_alan' }], steps: ['Alan = a × b  →  b = Alan ÷ a', `${a * b} ÷ ${a} = ${b} m`] });
   };
   GEN.a_cevre_alan = (lv) => {
     if (lv === 1) {
-      const a = ri(4, 12), b = ri(2, a - 1), ask = pick(['çevre', 'alan']); // b < a: kenarlar eşit olunca "dikdörtgen" kafa karıştırıyordu (kare)
+      const [a, b] = dikKenar(4), ask = pick(['çevre', 'alan']); // b < a: kenarlar eşit olunca "dikdörtgen" kafa karıştırıyordu (kare)
       const ok = ask === 'çevre' ? `${2 * (a + b)} cm` : `${a * b} cm²`, other = ask === 'çevre' ? `${a * b} cm` : `${2 * (a + b)} cm²`;
       return Q({ prompt: ask === 'çevre' ? `Kenarları ${a} cm ve ${b} cm olan dikdörtgen bir kartonun etrafına şerit yapıştırılacak. Ne kadar şerit gerekir?` : `Kenarları ${a} cm ve ${b} cm olan dikdörtgen bir kartonun üstü renkli kâğıtla tamamen kaplanacak. Ne kadar kâğıt gerekir?`, options: mc(ok, [[other, 'cevre_alan'], [ask === 'çevre' ? `${a + b} cm` : `${a + b} cm²`, ask === 'çevre' ? 'cevre_yarim' : 'cevre_alan']], [[ask === 'çevre' ? `${2 * (a + b)} cm²` : `${a * b} cm`, 'birim']]), steps: [ask === 'çevre' ? 'Etrafına şerit → çevre (uzunluk, cm)' : 'Üstünü kaplamak → alan (cm²)', ask === 'çevre' ? `2 × (${a} + ${b}) = ${2 * (a + b)} cm` : `${a} × ${b} = ${a * b} cm²`] });
     }
@@ -1411,7 +1424,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       const h = ri(6, 12), x = ri(1, Math.floor(h / 2) - 1), y = ri(x + 1, Math.floor(h / 2)), neAlan = Math.random() < 0.5;
       return tfQ({ prompt: `${h - x} cm × ${x} cm ve ${h - y} cm × ${y} cm boyutlarındaki iki dikdörtgenin ${neAlan ? 'alanları' : 'çevreleri'} eşittir.`, steps: [`Çevreler: 2 × (${h - x} + ${x}) = ${2 * h} cm ve 2 × (${h - y} + ${y}) = ${2 * h} cm → eşit.`, `Alanlar: ${h - x} × ${x} = ${(h - x) * x} cm² ve ${h - y} × ${y} = ${(h - y) * y} cm² → farklı.`, 'Çevresi eşit dikdörtgenlerin alanı farklı olabilir.'] }, !neAlan, neAlan ? 'cevre_alan_ayni' : 'cevre_alan');
     }
-    const P = pick([12, 16, 20, 24, 28, 32, 36, 40]), s = P / 4, h = P / 2;
+    const P = pick([12, 16, 20, 24]), s = P / 4, h = P / 2; // en büyük alan (kare) ≤ 36
     if (Math.random() < 0.4) {
       return Q({ prompt: `Kenar uzunlukları doğal sayı ve çevre uzunluğu ${P} cm olan dikdörtgenler arasında alanı EN KÜÇÜK olanın alanı kaç cm²'dir?`, options: mc(`${h - 1} cm²`, [[`${s * s} cm²`, 'cevre_alan_ayni'], [`${(h - 2) * 2} cm²`, 'cevre_alan_ayni']], [[`${P} cm²`, 'cevre_alan']]), steps: [`Uzun + kısa kenar = ${P} ÷ 2 = ${h}`, `Denemeler: ${h - 1}×1=${h - 1}, ${h - 2}×2=${(h - 2) * 2}, ..., ${s}×${s}=${s * s}`, `Kenarlar arasındaki fark en çok olunca alan en küçük: ${h - 1}×1 = ${h - 1} cm²`] });
     }
@@ -1525,11 +1538,11 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     const hazir = pick(['TÜİK\'in yayımladığı istatistikler', 'Meteorolojinin yayımladığı sıcaklık kayıtları', 'Okul kütüphanesinin kitap ödünç kayıtları', 'Gazetede yayımlanan nüfus bilgileri']);
     const kendi = pick(['Sınıfta yaptığımız anket', 'Arkadaşlarımızla yaptığımız görüşme', 'Okul bahçesinde yaptığımız gözlem', 'Sınıfta yaptığımız ölçüm']);
     const it = pick([
-      ['Aşağıdakilerden hangisi HAZIR veri kaynağıdır?', hazir, [['Sınıfta yaptığımız anket', 'soru_tek'], ['Arkadaşlarımızla yaptığımız görüşme', 'soru_tek'], ['Okul bahçesinde yaptığımız gözlem', 'soru_tek']]],
-      ['Aşağıdakilerden hangisi verileri KENDİMİZİN topladığı bir yöntemdir?', kendi, [['TÜİK\'in yayımladığı istatistikler', 'soru_tek'], ['Meteorolojinin yayımladığı sıcaklık kayıtları', 'soru_tek'], ['Gazetede yayımlanan nüfus bilgileri', 'soru_tek']]],
-      ['Anket hazırlarken hangisine DİKKAT EDİLMELİDİR?', 'Kişisel bilgilerin gizliliği korunmalıdır', [['Katılanların adres bilgisi mutlaka alınmalıdır', 'soru_tek'], ['Sorular tek bir kişiye göre hazırlanmalıdır', 'soru_tek'], ['Tanımadığımız kişilerin anketlerine hemen cevap vermeliyiz', 'soru_tek']]],
-      ['Bir anket sorusu nasıl olmalıdır?', 'Kısa, açık ve herkesin anlayacağı şekilde', [['Cevabı yönlendirecek şekilde', 'soru_tek'], ['Çok uzun ve karmaşık', 'soru_tek'], ['Katılanların kişisel bilgilerini soran', 'soru_tek']]],
-      ['Araştırma raporunda ankete katılanların adları yazılmalı mıdır?', 'Hayır, kişisel bilgiler gizli tutulur', [['Evet, herkesin adı yazılmalıdır', 'soru_tek'], ['Sadece en çok cevap verenin adı yazılır', 'soru_tek'], ['Sadece öğretmenin adı yazılır', 'soru_tek']]],
+      ['Aşağıdakilerden hangisi HAZIR veri kaynağıdır?', hazir, [['Sınıfta yaptığımız anket', 'veri_kaynak'], ['Arkadaşlarımızla yaptığımız görüşme', 'veri_kaynak'], ['Okul bahçesinde yaptığımız gözlem', 'veri_kaynak']]],
+      ['Aşağıdakilerden hangisi verileri KENDİMİZİN topladığı bir yöntemdir?', kendi, [['TÜİK\'in yayımladığı istatistikler', 'veri_kaynak'], ['Meteorolojinin yayımladığı sıcaklık kayıtları', 'veri_kaynak'], ['Gazetede yayımlanan nüfus bilgileri', 'veri_kaynak']]],
+      ['Anket hazırlarken hangisine DİKKAT EDİLMELİDİR?', 'Kişisel bilgilerin gizliliği korunmalıdır', [['Katılanların adres bilgisi mutlaka alınmalıdır', 'anket_kural'], ['Sorular tek bir kişiye göre hazırlanmalıdır', 'soru_tek'], ['Tanımadığımız kişilerin anketlerine hemen cevap vermeliyiz', 'anket_kural']]],
+      ['Bir anket sorusu nasıl olmalıdır?', 'Kısa, açık ve herkesin anlayacağı şekilde', [['Cevabı yönlendirecek şekilde', 'anket_kural'], ['Çok uzun ve karmaşık', 'anket_kural'], ['Katılanların kişisel bilgilerini soran', 'anket_kural']]],
+      ['Araştırma raporunda ankete katılanların adları yazılmalı mıdır?', 'Hayır, kişisel bilgiler gizli tutulur', [['Evet, herkesin adı yazılmalıdır', 'anket_kural'], ['Sadece en çok cevap verenin adı yazılır', 'anket_kural'], ['Sadece öğretmenin adı yazılır', 'anket_kural']]],
     ]);
     return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Hazır veri: başkalarının topladığı ve yayımladığı veri (TÜİK, gazete, kayıtlar).', 'Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız.', 'Kişisel bilgiler gizli tutulmalıdır.'] });
   };
@@ -1612,14 +1625,14 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     if (lv === 1) { const a = ri(2, 20), b = ri(2, 9), c = ri(2, 9); return Q({ type: 'input', prompt: `${a} + ${b} × ${c} = ?`, answer: String(a + b * c), inputMis: [{ v: (a + b) * c, mis: 'oncelik_soldan' }], steps: ['Önce çarpma!', `${b} × ${c} = ${b * c}`, `${a} + ${b * c} = ${a + b * c}`] }); }
     if (lv === 2) {
       const a = ri(2, 9), b = ri(2, 9), c = ri(2, 6), d = ri(1, 9);
-      return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }, { v: a + b * c - d, mis: 'oncelik_soldan' }], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
+      return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [...(c > d ? [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }] : []), { v: a + b * c - d, mis: 'oncelik_soldan' }], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
     }
     const a = ri(2, 9), b = ri(2, 5), c = ri(2, 4);
     return Q({ type: 'input', prompt: `${a} + ${b}² × ${c} = ?`, answer: String(a + b * b * c), inputMis: [{ v: (a + b) ** 2 * c, mis: 'oncelik_soldan' }, { v: (a + b * b) * c, mis: 'oncelik_soldan' }, { v: a + 2 * b * c, mis: 'us_carpim' }], steps: [`Önce üs: ${b}² = ${b * b}`, `Sonra çarpma: ${b * b} × ${c} = ${b * b * c}`, `En son toplama: ${a} + ${b * b * c} = ${a + b * b * c}`] });
   };
   GEN.e_oruntu = (lv) => {
     const a = ri(1, 9), d = ri(2, 7);
-    if (lv === 1) { const seq = [0, 1, 2, 3].map(i => a + i * d); return Q({ type: 'input', prompt: `${seq.join(', ')}, ....  Örüntünün bir sonraki terimi kaçtır?`, answer: String(a + 4 * d), inputMis: [{ v: a + 3 * d + 1, mis: 'oruntu_baslangic' }], steps: [`Terimler ${nk(d, 'er')} artıyor.`, `${seq[3]} + ${d} = ${a + 4 * d}`] }); }
+    if (lv === 1) { const seq = [0, 1, 2, 3].map(i => a + i * d); return Q({ type: 'input', prompt: `${seq.join(', ')}, ....  Örüntünün bir sonraki terimi kaçtır?`, answer: String(a + 4 * d), inputMis: [{ v: a + 5 * d, mis: 'oruntu_bir' }], steps: [`Terimler ${nk(d, 'er')} artıyor.`, `${seq[3]} + ${d} = ${a + 4 * d}`] }); }
     if (lv === 2) {
       const n = pick([10, 12, 15, 20]);
       return Q({ type: 'input', prompt: `${a} ile başlayan ve ${nk(d, 'er')} artan örüntünün ${n}. terimi kaçtır?`, answer: String(a + (n - 1) * d), inputMis: [{ v: n * d, mis: 'oruntu_baslangic' }, { v: a + n * d, mis: 'oruntu_bir' }], steps: [`1. terim ${a}. Her adımda ${d} artıyor.`, `${n}. terime kadar ${n - 1} artış olur: ${n - 1} × ${d} = ${(n - 1) * d}`, `${a} + ${(n - 1) * d} = ${a + (n - 1) * d}`] });
@@ -1721,7 +1734,9 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     else { const x = ri(10, 89); a = w + x / 100; b = w + (x + pick([-5, 5, 3, -3])) / 100; as = fmtD(a, 2); bs = fmtD(b, 2).replace(/0$/, ''); }
     if (Math.random() < .5) [a, b, as, bs] = [b, a, bs, as];
     const eq = Math.abs(a - b) < 1e-9, ok = eq ? 'İki markette fiyat aynı' : a < b ? 'A market' : 'B market';
-    const wr = [['A market', eq ? 'sifir_fark' : 'uzun_buyuk'], ['B market', eq ? 'sifir_fark' : 'uzun_buyuk'], ['İki markette fiyat aynı', 'sifir_fark']].filter(x => x[0] !== ok);
+    // Yanlış marketi seçmenin nedeni seviyeye göre farklı: 1'de lira kısmı farklı (kuruşa bakmak), 3'te basamak sayısı farklıysa "uzun büyük", eşitse yanlış basamağa bakmak
+    const yanlisNeden = eq ? 'sifir_fark' : lv === 1 ? 'tam_kisim' : as.length !== bs.length ? 'uzun_buyuk' : 'basamak_karsilastir';
+    const wr = [['A market', yanlisNeden], ['B market', yanlisNeden], ['İki markette fiyat aynı', 'sifir_fark']].filter(x => x[0] !== ok);
     return Q({ prompt: `${item}: A markette ${as} TL, B markette ${bs} TL. Hangi markette daha UCUZ?`, options: mc(ok, wr), steps: ['Önce lira (tam) kısmını karşılaştır.', 'Eşitse kuruş kısmına bak; basamak sayısını eşitle (0,5 = 0,50).', eq ? 'Fiyatlar aynı.' : `${fmtD(Math.min(a, b), 2)} TL daha ucuz.`], ref: '2. kitap s. 42' });
   }];
   VAR.f_yuzde = [(lv) => {
@@ -1729,7 +1744,8 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     return Q({ prompt: `Bir mağazada "%${p} İNDİRİM" tabelası var. %${p} hangi kesre eşittir?`, options: mc(fr(p, 100), [[fr(1, p), 'yuzde_ondalik'], [fr(p, 10), 'yuzde_ondalik'], [fr(p, 1000), 'yuzde_ondalik']]), steps: ['% işareti "yüzde", yani "100\'de" demektir.', `%${p} = ${p}/100`], ref: '2. kitap s. 17, 43' });
   }];
   VAR.a_alan = [(lv) => {
-    const a = ri(3, 6), b = ri(2, 5), pr = pick([150, 200, 250, 300, 350, 400]);
+    // Kare olmasın (kenarlar farklı) ve çevre ≠ alan (3×6, 4×4: yanılgılı cevap doğru cevapla çakışır)
+    let a, b; do { a = ri(3, 6); b = ri(2, a - 1); } while (a * b === 2 * (a + b)); const pr = pick([150, 200, 250, 300, 350, 400]);
     return Q({ type: 'input', prompt: `${a} m'ye ${b} m olan dikdörtgen biçimindeki odaya parke döşenecek. Parkenin metrekaresi ${pr} TL'dir. Parke kaç TL tutar?`, answer: String(a * b * pr), unit: 'TL', inputMis: [{ v: 2 * (a + b) * pr, mis: 'cevre_alan' }, { v: a * b, mis: 'problem_adim' }], steps: [`Odanın alanı: ${a} × ${b} = ${a * b} m²`, `Fiyat: ${a * b} × ${pr} = ${fmtN(a * b * pr)} TL`], ref: '1. kitap s. 158' });
   }];
   VAR.a_cevre = [(lv) => {
@@ -1749,7 +1765,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     const it = pick([
       ['Ayran yapma akış şemasındaki "Tuz yeterli mi?" kutusu hangi tür adımdır?', 'Karar adımı (Evet/Hayır)', [['İşlem adımı', 'algoritma_sira'], ['Başlangıç adımı', 'algoritma_sira'], ['Bitiş adımı', 'algoritma_sira']]],
       ['Bir algoritmanın akış şeması hangi adımla başlar?', 'Başla', [['Bitir', 'algoritma_sira'], ['Karar', 'algoritma_sira'], ['Sonucu yaz', 'algoritma_sira']]],
-      ['Akış şemasında "Tuz yeterli mi?" sorusunun cevabı "Hayır" ise ne yapılır?', 'Tuz ekleme adımına geri dönülür', [['Algoritma biter', 'dongu_sayma'], ['Baştan yoğurt eklenir', 'dongu_sayma'], ['Bardağa doldurulur', 'dongu_sayma']]],
+      ['Akış şemasında "Tuz yeterli mi?" sorusunun cevabı "Hayır" ise ne yapılır?', 'Tuz ekleme adımına geri dönülür', [['Algoritma biter', 'karar_dongu'], ['Baştan yoğurt eklenir', 'karar_dongu'], ['Bardağa doldurulur', 'karar_dongu']]],
     ]);
     return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Akış şeması: Başla → işlem adımları → karar kutuları → Bitir.', 'Karar kutusunda "Hayır" cevabı genellikle bir önceki adıma geri döndürür (döngü).'], ref: '2. kitap s. 150–152' });
   }];
@@ -1780,7 +1796,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   const GRID = {};
   GRID.e_oruntu = [(lv) => { const m = ri(2, 5), c = ri(0, 6), f = (x) => m * x + c, xs = [1, 2, 3], q = pick([5, 6, 10]); return GQ('Örüntüyü takip et: Kurala göre eksik sayı hangisi?', [...xs.map(x => [`${x}. adım`, String(f(x))]), [`${q}. adım`, '?']], String(f(q)), [String(f(q) + m), String(m * q), String(f(q - 1))], [`Her adımda ${m} artıyor; kural: adım × ${m}${c ? ' + ' + c : ''}`, `${q} × ${m}${c ? ' + ' + c : ''} = ${f(q)}`], 'oruntu_baslangic'); }];
   GRID.f_denk = [(lv) => { const k = ri(2, 4), bs = [[1, 2], [1, 3], [1, 4]], d = pick([5, 6, 8]); return GQ('Örüntüyü takip et: Eksik kesir hangisi?', [...bs.map(([n, dd]) => [fr(n, dd), fr(n * k, dd * k)]), [fr(1, d), '?']], fr(k, d * k), [fr(1 + k, d + k), fr(k, d)], [`Her satırda pay ve payda ${k} ile çarpılmış.`, `1/${d} → ${k}/${d * k}`], 'denk_toplama'); }];
-  GRID.e_us = [(lv) => { const e = pick([2, 3]), bs = e === 2 ? [2, 3, 4] : [1, 2, 3], q = e === 2 ? pick([5, 6, 7]) : 4; return GQ('Örüntüyü takip et: Eksik değer hangisi?', [...bs.map(b => [`${b}${e === 2 ? '²' : '³'}`, String(b ** e)]), [`${q}${e === 2 ? '²' : '³'}`, '?']], String(q ** e), [String(q * e), String(q ** e + q)], [`${q}${e === 2 ? '²' : '³'} = ${Array(e).fill(q).join(' × ')} = ${q ** e}`], 'us_carpim'); }];
+  GRID.e_us = [(lv) => { const e = pick([2, 3]), bs = e === 2 ? [2, 3, 4] : [1, 2, 3], q = e === 2 ? pick([5, 6, 7]) : 4; return GQ('Örüntüyü takip et: Eksik değer hangisi?', [...bs.map(b => [`${b}${e === 2 ? '²' : '³'}`, String(b ** e)]), [`${q}${e === 2 ? '²' : '³'}`, '?']], String(q ** e), [String(q * e), String(e === 2 ? q + 2 : q * q)], [`${q}${e === 2 ? '²' : '³'} = ${Array(e).fill(q).join(' × ')} = ${q ** e}`], 'us_carpim'); }];
   /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster (type 'kes') ----------
      model: 'pie' | 'bar' | 'line'. Öğrencinin cevabı {parca, boyali} ya da {konum}; denetim KES_CHECK ile kodla yapılır. */
   const KQ = (o) => Q(Object.assign({ type: 'kes' }, o));
@@ -1834,7 +1850,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       [H('cevre_yarim', 2, [l0, `${a} + ${b} = ${a + b}`, `Çevre = ${a + b} cm`], `${a + b} cm`), H('cevre_alan', 1, [l0, `${a} × ${b} = ${a * b}`, `Çevre = ${a * b} cm`], `${a * b} cm`)], ['ters_cevre', 'birim']);
   };
   SEN.a_alan = (lv) => {
-    let a, b; do { a = ri(4, lv === 3 ? 20 : 12); b = ri(2, a - 1); } while (a * b === 2 * (a + b));
+    const [a, b] = dikKenar(4);
     const l0 = 'Alan = uzun kenar × kısa kenar', l1 = `Alan = ${a} × ${b}`;
     return S(`Kenarları ${a} metre ve ${b} metre olan dikdörtgen bir odanın alanı kaç metrekaredir?`, [l0, l1, `Alan = ${a * b} m²`], `${a * b} m²`,
       [H('cevre_alan', 0, ['Alan = kenarların toplamı', `Alan = ${a} + ${b} + ${a} + ${b}`, `Alan = ${2 * (a + b)} m²`], `${2 * (a + b)} m²`), H('birim', 2, [l0, l1, `Alan = ${a * b} m`], `${a * b} m`)], ['cevre_yarim', 'ters_cevre']);
@@ -1842,7 +1858,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   SEN.a_cevre_alan = (lv) => {
     if (Math.random() < 0.5) {
       const k = ri(3, 15), P = 4 * k, l0 = 'Karenin 4 kenarı eşittir';
-      return S(`Çevresi ${P} cm olan karenin bir kenarı kaç cm?`, [l0, `Kenar = ${P} ÷ 4`, `Kenar = ${k} cm`], `${k} cm`, [H('ters_cevre', 1, [l0, `Kenar = ${P} ÷ 2`, `Kenar = ${2 * k} cm`], `${2 * k} cm`)], ['cevre_alan', 'cevre_yarim']);
+      return S(`Çevresi ${P} cm olan karenin bir kenarı kaç cm?`, [l0, `Kenar = ${P} ÷ 4`, `Kenar = ${k} cm`], `${k} cm`, [H('kare_cevre', 1, [l0, `Kenar = ${P} ÷ 2`, `Kenar = ${2 * k} cm`], `${2 * k} cm`)], ['ters_cevre', 'cevre_alan']);
     }
     const b = ri(3, 9), a = b + ri(2, 8), P = 2 * (a + b);
     return S(`Çevresi ${P} cm, uzun kenarı ${a} cm olan dikdörtgenin kısa kenarı kaç cm?`, [`İki kenarın toplamı = ${P} ÷ 2 = ${a + b}`, `Kısa kenar = ${a + b} − ${a}`, `Kısa kenar = ${b} cm`], `${b} cm`,
@@ -1972,9 +1988,9 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       [H('oruntu_baslangic', 1, [l0, `Kural: adım × ${m}`, `${N}. adım: ${N} × ${m} = ${m * N}`], String(m * N))], ['oruntu_bir', 'algoritma_sira']);
   };
   SEN.p_spektrum = (lv) => {
-    const r = ri(2, 6), m = ri(r + 1, 9), l1 = `İstenen: ${r} kırmızı top`;
-    return S(`Torbada ${r} kırmızı, ${m} mavi top var. Torbadan rastgele çekilen topun kırmızı olma olasılığı kaçtır?`, [`Payda: tüm toplar, ${r} + ${m} = ${r + m}`, l1, `Olasılık = ${fr(r, r + m)}`], fr(r, r + m),
-      [H('olasilik_oran', 0, [`Payda: kırmızı olmayan toplar, ${m}`, l1, `Olasılık = ${fr(r, m)}`], fr(r, m))], ['olasilik_buyuk', 'az_cok']);
+    const r = ri(2, 6), m = ri(r + 1, 9), l1 = `Pay (parça): ${r} kırmızı top`;
+    return S(`Torbada ${r} kırmızı, ${m} mavi top var. Torbadan rastgele çekilen topun kırmızı olma olasılığı kaçtır?`, [`Payda (bütün): tüm toplar, ${r} + ${m} = ${r + m}`, l1, `Olasılık = ${fr(r, r + m)}`], fr(r, r + m),
+      [H('olasilik_oran', 0, [`Payda (bütün): kırmızı olmayan toplar, ${m}`, l1, `Olasılık = ${fr(r, m)}`], fr(r, m))], ['olasilik_buyuk', 'az_cok']);
   };
 
   const ADIM = (i, s) => `<span class="adno">${i + 1}</span><span class="adtx">${s}</span>`;
@@ -2064,7 +2080,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       derin: [`2 × ${k} × (${a} + ${b})`, [[`${k} × (${a} + ${b})`, 'cevre_yarim', 'Parantezdeki iki kenar sadece yarım tur. Tam çevre için 2 ile de çarpmalısın.'], [`${k} × ${a} × ${b}`, 'cevre_alan', 'Kenarları çarpmak alanı verir. Tel için çevre gerekir.']]] });
   };
   PROB.parke = () => {
-    let a, b; do { a = ri(3, 8); b = ri(2, a - 1); } while (a * b === 2 * (a + b));
+    const [a, b] = dikKenar(3);
     const f = pick([150, 200, 250, 300, 350, 400]), alan = a * b, tutar = alan * f;
     return P({ skill: 'a_alan', baslik: 'Odaya parke döşeme',
       tablo: { verilen: [`Kenarlar ${a} m ve ${b} m`, `Metrekaresi ${f} TL`], ara: ['Odanın alanı'], istenen: 'Ödenecek toplam para' }, kur: { kartlar: [a, b, f], ornek: `${a} × ${b} × ${f}`, ne: 'ödenecek parayı' },
@@ -2150,13 +2166,14 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       tablo: { verilen: [`${r} kırmızı, ${m} mavi top`, `${y} sarı top eklendi`], ara: ['Yeni toplam top sayısı'], istenen: 'Kırmızı gelme olasılığı' },
       baglam: `Bir torbada ${r} kırmızı ve ${m} mavi top var. ${ad} torbaya ${y} sarı top daha ekledi. Torbadan rastgele bir top çekilirse kırmızı gelme olasılığı kaçtır?`,
       anla: ['Sarılar eklendikten sonra kırmızı gelme olasılığı', [['Torbadaki toplam top sayısı', 'ara_sonuc', 'Toplam top bir ara sonuç. Soru bir olasılık soruyor.'], ['Sarılar eklenmeden önceki olasılık', 'problem_adim', 'Soru, sarılar EKLENDİKTEN sonraki durumu soruyor.'], ['Kırmızı top sayısı', 'istenen_verilen', `Kırmızı top sayısı verilmiş (${r}). Soru kırmızı GELME olasılığını soruyor.`]]],
-      plan: ['Yeni toplam top sayısını bulurum, kırmızı top sayısını bu toplama bölerim.', [['Kırmızı top sayısını mavi top sayısına bölerim.', 'olasilik_oran', 'Olasılıkta payda TÜM toplardır, sadece maviler değil.'], ['Sarıları saymadan kırmızıyı toplama bölerim.', 'problem_adim', 'Sarılar da torbada ve çekilebilirler. Yeni toplamı kullanmalıyız.'], ['Toplam top sayısını kırmızı top sayısına bölerim.', 'pay_payda_ters', 'Pay ile payda yer değiştirmiş. Olasılık = istenen durum sayısı / tüm durumlar.']]],
+      plan: ['Yeni toplam top sayısını bulurum, kırmızı top sayısını bu toplama bölerim.', [['Kırmızı top sayısını mavi top sayısına bölerim.', 'olasilik_oran', 'Olasılıkta payda TÜM toplardır, sadece maviler değil.'], ['Sarıları saymadan kırmızıyı toplama bölerim.', 'problem_adim', 'Sarılar da torbada ve çekilebilirler. Yeni toplamı kullanmalıyız.'], ['Toplam top sayısını kırmızı top sayısına bölerim.', 'pay_payda_ters', 'Pay ile payda yer değiştirmiş. Pay kırmızı topların sayısı (parça), payda bütün topların sayısı (bütün) olmalı.']]],
       coz: [{ prompt: 'Torbada şimdi kaç top var?', answer: top, unit: 'top', ip: 'Torbada hangi renk toplar var? Hepsini topla.',
           inputMis: [{ v: r + m, mis: 'problem_adim', ac: `Sarı topları unuttun. ${y} sarı top da eklendi.` }], steps: [`${r} + ${m} + ${y} = ${top} top`] },
-        { prompt: `Torbada ${top} top var, ${r} tanesi kırmızı. Kırmızı gelme olasılığı kaçtır?`, ip: 'Olasılık = istenen top sayısı / tüm toplar.',
+        { prompt: `Torbada ${top} top var, ${r} tanesi kırmızı. Kırmızı gelme olasılığı kaçtır?`, ip: 'Kırmızı toplar, bütün topların kaçta kaçı? (parça / bütün)',
           options: mc(fr(r, top), [[fr(r, r + m), 'problem_adim', `Sarılar eklenmeden önceki toplamı kullandın. Şimdi torbada ${top} top var.`], [fr(r, m + y), 'olasilik_oran', 'Paydaya kırmızı olmayanları koydun. Payda tüm toplar olmalı.'], [fr(top, r), 'pay_payda_ters', 'Pay ile payda ters. Üstte istenen (kırmızı), altta tüm toplar olmalı.']]),
-          steps: ['Olasılık = kırmızı top sayısı / tüm toplar', `${fr(r, top)}`] }],
-      kontrol: [`Olasılığı ${fr(r, top)} buldun. Bunu nasıl kontrol edersin?`, `Bütün renklerin olasılıkları toplamı 1 olmalı: ${fr(r, top)} + ${fr(m, top)} + ${fr(y, top)} = 1`, [[`Kırmızı ve mavinin olasılıkları toplamı 1 olmalı: ${fr(r, top)} + ${fr(m, top)} = 1`, 'problem_adim', 'Sarıları unuttun. BÜTÜN renklerin olasılıkları toplanınca 1 olmalı.'], ['Olasılık 1\'den büyük de olabilir, kontrol gerekmez.', 'olasilik_buyuk', 'Olasılık en fazla 1 olabilir (kesin olay).']], 'Torbadaki bütün renklerin olasılıkları toplanınca 1 (kesin olay) etmeli.'] });
+          steps: ['Kırmızı toplar, bütün topların kaçta kaçı? (parça / bütün)', `${r} / ${top} = ${fr(r, top)}`] }],
+      // Kontrol: 5. sınıfta kesirlerle toplama yok; paydanın bütün topları saydığı toplama ile doğrulanır
+      kontrol: [`Kırmızı gelme olasılığını ${fr(r, top)} buldun. Bunu nasıl kontrol edersin?`, `Bütün renkleri say: ${r} + ${m} + ${y} = ${top}; payda ${top} olmalı.`, [[`Kırmızı ve mavileri say: ${r} + ${m} = ${r + m}; payda ${r + m} olmalı.`, 'problem_adim', 'Sarıları unuttun. Sarılar da torbada; payda BÜTÜN topları saymalı.'], ['Olasılık 1\'den büyük de olabilir, kontrol gerekmez.', 'olasilik_buyuk', 'Olasılık en fazla 1 olabilir (kesin olay).']], 'Kesrin paydası torbadaki bütün topların sayısı olmalı; bütün renkleri toplayınca paydayı bulmalısın.'] });
   };
   PROB.ucgen = () => {
     const x = ri(20, 70), u = 90 - x;
@@ -2176,7 +2193,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   PROB.pizza = () => {
     const [a1, a2] = shuffle(NAMES).slice(0, 2); let b, k, n1, n2; do { b = pick([2, 3, 4]); k = b === 4 ? ri(2, 3) : ri(2, 4); n1 = ri(1, b - 1); n2 = ri(1, b * k - 1); } while (n2 === n1 * k);
     const D = b * k, N1 = n1 * k, kazanan = N1 > n2 ? a1 : a2;
-    const yanlisMis = (x) => { const [nx, dx] = x === a1 ? [n1, b] : [n2, D], [ny, dy] = x === a1 ? [n2, D] : [n1, b]; return nx > ny ? 'pay_payda_ayri' : dx > dy ? 'payda_buyuk' : 'denk_toplama'; };
+    const yanlisMis = (x) => { const [nx, dx] = x === a1 ? [n1, b] : [n2, D], [ny, dy] = x === a1 ? [n2, D] : [n1, b]; return nx > ny ? 'pay_payda_ayri' : dx > dy ? 'payda_buyuk' : 'esit_payda'; };
     const buyukK = kazanan === a1 ? fr(N1, D) : fr(n2, D), kucukK = kazanan === a1 ? fr(n2, D) : fr(N1, D), acK = `Paydalar eşitken payı büyük olan büyüktür: ${buyukK} > ${kucukK}.`;
     return P({ skill: 'f_karsilastir', baslik: 'Pizza yarışı',
       tablo: { verilen: [`${a1} birinin ${fr(n1, b)} kadarını yedi`, `${a2} diğerinin ${fr(n2, D)} kadarını yedi`, 'Pizzalar aynı büyüklükte'], ara: [`Paydası ${D} olan denk kesir`], istenen: 'Kim daha çok yedi' },
@@ -2381,9 +2398,9 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     }),
     S('g_cokgen', 't1', 'Çokgenler', '57–69', {
       gorsel: { text: 'Çokgende <b>kenar = köşe = iç açı</b> sayısı. Köşegen, yan yana olmayan iki köşeyi birleştirir.', vis: () => V.polygon(6, true) },
-      hikaye: 'Arılar peteklerini <b>düzgün altıgen</b> yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir köşeden köşegen çizmek istersen kendine ve iki komşuna çizemezsin, geriye 6 − 3 = 3 köşe kalır.',
-      adim: ['Kenarları say → çokgenin adı (5 → beşgen).', 'Köşe ve iç açı sayısı kenar sayısına eşittir.', 'Bir köşeden köşegen: köşe sayısı − 3.', 'Düzgün çokgen: kenarlar eşit + açılar eşit.'],
-      kural: 'n kenarlı çokgen: n köşe, n iç açı; bir köşeden (n − 3) köşegen.',
+      hikaye: 'Arılar peteklerini <b>düzgün altıgen</b> yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir kenarı 1 cm olan petek gözünün bütün kenarlarının uzunlukları toplamı 6 × 1 = 6 cm olur.',
+      adim: ['Kenarları say → çokgenin adı (5 → beşgen).', 'Köşe ve iç açı sayısı kenar sayısına eşittir.', 'Köşegen, yan yana olmayan iki köşeyi birleştirir; kenar ise yan yana iki köşeyi.', 'Düzgün çokgen: kenarlar eşit + açılar eşit.'],
+      kural: 'n kenarlı çokgen: n köşe, n iç açı. Düzgün çokgende bütün kenarlar ve bütün açılar eşittir.',
     }),
     S('g_ucgen', 't1', 'Üçgenler', '70–85', {
       gorsel: { text: 'Üçgenin üç iç açısını yan yana koyarsan bir <b>doğru açı</b> (180°) oluşur.', vis: () => V.angle(180, { label: '60°+50°+70°' }) },
@@ -2536,7 +2553,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     }),
     S('e_oncelik', 't6', 'İşlem Önceliği', '133–136', {
       gorsel: { text: 'Sıra: <b>Parantez → Üs → Çarpma/Bölme → Toplama/Çıkarma</b>', vis: () => '<div class="steps4"><span>( )</span><span>x²</span><span>× ÷</span><span>+ −</span></div>' },
-      hikaye: 'Mert 3 paket kalem (her biri 4 tane) ve 2 tane tek kalem aldı. "3 × 4 + 2" yazdı. Soldan sağa yapsa 3 × 6 = 18 bulurdu ama gerçekte 12 + 2 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!',
+      hikaye: 'Mert 2 tane tek kalem ve 3 paket kalem (her pakette 4 tane) aldı. "2 + 3 × 4" yazdı. Soldan sağa yapsa 5 × 4 = 20 bulurdu ama gerçekte 2 + 12 = 14 kalemi vardı. Öncelik gerçek hayatı anlatır!',
       adim: ['Önce parantez içini yap.', 'Sonra üslü ifadeleri (kare, küp) hesapla.', 'Sonra çarpma ve bölmeyi soldan sağa yap.', 'En son toplama ve çıkarmayı soldan sağa yap.'],
       kural: '2 + 3 × 4 = 14 (20 değil!)',
     }),
@@ -2562,7 +2579,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     S('p_spektrum', 't7', 'Olasılık Spektrumu', '170–178', {
       gorsel: { text: 'Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa <b>az olası</b>, fazlaysa <b>çok olası</b>.', vis: () => V.spinner(['sb', 'c0b', 'sb', 'sb']) },
       hikaye: 'Doğum günü çarkında 4 dilimin 3\'ü mavi. Duru "Mavi gelme ihtimali yüksek!" dedi. Haklıydı: 3/4, yarıdan fazla, yani <b>çok olası</b>.',
-      adim: ['İstenen durumları say.', 'Tüm durumları say.', 'Olasılık = istenen / tüm.', '1/2 ile karşılaştır: az mı, eşit mi, çok mu?'],
+      adim: ['Kaç dilim mavi, say (parça).', 'Bütün dilimleri say (bütün).', 'Mavi dilimler bütünün kaçta kaçı? Bu kesir olasılığı gösterir.', '1/2 ile karşılaştır: az mı, eşit mi, çok mu?'],
       kural: 'Olasılık 0 ile 1 arasındadır; asla 1\'den büyük olamaz.',
     }),
   ];
@@ -2639,7 +2656,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-19 ccb1586', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-19 7ae0f3d', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 31074,
+ "toplam_karakter": 33223,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -390,6 +390,21 @@
    "key": "kart_g_cokgen_kural",
    "grup": "kart",
    "text": "n kenarlı çokgen: n köşe, n iç açı; bir köşeden (n eksi 3) köşegen."
+  },
+  {
+   "key": "kart_g_cokgen_hikaye_2",
+   "grup": "kart",
+   "text": "Arılar peteklerini düzgün altıgen yapar: 6 kenar, 6 köşe, 6 iç açı, hepsi eşit! Bir kenarı 1 santimetre olan petek gözünün bütün kenarlarının uzunlukları toplamı 6 çarpı 1 eşittir 6 santimetre olur."
+  },
+  {
+   "key": "kart_g_cokgen_adim_2",
+   "grup": "kart",
+   "text": "Kenarları say, çokgenin adını bul: 5 kenar, beşgen. Köşe ve iç açı sayısı kenar sayısına eşittir. Köşegen, yan yana olmayan iki köşeyi birleştirir; kenar ise yan yana iki köşeyi. Düzgün çokgen: kenarlar eşit ve açılar eşit."
+  },
+  {
+   "key": "kart_g_cokgen_kural_2",
+   "grup": "kart",
+   "text": "n kenarlı çokgen: n köşe, n iç açı. Düzgün çokgende bütün kenarlar ve bütün açılar eşittir."
   },
   {
    "key": "kart_g_ucgen_gorsel",
@@ -882,6 +897,11 @@
    "text": "Mert 3 paket kalem (her biri 4 tane) ve 2 tane tek kalem aldı. 3 çarpı 4 artı 2 yazdı. Soldan sağa yapsa 3 çarpı 6 eşittir 18 bulurdu ama gerçekte 12 artı 2 eşittir 14 kalemi vardı. Öncelik gerçek hayatı anlatır!"
   },
   {
+   "key": "kart_e_oncelik_hikaye_2",
+   "grup": "kart",
+   "text": "Mert 2 tane tek kalem ve 3 paket kalem aldı, her pakette 4 tane var. 2 artı 3 çarpı 4 yazdı. Soldan sağa yapsa 5 çarpı 4 eşittir 20 bulurdu, ama gerçekte 2 artı 12 eşittir 14 kalemi vardı. Öncelik gerçek hayatı anlatır!"
+  },
+  {
    "key": "kart_e_oncelik_adim",
    "grup": "kart",
    "text": "Önce parantez içini yap. Sonra üslü ifadeleri (kare, küp) hesapla. Sonra çarpma ve bölmeyi soldan sağa yap. En son toplama ve çıkarmayı soldan sağa yap."
@@ -965,6 +985,11 @@
    "key": "kart_p_spektrum_adim",
    "grup": "kart",
    "text": "İstenen durumları say. Tüm durumları say. Olasılık eşittir istenen / tüm. 1/2 ile karşılaştır: az mı, eşit mi, çok mu?"
+  },
+  {
+   "key": "kart_p_spektrum_adim_2",
+   "grup": "kart",
+   "text": "Kaç dilim mavi, say: bu parça. Bütün dilimleri say: bu bütün. Mavi dilimler bütünün kaçta kaçı? Bu kesir olasılığı gösterir. Bir bölü ikiyle karşılaştır: az mı, eşit mi, çok mu?"
   },
   {
    "key": "kart_p_spektrum_kural",
@@ -1297,6 +1322,11 @@
    "text": "Olasılık kesrini yanlış kurma. Olasılık eşittir istenen durum sayısı / tüm durumların sayısı. Paydaya tüm dilimleri yaz."
   },
   {
+   "key": "mis_olasilik_oran_2",
+   "grup": "yanilgi",
+   "text": "Olasılık kesrini yanlış kurma. Kesri parça bütün ilişkisiyle kur: pay, istediğin renkteki dilim ya da top sayısı; payda, bütün dilimlerin ya da topların sayısı."
+  },
+  {
    "key": "mis_az_cok",
    "grup": "yanilgi",
    "text": "Az olası ile çok olasıyı karıştırma. 1/2'den küçük olasılıklar az olası, 1/2'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır."
@@ -1400,6 +1430,36 @@
    "key": "mis_baslangic_sira",
    "grup": "yanilgi",
    "text": "Başlangıç anını birinci adım sanma. Başlangıç, hiç zaman geçmemiş andır, yani sıfırıncı gün ya da sıfırıncı hafta; o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam, başlangıç artı n çarpı artıştır."
+  },
+  {
+   "key": "mis_kare_cevre",
+   "grup": "yanilgi",
+   "text": "Karenin çevresini 2'ye bölerek kenarı bulma. Karenin 4 kenarı eşittir. Bir kenar eşittir çevre bölü 4."
+  },
+  {
+   "key": "mis_tam_kisim",
+   "grup": "yanilgi",
+   "text": "Ondalık sayılarda önce virgülden sonrasına bakma. Önce tam kısma, yani virgülün soluna bakılır. 225 virgül 11, 224 virgül 91 sayısından büyüktür, çünkü 225, 224 sayısından büyüktür. Kuruş kısmına sadece tam kısımlar eşitse bakılır."
+  },
+  {
+   "key": "mis_veri_kaynak",
+   "grup": "yanilgi",
+   "text": "Hazır veri ile kendi topladığımız veriyi karıştırma. Hazır veri, başkalarının toplayıp yayımladığı veridir; örneğin Türkiye İstatistik Kurumunun verileri, kayıtlar ya da gazete. Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız."
+  },
+  {
+   "key": "mis_anket_kural",
+   "grup": "yanilgi",
+   "text": "Anket hazırlama kurallarını karıştırma. Anket soruları kısa, açık ve yönlendirmesiz olur. Katılanların adı ve kişisel bilgileri gizli tutulur."
+  },
+  {
+   "key": "mis_karar_dongu",
+   "grup": "yanilgi",
+   "text": "Karar adımında hayır cevabının nereye gittiğini karıştırma. Karar kutusunda cevap hayır ise ok hangi adımı gösteriyorsa oraya dönülür. Koşul sağlanana kadar o adım tekrarlanır; buna döngü denir."
+  },
+  {
+   "key": "mis_esit_payda",
+   "grup": "yanilgi",
+   "text": "Paydaları eşit kesirleri karşılaştıramama. Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: on ikide sekiz, on ikide üçten büyüktür."
   }
  ]
 }

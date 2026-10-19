@@ -182,10 +182,13 @@
     let i = 0; sv.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse').forEach(el => { if (!el.classList.contains('dash')) el.setAttribute('pathLength', '1'); el.style.setProperty('--g', (0.15 + 0.12 * i++).toFixed(2) + 's'); });
     sv.querySelectorAll('text').forEach((el, k) => el.style.setProperty('--g', (0.5 + 0.1 * k).toFixed(2) + 's')); sv.classList.add('ciz');
   });
+  // Metni değişen anlatım kartının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
+  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, e_oncelik_hikaye: 2 };
+  const kartSes = (id, f) => `kart_${id}_${f}${KART_SES_SURUM[id + '_' + f] ? '_' + KART_SES_SURUM[id + '_' + f] : ''}`;
   const sayCard = (id, f) => {
     const kart = document.querySelector('.modal .lcard') || document.querySelector('.lcard');
     const parts = kart ? [...kart.querySelectorAll('.dp')] : [];
-    if (!parts.length) return say(`kart_${id}_${f}`, cardText(id, f));
+    if (!parts.length) return say(kartSes(id, f), cardText(id, f));
     cizimHazirla(kart);
     const agirlik = parts.map(p => Math.max(6, toSpeech(p.innerHTML).length)), top = agirlik.reduce((a, b) => a + b, 0);
     const bas = agirlik.map((_, i) => agirlik.slice(0, i).reduce((a, b) => a + b, 0) / top);
@@ -195,7 +198,7 @@
     const bitir = () => { if (tok === AUDIO.tok) { isaret(parts.length); kart.classList.remove('oynuyor'); } };
     // Sessiz yol: okuma hızı (~14 harf/sn), ağız ritimle oynar
     const zamanla = () => { if (tok !== AUDIO.tok) return; let i = 0; const ilerle = () => { if (tok !== AUDIO.tok) return; if (i >= parts.length) return bitir(); isaret(i); const sure = Math.max(1400, agirlik[i] / 14 * 1000); i++; setTimeout(ilerle, sure); }; ilerle(); };
-    const key = `kart_${id}_${f}`;
+    const key = kartSes(id, f);
     const sesli = () => sesAl(key).then(u => {
       if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a);
       a.addEventListener('timeupdate', () => { if (tok !== AUDIO.tok || !a.duration) return; const t = a.currentTime / a.duration; let i = 0; while (i + 1 < bas.length && bas[i + 1] <= t) i++; isaret(i); });
@@ -263,7 +266,7 @@
     t3: { ad: 'Metre Usta', tur: 'ölçü ustası kunduz', h: 'zipla', soz: ['Ben Metre Usta! Her şeyi ölçerim 📏', 'Çevre için kenarların hepsini topla.', 'Alan, içini kaplayan birim karelerin sayısıdır.'] },
     t4: { ad: 'Aşçı Dilim', tur: 'pizzacı kedi', h: 'sal', soz: ['Ben Aşçı Dilim! Pizzayı hep eşit dilimlerim 🍕', 'Payda: bütün kaç eşit parçaya bölündü?', 'Pay: o parçalardan kaç tane aldın?'] },
     t5: { ad: 'Grafi', tur: 'muhabir tavşan', h: 'zipla', soz: ['Ben Grafi! Herkese soru sorarım 📋', 'Önce veriyi topla, sonra tabloya yaz.', 'Sütun grafiğinde en uzun sütun en çok seçileni gösterir.'] },
-    t6: { ad: 'Denge', tur: 'terazici fil', h: 'egil', soz: ['Ben Denge! Teraziyi hiç düşürmem ⚖️', 'Eşittir işareti iki tarafın denk olduğunu söyler.', 'Önce parantez, sonra çarpma ve bölme, en son toplama ve çıkarma!'] },
+    t6: { ad: 'Denge', tur: 'terazici fil', h: 'egil', soz: ['Ben Denge! Teraziyi hiç düşürmem ⚖️', 'Eşittir işareti iki tarafın denk olduğunu söyler.', 'Önce parantez, sonra kare ve küp, sonra çarpma ve bölme, en son toplama ve çıkarma!'] },
     t7: { ad: 'Şans', tur: 'zarcı ejder', h: 'uc', soz: ['Ben Şans! Zarımla ve paramla oynarım 🎲', 'Kesin olan bir olayın olasılığı 1’dir.', 'İmkânsız bir olayın olasılığı 0’dır.'] },
   };
   const komsuHtml = (thId) => { const k = KOMSU[thId]; if (!k) return '';
@@ -386,7 +389,7 @@
         ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
-        <button class="btn ghost small" data-act="reset" style="color:var(--bad)">Tüm verileri sıfırla</button></div></div>${nav()}`;
+      </div></div>${nav()}`;
   }
 
   function cloudCard() {
@@ -453,7 +456,8 @@
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
       ${cloudCard()}
       ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
-      <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div>`}</div>${nav()}`;
+      <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div>`}
+      <div class="card" style="margin-top:14px"><b>Tehlikeli bölge</b><p class="muted sm" style="margin:6px 0 10px">Çocuğun bütün ilerlemesi, rozetleri, veli bilgileri ve veli şifresi bu cihazdan silinir. Geri alınamaz.</p><button class="btn ghost small" data-act="reset" style="color:var(--bad)">Tüm verileri sıfırla</button></div></div>${nav()}`;
   }
 
   /* ---------------- Beceri sayfası (modal) ---------------- */
@@ -611,7 +615,7 @@
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2 };
+  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2 };
   const misSes = (id) => `mis_${id}${MIS_SES_SURUM[id] ? '_' + MIS_SES_SURUM[id] : ''}`;
   function ikinciIpucu(q, res) {
     if (res.ip) return res.ip;
