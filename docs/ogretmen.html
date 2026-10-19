@@ -761,6 +761,26 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .parca-et{border:2px solid var(--r);border-radius:10px;padding:3px 8px;font-size:14px}
 .parca-et b{color:var(--r)}
 @media (prefers-reduced-motion: reduce){.pyay{animation:none;stroke-dashoffset:0}}
+
+/* ===== Tek harita «Matematik Diyarı» (20.10.2026): 7 bölge tek yolda, her bölgenin kendi manzarası ===== */
+.diyar-bas{display:flex;flex-direction:column;gap:6px;margin:0 0 2px}
+.diyar-bas .bar{height:10px}
+.bolge-atla .chip{white-space:nowrap}
+.path.harita.tek{padding:6px 16px 60px;gap:0}
+.path.harita.tek::after{background:linear-gradient(#BFE9FF,#E9FBF1);filter:none}
+.path.harita.tek::before{display:none}
+.path.harita.tek>.bolge{position:relative;z-index:auto;margin:0 -16px;padding:22px 16px 64px;display:flex;flex-direction:column;align-items:center;gap:40px;scroll-margin-top:78px}
+.bolge::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--fon) center/cover no-repeat;filter:saturate(1.45) brightness(1.04) contrast(1.05);-webkit-mask-image:linear-gradient(transparent 0,#000 70px,#000 calc(100% - 70px),transparent);mask-image:linear-gradient(transparent 0,#000 70px,#000 calc(100% - 70px),transparent)}
+:root[data-theme="dark"] .bolge::before{filter:saturate(1.45) brightness(.96) contrast(1.05)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .bolge::before{filter:saturate(1.45) brightness(.96) contrast(1.05)} }
+.bolge>*{position:relative;z-index:1}
+.bolge-kapi{width:100%;box-sizing:border-box;display:flex;gap:12px;align-items:center;border-radius:20px;padding:12px 14px;color:#fff;border:3px solid rgba(255,255,255,.85);box-shadow:0 5px 0 rgba(0,0,0,.18),0 12px 20px rgba(20,20,60,.2)}
+.bk-ic{font-size:34px;width:56px;height:56px;display:grid;place-items:center;background:rgba(255,255,255,.24);border-radius:16px;flex:none}
+.bolge-kapi h2{font-size:21px;margin:1px 0;line-height:1.15}
+.bk-ust{font-size:12px;font-weight:900;letter-spacing:.06em;opacity:.95}
+.bk-alt{font-size:13px;font-weight:700;opacity:.95} .bk-alt span{white-space:nowrap}
+.bk-kupa{font-size:30px;flex:none}
+.bg-yellow.bolge-kapi{color:#4A3500}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -2965,7 +2985,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-19 bfcaa1e', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-19 fdaf99a', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

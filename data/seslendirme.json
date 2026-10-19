@@ -192,14 +192,14 @@
    "text": "Yine geldin, süpersin! Bugün ne öğreniyoruz?"
   },
   {
-   "key": "pi_sinav_1",
+   "key": "pi_bolge_sinav_1",
    "grup": "pi",
-   "text": "Tema sınavı başlıyor. Sakin ol, sen buna hazırsın!"
+   "text": "Bölge sınavı başlıyor. Sakin ol, sen buna hazırsın!"
   },
   {
-   "key": "pi_kupa_1",
+   "key": "pi_bolge_kupa_1",
    "grup": "pi",
-   "text": "Kupa senin! Bu temanın ustası oldun!"
+   "text": "Kupa senin! Bu bölgenin ustası oldun!"
   },
   {
    "key": "pi_gorev_1",

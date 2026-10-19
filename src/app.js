@@ -292,13 +292,13 @@
   }
   const cikSayisi = () => Object.keys(album().sahip).length;
   const cikartmaHtml = (c, buyuk) => `<span class="cik ${c.parlak ? 'parlak' : ''} ${buyuk ? 'buyuk' : ''}">${c.e}</span>`;
-  const cikartmaSonuc = (c) => !c ? '' : `<div class="cik-sonuc">${cikartmaHtml(c, true)}<div><b>${c.parlak ? '✨ Parlak ' : ''}${c.ad} çıkartması!</b><div class="muted sm">${c.yeni ? 'Albümüne eklendi 📒' : `Bu sende vardı → +${CIK_TEKRAR} 💎`}${c.sayfa ? `<br><b>🎉 ${THEMES.find(t => t.id === c.tid).no}. tema sayfası tamam! +${CIK_SAYFA} 💎</b>` : ''}</div></div></div>`;
+  const cikartmaSonuc = (c) => !c ? '' : `<div class="cik-sonuc">${cikartmaHtml(c, true)}<div><b>${c.parlak ? '✨ Parlak ' : ''}${c.ad} çıkartması!</b><div class="muted sm">${c.yeni ? 'Albümüne eklendi 📒' : `Bu sende vardı → +${CIK_TEKRAR} 💎`}${c.sayfa ? `<br><b>🎉 ${bolgeAd(c.tid)} sayfası tamam! +${CIK_SAYFA} 💎</b>` : ''}</div></div></div>`;
   function albumModal() {
     const a = album(), tid = A.albumTema || THEMES[0].id, th = THEMES.find(t => t.id === tid), L = CIKARTMA[tid];
     const n = L.filter((_, i) => a.sahip[`${tid}_${i}`]).length;
     return `<div class="modal album"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">📒 Çıkartma albümüm</h2><span class="tag">${cikSayisi()}/${CIK_TOPLAM}</span></div>
       <div class="themes" style="margin:10px 0">${THEMES.map(t => { const k = CIKARTMA[t.id].filter((_, i) => a.sahip[`${t.id}_${i}`]).length; return `<button class="chip ${t.id === tid ? 'on' : ''}" data-act="album-tema" data-v="${t.id}">${t.icon} ${a.tamam[t.id] ? '✅' : k + '/6'}</button>`; }).join('')}</div>
-      <div class="album-sayfa bg-${th.color}"><div class="album-baslik">${th.no}. Tema · ${esc(th.title)}</div><div class="album-izgara">${L.map((x, i) => { const sayi = a.sahip[`${tid}_${i}`], par = i === L.length - 1;
+      <div class="album-sayfa bg-${th.color}"><div class="album-baslik">${bolgeAd(th.id)} · ${esc(th.title)}</div><div class="album-izgara">${L.map((x, i) => { const sayi = a.sahip[`${tid}_${i}`], par = i === L.length - 1;
         return sayi ? `<div class="album-yer">${cikartmaHtml({ e: x[0], parlak: par })}<b>${x[1]}</b>${sayi > 1 ? `<small>×${sayi}</small>` : ''}</div>` : `<div class="album-yer bos ${par ? 'parlak-bos' : ''}"><span class="cik-bos">${par ? '✨' : '?'}</span><b>${par ? 'Parlak' : '???'}</b></div>`; }).join('')}</div>
         <div class="album-alt">${a.tamam[tid] ? '🎉 Bu sayfa tamam!' : `${n}/6 · Sayfayı tamamlarsan +${CIK_SAYFA} 💎`}</div></div>
       <p class="muted sm" style="margin:12px 0 4px">Çıkartmalar haritadaki sandıklardan ve ders sonu sandıklarından çıkar. Aynısı çıkarsa ${CIK_TEKRAR} elmasa dönüşür. ✨ Parlak çıkartmalar nadirdir.</p>
@@ -321,7 +321,7 @@
   const hazineKart = () => { const h = hazine(), th = THEMES.find(t => t.id === h.tema), hazir = h.anahtar >= HAZINE_ANAHTAR && !h.acildi;
     const ana = Array.from({ length: HAZINE_ANAHTAR }, (_, i) => `<span class="anahtar ${i < h.anahtar ? 'var' : ''}">🗝️</span>`).join('');
     return `<button class="card hazine-kart ${hazir ? 'hazir' : ''}" data-act="hazine-git"><div class="hazine-ust">🗺️ HAFTANIN HAZİNE AVI</div><div class="row" style="gap:12px"><img src="img/sandik_${h.acildi ? 'acik' : 'kapali'}.webp" alt="" class="hazine-mini"><div class="grow" style="text-align:left">
-      ${h.acildi ? `<b>Bu haftanın hazinesini buldun! 🎉</b><div class="muted sm">Pazartesi yeni bir sandık gizlenecek.</div>` : hazir ? `<b>Anahtarlar tamam!</b><div class="muted sm">Hazine sandığı ${th.no}. temanın haritasında seni bekliyor.</div>` : `<b>Hazine sandığı ${th.no}. temada gizli</b><div class="muted sm">${HAZINE_ANAHTAR} ders bitir, her ders bir anahtar.</div>`}
+      ${h.acildi ? `<b>Bu haftanın hazinesini buldun! 🎉</b><div class="muted sm">Pazartesi yeni bir sandık gizlenecek.</div>` : hazir ? `<b>Anahtarlar tamam!</b><div class="muted sm">Hazine sandığı ${bolgeAd(th.id)} bölgesinde seni bekliyor.</div>` : `<b>Hazine sandığı ${bolgeAd(th.id)} bölgesinde gizli</b><div class="muted sm">${HAZINE_ANAHTAR} ders bitir, her ders bir anahtar.</div>`}
       <div class="anahtarlar">${ana}</div></div>${h.acildi ? '' : '<div class="bugun-git">Git ›</div>'}</div></button>`; };
   // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
   if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
@@ -378,27 +378,43 @@
     yol.insertAdjacentHTML('afterbegin', `<svg class="iz iz-${dolap().iz}" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><defs><linearGradient id="gkIz" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${yol.scrollHeight}"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".25" stop-color="#FFB020"/><stop offset=".5" stop-color="#3DDC84"/><stop offset=".75" stop-color="#2EC5FF"/><stop offset="1" stop-color="#8B5CFF"/></linearGradient></defs><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
   }
   addEventListener('resize', () => requestAnimationFrame(izCiz));
-  function viewHome() {
-    const th = THEMES.find(t => t.id === A.theme), sks = SKILLS.filter(s => s.theme === th.id);
-    const done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
+  // Tek harita: «Matematik Diyarı». Kitabın 7 teması burada 7 bölge olarak arka arkaya dizilir (aynı yol, aynı iz).
+  // Bölge adları temanın manzarasından gelir; kitapla köprü için her bölgede «Kitabında: … Tema» etiketi durur.
+  const DIYAR = 'Matematik Diyarı';
+  const BOLGE = { t1: 'Şekil Kasabası', t2: 'Sayı Adaları', t3: 'Ölçü Bahçesi', t4: 'Kesir Köyü', t5: 'Grafik Şehri', t6: 'Denge Vadisi', t7: 'Şans Lunaparkı' };
+  const bolgeAd = (tid) => BOLGE[tid] || '';
+  function bolgeHtml(th, curRef) {
+    const sks = SKILLS.filter(s => s.theme === th.id), done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
     const offs = [0, 62, 88, 62, 0, -62, -88, -62];
-    let curFound = false;
     const nodes = sks.map((s, i) => {
       const sk = A.st.skills[s.id], cr = E.crowns(E.eff(sk)), un = unlocked(s);
-      const isCur = un && !curFound && cr < 3; if (isCur) curFound = true;
-      const col = th.color;
-      const style = `--c:var(--${col});--cd:var(--${col}-d)`;
+      const isCur = un && !curRef.found && cr < 3; if (isCur) curRef.found = th.id;
+      const style = `--c:var(--${th.color});--cd:var(--${th.color}-d)`;
       const sandik = ((i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '') + (i === Math.min(3, sks.length - 2) ? hazineDuragi(th) : '');
       return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>${sandik}`;
     }).join('');
+    const kupa = A.st.trophies[th.id], acik = kupa || done === sks.length;
+    return `<section class="bolge" id="bolge-${th.id}" style="--fon:url(img/fon_${th.id}.webp)">
+      <div class="bolge-kapi bg-${th.color}"><div class="bk-ic">${th.icon}</div><div class="grow"><div class="bk-ust">${th.no}. BÖLGE · ${done}/${sks.length} konu</div><h2>${bolgeAd(th.id)}</h2><div class="bk-alt">${esc(th.title)} · <span>📗 Kitabında: ${th.book}. Kitap, ${th.no}. Tema</span></div></div>${kupa ? '<div class="bk-kupa" aria-label="Kupa kazanıldı">🏆</div>' : ''}</div>
+      ${nodes}<div class="node-wrap"><button class="node ${acik ? '' : 'locked'}" style="${kupa ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : acik ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="${bolgeAd(th.id)} sınavı">${kupa ? '🏆' : '🎓'}</button><div class="node-label">${kupa ? 'Kupa kazanıldı!' : 'Bölge Sınavı'}</div></div>
+    </section>`;
+  }
+  function viewHome() {
+    const curRef = { found: null }, bolgeler = THEMES.map(th => bolgeHtml(th, curRef)).join('');
+    const done = SKILLS.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
-    const due = E.dueSkills(A.st).length;
+    const due = E.dueSkills(A.st).length, simdiki = curRef.found || A.theme;
     return `${topbar()}<div class="scroll">
       <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
-      <div class="themes">${THEMES.map(t => `<button class="chip ${t.id === A.theme ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${t.no}. Tema</button>`).join('')}</div>
-      <div class="banner bg-${th.color}"><div class="sub">${th.no}. TEMA · ${done}/${sks.length} beceri</div><h2>${th.title}</h2><div class="sub" style="margin-top:4px">${th.goal}</div><span class="bk">📗 ${th.book}. Kitap · ${th.no}. Tema</span><div class="big">${th.icon}</div></div>
-      <div class="path harita" style="--fon:url(img/fon_${th.id}.webp)">${nodes}<div class="node-wrap"><button class="node ${done === sks.length || A.st.trophies[th.id] ? '' : 'locked'}" style="${A.st.trophies[th.id] ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : done === sks.length ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="Tema sınavı">${A.st.trophies[th.id] ? '🏆' : '🎓'}</button><div class="node-label">${A.st.trophies[th.id] ? 'Kupa kazanıldı!' : 'Tema Sınavı'}</div></div></div>
+      <div class="diyar-bas"><div><b>🗺️ ${DIYAR}</b><span class="muted sm"> · ${done}/${SKILLS.length} konu · ${Object.keys(A.st.trophies).length}/7 kupa</span></div><div class="bar"><i style="width:${Math.round(100 * done / SKILLS.length)}%"></i></div></div>
+      <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
+      <div class="path harita tek">${bolgeler}</div>
     </div>${nav()}`;
+  }
+  // Harita açılınca çocuğun bulunduğu yere (sıradaki düğüm) kaydır; bölge düğmesi o bölgeye götürür
+  function haritaKaydir(hedef, yumusak) {
+    const el = hedef ? document.getElementById('bolge-' + hedef) : (document.querySelector('.path.harita .node.cur') || null);
+    if (!el) return; el.scrollIntoView({ behavior: yumusak && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto', block: hedef ? 'start' : 'center' });
   }
 
   // "Bugün bunu yap": tek, net öneri (Duolingo'nun "sonraki adım" fikri). Öncelik: unutulmaya yüz tutmuş konu →
@@ -432,13 +448,13 @@
       ${item('p-hata', '🔍', '#FFF4D6', 'Hata Avcısı', 'Arkadaşlarının çözümündeki hatayı bul, kim haklı sen karar ver.', false)}
       ${item('p-speed', '⚡', '#FFF0DB', 'Hızlı Yarış · 60 sn', `En iyi skorun: ${A.st.speedBest} doğru. Rekorunu kır!`, false)}
       ${item('p-mix', '🎲', '#E8E5FF', 'Karışık Pratik', 'Çalıştığın tüm konulardan karışık sorular.', !any)}
-      ${item('p-place', '🧭', '#E3F1FF', 'Seviye Belirleme', '7 soruda her temadaki seviyeni yeniden ölç.', false)}
+      ${item('p-place', '🧭', '#E3F1FF', 'Seviye Belirleme', '7 soruda her bölgedeki seviyeni yeniden ölç.', false)}
     </div></div>${nav()}`;
   }
 
   function viewBooks() {
     const b = A.book || 1, K = KITAP[b];
-    const tag = { hazir: ['🧭', 'Hazır mıyız?', 'Ön bilgini 5 soruda kontrol et'], izleme: ['📝', 'İzleme testi', 'Tema sınavıyla kendini dene'], olcme: ['🎓', 'Ölçme', 'Tema sınavı (10 soru)'], performans: ['🛠️', 'Performans görevi', 'Gerçek hayat görevi'], bilgi: ['📖', '', 'Konuya giriş'] };
+    const tag = { hazir: ['🧭', 'Hazır mıyız?', 'Ön bilgini 5 soruda kontrol et'], izleme: ['📝', 'İzleme testi', 'Bölge sınavıyla kendini dene'], olcme: ['🎓', 'Ölçme', 'Bölge sınavı (10 soru)'], performans: ['🛠️', 'Performans görevi', 'Gerçek hayat görevi'], bilgi: ['📖', '', 'Konuya giriş'] };
     const themeBlock = (T) => { const th = THEMES.find(t => t.id === T.tema), sks = SKILLS.filter(s => s.theme === th.id), avg = sks.reduce((a, s) => a + E.eff(A.st.skills[s.id]), 0) / sks.length;
       return `<div class="bk-theme"><div class="banner bg-${th.color}" style="padding:14px"><div class="sub">${th.no}. TEMA</div><h2 style="font-size:19px">${th.title}</h2><div class="bar" style="margin-top:8px;background:rgba(255,255,255,.3)"><i style="width:${Math.round(avg * 100)}%;background:#fff"></i></div><div class="sub" style="margin-top:4px">Ustalık %${Math.round(avg * 100)}${A.st.trophies[th.id] ? ' · 🏆 kupa' : ''}</div><div class="big">${th.icon}</div></div>
         <div class="toc">${T.ic.map(it => { const t = tag[it.tur]; const act = it.tur === 'konu' ? `data-act="node" data-v="${it.sk[0]}"` : it.tur === 'hazir' ? `data-act="hazir" data-v="${th.id}"` : (it.tur === 'izleme' || it.tur === 'olcme') ? `data-act="exam" data-v="${th.id}"` : it.tur === 'performans' ? `data-act="task" data-v="${th.id}"` : '';
@@ -481,7 +497,7 @@
       <li>XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır.</li></ul></details>`;
     const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'aştın ✓' : m.kesin ? 'çalışıyoruz' : 'göz kulak'}</span></div>`).join('') || '<div class="muted sm">Henüz bir tuzak görmedik. 🙌</div>';
     return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${dolapPi(70, 'happy')}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
-      <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Tema kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
+      <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Bölge kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
       <button class="card album-kart" data-act="album"><span class="album-ikon">📒</span><div class="grow" style="text-align:left"><b>Çıkartma albümüm</b><div class="qbar"><i style="--hedef:${Math.round(100 * cikSayisi() / CIK_TOPLAM)}%"></i><span>${cikSayisi()} / ${CIK_TOPLAM}</span></div></div><span>›</span></button>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
         <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">İlk denemede doğru</span><b>${fp.ilkAcc === null ? '–' : '%' + Math.round(fp.ilkAcc * 100)}</b><small class="muted">${fp.ilkAcc === null ? 'en az 5 cevap' : fp.ilkSay.ok + '/' + fp.ilkSay.n + ' cevap'}</small></div>
@@ -571,7 +587,7 @@
   /* ---------------- Beceri sayfası (modal) ---------------- */
   function skillModal(id) {
     const s = SKILL[id], sk = A.st.skills[id], th = THEMES.find(t => t.id === s.theme), m = E.eff(sk), cr = E.crowns(m), un = unlocked(s);
-    return `<div class="scrim" data-act="close-modal"></div><div class="modal"><div class="row"><div class="grow"><span class="tag">${th.no}. Tema · ${esc(th.title)}</span><h2 style="margin-top:6px">${esc(s.title)}</h2></div><div style="font-size:40px">${th.icon}</div></div>
+    return `<div class="scrim" data-act="close-modal"></div><div class="modal"><div class="row"><div class="grow"><span class="tag">${bolgeAd(th.id)} · ${esc(th.title)}</span><h2 style="margin-top:6px">${esc(s.title)}</h2></div><div style="font-size:40px">${th.icon}</div></div>
       <div class="row" style="margin:12px 0"><div class="grow"><div class="bar"><i style="width:${Math.round(m * 100)}%;background:var(--${th.color})"></i></div></div><b>${'⭐'.repeat(cr) || '☆'}</b></div>
       <p class="muted sm" style="margin:0 0 14px">Ustalık: %${Math.round(m * 100)} · ${sk.n} soru · 📗 ${th.book}. Kitap, ${th.no}. Tema</p>
       ${un ? `<div class="list"><button class="btn" data-act="start" data-v="${id}">${sk.n ? 'Derse devam' : 'Derse başla'} · +XP</button><button class="btn ghost" data-act="learn" data-v="${id}">📖 Önce konu anlatımı</button></div>` : `<div class="speech">🔒 Bu beceri, bir önceki beceriyi bitirince açılır. Okulda bu konuya geçtiysen "Atla" ile hemen başlayabilirsin.</div><div class="list" style="margin-top:12px"><button class="btn accent" data-act="start" data-v="${id}">Atla ve başla</button></div>`}
@@ -618,7 +634,7 @@
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'tablo' ? A.tb.every(Boolean) : q.type === 'kur' ? E.ATOLYE.kurGecerli(q, A.kur) : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
-    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Tema sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
+    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Bölge sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
       ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
@@ -775,7 +791,7 @@
       <div class="tiles"><div class="tile gold"><div class="h">XP</div><div class="v">⚡ ${ses.xp}</div></div><div class="tile okt"><div class="h">Doğruluk</div><div class="v">🎯 %${acc}</div></div><div class="tile bl"><div class="h">Süre</div><div class="v">⏱ ${mins} dk</div></div></div>
       ${resc}${r.newBadges.map(b => `<div class="card row" style="width:100%"><div style="font-size:40px">${b.icon}</div><div style="text-align:left"><b>Yeni rozet: ${b.name}</b><div class="muted sm">${b.desc}</div></div></div>`).join('')}
       ${ses.mode === 'speed' && ses.correct >= A.st.speedBest ? '<div class="tag warm">🏅 Yeni rekor!</div>' : ''}
-      ${r.trophy ? (r.trophy.pass ? `<div class="card row" style="width:100%;border-color:var(--gold)"><div style="font-size:44px">🏆</div><div style="text-align:left"><b>Tema sınavını geçtin! (%${acc})</b><div class="muted sm">Kupa senin. +50 💎</div></div></div>` : `<div class="speech">Sınav için %70 gerekiyor. Zorlandığın becerileri çalışıp tekrar dene, kupa seni bekliyor! 💪</div>`) : ''}
+      ${r.trophy ? (r.trophy.pass ? `<div class="card row" style="width:100%;border-color:var(--gold)"><div style="font-size:44px">🏆</div><div style="text-align:left"><b>Bölge sınavını geçtin! (%${acc})</b><div class="muted sm">Kupa senin. +50 💎</div></div></div>` : `<div class="speech">Sınav için %70 gerekiyor. Zorlandığın becerileri çalışıp tekrar dene, kupa seni bekliyor! 💪</div>`) : ''}
       <div style="flex:1"></div><button class="btn" data-act="end-ok" style="max-width:420px">${(A.endSteps || []).length > 1 ? 'Devam' : 'Devam'}</button></div>`;
   }
   // Dersin teması: oturumun teması, yoksa en çok soru gelen beceri teması
@@ -824,8 +840,15 @@
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
+    // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
+    const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
     $app.innerHTML = h;
-    if (A.st.profile && A.tab === 'yol' && A.view !== 'lesson' && A.view !== 'end') { requestAnimationFrame(izCiz); setTimeout(izCiz, 400); }
+    A._ekran = !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
+    if (A._ekran === 'yol') {
+      const sc = $app.querySelector('.scroll');
+      if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
+      requestAnimationFrame(izCiz); setTimeout(izCiz, 400);
+    }
   }
 
   /* =================== AKIŞ =================== */
@@ -840,7 +863,7 @@
     if (A.ses.format && mode !== 'lesson' && mode !== 'learn') A.ses.format = null;
     A.ses.showCard = !!A.ses.format;
     if (mode === 'speed') { A.ses.left = 60; clearInterval(A.timer); A.timer = setInterval(() => { A.ses.left -= 1; if (A.ses.left <= 0) { clearInterval(A.timer); finishSession(); } else if (A.view === 'lesson' && !A.fb) { const t = document.querySelector('.timer'); if (t) t.textContent = Math.ceil(A.ses.left) + ' sn'; const p = document.querySelector('.prog>i'); if (p) p.style.width = (100 * (1 - A.ses.left / 60)) + '%'; } }, 1000); }
-    A.view = 'lesson'; sfx.swoosh(); sahneHazirla(); if (mode === 'exam') setTimeout(() => piSay('sinav'), 200); else if (!A.ses.showCard && !['speed', 'placement'].includes(mode)) setTimeout(() => piSay('ders_basla'), 200);
+    A.view = 'lesson'; sfx.swoosh(); sahneHazirla(); if (mode === 'exam') setTimeout(() => piSay('bolge_sinav'), 200); else if (!A.ses.showCard && !['speed', 'placement'].includes(mode)) setTimeout(() => piSay('ders_basla'), 200);
     if (!A.ses.showCard) nextQuestion(); else { render(); if (A.st.settings.voice) setTimeout(() => sayCard(skillId, A.ses.format), 300); }
   }
   // Ders ortası mola ekranı (kısa, motive edici)
@@ -936,7 +959,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -948,7 +971,7 @@
     switch (act) {
       case 'ust': if (UST[v]) { sfx.tap(); toast(UST[v]()); } break;
       case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
-      case 'theme': A.theme = v; sfx.tap(); render(); setTimeout(() => { const k = document.querySelector('.komsu'); if (k && komsuSay[v] === undefined) k.click(); }, 500); break;
+      case 'theme': A.theme = v; sfx.tap(); document.querySelectorAll('.bolge-atla .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v)); haritaKaydir(v, true); setTimeout(() => { const k = document.querySelector(`#bolge-${v} .komsu`); if (k && komsuSay[v] === undefined) k.click(); }, 700); break;
       case 'node': A.modal = skillModal(v); render(); break;
       case 'yol-sandik': { const [tid, i] = v.split('|'), th = THEMES.find(t => t.id === tid), sk = SKILLS.filter(x => x.theme === tid)[+i], k = `${tid}_${i}`;
         A.st.sandiklar = A.st.sandiklar || {};
@@ -961,7 +984,7 @@
         const b = el.querySelector('.kbal'); if (b) { b.textContent = k.soz[n]; b.classList.remove('acik'); void b.offsetWidth; b.classList.add('acik'); }
         el.classList.remove('tik'); void el.offsetWidth; el.classList.add('tik'); tone(520 + 80 * n, .12, 'triangle'); tone(780 + 80 * n, .12, 'triangle', .09);
         clearTimeout(el._t); el._t = setTimeout(() => { el.classList.remove('tik'); b && b.classList.remove('acik'); }, 4200); break; }
-      case 'trophy': { const sk = SKILLS.filter(x => x.theme === v); if (A.st.trophies[v] || sk.every(x => E.crowns(E.eff(A.st.skills[x.id])) >= 1)) startSession('exam', null, v); else toast('🎓 Temadaki tüm becerilerde en az 1 yıldız topla, sınav açılsın!'); break; }
+      case 'trophy': { const sk = SKILLS.filter(x => x.theme === v); if (A.st.trophies[v] || sk.every(x => E.crowns(E.eff(A.st.skills[x.id])) >= 1)) startSession('exam', null, v); else toast('🎓 Bu bölgedeki tüm konularda en az 1 yıldız topla, sınav açılsın!'); break; }
       case 'exam': startSession('exam', null, v); break;
       case 'hazir': startSession('hazir', null, v); break;
       case 'task': A.modal = taskModal(v); render(); break;

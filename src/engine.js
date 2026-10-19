@@ -247,10 +247,10 @@
     { id: 'seri7', icon: '🌋', name: 'Bir Hafta Ateş', desc: '7 gün üst üste çalıştın.', test: (st) => st.streak >= 7 },
     { id: 'kusursuz', icon: '💎', name: 'Kusursuz', desc: 'Bir dersi hiç hata yapmadan bitirdin.', test: (st, ses) => ses && ses.wrong === 0 && ses.answered.length >= 5 },
     { id: 'hata10', icon: '🕵️', name: 'Hata Avcısı', desc: 'Hatandan sonra 10 kez doğruya döndün.', test: (st) => st.rescue.ok >= 10 },
-    { id: 'kasif', icon: '🧭', name: 'Kâşif', desc: '7 temanın hepsini denedin.', test: (st) => st.themesTried.length >= 7 },
+    { id: 'kasif', icon: '🧭', name: 'Kâşif', desc: '7 bölgenin hepsini denedin.', test: (st) => st.themesTried.length >= 7 },
     { id: 'hiz', icon: '⚡', name: 'Şimşek', desc: 'Hızlı Yarış\'ta 10 doğruya ulaştın.', test: (st) => st.speedBest >= 10 },
     { id: 'usta', icon: '👑', name: 'Tema Ustası', desc: 'Bir temanın tüm becerilerinde 3 taç.', test: (st) => THEMES.some(t => SKILLS.filter(s => s.theme === t.id).every(s => E.crowns(E.eff(st.skills[s.id])) >= 3)) },
-    { id: 'kupa', icon: '🏆', name: 'Kupa Avcısı', desc: 'Bir tema sınavını %70 ve üzeriyle geçtin.', test: (st) => Object.keys(st.trophies || {}).length >= 1 },
+    { id: 'kupa', icon: '🏆', name: 'Kupa Avcısı', desc: 'Bir bölge sınavını %70 ve üzeriyle geçtin.', test: (st) => Object.keys(st.trophies || {}).length >= 1 },
     { id: 'ay', icon: '📅', name: 'Ayın Şampiyonu', desc: 'Aylık görevi tamamladın.', test: (st) => st.month && st.month.claimed },
     { id: 'xp500', icon: '🚀', name: '500 XP', desc: 'Toplam 500 XP topladın.', test: (st) => st.xp >= 500 },
   ];
