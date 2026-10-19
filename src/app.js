@@ -234,6 +234,40 @@
   const mascot = (state = '', w = 110) => PI_GORSEL
     ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`
     : mascotSvg(state, w);
+  /* ---------------- Pi'nin dolabı: elmasla kostüm ve iz rengi (para ile satılmaz, §1-7) ---------------- */
+  const KOSTUMLER = [
+    { id: 'normal', ad: 'Her günkü Pi', fiyat: 0 }, { id: 'astronot', ad: 'Astronot', fiyat: 60 }, { id: 'kahraman', ad: 'Süper kahraman', fiyat: 80 },
+    { id: 'futbol', ad: 'Futbolcu', fiyat: 80 }, { id: 'mucit', ad: 'Mucit', fiyat: 90 }, { id: 'sihirbaz', ad: 'Sihirbaz', fiyat: 100 },
+    { id: 'dedektif', ad: 'Dedektif', fiyat: 100 }, { id: 'korsan', ad: 'Korsan', fiyat: 120 }, { id: 'kral', ad: 'Kral', fiyat: 200 }];
+  const IZLER = [{ id: 'altin', ad: 'Altın iz', fiyat: 0, renk: '#FFB020' }, { id: 'neon', ad: 'Neon mavi', fiyat: 30, renk: '#2EC5FF' },
+    { id: 'pembe', ad: 'Şeker pembe', fiyat: 30, renk: '#FF5FA8' }, { id: 'gokkusagi', ad: 'Gökkuşağı', fiyat: 40, renk: 'linear-gradient(90deg,#FF4D4D,#FFB020,#3DDC84,#2EC5FF,#8B5CFF)' }];
+  const KOSTUM_KOK = (window.MY_CONFIG && MY_CONFIG.supabaseUrl) ? MY_CONFIG.supabaseUrl + '/storage/v1/object/public/gorsel/kostum_' : '';
+  const kostumSrc = (id) => id === 'normal' || !KOSTUM_KOK ? PI_GORSEL + 'pi_bekle.webp' : KOSTUM_KOK + id + '.png';
+  const dolap = () => { const d = A.st.dolap = A.st.dolap || {}; d.sahip = d.sahip || ['normal']; d.giyili = d.giyili || 'normal'; d.izler = d.izler || ['altin']; d.iz = d.iz || 'altin'; return d; };
+  // Ana sayfada ve profilde görünen Pi: giydiği kostümle; görsel gelmezse her günkü Pi
+  const giyiliPi = (w, state = '') => { const k = dolap().giyili; return `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${k === 'normal' ? PI_GORSEL + (PI_DURUM[state] || 'pi_bekle') + '.webp' : kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='${PI_GORSEL}pi_bekle.webp'"></div>`; };
+  const dolapPi = (w, state = '') => `<button class="dolap-pi" data-act="dolap" aria-label="Pi'nin dolabı">${giyiliPi(w, state)}<span class="dolap-rozet">👕</span></button>`;
+  function dolapModal() {
+    const d = dolap(), sec = A.dolapSec || 'k:' + d.giyili, [tur, id] = sec.split(':');
+    const liste = tur === 'k' ? KOSTUMLER : IZLER, o = liste.find(x => x.id === id) || liste[0];
+    const sahip = (tur === 'k' ? d.sahip : d.izler).includes(o.id), giyili = tur === 'k' ? d.giyili === o.id : d.iz === o.id;
+    let dugme;
+    if (giyili) dugme = `<button class="btn ghost" disabled>${tur === 'k' ? 'Giyili' : 'Seçili'} ✓</button>`;
+    else if (sahip) dugme = `<button class="btn" data-act="dolap-giy">${tur === 'k' ? '👕 Giy' : '✨ Seç'}</button>`;
+    else if (A.st.gems < o.fiyat) dugme = `<button class="btn ghost" disabled>💎 ${o.fiyat} · ${o.fiyat - A.st.gems} elmas daha lazım</button><p class="muted sm" style="margin:6px 0 0">Ders bitirip sandık açarak elmas kazanırsın.</p>`;
+    else if (A.dolapOnay === sec) dugme = `<div class="row" style="gap:8px"><button class="btn ghost grow" data-act="dolap-vazgec">Vazgeç</button><button class="btn grow" data-act="dolap-al">Evet, 💎 ${o.fiyat} harca</button></div>`;
+    else dugme = `<button class="btn" data-act="dolap-onay">💎 ${o.fiyat} elmasla al</button>`;
+    const onizleme = tur === 'k' ? `<img src="${kostumSrc(o.id)}" alt="" class="dolap-buyuk" onerror="this.onerror=null;this.src='${PI_GORSEL}pi_bekle.webp'">`
+      : `<div class="dolap-izon"><svg viewBox="0 0 220 120" width="220" height="120"><defs><linearGradient id="gkOn" x1="0" x2="1"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".25" stop-color="#FFB020"/><stop offset=".5" stop-color="#3DDC84"/><stop offset=".75" stop-color="#2EC5FF"/><stop offset="1" stop-color="#8B5CFF"/></linearGradient></defs><path d="M20 100 C20 50 200 70 200 20" fill="none" stroke="${o.id === 'gokkusagi' ? 'url(#gkOn)' : o.renk}" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 18"/></svg></div>`;
+    const kart = (t, x) => { const own = (t === 'k' ? d.sahip : d.izler).includes(x.id), on = (t === 'k' ? d.giyili : d.iz) === x.id;
+      return `<button class="dolap-kart ${sec === t + ':' + x.id ? 'sec' : ''}" data-act="dolap-sec" data-v="${t}:${x.id}">${t === 'k' ? `<img src="${kostumSrc(x.id)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${PI_GORSEL}pi_bekle.webp'">` : `<span class="iz-ornek" style="background:${x.renk}"></span>`}<b>${x.ad}</b><small>${on ? '✓ üzerinde' : own ? 'senin' : '💎 ' + x.fiyat}</small></button>`; };
+    return `<div class="modal dolap"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">👕 Pi'nin dolabı</h2><span class="tag">💎 ${A.st.gems}</span></div>
+      <div class="dolap-sahne">${onizleme}<h3 style="margin:6px 0 10px">${o.ad}</h3>${dugme}</div>
+      <h3 class="dolap-baslik">Kostümler</h3><div class="dolap-izgara">${KOSTUMLER.filter(x => KOSTUM_KOK || x.id === 'normal').map(x => kart('k', x)).join('')}</div>
+      <h3 class="dolap-baslik">Haritadaki iz</h3><div class="dolap-izgara iz4">${IZLER.map(x => kart('i', x)).join('')}</div>
+      <p class="muted sm" style="text-align:center;margin:12px 0 4px">Elmaslar yalnız derslerle kazanılır, parayla satılmaz.</p>
+      <button class="btn ghost" data-act="close-modal" style="margin-top:6px">Kapat</button></div>`;
+  }
   // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
   if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
 
@@ -255,7 +289,7 @@
   const goalRing = () => { const v = Math.min(1, todayXP() / A.st.dailyGoal), r = 15, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 38 38" aria-label="Günlük hedef ${todayXP()}/${A.st.dailyGoal} XP"><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" transform="rotate(-90 19 19)"/><text x="19" y="23" text-anchor="middle" font-size="11" font-weight="900" fill="var(--ink)">⚡</text></svg>`; };
   // Üst çubuk: her simgeye dokununca ne olduğunu kısa bir cümleyle söyler (çocuk 🧊'nin ne olduğunu bilemez)
   const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
-  const UST = { seri: () => `🔥 Serin <b>${A.st.streak} gün</b>. Her gün en az bir ders yaparsan büyür.`, elmas: () => `💎 <b>${A.st.gems} elmasın</b> var. Ders sonundaki sandıklardan kazanırsın, seri koruyucu alırsın.`,
+  const UST = { seri: () => `🔥 Serin <b>${A.st.streak} gün</b>. Her gün en az bir ders yaparsan büyür.`, elmas: () => `💎 <b>${A.st.gems} elmasın</b> var. Ders sonundaki ve yoldaki sandıklardan kazanırsın. Seri koruyucu alırsın ya da Pi'ye kostüm alırsın (Pi'ye dokun).`,
     hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Bir gün ders yapamazsan serin bozulmaz.` };
   const nav = () => `<nav class="nav">${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
 
@@ -286,7 +320,7 @@
     const R = yol.getBoundingClientRect(), pts = [...yol.querySelectorAll('.node, .yolsandik')].map(n => { const r = n.getBoundingClientRect(); return [r.left + r.width / 2 - R.left, r.top + r.height / 2 - R.top]; });
     if (pts.length < 2) return;
     let d = `M${pts[0][0]},${pts[0][1]}`; for (let k = 1; k < pts.length; k++) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k], my = (y0 + y1) / 2; d += ` C${x0},${my} ${x1},${my} ${x1},${y1}`; }
-    yol.insertAdjacentHTML('afterbegin', `<svg class="iz" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
+    yol.insertAdjacentHTML('afterbegin', `<svg class="iz iz-${dolap().iz}" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><defs><linearGradient id="gkIz" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${yol.scrollHeight}"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".25" stop-color="#FFB020"/><stop offset=".5" stop-color="#3DDC84"/><stop offset=".75" stop-color="#2EC5FF"/><stop offset="1" stop-color="#8B5CFF"/></linearGradient></defs><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
   }
   addEventListener('resize', () => requestAnimationFrame(izCiz));
   function viewHome() {
@@ -305,7 +339,7 @@
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
     const due = E.dueSkills(A.st).length;
     return `${topbar()}<div class="scroll">
-      <div class="row" style="margin:4px 0 10px">${mascot('', 64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
+      <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
       <div class="themes">${THEMES.map(t => `<button class="chip ${t.id === A.theme ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${t.no}. Tema</button>`).join('')}</div>
       <div class="banner bg-${th.color}"><div class="sub">${th.no}. TEMA · ${done}/${sks.length} beceri</div><h2>${th.title}</h2><div class="sub" style="margin-top:4px">${th.goal}</div><span class="bk">📗 ${th.book}. Kitap · ${th.no}. Tema</span><div class="big">${th.icon}</div></div>
       <div class="path harita" style="--fon:url(img/fon_${th.id}.webp)">${nodes}<div class="node-wrap"><button class="node ${done === sks.length || A.st.trophies[th.id] ? '' : 'locked'}" style="${A.st.trophies[th.id] ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : done === sks.length ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="Tema sınavı">${A.st.trophies[th.id] ? '🏆' : '🎓'}</button><div class="node-label">${A.st.trophies[th.id] ? 'Kupa kazanıldı!' : 'Tema Sınavı'}</div></div></div>
@@ -390,7 +424,7 @@
       <li><b>Problem adımları:</b> atölyede her adımın ilk denemede doğru oranı. "Kendin dene", benzer yeni problemi tek başına çözmektir.</li>
       <li>XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır.</li></ul></details>`;
     const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'aştın ✓' : m.kesin ? 'çalışıyoruz' : 'göz kulak'}</span></div>`).join('') || '<div class="muted sm">Henüz bir tuzak görmedik. 🙌</div>';
-    return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${mascot('happy', 70)}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
+    return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${dolapPi(70, 'happy')}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
       <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Tema kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
         <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">İlk denemede doğru</span><b>${fp.ilkAcc === null ? '–' : '%' + Math.round(fp.ilkAcc * 100)}</b><small class="muted">${fp.ilkAcc === null ? 'en az 5 cevap' : fp.ilkSay.ok + '/' + fp.ilkSay.n + ' cevap'}</small></div>
@@ -912,6 +946,15 @@
       case 'set-sound': A.st.settings.sound = el.checked; save(); break;
       case 'set-voice': A.st.settings.voice = el.checked; save(); break;
       case 'goal': A.st.dailyGoal = +v; save(); render(); break;
+      case 'dolap': A.dolapSec = null; A.dolapOnay = null; A.modal = dolapModal(); render(); break;
+      case 'dolap-sec': A.dolapSec = v; A.dolapOnay = null; A.modal = dolapModal(); render(); { const [t, id] = v.split(':'); if (t === 'k') tone(520, .08, 'triangle'); } break;
+      case 'dolap-onay': A.dolapOnay = A.dolapSec || 'k:' + dolap().giyili; A.modal = dolapModal(); render(); break;
+      case 'dolap-vazgec': A.dolapOnay = null; A.modal = dolapModal(); render(); break;
+      case 'dolap-al': { const d = dolap(), [t, id] = (A.dolapOnay || '').split(':'), o = (t === 'k' ? KOSTUMLER : IZLER).find(x => x.id === id);
+        if (!o || A.st.gems < o.fiyat) { A.dolapOnay = null; A.modal = dolapModal(); render(); break; }
+        const arr = t === 'k' ? d.sahip : d.izler; if (!arr.includes(id)) { A.st.gems -= o.fiyat; arr.push(id); }
+        if (t === 'k') d.giyili = id; else d.iz = id; A.dolapOnay = null; save(); A.modal = dolapModal(); render(); sfx.badge(); confetti(); toast(t === 'k' ? `👕 Pi artık ${o.ad}!` : `✨ Haritadaki iz: ${o.ad}`); break; }
+      case 'dolap-giy': { const d = dolap(), [t, id] = (A.dolapSec || '').split(':'); if (t === 'k' && d.sahip.includes(id)) d.giyili = id; else if (t === 'i' && d.izler.includes(id)) d.iz = id; save(); A.modal = dolapModal(); render(); tone(700, .12, 'triangle'); break; }
       case 'buy-freeze': if (A.st.gems >= 50) { A.st.gems -= 50; A.st.freezes++; save(); render(); toast('🧊 Seri koruyucu alındı!'); } else toast('Yeterli elmasın yok. Ders yaparak kazanabilirsin!'); break;
       case 'reset': A.modal = confirmModal('Tüm veriler silinsin mi?', 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break;
       case 'reset-yes': A.modal = null; A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; render(); break;
