@@ -162,10 +162,12 @@
     }
     // Seviye 3: n nokta (3–6), farklı harfler ve bağlamlar; n·(n−1)/2 doğru parçası
     const n = ri(3, 6), set = pick([['A', 'B', 'C', 'D', 'E', 'F'], ['K', 'L', 'M', 'N', 'O', 'P'], ['P', 'R', 'S', 'T', 'U', 'V']]).slice(0, n), ans = n * (n - 1) / 2;
-    const prompt = Math.random() < 0.5 ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Her iki durak arası bir doğru parçası sayılırsa kaç farklı doğru parçası oluşur?`;
+    const yol = Math.random() < 0.5, prompt = !yol ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Uç noktaları bu duraklardan ikisi olan kaç farklı doğru parçası vardır?`;
     const parcalar = Array.from({ length: n - 1 }, (_, i) => n - 1 - i);
     return Q({ type: 'input', prompt, answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }, { v: n * (n - 1), mis: 'nokta_sayma' }],
-      steps: [`${set[0]} noktasından başlayanlar: ${n - 1} tane`, `${set[1]} noktasından başlayanlar: ${n - 2} tane (${set[1]}${set[0]} zaten sayıldı)`, `Toplam: ${parcalar.join(' + ')} = ${ans}`], hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
+      // Her noktadan yalnız sağa doğru say: aynı parça iki kez sayılmaz (PR ile RP aynı parça)
+      steps: [...set.slice(0, -1).map((h, i) => `${h} noktasından sağa doğru: ${set.slice(i + 1).map(k => h + k).join(', ')} → ${n - 1 - i} tane`), `Toplam: ${parcalar.join(' + ')} = ${ans}`],
+      cozumGorsel: U.parcaSayGorsel(set), hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
   };
   GEN.g_cember = (lv) => {
     if (lv === 1) {

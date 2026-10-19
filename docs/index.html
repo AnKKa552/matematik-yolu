@@ -750,6 +750,16 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}}
 :root[data-theme="dark"] .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}
 @media (prefers-reduced-motion: reduce){.hazine-kart.hazir{animation:none}}
+
+/* Çözüm görseli: doğru parçalarını tek tek çizen şekil */
+.parca-gorsel{margin:10px 0 6px;color:var(--ink)}
+.parca-svg{display:block;max-width:360px;margin:0 auto}
+.pyay{stroke-dasharray:1;stroke-dashoffset:1;animation:pyayCiz .5s ease-out forwards}
+@keyframes pyayCiz{to{stroke-dashoffset:0}}
+.parca-ack{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.parca-et{border:2px solid var(--r);border-radius:10px;padding:3px 8px;font-size:14px}
+.parca-et b{color:var(--r)}
+@media (prefers-reduced-motion: reduce){.pyay{animation:none;stroke-dashoffset:0}}
 </style>
 </head>
 <body>
@@ -770,6 +780,20 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
   U.fmtN = (n) => { const s = String(Math.round(n)); return s.replace(/\B(?=(\d{3})+(?!\d))/g, U.NB); };
   // ondalık virgül: 0.25 -> "0,25"
   U.fmtD = (x, dp) => { let s = (dp === undefined) ? String(+x.toFixed(6)) : x.toFixed(dp); return s.replace('.', ','); };
+  // Çözüm görseli: doğru üzerindeki noktalar ve aralarındaki bütün doğru parçaları (her başlangıç noktası bir renk, yalnız sağa doğru)
+  U.parcaSayGorsel = (set) => {
+    const n = set.length, W = 320, x0 = 26, x1 = W - 26, R = ['#5B4BFF', '#FF8A00', '#12B886', '#E64980', '#228BE6'];
+    const X = (i) => x0 + (x1 - x0) * i / (n - 1), maxH = 18 + (n - 1) * 15 + (n - 2) * 4, y = maxH + 14, H = y + 30;
+    let yay = '', sira = 0;
+    for (let i = 0; i < n - 1; i++) for (let j = i + 1; j < n; j++) {
+      const h = 18 + (j - i) * 15 + i * 4, mx = (X(i) + X(j)) / 2;
+      yay += `<path class="pyay" pathLength="1" style="animation-delay:${(sira++ * 0.35).toFixed(2)}s" d="M${X(i)},${y} Q${mx},${y - 2 * h} ${X(j)},${y}" stroke="${R[i % R.length]}"/>`;
+    }
+    const nok = set.map((h, i) => `<circle cx="${X(i)}" cy="${y}" r="6" fill="currentColor"/><text x="${X(i)}" y="${y + 24}" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor">${h}</text>`).join('');
+    const svg = `<svg class="parca-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Doğru parçaları"><line x1="8" y1="${y}" x2="${W - 8}" y2="${y}" stroke="currentColor" stroke-width="3" opacity=".45"/><g fill="none" stroke-width="3.5" stroke-linecap="round">${yay}</g>${nok}</svg>`;
+    const ack = set.slice(0, -1).map((h, i) => `<span class="parca-et" style="--r:${R[i % R.length]}"><b>${h} →</b> ${set.slice(i + 1).map(k => h + k).join(', ')}</span>`).join('');
+    return `<div class="parca-gorsel">${svg}<div class="parca-ack">${ack}</div></div>`;
+  };
   U.fr = (n, d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
   U.mixed = (w, n, d) => `<span class="mx">${w}${U.fr(n, d)}</span>`;
   U.norm = (s) => String(s).trim().toLowerCase().replace(/[\s  ]/g, '').replace(/\./g, '').replace('%', '%');
@@ -1215,10 +1239,12 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
     }
     // Seviye 3: n nokta (3–6), farklı harfler ve bağlamlar; n·(n−1)/2 doğru parçası
     const n = ri(3, 6), set = pick([['A', 'B', 'C', 'D', 'E', 'F'], ['K', 'L', 'M', 'N', 'O', 'P'], ['P', 'R', 'S', 'T', 'U', 'V']]).slice(0, n), ans = n * (n - 1) / 2;
-    const prompt = Math.random() < 0.5 ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Her iki durak arası bir doğru parçası sayılırsa kaç farklı doğru parçası oluşur?`;
+    const yol = Math.random() < 0.5, prompt = !yol ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Uç noktaları bu duraklardan ikisi olan kaç farklı doğru parçası vardır?`;
     const parcalar = Array.from({ length: n - 1 }, (_, i) => n - 1 - i);
     return Q({ type: 'input', prompt, answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }, { v: n * (n - 1), mis: 'nokta_sayma' }],
-      steps: [`${set[0]} noktasından başlayanlar: ${n - 1} tane`, `${set[1]} noktasından başlayanlar: ${n - 2} tane (${set[1]}${set[0]} zaten sayıldı)`, `Toplam: ${parcalar.join(' + ')} = ${ans}`], hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
+      // Her noktadan yalnız sağa doğru say: aynı parça iki kez sayılmaz (PR ile RP aynı parça)
+      steps: [...set.slice(0, -1).map((h, i) => `${h} noktasından sağa doğru: ${set.slice(i + 1).map(k => h + k).join(', ')} → ${n - 1 - i} tane`), `Toplam: ${parcalar.join(' + ')} = ${ans}`],
+      cozumGorsel: U.parcaSayGorsel(set), hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
   };
   GEN.g_cember = (lv) => {
     if (lv === 1) {
@@ -4059,7 +4085,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
-    const steps = (q.steps || []).length ? `<details class="howto"><summary>🪜 Nasıl çözülür?</summary><ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
+    const steps = (q.steps || []).length ? `<details class="howto" ${q.cozumGorsel ? 'open' : ''}><summary>🪜 Nasıl çözülür?</summary>${q.cozumGorsel || ''}<ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
     return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'derin', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}${tahminKarsilastir(q)}</div>${mascot('sad', 64)}</div>
       ${fb.ac ? `<div class="mis baglamli"><b>🧭 Neden olmadı?</b><div style="margin-top:4px">${fb.ac}</div></div>` : ''}
       ${fb.mis !== 'genel' ? `<div class="mis ${fb.ac ? 'kural' : ''}"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${fb.ac ? 'Genel kural: ' : ''}${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}

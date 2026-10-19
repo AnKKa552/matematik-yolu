@@ -751,6 +751,16 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}}
 :root[data-theme="dark"] .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}
 @media (prefers-reduced-motion: reduce){.hazine-kart.hazir{animation:none}}
+
+/* Çözüm görseli: doğru parçalarını tek tek çizen şekil */
+.parca-gorsel{margin:10px 0 6px;color:var(--ink)}
+.parca-svg{display:block;max-width:360px;margin:0 auto}
+.pyay{stroke-dasharray:1;stroke-dashoffset:1;animation:pyayCiz .5s ease-out forwards}
+@keyframes pyayCiz{to{stroke-dashoffset:0}}
+.parca-ack{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.parca-et{border:2px solid var(--r);border-radius:10px;padding:3px 8px;font-size:14px}
+.parca-et b{color:var(--r)}
+@media (prefers-reduced-motion: reduce){.pyay{animation:none;stroke-dashoffset:0}}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -815,6 +825,20 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   U.fmtN = (n) => { const s = String(Math.round(n)); return s.replace(/\B(?=(\d{3})+(?!\d))/g, U.NB); };
   // ondalık virgül: 0.25 -> "0,25"
   U.fmtD = (x, dp) => { let s = (dp === undefined) ? String(+x.toFixed(6)) : x.toFixed(dp); return s.replace('.', ','); };
+  // Çözüm görseli: doğru üzerindeki noktalar ve aralarındaki bütün doğru parçaları (her başlangıç noktası bir renk, yalnız sağa doğru)
+  U.parcaSayGorsel = (set) => {
+    const n = set.length, W = 320, x0 = 26, x1 = W - 26, R = ['#5B4BFF', '#FF8A00', '#12B886', '#E64980', '#228BE6'];
+    const X = (i) => x0 + (x1 - x0) * i / (n - 1), maxH = 18 + (n - 1) * 15 + (n - 2) * 4, y = maxH + 14, H = y + 30;
+    let yay = '', sira = 0;
+    for (let i = 0; i < n - 1; i++) for (let j = i + 1; j < n; j++) {
+      const h = 18 + (j - i) * 15 + i * 4, mx = (X(i) + X(j)) / 2;
+      yay += `<path class="pyay" pathLength="1" style="animation-delay:${(sira++ * 0.35).toFixed(2)}s" d="M${X(i)},${y} Q${mx},${y - 2 * h} ${X(j)},${y}" stroke="${R[i % R.length]}"/>`;
+    }
+    const nok = set.map((h, i) => `<circle cx="${X(i)}" cy="${y}" r="6" fill="currentColor"/><text x="${X(i)}" y="${y + 24}" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor">${h}</text>`).join('');
+    const svg = `<svg class="parca-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Doğru parçaları"><line x1="8" y1="${y}" x2="${W - 8}" y2="${y}" stroke="currentColor" stroke-width="3" opacity=".45"/><g fill="none" stroke-width="3.5" stroke-linecap="round">${yay}</g>${nok}</svg>`;
+    const ack = set.slice(0, -1).map((h, i) => `<span class="parca-et" style="--r:${R[i % R.length]}"><b>${h} →</b> ${set.slice(i + 1).map(k => h + k).join(', ')}</span>`).join('');
+    return `<div class="parca-gorsel">${svg}<div class="parca-ack">${ack}</div></div>`;
+  };
   U.fr = (n, d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
   U.mixed = (w, n, d) => `<span class="mx">${w}${U.fr(n, d)}</span>`;
   U.norm = (s) => String(s).trim().toLowerCase().replace(/[\s  ]/g, '').replace(/\./g, '').replace('%', '%');
@@ -1227,10 +1251,12 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     }
     // Seviye 3: n nokta (3–6), farklı harfler ve bağlamlar; n·(n−1)/2 doğru parçası
     const n = ri(3, 6), set = pick([['A', 'B', 'C', 'D', 'E', 'F'], ['K', 'L', 'M', 'N', 'O', 'P'], ['P', 'R', 'S', 'T', 'U', 'V']]).slice(0, n), ans = n * (n - 1) / 2;
-    const prompt = Math.random() < 0.5 ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Her iki durak arası bir doğru parçası sayılırsa kaç farklı doğru parçası oluşur?`;
+    const yol = Math.random() < 0.5, prompt = !yol ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Uç noktaları bu duraklardan ikisi olan kaç farklı doğru parçası vardır?`;
     const parcalar = Array.from({ length: n - 1 }, (_, i) => n - 1 - i);
     return Q({ type: 'input', prompt, answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }, { v: n * (n - 1), mis: 'nokta_sayma' }],
-      steps: [`${set[0]} noktasından başlayanlar: ${n - 1} tane`, `${set[1]} noktasından başlayanlar: ${n - 2} tane (${set[1]}${set[0]} zaten sayıldı)`, `Toplam: ${parcalar.join(' + ')} = ${ans}`], hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
+      // Her noktadan yalnız sağa doğru say: aynı parça iki kez sayılmaz (PR ile RP aynı parça)
+      steps: [...set.slice(0, -1).map((h, i) => `${h} noktasından sağa doğru: ${set.slice(i + 1).map(k => h + k).join(', ')} → ${n - 1 - i} tane`), `Toplam: ${parcalar.join(' + ')} = ${ans}`],
+      cozumGorsel: U.parcaSayGorsel(set), hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
   };
   GEN.g_cember = (lv) => {
     if (lv === 1) {
@@ -2735,7 +2761,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-19 c847f4a', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-19 2859789', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

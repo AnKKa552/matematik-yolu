@@ -739,3 +739,13 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}}
 :root[data-theme="dark"] .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}
 @media (prefers-reduced-motion: reduce){.hazine-kart.hazir{animation:none}}
+
+/* Çözüm görseli: doğru parçalarını tek tek çizen şekil */
+.parca-gorsel{margin:10px 0 6px;color:var(--ink)}
+.parca-svg{display:block;max-width:360px;margin:0 auto}
+.pyay{stroke-dasharray:1;stroke-dashoffset:1;animation:pyayCiz .5s ease-out forwards}
+@keyframes pyayCiz{to{stroke-dashoffset:0}}
+.parca-ack{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.parca-et{border:2px solid var(--r);border-radius:10px;padding:3px 8px;font-size:14px}
+.parca-et b{color:var(--r)}
+@media (prefers-reduced-motion: reduce){.pyay{animation:none;stroke-dashoffset:0}}

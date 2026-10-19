@@ -192,6 +192,9 @@ Her cevap `kanit` ile kaydedilir: **ilk** (ipucusuz ilk denemede doğru) · **ip
 }
 ```
 
+### 5.1.0 Çözüm görseli (`q.cozumGorsel`, 19.10.2026, proje sahibinin önerisi)
+Sayma ya da şekil gerektiren sorularda, yanlış cevaptan sonra "🪜 Nasıl çözülür?" kutusu açık gelir ve adımların üstünde çözümü çizen bir şekil durur. İlk örnek: doğru üzerindeki noktalarla kaç doğru parçası oluştuğu (`g_temel` seviye 3, `U.parcaSayGorsel`). Noktalar doğru üzerinde, her doğru parçası bir yay olarak **tek tek çizilir**; aynı noktadan başlayan parçalar aynı renktedir ve altında renkli etiketler durur ("P → PR, PS", "R → RS"). Adımlar da her noktadan yalnız sağa doğru sayar, böylece aynı parça iki kez sayılmaz. Hareketi azalt açıksa çizim animasyonu kapanır. Yeni bir görsel: `core.js`te SVG döndüren bir `U.…Gorsel` yaz, üreticide `cozumGorsel` alanına koy.
+
 ### 5.1.1 Parmakla kesir (`type: 'kes'`, 17.10.2026)
 Öğrenci şıktan seçmez; modeli kendi eliyle kurar. `model`: `pie` (pasta), `bar` (şerit) ya da `line` (sayı doğrusu). Alanlar: `hedef: [pay, payda]`, `parca` (sabit parça sayısı; `null` ise öğrenci − / + ile 1–12 arası kendisi böler), `denk` (true ise denk kesir de doğru: 6/8 = 3/4), `ust` (sayı doğrusunun sonu, 1 ya da 2), `cevap` (geri bildirimde gösterilen metin).
 - Cevap `{parca, boyali}` ya da `{konum}` olarak gelir ve `KES_CHECK` ile **kodla** değerlendirilir. Açık uçlu olduğu için her yanlış durum bir yanılgıya bağlanır: tümleyeni boyamak → `bos_kisim`; ters kesir → `pay_payda_ters`; sayı doğrusunda bir eksik/fazla → `cizgi_sayma`; geri kalan her şey → `kesir_model`.

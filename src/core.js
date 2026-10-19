@@ -14,6 +14,20 @@
   U.fmtN = (n) => { const s = String(Math.round(n)); return s.replace(/\B(?=(\d{3})+(?!\d))/g, U.NB); };
   // ondalık virgül: 0.25 -> "0,25"
   U.fmtD = (x, dp) => { let s = (dp === undefined) ? String(+x.toFixed(6)) : x.toFixed(dp); return s.replace('.', ','); };
+  // Çözüm görseli: doğru üzerindeki noktalar ve aralarındaki bütün doğru parçaları (her başlangıç noktası bir renk, yalnız sağa doğru)
+  U.parcaSayGorsel = (set) => {
+    const n = set.length, W = 320, x0 = 26, x1 = W - 26, R = ['#5B4BFF', '#FF8A00', '#12B886', '#E64980', '#228BE6'];
+    const X = (i) => x0 + (x1 - x0) * i / (n - 1), maxH = 18 + (n - 1) * 15 + (n - 2) * 4, y = maxH + 14, H = y + 30;
+    let yay = '', sira = 0;
+    for (let i = 0; i < n - 1; i++) for (let j = i + 1; j < n; j++) {
+      const h = 18 + (j - i) * 15 + i * 4, mx = (X(i) + X(j)) / 2;
+      yay += `<path class="pyay" pathLength="1" style="animation-delay:${(sira++ * 0.35).toFixed(2)}s" d="M${X(i)},${y} Q${mx},${y - 2 * h} ${X(j)},${y}" stroke="${R[i % R.length]}"/>`;
+    }
+    const nok = set.map((h, i) => `<circle cx="${X(i)}" cy="${y}" r="6" fill="currentColor"/><text x="${X(i)}" y="${y + 24}" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor">${h}</text>`).join('');
+    const svg = `<svg class="parca-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Doğru parçaları"><line x1="8" y1="${y}" x2="${W - 8}" y2="${y}" stroke="currentColor" stroke-width="3" opacity=".45"/><g fill="none" stroke-width="3.5" stroke-linecap="round">${yay}</g>${nok}</svg>`;
+    const ack = set.slice(0, -1).map((h, i) => `<span class="parca-et" style="--r:${R[i % R.length]}"><b>${h} →</b> ${set.slice(i + 1).map(k => h + k).join(', ')}</span>`).join('');
+    return `<div class="parca-gorsel">${svg}<div class="parca-ack">${ack}</div></div>`;
+  };
   U.fr = (n, d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
   U.mixed = (w, n, d) => `<span class="mx">${w}${U.fr(n, d)}</span>`;
   U.norm = (s) => String(s).trim().toLowerCase().replace(/[\s  ]/g, '').replace(/\./g, '').replace('%', '%');
