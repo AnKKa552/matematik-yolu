@@ -724,3 +724,18 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .cik-bos{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.25);font-size:26px;font-weight:900}
 .album-alt{text-align:center;font-weight:700;margin-top:10px}
 @media (prefers-reduced-motion: reduce){.cik.buyuk,.cik.parlak::after{animation:none}}
+
+/* Haftalık hazine avı */
+.yolsandik.hazine img{filter:drop-shadow(0 0 10px rgba(255,200,0,.9)) saturate(1.2) hue-rotate(-25deg)}
+.yolsandik.hazine.bekliyor img{filter:drop-shadow(0 0 6px rgba(255,200,0,.6)) grayscale(.35);opacity:1}
+.hazine-etiket{margin-top:2px;background:#FFF3C4;color:#7A5200;font-weight:900;font-size:13px;padding:4px 10px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.18);white-space:nowrap}
+.hazine-kart{display:block;width:100%;font:inherit;color:var(--ink);cursor:pointer;border:2px solid #FFD34D;background:linear-gradient(135deg,#FFF8DC,var(--surface) 60%)}
+.hazine-kart.hazir{animation:hazineParla 1.8s ease-in-out infinite}
+@keyframes hazineParla{0%,100%{box-shadow:0 0 0 0 rgba(255,190,0,.0)}50%{box-shadow:0 0 0 6px rgba(255,190,0,.35)}}
+.hazine-ust{font-size:12px;font-weight:900;letter-spacing:.06em;color:#C78A00;margin-bottom:6px}
+.hazine-mini{width:58px;height:auto}
+.anahtarlar{display:flex;gap:6px;margin-top:6px}
+.anahtar{font-size:20px;filter:grayscale(1);opacity:.35}.anahtar.var{filter:none;opacity:1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}}
+:root[data-theme="dark"] .hazine-kart{background:linear-gradient(135deg,#3A3010,var(--surface) 60%)}
+@media (prefers-reduced-motion: reduce){.hazine-kart.hazir{animation:none}}

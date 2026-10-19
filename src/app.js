@@ -304,6 +304,25 @@
       <p class="muted sm" style="margin:12px 0 4px">Çıkartmalar haritadaki sandıklardan ve ders sonu sandıklarından çıkar. Aynısı çıkarsa ${CIK_TEKRAR} elmasa dönüşür. ✨ Parlak çıkartmalar nadirdir.</p>
       <button class="btn ghost" data-act="close-modal" style="margin-top:6px">Kapat</button></div>`;
   }
+  /* ---------------- Haftalık hazine avı: her pazartesi bir temaya altın sandık gizlenir; 3 ders = 3 anahtar ---------------- */
+  const HAZINE_ANAHTAR = 3, HAZINE_ELMAS = 40;
+  const haftaBas = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); };
+  function hazine() {
+    const ws = haftaBas(); let h = A.st.hazine;
+    if (!h || h.hafta !== ws) {
+      // Çalıştığı temalardan biri (hiç çalışmadıysa 1. tema); hafta sayısına göre sırayla döner
+      const cal = THEMES.filter(t => SKILLS.some(k => k.theme === t.id && A.st.skills[k.id] && A.st.skills[k.id].n > 0)), L = cal.length ? cal : [THEMES[0]];
+      h = A.st.hazine = { hafta: ws, anahtar: 0, acildi: false, tema: L[Math.floor(ws / 604800000) % L.length].id };
+    }
+    return h;
+  }
+  const hazineDuragi = (th) => { const h = hazine(); if (h.tema !== th.id) return ''; const hazir = h.anahtar >= HAZINE_ANAHTAR && !h.acildi;
+    return `<div class="node-wrap sandik-durak" style="transform:translateX(-80px)"><button class="yolsandik hazine ${h.acildi ? 'acildi' : hazir ? 'hazir' : 'bekliyor'}" data-act="hazine-ac" aria-label="Haftanın hazine sandığı"><img src="img/sandik_${h.acildi ? 'acik' : 'kapali'}.webp" alt="" draggable="false"></button>${hazir ? '<div class="bubble sb">AÇ!</div>' : ''}<div class="hazine-etiket">${h.acildi ? 'Hazine bulundu ✓' : hazir ? '🌟 Haftanın hazinesi' : `🗝️ ${h.anahtar}/${HAZINE_ANAHTAR} anahtar`}</div></div>`; };
+  const hazineKart = () => { const h = hazine(), th = THEMES.find(t => t.id === h.tema), hazir = h.anahtar >= HAZINE_ANAHTAR && !h.acildi;
+    const ana = Array.from({ length: HAZINE_ANAHTAR }, (_, i) => `<span class="anahtar ${i < h.anahtar ? 'var' : ''}">🗝️</span>`).join('');
+    return `<button class="card hazine-kart ${hazir ? 'hazir' : ''}" data-act="hazine-git"><div class="hazine-ust">🗺️ HAFTANIN HAZİNE AVI</div><div class="row" style="gap:12px"><img src="img/sandik_${h.acildi ? 'acik' : 'kapali'}.webp" alt="" class="hazine-mini"><div class="grow" style="text-align:left">
+      ${h.acildi ? `<b>Bu haftanın hazinesini buldun! 🎉</b><div class="muted sm">Pazartesi yeni bir sandık gizlenecek.</div>` : hazir ? `<b>Anahtarlar tamam!</b><div class="muted sm">Hazine sandığı ${th.no}. temanın haritasında seni bekliyor.</div>` : `<b>Hazine sandığı ${th.no}. temada gizli</b><div class="muted sm">${HAZINE_ANAHTAR} ders bitir, her ders bir anahtar.</div>`}
+      <div class="anahtarlar">${ana}</div></div>${h.acildi ? '' : '<div class="bugun-git">Git ›</div>'}</div></button>`; };
   // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
   if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
 
@@ -369,7 +388,7 @@
       const isCur = un && !curFound && cr < 3; if (isCur) curFound = true;
       const col = th.color;
       const style = `--c:var(--${col});--cd:var(--${col}-d)`;
-      const sandik = (i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '';
+      const sandik = ((i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '') + (i === Math.min(3, sks.length - 2) ? hazineDuragi(th) : '');
       return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
@@ -403,6 +422,7 @@
     const O = bugunOneri();
     return `${topbar()}<div class="scroll">
       ${O ? `<button class="card bugun" data-act="${O.act}" ${O.v ? `data-v="${O.v}"` : ''}><div class="sm bugun-ust">BUGÜN BUNU YAP</div><div class="row"><div class="bugun-ic">${O.ic}</div><div class="grow"><h3>${esc(O.t)}</h3><div class="muted sm">${O.n}</div></div><div class="bugun-git">Başla ›</div></div></button>` : ''}
+      ${hazineKart()}
       <div class="mbanner"><div class="grow"><div class="sm" style="font-weight:900;opacity:.9">${left} GÜN KALDI</div><h2>${mo.ad}</h2><div class="sm" style="font-weight:800">Günlük görevleri tamamla, ${mo.hedef} göreve ulaş!</div><div class="qbar light"><i style="width:${Math.min(100, Math.round(100 * mo.done / mo.hedef))}%"></i><span>${mo.done} / ${mo.hedef}</span></div></div>${mascot(mo.claimed ? 'happy' : '', 70)}</div>
       <h2 class="sect">Günlük Görevler <span class="muted sm">· gece yarısı yenilenir</span></h2><div class="card list" style="gap:4px">${Q.list.map(qrow).join('')}</div>
       <h2 class="sect">Pratik Merkezi</h2><div class="list">
@@ -916,7 +936,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -987,6 +1007,18 @@
       case 'goal': A.st.dailyGoal = +v; save(); render(); break;
       case 'album': A.albumTema = A.albumTema || A.theme || THEMES[0].id; A.modal = albumModal(); render(); break;
       case 'album-tema': A.albumTema = v; A.modal = albumModal(); render(); break;
+      case 'hazine-git': { const h = hazine(); if (h.acildi) { toast('Bu haftanın hazinesini buldun. Pazartesi yenisi gelecek! 🗺️'); break; } A.tab = 'yol'; A.view = 'home'; A.theme = h.tema; render(); setTimeout(() => { const el = document.querySelector('.yolsandik.hazine'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 450); break; }
+      case 'hazine-ac': { const h = hazine(), th = THEMES.find(t => t.id === h.tema);
+        if (h.acildi) { toast('Bu haftanın hazinesini buldun. Pazartesi yenisi gelecek! 🗺️'); break; }
+        if (h.anahtar < HAZINE_ANAHTAR) { toast(`🗝️ ${HAZINE_ANAHTAR - h.anahtar} anahtar daha lazım. Her bitirdiğin ders bir anahtar!`); break; }
+        h.acildi = Date.now(); A.st.gems += HAZINE_ELMAS;
+        // Ödül: temanın parlak çıkartması; o varsa eksik bir çıkartma; hepsi varsa +10 elmas
+        const a = album(), L = CIKARTMA[th.id], son = L.length - 1, eksik = [son, ...L.map((_, i) => i).filter(i => i !== son)].find(i => !a.sahip[`${th.id}_${i}`]);
+        let cik = null, ek = 0;
+        if (eksik === undefined) { ek = 10; A.st.gems += ek; } else { a.sahip[`${th.id}_${eksik}`] = 1; cik = { tid: th.id, i: eksik, e: L[eksik][0], ad: L[eksik][1], parlak: eksik === son, yeni: true, elmas: 0, sayfa: false };
+          if (!a.tamam[th.id] && L.every((_, k) => a.sahip[`${th.id}_${k}`])) { a.tamam[th.id] = Date.now(); A.st.gems += CIK_SAYFA; cik.sayfa = true; } }
+        save(); sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80, 30, 120]); } catch (e) { } confetti(); setTimeout(confetti, 500);
+        A.modal = `<div class="modal center hazine-modal"><div class="hazine-ust">🗺️ HAFTANIN HAZİNESİ</div><img src="img/sandik_acik.webp" alt="" style="width:170px;display:block;margin:6px auto 0" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${HAZINE_ELMAS + ek} 💎</h2><p class="muted" style="margin:0 0 10px">Hazine sandığını buldun! Bu hafta çok çalıştın. 🌟</p>${cikartmaSonuc(cik)}<button class="btn" data-act="close-modal" style="margin-top:12px">Harika!</button></div>`; render(); break; }
       case 'dolap': A.dolapSec = null; A.dolapOnay = null; A.modal = dolapModal(); render(); break;
       case 'dolap-sec': A.dolapSec = v; A.dolapOnay = null; A.modal = dolapModal(); render(); { const [t, id] = v.split(':'); if (t === 'k') tone(520, .08, 'triangle'); } break;
       case 'dolap-onay': A.dolapOnay = A.dolapSec || 'k:' + dolap().giyili; A.modal = dolapModal(); render(); break;
