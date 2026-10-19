@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 33223,
+ "toplam_karakter": 33937,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1460,6 +1460,26 @@
    "key": "mis_esit_payda",
    "grup": "yanilgi",
    "text": "Paydaları eşit kesirleri karşılaştıramama. Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: on ikide sekiz, on ikide üçten büyüktür."
+  },
+  {
+   "key": "mis_olasilik_buyuk_2",
+   "grup": "yanilgi",
+   "text": "Olasılığın 1'den büyük olabileceğini sanma. Bir olayın olasılığı 0 ile 1 arasındadır, 0 ve 1 dahil. İmkânsız olayın olasılığı 0, kesin olayın olasılığı 1'dir. İstediğin renkteki toplar, bütün toplardan fazla olamaz."
+  },
+  {
+   "key": "mis_olasilik_tercih",
+   "grup": "yanilgi",
+   "text": "Olasılığı sevdiği renge ya da şansa göre tahmin etme. Olasılık kişisel seçime bağlı değildir. Torbada hangi renkten daha çok top varsa, o rengin çekilme olasılığı daha fazladır."
+  },
+  {
+   "key": "mis_iki_sonuc_esit",
+   "grup": "yanilgi",
+   "text": "İki sonuç varsa olasılıkları eşit sanma. Sonuçların sayısı değil, her sonucu veren parçaların sayısı önemlidir. Dört yüzü mavi, iki yüzü kırmızı küpte mavi gelme olasılığı daha fazladır."
+  },
+  {
+   "key": "kart_p_spektrum_gorsel_2",
+   "grup": "kart",
+   "text": "Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa az olası, yarısıysa eşit olası, fazlaysa çok olası."
   }
  ]
 }

@@ -1136,7 +1136,7 @@
         "olasilik_buyuk"
       ],
       "anlatim": {
-        "gorsel": "Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa az olası , fazlaysa çok olası .",
+        "gorsel": "Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa az olası, yarısıysa eşit olası, fazlaysa çok olası.",
         "hikaye": "Doğum günü çarkında 4 dilimin 3'ü mavi. Duru \"Mavi gelme ihtimali yüksek!\" dedi. Haklıydı: 3/4, yarıdan fazla, yani çok olası .",
         "adim": [
           "Kaç dilim mavi, say (parça).",
@@ -1403,7 +1403,7 @@
     },
     "olasilik_buyuk": {
       "ad": "Olasılığın 1'den büyük olabileceğini sanma",
-      "duzeltme": "Olasılık her zaman 0 ile 1 arasındadır (%0 ile %100). İstenen durum sayısı tüm durumlardan fazla olamaz."
+      "duzeltme": "Bir olayın olasılığı 0 ile 1 arasındadır (0 ve 1 dâhil). İmkânsız olayın olasılığı 0, kesin olayın olasılığı 1'dir. İstediğin renkteki toplar, bütün toplardan fazla olamaz."
     },
     "olasilik_oran": {
       "ad": "Olasılık kesrini yanlış kurma",
@@ -1512,6 +1512,14 @@
     "esit_payda": {
       "ad": "Paydaları eşit kesirleri karşılaştıramama",
       "duzeltme": "Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: 8/12 > 3/12."
+    },
+    "olasilik_tercih": {
+      "ad": "Olasılığı sevdiği renge ya da şansa göre tahmin etme",
+      "duzeltme": "Olasılık kişisel seçime bağlı değildir. Torbada hangi renkten daha çok top varsa, o rengin çekilme olasılığı daha fazladır."
+    },
+    "iki_sonuc_esit": {
+      "ad": "İki sonuç varsa olasılıkları eşit sanma",
+      "duzeltme": "Sonuçların sayısı değil, her sonucu veren parçaların sayısı önemlidir. 4 yüzü mavi, 2 yüzü kırmızı küpte mavi gelme olasılığı daha fazladır."
     }
   },
   "anlatim_bicimleri": {

@@ -1169,7 +1169,9 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
     dongu_sayma: { t: 'Döngü tekrarlarını yanlış sayma', fix: 'Döngünün her turunda değeri yaz ve koşulu kontrol et. Kaç kez tekrar ettiğini tek tek işaretle.' },
     // Olasılık
     olay_tur: { t: 'Kesin, imkânsız ve mümkün olayları karıştırma', fix: 'Kesin olay mutlaka olur (olasılık 1), imkânsız olay asla olmaz (0). Arada kalanlar mümkün olaylardır.' },
-    olasilik_buyuk: { t: 'Olasılığın 1\'den büyük olabileceğini sanma', fix: 'Olasılık her zaman 0 ile 1 arasındadır (%0 ile %100). İstenen durum sayısı tüm durumlardan fazla olamaz.' },
+    olasilik_buyuk: { t: 'Olasılığın 1\'den büyük olabileceğini sanma', fix: 'Bir olayın olasılığı 0 ile 1 arasındadır (0 ve 1 dâhil). İmkânsız olayın olasılığı 0, kesin olayın olasılığı 1\'dir. İstediğin renkteki toplar, bütün toplardan fazla olamaz.' },
+    olasilik_tercih: { t: 'Olasılığı sevdiği renge ya da şansa göre tahmin etme', fix: 'Olasılık kişisel seçime bağlı değildir. Torbada hangi renkten daha çok top varsa, o rengin çekilme olasılığı daha fazladır.' },
+    iki_sonuc_esit: { t: 'İki sonuç varsa olasılıkları eşit sanma', fix: 'Sonuçların sayısı değil, her sonucu veren parçaların sayısı önemlidir. 4 yüzü mavi, 2 yüzü kırmızı küpte mavi gelme olasılığı daha fazladır.' },
     olasilik_oran: { t: 'Olasılık kesrini yanlış kurma', fix: 'Kesri parça-bütün ilişkisiyle kur: pay, istediğin renkteki dilim ya da top sayısı; payda, bütün dilimlerin ya da topların sayısı.' },
     az_cok: { t: 'Az olası ile çok olasıyı karıştırma', fix: '1/2\'den küçük olasılıklar az olası, 1/2\'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır.' },
     sifir_basta: { t: 'En küçük sayıyı 0 ile başlatma', fix: 'Bir sayının en soldaki basamağı 0 olamaz. En küçük sayıyı yazarken önce 0 dışındaki en küçük rakamı, hemen ardından 0\'ı yaz.' },
@@ -1779,7 +1781,30 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
     }
     if (lv === 2) {
       const kk = Math.max(1, Math.min(n - 1, k)), cc = shuffle(Array.from({ length: n }, (_, i) => i < kk ? 'sb' : 'c0b'));
-      return Q({ prompt: 'Çark çevrildiğinde okun MAVİ dilimde durma olasılığı kaçtır?', visual: V.spinner(cc), options: mc(fr(kk, n), [[fr(n - kk, n), 'olasilik_oran'], [fr(kk, n - kk === kk ? n + 1 : n - kk), 'olasilik_oran'], [fr(n, kk), 'olasilik_buyuk']]), steps: ['Olasılık = mavi dilim sayısı / tüm dilimler', `${kk}/${n}`] });
+      return Q({ prompt: 'Çark çevrildiğinde okun MAVİ dilimde durma olasılığı kaçtır?', visual: V.spinner(cc), options: mc(fr(kk, n), [[fr(n - kk, n), 'olasilik_oran'], [fr(kk, n - kk === kk ? n + 1 : n - kk), 'olasilik_oran'], [fr(n, kk), 'olasilik_buyuk']]), steps: [`Parça: ${kk} mavi dilim. Bütün: ${n} dilim.`, `Mavi dilimler bütünün ${fr(kk, n)} kadarı.`] });
+    }
+    const tur = ri(0, 3);
+    if (tur === 1) {
+      // Gerekçe: tahmin, torbadaki top sayılarına dayanmalı (kişisel tercih ya da şans gerekçe değildir)
+      const [cok, az] = shuffle(['kırmızı', 'mavi', 'yeşil', 'sarı']).slice(0, 2), a = ri(3, 7), b = ri(1, a - 1), ad = pick(NAMES);
+      return Q({ prompt: `Renkleri dışında özdeş ${a} ${cok} ve ${b} ${az} top bir torbaya atılıyor. ${ad}, "Rastgele çekilen topun ${cok} olma olasılığı çoktur." diyor. Hangisi doğru bir gerekçedir?`,
+        options: mc(`Torbada ${cok} toplar ${az} toplardan fazla.`, [[`${cok[0].toLocaleUpperCase('tr-TR') + cok.slice(1)} en sevdiği renk.`, 'olasilik_tercih'], [`${b} onun şanslı sayısı.`, 'olasilik_tercih'], ['İki renk var, olasılıklar her zaman eşittir.', 'iki_sonuc_esit']]),
+        steps: [`${a + b} toptan ${a} tanesi ${cok}: yarısından fazla.`, 'Bu yüzden çekilen topun ' + cok + ' olma olasılığı çoktur.'] });
+    }
+    if (tur === 2) {
+      // Adil oyun: renk küpü; yüz sayıları eşitse adil
+      const m = ri(1, 5), k = 6 - m, adil = m === k, [o1, o2] = shuffle(NAMES).slice(0, 2);
+      return Q({ prompt: `Bir renk küpünün ${m} yüzü mavi, ${k} yüzü kırmızı. Küp atılınca mavi gelirse ${o1}, kırmızı gelirse ${o2} puan alıyor. Bu oyun adil midir?`,
+        options: mc(adil ? 'Evet, iki rengin olasılığı eşit.' : `Hayır, ${m > k ? 'mavi' : 'kırmızı'} gelme olasılığı daha fazla.`,
+          adil ? [['Hayır, mavi gelme olasılığı daha fazla.', 'az_cok'], ['Hayır, kırmızı gelme olasılığı daha fazla.', 'az_cok']]
+               : [['Evet, iki renk var; olasılıklar eşittir.', 'iki_sonuc_esit'], [`Hayır, ${m > k ? 'kırmızı' : 'mavi'} gelme olasılığı daha fazla.`, 'az_cok']]),
+        steps: [`6 yüzden ${m} tanesi mavi, ${k} tanesi kırmızı.`, adil ? 'Yüz sayıları eşit, olasılıklar eşit: oyun adil.' : 'Yüz sayıları farklı, olasılıklar farklı: oyun adil değil.'] });
+    }
+    if (tur === 3) {
+      // Spektrum: ondalık ya da yüzde gösterimin yeri
+      const [g, t] = pick([['0', 'İmkânsız'], ['%0', 'İmkânsız'], ['0,2', 'Az olası'], ['%25', 'Az olası'], ['0,5', 'Eşit olası'], ['%50', 'Eşit olası'], ['0,8', 'Çok olası'], ['%75', 'Çok olası'], ['1', 'Kesin'], ['%100', 'Kesin']]);
+      return Q({ prompt: `Bir olayın olasılığı ${g}. Bu olay olasılık spektrumunda nerededir?`, options: mc(t, ['İmkânsız', 'Az olası', 'Eşit olası', 'Çok olası', 'Kesin'].filter(x => x !== t).map(x => [x, (t === 'Az olası' && x === 'Çok olası') || (t === 'Çok olası' && x === 'Az olası') ? 'az_cok' : 'olay_tur'])),
+        steps: ['Spektrum 0\'dan (imkânsız) 1\'e (kesin) gider; %0 ile %100 de aynıdır.', '0,5 (%50) ortadadır: eşit olası. Küçükse az olası, büyükse çok olası.'] });
     }
     return tfQ({ prompt: pick([`Bir olayın olasılığı ${fr(5, 4)} olabilir.`, 'Bir olayın olasılığı %120 olabilir.']), steps: ['Olasılık her zaman 0 ile 1 arasındadır.', '1\'den büyük olasılık (veya %100\'den fazlası) olamaz.'] }, false, 'olasilik_buyuk');
   };
@@ -2259,12 +2284,12 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
       tablo: { verilen: [`${r} kırmızı, ${m} mavi top`, `${y} sarı top eklendi`], ara: ['Yeni toplam top sayısı'], istenen: 'Kırmızı gelme olasılığı' },
       baglam: `Bir torbada ${r} kırmızı ve ${m} mavi top var. ${ad} torbaya ${y} sarı top daha ekledi. Torbadan rastgele bir top çekilirse kırmızı gelme olasılığı kaçtır?`,
       anla: ['Sarılar eklendikten sonra kırmızı gelme olasılığı', [['Torbadaki toplam top sayısı', 'ara_sonuc', 'Toplam top bir ara sonuç. Soru bir olasılık soruyor.'], ['Sarılar eklenmeden önceki olasılık', 'problem_adim', 'Soru, sarılar EKLENDİKTEN sonraki durumu soruyor.'], ['Kırmızı top sayısı', 'istenen_verilen', `Kırmızı top sayısı verilmiş (${r}). Soru kırmızı GELME olasılığını soruyor.`]]],
-      plan: ['Yeni toplam top sayısını bulurum, kırmızı top sayısını bu toplama bölerim.', [['Kırmızı top sayısını mavi top sayısına bölerim.', 'olasilik_oran', 'Olasılıkta payda TÜM toplardır, sadece maviler değil.'], ['Sarıları saymadan kırmızıyı toplama bölerim.', 'problem_adim', 'Sarılar da torbada ve çekilebilirler. Yeni toplamı kullanmalıyız.'], ['Toplam top sayısını kırmızı top sayısına bölerim.', 'pay_payda_ters', 'Pay ile payda yer değiştirmiş. Pay kırmızı topların sayısı (parça), payda bütün topların sayısı (bütün) olmalı.']]],
+      plan: ['Yeni toplam top sayısını bulurum; kırmızı topların bütün topların kaçta kaçı olduğunu kesirle gösteririm.', [['Kırmızı topları yalnız mavi toplarla karşılaştırırım; kesrin paydası mavi top sayısı olur.', 'olasilik_oran', 'Kesrin paydası BÜTÜN toplardır, sadece maviler değil.'], ['Sarıları saymadan kırmızıların kaçta kaç olduğunu bulurum.', 'problem_adim', 'Sarılar da torbada ve çekilebilirler. Yeni toplamı kullanmalıyız.'], ['Kesrin payına bütün topları, paydasına kırmızı topları yazarım.', 'pay_payda_ters', 'Pay ile payda yer değiştirmiş. Pay kırmızı topların sayısı (parça), payda bütün topların sayısı (bütün) olmalı.']]],
       coz: [{ prompt: 'Torbada şimdi kaç top var?', answer: top, unit: 'top', ip: 'Torbada hangi renk toplar var? Hepsini topla.',
           inputMis: [{ v: r + m, mis: 'problem_adim', ac: `Sarı topları unuttun. ${y} sarı top da eklendi.` }], steps: [`${r} + ${m} + ${y} = ${top} top`] },
         { prompt: `Torbada ${top} top var, ${r} tanesi kırmızı. Kırmızı gelme olasılığı kaçtır?`, ip: 'Kırmızı toplar, bütün topların kaçta kaçı? (parça / bütün)',
-          options: mc(fr(r, top), [[fr(r, r + m), 'problem_adim', `Sarılar eklenmeden önceki toplamı kullandın. Şimdi torbada ${top} top var.`], [fr(r, m + y), 'olasilik_oran', 'Paydaya kırmızı olmayanları koydun. Payda tüm toplar olmalı.'], [fr(top, r), 'pay_payda_ters', 'Pay ile payda ters. Üstte istenen (kırmızı), altta tüm toplar olmalı.']]),
-          steps: ['Kırmızı toplar, bütün topların kaçta kaçı? (parça / bütün)', `${r} / ${top} = ${fr(r, top)}`] }],
+          options: mc(fr(r, top), [[fr(r, r + m), 'problem_adim', `Sarılar eklenmeden önceki toplamı kullandın. Şimdi torbada ${top} top var.`], [fr(r, m + y), 'olasilik_oran', 'Paydaya kırmızı olmayanları koydun. Payda bütün toplar olmalı.'], [fr(top, r), 'pay_payda_ters', 'Pay ile payda ters. Pay kırmızı topların sayısı (parça), payda bütün topların sayısı (bütün) olmalı.']]),
+          steps: [`Parça: ${r} kırmızı top. Bütün: ${top} top.`, `Kırmızı toplar bütün topların ${fr(r, top)} kadarı.`] }],
       // Kontrol: 5. sınıfta kesirlerle toplama yok; paydanın bütün topları saydığı toplama ile doğrulanır
       kontrol: [`Kırmızı gelme olasılığını ${fr(r, top)} buldun. Bunu nasıl kontrol edersin?`, `Bütün renkleri say: ${r} + ${m} + ${y} = ${top}; payda ${top} olmalı.`, [[`Kırmızı ve mavileri say: ${r} + ${m} = ${r + m}; payda ${r + m} olmalı.`, 'problem_adim', 'Sarıları unuttun. Sarılar da torbada; payda BÜTÜN topları saymalı.'], ['Olasılık 1\'den büyük de olabilir, kontrol gerekmez.', 'olasilik_buyuk', 'Olasılık en fazla 1 olabilir (kesin olay).']], 'Kesrin paydası torbadaki bütün topların sayısı olmalı; bütün renkleri toplayınca paydayı bulmalısın.'] });
   };
@@ -2670,7 +2695,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
       kural: 'İmkânsız = 0 • Kesin = 1 • Mümkün: 0 ile 1 arası.',
     }),
     S('p_spektrum', 't7', 'Olasılık Spektrumu', '170–178', {
-      gorsel: { text: 'Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa <b>az olası</b>, fazlaysa <b>çok olası</b>.', vis: () => V.spinner(['sb', 'c0b', 'sb', 'sb']) },
+      gorsel: { text: 'Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa <b>az olası</b>, yarısıysa <b>eşit olası</b>, fazlaysa <b>çok olası</b>.', vis: () => V.spinner(['sb', 'c0b', 'sb', 'sb']) },
       hikaye: 'Doğum günü çarkında 4 dilimin 3\'ü mavi. Duru "Mavi gelme ihtimali yüksek!" dedi. Haklıydı: 3/4, yarıdan fazla, yani <b>çok olası</b>.',
       adim: ['Kaç dilim mavi, say (parça).', 'Bütün dilimleri say (bütün).', 'Mavi dilimler bütünün kaçta kaçı? Bu kesir olasılığı gösterir.', '1/2 ile karşılaştır: az mı, eşit mi, çok mu?'],
       kural: 'Olasılık 0 ile 1 arasındadır; asla 1\'den büyük olamaz.',
@@ -3523,7 +3548,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
     sv.querySelectorAll('text').forEach((el, k) => el.style.setProperty('--g', (0.5 + 0.1 * k).toFixed(2) + 's')); sv.classList.add('ciz');
   });
   // Metni değişen anlatım kartının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, e_oncelik_hikaye: 2 };
+  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, p_spektrum_gorsel: 2, e_oncelik_hikaye: 2 };
   const kartSes = (id, f) => `kart_${id}_${f}${KART_SES_SURUM[id + '_' + f] ? '_' + KART_SES_SURUM[id + '_' + f] : ''}`;
   const sayCard = (id, f) => {
     const kart = document.querySelector('.modal .lcard') || document.querySelector('.lcard');
@@ -4063,7 +4088,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2 };
+  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2 };
   const misSes = (id) => `mis_${id}${MIS_SES_SURUM[id] ? '_' + MIS_SES_SURUM[id] : ''}`;
   function ikinciIpucu(q, res) {
     if (res.ip) return res.ip;

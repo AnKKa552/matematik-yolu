@@ -234,7 +234,7 @@
       kural: 'İmkânsız = 0 • Kesin = 1 • Mümkün: 0 ile 1 arası.',
     }),
     S('p_spektrum', 't7', 'Olasılık Spektrumu', '170–178', {
-      gorsel: { text: 'Çarkta mavi dilim sayısı / tüm dilimler = olasılık. Yarıdan azsa <b>az olası</b>, fazlaysa <b>çok olası</b>.', vis: () => V.spinner(['sb', 'c0b', 'sb', 'sb']) },
+      gorsel: { text: 'Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa <b>az olası</b>, yarısıysa <b>eşit olası</b>, fazlaysa <b>çok olası</b>.', vis: () => V.spinner(['sb', 'c0b', 'sb', 'sb']) },
       hikaye: 'Doğum günü çarkında 4 dilimin 3\'ü mavi. Duru "Mavi gelme ihtimali yüksek!" dedi. Haklıydı: 3/4, yarıdan fazla, yani <b>çok olası</b>.',
       adim: ['Kaç dilim mavi, say (parça).', 'Bütün dilimleri say (bütün).', 'Mavi dilimler bütünün kaçta kaçı? Bu kesir olasılığı gösterir.', '1/2 ile karşılaştır: az mı, eşit mi, çok mu?'],
       kural: 'Olasılık 0 ile 1 arasındadır; asla 1\'den büyük olamaz.',
