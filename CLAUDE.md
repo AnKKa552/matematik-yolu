@@ -106,6 +106,15 @@ Bu boyutların hepsi "Ben → Öğrenme Parmak İzim" ekranında öğrenciye, "V
 
 ---
 
+### 3.1 Kullanılabilirlik turu (19.10.2026)
+Uygulama, ilk kez açan bir çocuğun gözünden baştan sona gezildi (her ekran ölçüldü: dokunuş sayısı, yazı miktarı, 44 px altı dokunma alanı). Düzeltilenler:
+- **Kayıt tek alan:** "Sana ne diyelim?" (yalnız ad). Doğum tarihi, okul ve soyad **istenmez** (hiçbir yerde kullanılmıyordu; KVKK veri minimizasyonu §1-6). Veli adımı atlanabilir kalır.
+- **Dürüst veli raporu:** güçlü/zayıf konu etiketi için o konuda **en az 4 cevap** gerekir (seviye belirlemedeki tek soruyla "destek gereken konu" yazılmaz). 1 dakikadan kısa çalışma "0 dk" değil "<1 dk".
+- **Lig, yeni başlayanı kırmaz:** çocuğun ilk lig haftasında düşme yok ("🌱 İlk haftan: bu hafta ligden düşmezsin"), düşme bölgesi gösterilmez; demo rakipler hafta başında sıfıra yakın XP ile başlar (önceden yeni çocuk ilk gün kırmızı bölgede başlıyordu).
+- **Üst çubuk açıklamalı:** 🔥 💎 ⚡ 🧊 simgelerine dokununca ne oldukları tek cümleyle yazar.
+- **Dokunma alanları ≥ 44 px:** tema düğmeleri, dersi kapat ✕, soru 🔊, kitap sekmeleri, EBA bağlantıları, küçük düğmeler.
+- Not: test ortamında görülen "Unexpected token '<'" hatası uygulamadan değil, ağ engelinin supabase-js yerine HTML döndürmesinden kaynaklanır (gerçek cihazda yok).
+
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 
 ### 4.1 Ustalık: Bayesian Knowledge Tracing (BKT)

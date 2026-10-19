@@ -275,8 +275,10 @@
     const hintRate = st.hints.q ? st.hints.used / st.hints.q : 0;
     const resil = st.rescue.tries ? st.rescue.ok / st.rescue.tries : null;
     const attempted = SKILLS.filter(s => st.skills[s.id].n > 0);
-    const strong = attempted.slice().sort((a, b) => E.eff(st.skills[b.id]) - E.eff(st.skills[a.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) >= 0.5);
-    const weak = attempted.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7 && !strong.includes(s));
+    // Güçlü/zayıf etiketi için en az 4 cevap gerekir (seviye belirlemedeki tek soruyla etiket konmaz; §4.7 dürüst gösterge)
+    const olculen4 = attempted.filter(s => st.skills[s.id].n >= 4);
+    const strong = olculen4.slice().sort((a, b) => E.eff(st.skills[b.id]) - E.eff(st.skills[a.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) >= 0.5);
+    const weak = olculen4.slice().sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id])).slice(0, 3).filter(s => E.eff(st.skills[s.id]) < 0.7 && !strong.includes(s));
     const misList = Object.entries(st.mis).filter(([k]) => k !== 'genel').map(([k, v]) => ({ id: k, ...v, t: MIS[k] ? MIS[k].t : k, active: v.n > v.fixed, kesin: (v.q ? v.q.length : v.n) >= 2 })).sort((a, b) => (b.n - b.fixed) - (a.n - a.fixed));
     const totalQ = attempted.reduce((a, s) => a + st.skills[s.id].n, 0), totalOk = attempted.reduce((a, s) => a + st.skills[s.id].ok, 0);
     const A_ = st.atolye || {}, asamalar = ['anla', 'plan', 'tahmin', 'coz', 'kontrol', 'derin'].map(k => ({ k, ad: ATOLYE.ASAMA[k], ek: k === 'tahmin' || k === 'derin', n: (A_[k] || {}).n || 0, ok: (A_[k] || {}).ok || 0, acc: (A_[k] || {}).n ? A_[k].ok / A_[k].n : null }));
@@ -293,7 +295,7 @@
   /* ---------------- Veli raporu metni ---------------- */
   E.parentReport = (st) => {
     const p = st.profile || {}, fp = E.fingerprint(st), wk = Date.now() - 7 * DAY;
-    const ses = st.sessions.filter(s => s.at >= wk), mins = Math.round(ses.reduce((a, s) => a + s.ms, 0) / 60000), xp = ses.reduce((a, s) => a + s.xp, 0);
+    const ses = st.sessions.filter(s => s.at >= wk), msTop = ses.reduce((a, s) => a + s.ms, 0), mins = msTop > 0 && msTop < 60000 ? '<1' : Math.round(msTop / 60000), xp = ses.reduce((a, s) => a + s.xp, 0);
     const daysActive = new Set(ses.map(s => today(s.at))).size;
     const qn = ses.reduce((a, s) => a + s.n, 0), acc = qn ? Math.round(100 * ses.reduce((a, s) => a + s.acc * s.n, 0) / qn) : 0;
     const L = [];
@@ -301,7 +303,7 @@
     L.push(`Öğrenci: ${p.name || '-'} (5. sınıf)`);
     L.push(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`);
     L.push('');
-    L.push(`⏱ Son 7 gün: ${daysActive} gün çalıştı, toplam ${mins} dakika, ${ses.length} ders, ${qn} soru.`);
+    L.push(`⏱ Son 7 gün: ${daysActive} gün çalıştı, toplam ${mins === '<1' ? '1 dakikadan az' : mins + ' dakika'}, ${ses.length} ders, ${qn} soru.`);
     L.push(`✅ Doğruluk: %${acc}   ⚡ Kazanılan XP: ${xp}   🔥 Seri: ${st.streak} gün`);
     if (fp.strong.length) L.push(`💪 Güçlü olduğu konular: ${fp.strong.map(s => s.title).join(', ')}`);
     if (fp.weak.length) L.push(`🎯 Destek gereken konular: ${fp.weak.map(s => s.title).join(', ')}`);
@@ -366,7 +368,8 @@
     const ws = weekStart();
     if (st.week.start === ws) return null;
     const L = E.league(st, st.week.start), rank = L.rows.findIndex(r => r.me) + 1, from = st.league.tier || 0;
-    let to = from; if (st.week.xp > 0 && rank <= 3) to = Math.min(TIERS.length - 1, from + 1); else if (rank >= 8) to = Math.max(0, from - 1);
+    const ilkHafta = !st.league.last; // ilk haftasında çocuk ligden düşmez (yeni başlayanı kırmamak için)
+    let to = from; if (st.week.xp > 0 && rank <= 3) to = Math.min(TIERS.length - 1, from + 1); else if (rank >= 8 && !ilkHafta) to = Math.max(0, from - 1);
     if (st.week.xp > 0 && rank <= 3) st.top3 = (st.top3 || 0) + 1;
     st.league = { tier: to, last: { rank, from, to, xp: st.week.xp } };
     st.week = { start: ws, xp: 0 };
@@ -380,10 +383,10 @@
     const ws = wsArg || st.week.start, seed = (s) => { let x = Math.sin(s) * 10000; return x - Math.floor(x); };
     const names = ['Kuzey', 'Lina', 'Toprak', 'Masal', 'Atlas', 'İnci', 'Poyraz', 'Eylül', 'Bulut'];
     const elapsed = Math.min(1, (Date.now() - ws) / (7 * DAY));
-    const rows = names.map((n, i) => ({ name: n, demo: true, xp: Math.round((80 + seed(ws / 1e7 + i) * 520) * (0.25 + elapsed * 0.75)) }));
+    const rows = names.map((n, i) => ({ name: n, demo: true, xp: Math.round((80 + seed(ws / 1e7 + i) * 520) * (0.08 + elapsed * 0.92)) })); // hafta başında rakipler de sıfıra yakın başlar
     rows.push({ name: (st.profile && st.profile.name) || 'Sen', me: true, xp: st.week.xp });
     rows.sort((a, b) => b.xp - a.xp);
-    return { tier: TIERS[st.league.tier || 0], rows, daysLeft: Math.max(0, Math.ceil((ws + 7 * DAY - Date.now()) / DAY)) };
+    return { tier: TIERS[st.league.tier || 0], ilkHafta: !st.league.last, rows, daysLeft: Math.max(0, Math.ceil((ws + 7 * DAY - Date.now()) / DAY)) };
   };
 
   G.MY_E = E;

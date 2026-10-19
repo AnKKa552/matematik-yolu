@@ -16,7 +16,7 @@ async def main():
         await pg.evaluate("window.MY_APP.st.settings.voice=false; window.MY_APP.st.settings.sound=false")
         await pg.screenshot(path=OUT+'01_welcome.png')
         await pg.click('[data-act=onb-next]')
-        await pg.fill('#f-name','Ela Yılmaz'); await pg.fill('#f-birth','2015-05-10'); await pg.fill('#f-school','5/B')
+        await pg.fill('#f-name','Ela Yılmaz')
         await pg.screenshot(path=OUT+'02_info.png'); await pg.click('[data-act=onb-next]')
         await pg.fill('#f-pname','Ayşe Yılmaz'); await pg.fill('#f-pphone','0532 111 22 33'); await pg.check('#f-kvkk')
         await pg.click('[data-act=onb-next]')

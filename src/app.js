@@ -250,7 +250,10 @@
   /* =================== GÖRÜNÜMLER =================== */
   const unlocked = (sk) => { if (!sk.prereq.length) return true; const p = A.st.skills[sk.prereq[0]]; return p.lessons > 0 || E.eff(p) >= 0.5 || A.st.skills[sk.id].n > 0 || E.eff(A.st.skills[sk.id]) >= 0.3; };
   const goalRing = () => { const v = Math.min(1, todayXP() / A.st.dailyGoal), r = 15, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 38 38" aria-label="Günlük hedef ${todayXP()}/${A.st.dailyGoal} XP"><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" transform="rotate(-90 19 19)"/><text x="19" y="23" text-anchor="middle" font-size="11" font-weight="900" fill="var(--ink)">⚡</text></svg>`; };
-  const topbar = () => `<div class="topbar"><div class="stat fire" title="Seri"><span class="ic">🔥</span>${A.st.streak}</div><div class="stat gem" title="Elmas"><span class="ic">💎</span>${A.st.gems}</div><div class="stat" title="Günlük hedef">${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></div><div class="stat" title="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</div></div>`;
+  // Üst çubuk: her simgeye dokununca ne olduğunu kısa bir cümleyle söyler (çocuk 🧊'nin ne olduğunu bilemez)
+  const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
+  const UST = { seri: () => `🔥 Serin <b>${A.st.streak} gün</b>. Her gün en az bir ders yaparsan büyür.`, elmas: () => `💎 <b>${A.st.gems} elmasın</b> var. Ders sonundaki sandıklardan kazanırsın, seri koruyucu alırsın.`,
+    hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Bir gün ders yapamazsan serin bozulmaz.` };
   const nav = () => `<nav class="nav">${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
 
   /* Harita mahallesi: her temanın kendine has komşusu (özgün karakterler, ses yok: konuşan tek ses Pi) */
@@ -332,10 +335,10 @@
     const L0 = E.league(A.st), srv = CL && CL.lig, L = srv ? { tier: E.TIERS[srv[0].kademe || 0], daysLeft: L0.daysLeft, rows: srv.map(r => ({ name: r.ben ? ((A.st.profile && A.st.profile.name.split(' ')[0]) || 'Sen') : r.takma_ad, xp: r.xp, me: r.ben })) } : L0, colors = ['#5B4BFF', '#FF9F1C', '#14B8A6', '#EC4899', '#3B82F6', '#22C55E', '#8B5CF6', '#F97316', '#EAB308', '#0EA5E9'];
     const ti = A.st.league.tier || 0, last = A.st.league.last, gems = ['🥉', '🥈', '🥇', '💚', '💎'];
     return `${topbar()}<div class="scroll"><div class="tiers">${E.TIERS.map((t, i) => `<div class="tier ${i === ti ? 'on' : i < ti ? 'past' : ''}"><span>${gems[i]}</span><small>${t}</small></div>`).join('')}</div>
-      <div class="center" style="margin:6px 0 10px"><h2>${L.tier} Ligi</h2><div class="muted sm">Hafta bitimine ${L.daysLeft} gün · İlk 3 yükselir, son 3 düşer</div></div>
+      <div class="center" style="margin:6px 0 10px"><h2>${L.tier} Ligi</h2><div class="muted sm">Hafta bitimine ${L.daysLeft} gün · İlk 3 yükselir${L.ilkHafta ? '' : ', son 3 düşer'}</div></div>
       ${last ? `<div class="speech" style="margin-bottom:10px">Geçen hafta <b>${last.rank}.</b> oldun${last.to > last.from ? ' ve <b>' + E.TIERS[last.to] + ' Ligi</b>\'ne yükseldin! 🎉' : last.to < last.from ? '; bu hafta geri dönme zamanı! 💪' : '.'}</div>` : ''}
-      <div class="card" style="padding:8px">${L.rows.map((r, i) => `${i === 3 ? '<div class="zone up">▲ YÜKSELME BÖLGESİ ▲</div>' : ''}${i === 7 ? '<div class="zone down">▼ DÜŞME BÖLGESİ ▼</div>' : ''}<div class="lrow ${r.me ? 'me' : ''}"><div class="rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</div><div class="av" style="background:${colors[i % 10]}">${esc(r.name[0])}</div><div class="grow"><b>${esc(r.name)}</b>${r.demo ? ' <span class="muted sm">(demo)</span>' : ''}</div><b>${r.xp} XP</b></div>`).join('')}</div>
-      <p class="muted sm center">${srv ? 'Rakiplerin aynı ligdeki gerçek öğrenciler; sadece takma adları görünür.' : 'Rakipler örnek (demo) öğrencilerdir. Bulut hesabı bağlanınca gerçek öğrencilerle eşleşirsin.'}</p></div>${nav()}`;
+      <div class="card" style="padding:8px">${L.rows.map((r, i) => `${i === 3 ? '<div class="zone up">▲ YÜKSELME BÖLGESİ ▲</div>' : ''}${i === 7 && !L.ilkHafta ? '<div class="zone down">▼ DÜŞME BÖLGESİ ▼</div>' : ''}<div class="lrow ${r.me ? 'me' : ''}"><div class="rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</div><div class="av" style="background:${colors[i % 10]}">${esc(r.name[0])}</div><div class="grow"><b>${esc(r.name)}</b>${r.demo ? ' <span class="muted sm">(demo)</span>' : ''}</div><b>${r.xp} XP</b></div>`).join('')}</div>
+      ${L.ilkHafta ? '<p class="center sm" style="font-weight:800">🌱 İlk haftan: bu hafta ligden düşmezsin. İlk 3\'e girersen yükselirsin!</p>' : ''}<p class="muted sm center">${srv ? 'Rakiplerin aynı ligdeki gerçek öğrenciler; sadece takma adları görünür.' : 'Rakipler örnek (demo) öğrencilerdir. Bulut hesabı bağlanınca gerçek öğrencilerle eşleşirsin.'}</p></div>${nav()}`;
   }
 
   function viewProfile() {
@@ -627,9 +630,8 @@
     const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 2, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
     if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button></div>`;
     if (o.step === 1) return `<div class="onb">${dots}<h2>Seni tanıyalım</h2>
-      <div class="field"><label>Adın ve soyadın</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela Yılmaz" autocomplete="off"></div>
-      <div class="field"><label>Doğum tarihin</label><input id="f-birth" type="date" value="${esc(d.birth || '')}"></div>
-      <div class="field"><label>Okulun / şuben (isteğe bağlı)</label><input id="f-school" value="${esc(d.school || '')}" placeholder="Örn: 5/B"></div>
+      <div class="field"><label>Sana ne diyelim?</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela" autocomplete="off" maxlength="30"></div>
+      <p class="muted sm" style="margin:4px 0 0">Sadece adın yeter. Pi seni bu adla çağıracak. 🙂</p>
       <div style="flex:1"></div><button class="btn" data-act="onb-next">İleri</button></div>`;
     if (o.step === 2) return `<div class="onb">${dots}<h2>Veli bilgileri</h2><p class="muted" style="margin:0">Haftalık gelişim raporu bu kişiye gönderilir.</p>
       <div class="field"><label>Velinin adı soyadı</label><input id="f-pname" value="${esc(d.parentName || '')}"></div>
@@ -772,6 +774,7 @@
     if (A.view === 'lesson' && A.q && !A.fb && A.idle) idleKur();
     const act = el.dataset.act, v = el.dataset.v;
     switch (act) {
+      case 'ust': if (UST[v]) { sfx.tap(); toast(UST[v]()); } break;
       case 'tab': A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
       case 'theme': A.theme = v; sfx.tap(); render(); setTimeout(() => { const k = document.querySelector('.komsu'); if (k && komsuSay[v] === undefined) k.click(); }, 500); break;
       case 'node': A.modal = skillModal(v); render(); break;
@@ -830,7 +833,7 @@
       case 'edit-profile': A.onb = { step: 1, data: Object.assign({}, A.st.profile), edit: true }; A.st.profile = null; render(); break;
       case 'onb-next': case 'onb-skip': {
         const o = A.onb, d = o.data;
-        if (o.step === 1) { d.name = (document.getElementById('f-name').value || '').trim(); d.birth = document.getElementById('f-birth').value; d.school = document.getElementById('f-school').value.trim(); if (!d.name) { toast('Adını yazar mısın? 🙂'); break; } }
+        if (o.step === 1) { d.name = (document.getElementById('f-name').value || '').trim(); if (!d.name) { toast('Adını yazar mısın? 🙂'); break; } }
         if (o.step === 2 && act === 'onb-next') { d.parentName = document.getElementById('f-pname').value.trim(); d.parentPhone = document.getElementById('f-pphone').value.trim(); d.parentEmail = document.getElementById('f-pmail').value.trim(); d.kvkk = document.getElementById('f-kvkk').checked; if ((d.parentPhone || d.parentEmail) && !d.kvkk) { toast('Veli onayı kutusunu işaretlemelisiniz.'); break; } }
         if (o.edit && o.step === 2) { A.st.profile = Object.assign({}, d); delete A.st.profile.edit; save(); A.onb = { step: 0, data: {} }; A.tab = 'veli'; render(); break; }
         o.step++; render(); break; }
@@ -839,7 +842,7 @@
       case 'pi-hello': piSay('hosgeldin'); break;
       case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
-      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, birth: d.birth, school: d.school, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, created: Date.now() }; save(); if (act === 'onb-finish') startSession('placement', null); else render(); break; }
+      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, created: Date.now() }; save(); if (act === 'onb-finish') startSession('placement', null); else render(); break; }
     }
   });
   document.addEventListener('keydown', (e) => {
