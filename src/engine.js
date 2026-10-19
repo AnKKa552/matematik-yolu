@@ -298,7 +298,7 @@
     const ses = st.sessions.filter(s => s.at >= wk), msTop = ses.reduce((a, s) => a + s.ms, 0), mins = msTop > 0 && msTop < 60000 ? '<1' : Math.round(msTop / 60000), xp = ses.reduce((a, s) => a + s.xp, 0);
     const daysActive = new Set(ses.map(s => today(s.at))).size;
     const qn = ses.reduce((a, s) => a + s.n, 0), acc = qn ? Math.round(100 * ses.reduce((a, s) => a + s.acc * s.n, 0) / qn) : 0;
-    const L = [];
+    const L = []; let probIcgoru = null;
     L.push(`📘 Matematik Yolu — Haftalık Gelişim Raporu`);
     L.push(`Öğrenci: ${p.name || '-'} (5. sınıf)`);
     L.push(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`);
@@ -317,8 +317,9 @@
       const azVeri = fp.problem.asamalar.some(a => a.n && a.n < 5);
       L.push(`🧩 Problem çözme (${fp.problem.sayi} problem, ilk denemede doğru${azVeri ? ', ön değerlendirme: veri az' : ''}): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)} (${a.ok}/${a.n})`).join(' · ')}`);
       const z = fp.problem.zayif, coz = fp.problem.asamalar.find(a => a.k === 'coz');
-      if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) L.push(`   → Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`);
-      else if (z) L.push(`   → En çok "${z.ad}" adımında desteğe ihtiyacı var.`);
+      if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) probIcgoru = `Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`;
+      else if (z) probIcgoru = `En çok "${z.ad}" adımında desteğe ihtiyacı var.`;
+      if (probIcgoru) L.push(`   → ${probIcgoru}`);
       if (fp.problem.bagimsiz) L.push(`   → Benzer yeni problemi tek başına çözme: ilk denemede %${Math.round(fp.problem.bagimsiz.acc * 100)} (${fp.problem.bagimsiz.ok}/${fp.problem.bagimsiz.n}${fp.problem.bagimsiz.n < 5 ? ', ön değerlendirme' : ''}). Öğrenmenin en güçlü kanıtı budur.`);
     }
     if (fp.bestFormat) L.push(`🧠 En iyi öğrendiği anlatım biçimi: ${FORMATS[fp.bestFormat].name}`);
@@ -327,7 +328,10 @@
     L.push('');
     const tip = fp.weak.length ? `Bu hafta evde "${fp.weak[0].title}" konusunu günlük hayattan bir örnekle konuşmanız (ör. market fişi, saat, ölçme) çok faydalı olur.` : 'Harika gidiyor! Günde 10-15 dakikalık düzenli çalışmayı sürdürmesini destekleyin.';
     L.push(`👨‍👩‍👧 Öneri: ${tip}`);
-    return { text: L.join('\n'), mins, xp, acc, daysActive, lessons: ses.length, qn };
+    // Görsel rapor için: son 7 günün günlük dakikası ve tema bazında ustalık (yalnız çalışılan beceriler)
+    const gunluk = []; for (let i = 6; i >= 0; i--) { const t0 = new Date(); t0.setHours(0, 0, 0, 0); const bas = t0.getTime() - i * DAY, son = bas + DAY; gunluk.push({ at: bas, dk: Math.round(st.sessions.filter(s => s.at >= bas && s.at < son).reduce((a, s) => a + s.ms, 0) / 60000) }); }
+    const temalar = (typeof THEMES !== 'undefined' ? THEMES : []).map(th => { const sk = SKILLS.filter(s => s.theme === th.id && st.skills[s.id].n > 0); return { id: th.id, no: th.no, ad: th.title, ikon: th.icon, renk: th.color, n: sk.length, top: SKILLS.filter(s => s.theme === th.id).length, m: sk.length ? sk.reduce((a, s) => a + E.eff(st.skills[s.id]), 0) / sk.length : null }; });
+    return { text: L.join('\n'), mins, xp, acc, daysActive, lessons: ses.length, qn, fp, act, olasi, fixed, probIcgoru, tip, gunluk, temalar };
   };
 
 

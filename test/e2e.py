@@ -18,8 +18,6 @@ async def main():
         await pg.click('[data-act=onb-next]')
         await pg.fill('#f-name','Ela Yılmaz')
         await pg.screenshot(path=OUT+'02_info.png'); await pg.click('[data-act=onb-next]')
-        await pg.fill('#f-pname','Ayşe Yılmaz'); await pg.fill('#f-pphone','0532 111 22 33'); await pg.check('#f-kvkk')
-        await pg.click('[data-act=onb-next]')
         await pg.click('[data-act=motiv][data-v=yaris]'); await pg.screenshot(path=OUT+'03_motiv.png')
         await pg.click('[data-act=onb-finish]')
         # yerleştirme: 7 soru, rastgele cevap
@@ -107,9 +105,25 @@ async def main():
             while await pg.evaluate("window.MY_APP.view")=='lesson' and n<30:
                 await answer(0.7, f'{t}_{n}' if n==0 else None); n+=1
             await bitir()
-        for tab in ['pratik','lig','profil','veli']:
+        for tab in ['pratik','lig','profil']:
             await pg.click(f'[data-act=tab][data-v={tab}]'); await pg.wait_for_timeout(200)
             await pg.screenshot(path=OUT+f'20_{tab}.png', full_page=True)
+        # Veli alanı şifreli: önce kapı, şifre belirleme, sonra veli bilgileri
+        await pg.click('[data-act=tab][data-v=veli]'); await pg.wait_for_timeout(200)
+        assert await pg.query_selector('#f-pin1'), 'veli kapısı yok'
+        assert not await pg.query_selector('pre.report'), 'rapor kapısız görünüyor'
+        await pg.screenshot(path=OUT+'19a_veli_kapi.png')
+        await pg.fill('#f-pin1','4826'); await pg.fill('#f-pin2','4826'); await pg.click('[data-act=veli-pin-kur]'); await pg.wait_for_timeout(200)
+        assert await pg.query_selector('pre.report'), 'şifreden sonra rapor yok'
+        await pg.click('[data-act=edit-profile]'); await pg.fill('#f-pname','Ayşe Yılmaz'); await pg.fill('#f-pphone','0532 111 22 33'); await pg.check('#f-kvkk'); await pg.click('[data-act=veli-kaydet]'); await pg.wait_for_timeout(200)
+        assert (await pg.evaluate("window.MY_APP.st.profile.parentPhone"))=='0532 111 22 33'
+        await pg.click('[data-act=tab][data-v=yol]'); await pg.click('[data-act=tab][data-v=veli]'); await pg.wait_for_timeout(150)
+        assert await pg.query_selector('#f-pin'), 'sekmeden çıkınca kilitlenmedi'
+        await pg.fill('#f-pin','1111'); await pg.click('[data-act=veli-pin-gir]'); await pg.wait_for_timeout(150)
+        assert not await pg.query_selector('pre.report'), 'yanlış şifreyle açıldı'
+        await pg.fill('#f-pin','4826'); await pg.click('[data-act=veli-pin-gir]'); await pg.wait_for_timeout(150)
+        assert await pg.query_selector('pre.report'), 'doğru şifreyle açılmadı'
+        await pg.screenshot(path=OUT+'20_veli.png', full_page=True)
         # hatalar modu + hızlı yarış
         await pg.click('[data-act=tab][data-v=pratik]'); await pg.click('[data-act=p-mistakes]'); await pg.wait_for_timeout(1200)
         n=0

@@ -649,6 +649,28 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 a.chip{min-height:44px;text-decoration:none}
 .btn.small{min-height:44px}
 .seg button,.ktab button{min-height:44px}
+/* Veli kapısı: çocuğa nazik yönlendirme kartı */
+.veli-cocuk{background:var(--brand-t);border-color:transparent;margin-bottom:12px}
+.veli-cocuk .btn{display:block;width:100%}
+#f-pin,#f-pin1,#f-pin2{font-size:24px;letter-spacing:10px;text-align:center}
+/* Görev sekmesi: tek öneri kartı */
+.card.bugun{display:block;width:100%;text-align:left;border:2px solid var(--brand,#5B4BFF);margin-bottom:14px;cursor:pointer}
+.bugun-ust{font-weight:900;letter-spacing:.06em;color:var(--brand,#5B4BFF);margin-bottom:6px}
+.bugun-ic{font-size:30px;width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:var(--brand-t);flex:none}
+.bugun h3{margin:0 0 2px;font-size:17px}
+.bugun-git{font-weight:900;color:#fff;background:var(--brand,#5B4BFF);border-radius:12px;padding:10px 12px;flex:none;min-height:44px;display:grid;place-items:center}
+/* Görsel veli raporu */
+.rkart{margin-bottom:12px}.rkart h3{margin:0 0 8px;font-size:16px}
+.rgun{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;text-align:center;margin-bottom:6px}
+.rgun-c{height:70px;background:var(--surface2);border-radius:8px;display:flex;align-items:flex-end;overflow:hidden}
+.rgun-c i{display:block;width:100%;background:var(--brand);border-radius:8px 8px 0 0}
+.rgun b{display:block;font-size:12px;min-height:16px}.rgun small{color:var(--muted);font-size:11px}
+.rbar{margin:6px 0;gap:8px}.rbar-ad{width:128px;flex:none;display:flex;flex-direction:column;line-height:1.2}.rbar-y{width:70px;text-align:right;flex:none}
+.rsat{margin-top:10px}.rsat .tag{margin:4px 4px 0 0;display:inline-block}
+.rmis{margin:4px 0 0;padding-left:20px}.rmis li{margin:2px 0}
+.ricgoru{margin-top:10px;padding:10px;border-radius:12px;background:var(--brand-t);font-weight:700}
+.rmetin summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rmetin .report{margin-top:10px}
 </style>
 </head>
 <body>
@@ -2894,7 +2916,7 @@ a.chip{min-height:44px;text-decoration:none}
     const ses = st.sessions.filter(s => s.at >= wk), msTop = ses.reduce((a, s) => a + s.ms, 0), mins = msTop > 0 && msTop < 60000 ? '<1' : Math.round(msTop / 60000), xp = ses.reduce((a, s) => a + s.xp, 0);
     const daysActive = new Set(ses.map(s => today(s.at))).size;
     const qn = ses.reduce((a, s) => a + s.n, 0), acc = qn ? Math.round(100 * ses.reduce((a, s) => a + s.acc * s.n, 0) / qn) : 0;
-    const L = [];
+    const L = []; let probIcgoru = null;
     L.push(`📘 Matematik Yolu — Haftalık Gelişim Raporu`);
     L.push(`Öğrenci: ${p.name || '-'} (5. sınıf)`);
     L.push(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`);
@@ -2913,8 +2935,9 @@ a.chip{min-height:44px;text-decoration:none}
       const azVeri = fp.problem.asamalar.some(a => a.n && a.n < 5);
       L.push(`🧩 Problem çözme (${fp.problem.sayi} problem, ilk denemede doğru${azVeri ? ', ön değerlendirme: veri az' : ''}): ${fp.problem.asamalar.filter(a => a.n).map(a => `${a.ad} %${Math.round(a.acc * 100)} (${a.ok}/${a.n})`).join(' · ')}`);
       const z = fp.problem.zayif, coz = fp.problem.asamalar.find(a => a.k === 'coz');
-      if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) L.push(`   → Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`);
-      else if (z) L.push(`   → En çok "${z.ad}" adımında desteğe ihtiyacı var.`);
+      if (z && (z.k === 'anla' || z.k === 'plan') && coz.acc !== null && coz.acc - z.acc >= 0.15) probIcgoru = `Hesaplamada değil, problemi ${z.k === 'anla' ? 'anlamada' : 'planlamada'} zorlanıyor. Problemleri birlikte sesli okuyup "Ne isteniyor?" diye sormak çok işe yarar.`;
+      else if (z) probIcgoru = `En çok "${z.ad}" adımında desteğe ihtiyacı var.`;
+      if (probIcgoru) L.push(`   → ${probIcgoru}`);
       if (fp.problem.bagimsiz) L.push(`   → Benzer yeni problemi tek başına çözme: ilk denemede %${Math.round(fp.problem.bagimsiz.acc * 100)} (${fp.problem.bagimsiz.ok}/${fp.problem.bagimsiz.n}${fp.problem.bagimsiz.n < 5 ? ', ön değerlendirme' : ''}). Öğrenmenin en güçlü kanıtı budur.`);
     }
     if (fp.bestFormat) L.push(`🧠 En iyi öğrendiği anlatım biçimi: ${FORMATS[fp.bestFormat].name}`);
@@ -2923,7 +2946,10 @@ a.chip{min-height:44px;text-decoration:none}
     L.push('');
     const tip = fp.weak.length ? `Bu hafta evde "${fp.weak[0].title}" konusunu günlük hayattan bir örnekle konuşmanız (ör. market fişi, saat, ölçme) çok faydalı olur.` : 'Harika gidiyor! Günde 10-15 dakikalık düzenli çalışmayı sürdürmesini destekleyin.';
     L.push(`👨‍👩‍👧 Öneri: ${tip}`);
-    return { text: L.join('\n'), mins, xp, acc, daysActive, lessons: ses.length, qn };
+    // Görsel rapor için: son 7 günün günlük dakikası ve tema bazında ustalık (yalnız çalışılan beceriler)
+    const gunluk = []; for (let i = 6; i >= 0; i--) { const t0 = new Date(); t0.setHours(0, 0, 0, 0); const bas = t0.getTime() - i * DAY, son = bas + DAY; gunluk.push({ at: bas, dk: Math.round(st.sessions.filter(s => s.at >= bas && s.at < son).reduce((a, s) => a + s.ms, 0) / 60000) }); }
+    const temalar = (typeof THEMES !== 'undefined' ? THEMES : []).map(th => { const sk = SKILLS.filter(s => s.theme === th.id && st.skills[s.id].n > 0); return { id: th.id, no: th.no, ad: th.title, ikon: th.icon, renk: th.color, n: sk.length, top: SKILLS.filter(s => s.theme === th.id).length, m: sk.length ? sk.reduce((a, s) => a + E.eff(st.skills[s.id]), 0) / sk.length : null }; });
+    return { text: L.join('\n'), mins, xp, acc, daysActive, lessons: ses.length, qn, fp, act, olasi, fixed, probIcgoru, tip, gunluk, temalar };
   };
 
 
@@ -3484,12 +3510,27 @@ a.chip{min-height:44px;text-decoration:none}
     </div>${nav()}`;
   }
 
+  // "Bugün bunu yap": tek, net öneri (Duolingo'nun "sonraki adım" fikri). Öncelik: unutulmaya yüz tutmuş konu →
+  // birikmiş hatalar → yoldaki sıradaki konu. Gerekçesi çocuğa tek cümleyle söylenir.
+  function bugunOneri() {
+    const st = A.st, calisilan = SKILLS.filter(s => st.skills[s.id].n > 0), due = E.dueSkills(st), ms = st.mistakes.length;
+    const siradaki = SKILLS.find(s => unlocked(s) && E.eff(st.skills[s.id]) < 0.7) || SKILLS.find(s => E.eff(st.skills[s.id]) < 0.85);
+    const hedefTamam = todayXP() >= st.dailyGoal;
+    if (!calisilan.length) return siradaki ? { act: 'learn', v: siradaki.id, ic: '🌱', t: siradaki.title, n: 'İlk konunla başla. Pi önce anlatacak, sonra 5 soru.' } : null;
+    if (due.length && due[0].r < 0.5) return { act: 'p-review', ic: '⏰', t: `Tekrar: ${SKILL[due[0].id].title}`, n: due.length > 1 ? `${due.length} konu unutulmaya başladı. Kısa bir tekrarla tazele.` : 'Bu konu unutulmaya başladı. Kısa bir tekrarla tazele.' };
+    if (ms >= 3) return { act: 'p-mistakes', ic: '🕵️', t: `Hatalarımı Çalış (${ms})`, n: 'Birkaç tuzak birikti. Onları birlikte aşalım.' };
+    if (hedefTamam && due.length) return { act: 'p-review', ic: '⏰', t: `Tekrar: ${SKILL[due[0].id].title}`, n: 'Bugünkü hedefin tamam! İstersen bir konuyu tazele.' };
+    if (siradaki) { const yeni = st.skills[siradaki.id].n === 0; return { act: yeni ? 'learn' : 'start', v: siradaki.id, ic: yeni ? '✨' : '📘', t: siradaki.title, n: hedefTamam ? 'Bugünkü hedefin tamam! Devam etmek istersen sıradaki konu bu.' : yeni ? 'Yolundaki sıradaki yeni konu. Pi önce anlatacak.' : 'Yolundaki sıradaki konu. Biraz daha çalışınca yıldızı dolacak.' }; }
+    return { act: 'p-mix', ic: '🎲', t: 'Karışık Pratik', n: 'Bütün konularda çok iyisin! Karışık sorularla formunu koru.' };
+  }
   function viewPractice() {
     const due = E.dueSkills(A.st), ms = A.st.mistakes.length, any = SKILLS.some(s => A.st.skills[s.id].n > 0);
     const item = (act, ic, bg, title, sub, dis) => `<button class="card prac" data-act="${act}" ${dis ? 'disabled style="opacity:.5"' : ''}><div class="ic" style="background:${bg}">${ic}</div><div class="grow"><h3>${title}</h3><div class="muted sm">${sub}</div></div><div style="font-size:22px">›</div></button>`;
     const Q = E.quests(A.st), qrow = (q) => `<div class="quest ${q.ok ? 'done' : ''}"><div class="qi">${q.ikon}</div><div class="grow"><b>${q.ad}</b><div class="qbar"><i style="width:${Math.round(100 * q.v / q.hedef)}%"></i><span>${q.v} / ${q.hedef}</span></div></div><div class="qr">${q.ok ? '✅' : '🎁'}<small>${q.odul}💎</small></div></div>`;
     const mo = Q.month, now = new Date(), left = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
+    const O = bugunOneri();
     return `${topbar()}<div class="scroll">
+      ${O ? `<button class="card bugun" data-act="${O.act}" ${O.v ? `data-v="${O.v}"` : ''}><div class="sm bugun-ust">BUGÜN BUNU YAP</div><div class="row"><div class="bugun-ic">${O.ic}</div><div class="grow"><h3>${esc(O.t)}</h3><div class="muted sm">${O.n}</div></div><div class="bugun-git">Başla ›</div></div></button>` : ''}
       <div class="mbanner"><div class="grow"><div class="sm" style="font-weight:900;opacity:.9">${left} GÜN KALDI</div><h2>${mo.ad}</h2><div class="sm" style="font-weight:800">Günlük görevleri tamamla, ${mo.hedef} göreve ulaş!</div><div class="qbar light"><i style="width:${Math.min(100, Math.round(100 * mo.done / mo.hedef))}%"></i><span>${mo.done} / ${mo.hedef}</span></div></div>${mascot(mo.claimed ? 'happy' : '', 70)}</div>
       <h2 class="sect">Günlük Görevler <span class="muted sm">· gece yarısı yenilenir</span></h2><div class="card list" style="gap:4px">${Q.list.map(qrow).join('')}</div>
       <h2 class="sect">Pratik Merkezi</h2><div class="list">
@@ -3546,7 +3587,7 @@ a.chip{min-height:44px;text-decoration:none}
       <li><b>Anlatım:</b> bir anlatım kartından sonraki ilk 3 sorudan en az 2'sinin doğru olma oranı. En az 2 kart gösterilince ölçülmüş sayılır.</li>
       <li><b>Problem adımları:</b> atölyede her adımın ilk denemede doğru oranı. "Kendin dene", benzer yeni problemi tek başına çözmektir.</li>
       <li>XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır.</li></ul></details>`;
-    const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'düzeldi ✓' : m.kesin ? 'çalışılıyor' : 'olası · 1 kez'}</span></div>`).join('') || '<div class="muted sm">Henüz kavram yanılgısı tespit edilmedi.</div>';
+    const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'aştın ✓' : m.kesin ? 'çalışıyoruz' : 'göz kulak'}</span></div>`).join('') || '<div class="muted sm">Henüz bir tuzak görmedik. 🙌</div>';
     return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${mascot('happy', 70)}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
       <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Tema kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
@@ -3555,7 +3596,7 @@ a.chip{min-height:44px;text-decoration:none}
         <h3 style="font-size:15px;margin:14px 0 4px">Cevaplarım nasıl geldi?</h3>${kbar}
         <h3 style="font-size:15px;margin:14px 0 4px">Bana en iyi gelen anlatım</h3>${fbars}
         ${fp.problem.sayi ? `<h3 style="font-size:15px;margin:14px 0 4px">Problem çözme adımlarım <span class="muted sm">(ilk denemede)</span></h3>${fp.problem.asamalar.some(a => a.n && a.n < 5) ? '<div class="muted sm">Ön değerlendirme: henüz az veri var, sayılar çözdükçe netleşir.</div>' : ''}${fp.problem.asamalar.filter(a => !a.ek || a.n).concat(fp.problem.bagimsiz ? [{ ad: '🎯 Kendin dene', acc: fp.problem.bagimsiz.acc, ok: fp.problem.bagimsiz.ok, n: fp.problem.bagimsiz.n }] : []).map(a => `<div class="row" style="margin:6px 0"><div style="width:120px" class="sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${a.acc === null ? 0 : Math.round(a.acc * 100)}%"></i></div><div class="sm" style="width:74px;text-align:right">${a.acc === null ? '–' : '%' + Math.round(a.acc * 100) + ` <small class="muted">${a.ok}/${a.n}</small>`}</div></div>`).join('')}` : ''}
-        <h3 style="font-size:15px;margin:14px 0 4px">Kavram yanılgılarım</h3>${mis}${nasil}</div>
+        <h3 style="font-size:15px;margin:14px 0 4px">🪤 Pi ile üzerinde çalıştığımız tuzaklar</h3><p class="muted sm" style="margin:0 0 6px">Tuzak, herkesin düşebileceği yaygın bir hatadır. Benzer soruları doğru yapınca "aştın ✓" olur.</p>${mis}${nasil}</div>
       <h2 class="sect">Rozetler</h2><div class="badges">${E.BADGES.map(b => `<div class="badge ${A.st.badges.includes(b.id) ? '' : 'off'}" title="${esc(b.desc)}"><div class="i">${b.icon}</div><div class="n">${b.name}</div></div>`).join('')}</div>
       <h2 class="sect">Ayarlar</h2><div class="card list">
         <label class="check"><input type="checkbox" data-act="set-sound" ${A.st.settings.sound ? 'checked' : ''}> Ses efektleri</label>
@@ -3572,17 +3613,65 @@ a.chip{min-height:44px;text-decoration:none}
     if (!CL.oturum) return `<div class="card" style="margin-top:14px"><b>☁️ Bulut hesabı (veli)</b><p class="muted sm" style="margin:6px 0 10px">E-posta adresinize bir giriş bağlantısı gönderelim. Şifre gerekmez.</p><div class="field"><input id="f-cloudmail" type="email" placeholder="veli@ornek.com" value="${esc((A.st.profile || {}).parentEmail || '')}"></div><button class="btn small" style="margin-top:8px" data-act="cloud-login">Giriş bağlantısı gönder</button></div>`;
     return `<div class="card" style="margin-top:14px"><b>☁️ Bulut hesabı bağlı</b><p class="muted sm" style="margin:6px 0 10px">${esc(CL.oturum.user.email)} · ${CL.sonKayit ? 'son kayıt ' + new Date(CL.sonKayit).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : 'kaydediliyor'}</p><button class="btn ghost small" data-act="cloud-logout">Çıkış yap</button></div>`;
   }
+  // Veli alanı şifreli: çocuk kendi hakkındaki veli raporunu (zayıf konular, yanılgılar) görmesin diye.
+  // Bu bir "çocuk kapısı"dır, kriptografik güvenlik değildir (veri zaten bu cihazda).
+  const pinOzet = (tuz, pin) => { let h = 2166136261 >>> 0; const m = 'my-veli|' + tuz + '|' + pin; for (let k = 0; k < 2000; k++) for (let i = 0; i < m.length; i++) { h ^= m.charCodeAt(i) + k; h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+  function veliKapisi() {
+    const V = A.st.veli, ad = esc((A.st.profile || {}).name || 'Çocuğunuz');
+    const ust = `<div class="center" style="margin:10px 0 6px;font-size:44px">🔒</div><h2 class="center">Veli alanı</h2>
+      <div class="card veli-cocuk"><b>Merhaba ${ad}! 🙂</b> Burası anne-baban için. Kendi gelişimini görmek istersen <b>Ben</b> sekmesine bak.<button class="btn small" style="margin-top:10px" data-act="tab" data-v="profil">🧠 Ben sekmesine git</button></div>`;
+    if (!V || !V.pin) return `${topbar()}<div class="scroll">${ust}
+      <div class="card"><b>Velisi misiniz? Önce bir şifre belirleyin.</b><p class="muted sm" style="margin:6px 0 10px">Haftalık gelişim raporu, veli bilgileri ve onaylar bu şifrenin arkasında durur. 4 rakam; çocuğunuzun bilmediği bir şifre seçin.</p>
+        <div class="field"><label>Şifre (4 rakam)</label><input id="f-pin1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password"></div>
+        <div class="field"><label>Şifre tekrar</label><input id="f-pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password"></div>
+        <button class="btn" style="margin-top:8px" data-act="veli-pin-kur">Şifreyi belirle ve gir</button></div></div>${nav()}`;
+    return `${topbar()}<div class="scroll">${ust}
+      <div class="card"><b>Veli şifresi</b>
+        <div class="field"><input id="f-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Veli şifresi" placeholder="• • • •"></div>
+        <button class="btn" style="margin-top:8px" data-act="veli-pin-gir">Gir</button>
+        <button class="btn ghost small" style="margin-top:8px" data-act="veli-unuttum">Şifremi unuttum</button></div></div>${nav()}`;
+  }
+  function veliBilgiFormu(p) {
+    return `<div class="card" style="margin-top:14px"><b>Bilgileri düzenle</b>
+      <div class="field"><label>Çocuğun adı (uygulamada görünen)</label><input id="f-cname" value="${esc(p.name || '')}" maxlength="30"></div>
+      <div class="field"><label>Velinin adı soyadı</label><input id="f-pname" value="${esc(p.parentName || '')}"></div>
+      <div class="field"><label>Velinin telefonu (WhatsApp)</label><input id="f-pphone" type="tel" inputmode="tel" value="${esc(p.parentPhone || '')}" placeholder="05xx xxx xx xx"></div>
+      <div class="field"><label>Velinin e-postası (isteğe bağlı)</label><input id="f-pmail" type="email" value="${esc(p.parentEmail || '')}"></div>
+      <label class="check"><input type="checkbox" id="f-kvkk" ${p.kvkk ? 'checked' : ''}> Velisi olarak, bu bilgilerin yalnızca gelişim raporu göndermek amacıyla kullanılmasına onay veriyorum. (Prototipte veriler sadece bu cihazda saklanır.)</label>
+      <div class="row" style="margin-top:10px"><button class="btn small" data-act="veli-kaydet">Kaydet</button><button class="btn ghost small" data-act="veli-vazgec">Vazgeç</button></div></div>`;
+  }
+  // Veli raporunun görsel hali: kartlar ve çubuklar. Metin hali (paylaşılan) değişmedi, altta açılır kutuda.
+  function veliGorsel(R) {
+    const fp = R.fp, yz = x => Math.round(x * 100), GUN = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    const enCok = Math.max(10, ...R.gunluk.map(g => g.dk));
+    const gunler = `<div class="rgun">${R.gunluk.map(g => `<div><div class="rgun-c"><i style="height:${g.dk ? Math.max(6, Math.round(100 * g.dk / enCok)) : 0}%"></i></div><b>${g.dk || ''}</b><small>${GUN[new Date(g.at).getDay()]}</small></div>`).join('')}</div><div class="muted sm">Günlük çalışma (dakika). Günde 10–15 dakika yeterli.</div>`;
+    const tema = R.temalar.filter(t => t.n).map(t => `<div class="row rbar"><div class="rbar-ad sm"><b>${t.ikon} ${esc(t.ad)}</b><small class="muted">${t.n}/${t.top} konu</small></div><div class="bar grow"><i style="width:${yz(t.m)}%;background:var(--${t.renk})"></i></div><div class="sm rbar-y">%${yz(t.m)}</div></div>`).join('') || '<div class="muted sm">Henüz çalışılan tema yok.</div>';
+    const chip = (arr, cls) => arr.map(x => `<span class="tag ${cls}">${esc(x.title || x.t)}</span>`).join(' ');
+    const konular = (fp.strong.length || fp.weak.length) ? `${fp.strong.length ? `<div class="rsat"><span class="sm"><b>💪 Güçlü</b></span> ${chip(fp.strong, 'ok')}</div>` : ''}${fp.weak.length ? `<div class="rsat"><span class="sm"><b>🎯 Destek gereken</b></span> ${chip(fp.weak, 'warm')}</div>` : ''}` : '<div class="muted sm">Güçlü/zayıf konu için bir konuda en az 4 cevap gerekir.</div>';
+    const K = fp.kanit, kanit = K && K.n >= 5 ? `<div class="kanitbar"><i class="k1" style="width:${K.ilk * 100}%"></i><i class="k2" style="width:${K.ipucu * 100}%"></i><i class="k3" style="width:${K.cozum * 100}%"></i></div><div class="kanitlej sm"><span><b class="k1"></b>İlk denemede %${yz(K.ilk)}</span><span><b class="k2"></b>İpucuyla %${yz(K.ipucu)}</span><span><b class="k3"></b>Çözüm gösterildi %${yz(K.cozum)}</span><span>(${K.n} cevap)</span></div>` : '<div class="muted sm">En az 5 cevaptan sonra görünür.</div>';
+    const pr = fp.problem, prob = pr.sayi >= 2 ? `<div class="card rkart"><h3>🧩 Problem çözme <span class="muted sm">(${pr.sayi} problem)</span></h3>${pr.asamalar.filter(a => a.n).map(a => `<div class="row rbar"><div class="rbar-ad sm"><b>${a.ad}</b></div><div class="bar grow"><i style="width:${yz(a.acc)}%"></i></div><div class="sm rbar-y">%${yz(a.acc)} <small class="muted">${a.ok}/${a.n}</small></div></div>`).join('')}${pr.bagimsiz ? `<div class="row rbar"><div class="rbar-ad sm"><b>🎯 Tek başına</b></div><div class="bar grow"><i style="width:${yz(pr.bagimsiz.acc)}%;background:var(--ok)"></i></div><div class="sm rbar-y">%${yz(pr.bagimsiz.acc)} <small class="muted">${pr.bagimsiz.ok}/${pr.bagimsiz.n}</small></div></div>` : ''}${R.probIcgoru ? `<div class="ricgoru">💡 ${esc(R.probIcgoru)}</div>` : ''}</div>` : '';
+    const misSat = (arr, ic, bas) => arr.length ? `<div class="rsat"><span class="sm"><b>${ic} ${bas}</b></span><ul class="rmis">${arr.map(m => `<li>${esc(m.t)}</li>`).join('')}</ul></div>` : '';
+    const mis = misSat(R.act, '🧩', 'Üzerinde çalışılıyor (farklı sorularda tekrarladı)') + misSat(R.olasi, '🔎', 'Olası güçlük (bir kez görüldü, izleniyor)') + misSat(R.fixed, '🌟', 'Düzeltti');
+    return `<div class="card rkart"><h3>📅 Bu hafta</h3>${gunler}</div>
+      <div class="card rkart"><h3>📚 Konulara göre ustalık</h3>${tema}${konular}</div>
+      <div class="card rkart"><h3>🧾 Cevaplar nasıl geldi?</h3>${kanit}</div>
+      ${prob}
+      ${mis ? `<div class="card rkart"><h3>🧠 Kavram yanılgıları</h3>${mis}</div>` : ''}
+      <div class="card rkart roneri"><h3>👨‍👩‍👧 Bu hafta için öneri</h3><p style="margin:4px 0 0">${esc(R.tip)}</p>${fp.bestFormat ? `<p class="muted sm" style="margin:8px 0 0">En iyi öğrendiği anlatım: <b>${FORMATS[fp.bestFormat].name}</b> · Çalışma tarzı: <b>${fp.pace}</b></p>` : ''}</div>`;
+  }
   function viewParent() {
+    if (!A.veliAcik) return veliKapisi();
     const p = A.st.profile || {}, R = E.parentReport(A.st), txt = R.text;
     const phone = String(p.parentPhone || '').replace(/\D/g, ''), intl = phone.startsWith('90') ? phone : phone.startsWith('0') ? '9' + phone : phone.length === 10 ? '90' + phone : phone;
     const wa = `https://wa.me/${intl}?text=${encodeURIComponent(txt)}`, tg = `https://t.me/share/url?url=${encodeURIComponent('Matematik Yolu')}&text=${encodeURIComponent(txt)}`, mail = `mailto:${encodeURIComponent(p.parentEmail || '')}?subject=${encodeURIComponent('Matematik Yolu – Haftalık Rapor: ' + (p.name || ''))}&body=${encodeURIComponent(txt)}`;
-    return `${topbar()}<div class="scroll"><h2 class="sect">Veli Raporu</h2>
+    return `${topbar()}<div class="scroll"><div class="row" style="align-items:center"><h2 class="sect grow">Veli Raporu</h2><button class="btn ghost small" data-act="veli-kilitle" aria-label="Veli alanını kilitle">🔒 Kilitle</button></div>
       <div class="kv" style="margin-bottom:12px"><div class="card"><span class="muted sm">Bu hafta</span><b>${R.mins} dk</b></div><div class="card"><span class="muted sm">Doğruluk</span><b>%${R.acc}</b></div><div class="card"><span class="muted sm">Aktif gün</span><b>${R.daysActive}/7</b></div><div class="card"><span class="muted sm">Çözülen soru</span><b>${R.qn}</b></div></div>
-      <pre class="report">${esc(txt)}</pre>
+      ${veliGorsel(R)}
+      <details class="card rmetin"><summary><b>📝 Gönderilecek mesaj metni</b> <span class="muted sm">(WhatsApp/e-posta ile bu gider)</span></summary><pre class="report">${esc(txt)}</pre></details>
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
       ${cloudCard()}
-      <div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
-      <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div></div>${nav()}`;
+      ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
+      <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div>`}</div>${nav()}`;
   }
 
   /* ---------------- Beceri sayfası (modal) ---------------- */
@@ -3819,18 +3908,12 @@ a.chip{min-height:44px;text-decoration:none}
 
   /* ---------------- Karşılama / kayıt ---------------- */
   function viewOnboard() {
-    const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 2, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
+    const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
     if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button></div>`;
     if (o.step === 1) return `<div class="onb">${dots}<h2>Seni tanıyalım</h2>
       <div class="field"><label>Sana ne diyelim?</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela" autocomplete="off" maxlength="30"></div>
       <p class="muted sm" style="margin:4px 0 0">Sadece adın yeter. Pi seni bu adla çağıracak. 🙂</p>
       <div style="flex:1"></div><button class="btn" data-act="onb-next">İleri</button></div>`;
-    if (o.step === 2) return `<div class="onb">${dots}<h2>Veli bilgileri</h2><p class="muted" style="margin:0">Haftalık gelişim raporu bu kişiye gönderilir.</p>
-      <div class="field"><label>Velinin adı soyadı</label><input id="f-pname" value="${esc(d.parentName || '')}"></div>
-      <div class="field"><label>Velinin telefonu (WhatsApp)</label><input id="f-pphone" type="tel" inputmode="tel" value="${esc(d.parentPhone || '')}" placeholder="05xx xxx xx xx"></div>
-      <div class="field"><label>Velinin e-postası (isteğe bağlı)</label><input id="f-pmail" type="email" value="${esc(d.parentEmail || '')}"></div>
-      <label class="check"><input type="checkbox" id="f-kvkk" ${d.kvkk ? 'checked' : ''}> Velisi olarak, bu bilgilerin yalnızca gelişim raporu göndermek amacıyla kullanılmasına onay veriyorum. (Prototipte veriler sadece bu cihazda saklanır.)</label>
-      <div style="flex:1"></div><button class="btn" data-act="onb-next">İleri</button><button class="btn ghost" data-act="onb-skip">Şimdilik atla</button></div>`;
     const ch = (k, ic, t, s) => `<button class="card choice ${d.motivation === k ? 'on' : ''}" data-act="motiv" data-v="${k}"><span class="ic">${ic}</span><span><b>${t}</b><br><span class="muted sm">${s}</span></span></button>`;
     return `<div class="onb">${dots}<h2>Seni en çok ne mutlu eder?</h2>
       ${ch('yaris', '🏆', 'Yarışmak', 'Ligde arkadaşlarımı geçmek, rekor kırmak')}${ch('koleksiyon', '🏅', 'Toplamak', 'Rozet, taç ve elmas biriktirmek')}${ch('kesif', '🧭', 'Keşfetmek', 'Hikâyeler ve yeni konular keşfetmek')}
@@ -3967,7 +4050,7 @@ a.chip{min-height:44px;text-decoration:none}
     const act = el.dataset.act, v = el.dataset.v;
     switch (act) {
       case 'ust': if (UST[v]) { sfx.tap(); toast(UST[v]()); } break;
-      case 'tab': A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
+      case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
       case 'theme': A.theme = v; sfx.tap(); render(); setTimeout(() => { const k = document.querySelector('.komsu'); if (k && komsuSay[v] === undefined) k.click(); }, 500); break;
       case 'node': A.modal = skillModal(v); render(); break;
       case 'komsu': { const k = KOMSU[v]; if (!k) break; const n = komsuSay[v] = komsuSay[v] === undefined ? 0 : (komsuSay[v] + 1) % k.soz.length;
@@ -4022,13 +4105,32 @@ a.chip{min-height:44px;text-decoration:none}
       case 'reset': A.modal = confirmModal('Tüm veriler silinsin mi?', 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break;
       case 'reset-yes': A.modal = null; A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; render(); break;
       case 'copy': try { navigator.clipboard.writeText(E.parentReport(A.st).text).then(() => toast('Rapor kopyalandı ✓'), () => toast('Kopyalanamadı')); } catch (e) { toast('Kopyalanamadı'); } break;
-      case 'edit-profile': A.onb = { step: 1, data: Object.assign({}, A.st.profile), edit: true }; A.st.profile = null; render(); break;
+      case 'edit-profile': A.veliDuzenle = true; render(); break;
+      case 'veli-vazgec': A.veliDuzenle = false; render(); break;
+      case 'veli-kaydet': { const p = A.st.profile || (A.st.profile = {}), g = id => (document.getElementById(id).value || '').trim();
+        const ad = g('f-cname'), pn = g('f-pname'), ph = g('f-pphone'), pm = g('f-pmail'), kv = document.getElementById('f-kvkk').checked;
+        if (!ad) { toast('Çocuğun adı boş kalamaz.'); break; }
+        if ((ph || pm) && !kv) { toast('Telefon ya da e-posta için onay kutusunu işaretlemelisiniz.'); break; }
+        Object.assign(p, { name: ad, parentName: pn, parentPhone: ph, parentEmail: pm, kvkk: kv }); save(); A.veliDuzenle = false; toast('Kaydedildi ✓'); render(); break; }
+      case 'veli-pin-kur': { const a = (document.getElementById('f-pin1').value || '').trim(), b = (document.getElementById('f-pin2').value || '').trim();
+        if (!/^\d{4}$/.test(a)) { toast('Şifre 4 rakam olmalı.'); break; }
+        if (a !== b) { toast('İki şifre aynı değil.'); break; }
+        if (/^(\d)\1{3}$/.test(a) || '0123456789'.includes(a) || '9876543210'.includes(a)) { toast('Bu şifre çok kolay tahmin edilir (1111, 1234 gibi). Başka bir şifre seçin.'); break; }
+        const tuz = Math.random().toString(36).slice(2, 10); A.st.veli = { tuz, pin: pinOzet(tuz, a) }; save(); A.veliAcik = true; render(); break; }
+      case 'veli-pin-gir': { const V = A.st.veli || {}, simdi = Date.now();
+        if (A.veliKilit && simdi < A.veliKilit) { toast(`Çok fazla deneme. ${Math.ceil((A.veliKilit - simdi) / 1000)} sn sonra tekrar deneyin.`); break; }
+        const a = (document.getElementById('f-pin').value || '').trim();
+        if (V.pin && pinOzet(V.tuz, a) === V.pin) { A.veliAcik = true; A.veliHata = 0; render(); break; }
+        A.veliHata = (A.veliHata || 0) + 1; if (A.veliHata >= 5) { A.veliHata = 0; A.veliKilit = simdi + 60000; toast('5 yanlış deneme: 1 dakika bekleyin.'); } else toast('Şifre yanlış.');
+        document.getElementById('f-pin').value = ''; break; }
+      case 'veli-unuttum': A.modal = confirmModal('Şifre sıfırlansın mı?', 'Güvenlik için veli bilgileri (ad, telefon, e-posta) ve verdiğiniz onay da silinir; yeni şifre belirleyip yeniden girersiniz. Çocuğun ilerlemesi silinmez.', 'veli-unuttum-evet', 'Evet, sıfırla', 'Vazgeç'); render(); break;
+      case 'veli-unuttum-evet': { A.modal = null; const p = A.st.profile || {}; delete p.parentName; delete p.parentPhone; delete p.parentEmail; p.kvkk = false; A.st.veli = null; save(); A.veliAcik = false; render(); break; }
+      case 'veli-kilitle': A.veliAcik = false; A.veliDuzenle = false; A.tab = 'profil'; render(); window.scrollTo(0, 0); break;
       case 'onb-next': case 'onb-skip': {
         const o = A.onb, d = o.data;
         if (o.step === 1) { d.name = (document.getElementById('f-name').value || '').trim(); if (!d.name) { toast('Adını yazar mısın? 🙂'); break; } }
-        if (o.step === 2 && act === 'onb-next') { d.parentName = document.getElementById('f-pname').value.trim(); d.parentPhone = document.getElementById('f-pphone').value.trim(); d.parentEmail = document.getElementById('f-pmail').value.trim(); d.kvkk = document.getElementById('f-kvkk').checked; if ((d.parentPhone || d.parentEmail) && !d.kvkk) { toast('Veli onayı kutusunu işaretlemelisiniz.'); break; } }
-        if (o.edit && o.step === 2) { A.st.profile = Object.assign({}, d); delete A.st.profile.edit; save(); A.onb = { step: 0, data: {} }; A.tab = 'veli'; render(); break; }
-        o.step++; render(); break; }
+        // Veli bilgileri ve onay çocuğun kaydında sorulmaz; veli bunları şifreli Veli alanında girer
+        o.step = o.step === 1 ? 3 : o.step + 1; render(); break; }
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
       case 'pi-hello': piSay('hosgeldin'); break;
