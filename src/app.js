@@ -268,6 +268,42 @@
       <p class="muted sm" style="text-align:center;margin:12px 0 4px">Elmaslar yalnız derslerle kazanılır, parayla satılmaz.</p>
       <button class="btn ghost" data-act="close-modal" style="margin-top:6px">Kapat</button></div>`;
   }
+  /* ---------------- Çıkartma albümü: sandıklardan çıkartma, her temaya bir sayfa (para ile satılmaz) ---------------- */
+  const CIKARTMA = {
+    t1: [['📐', 'Gönye'], ['🧭', 'Pergel'], ['🔺', 'Üçgen'], ['🔷', 'Baklava'], ['⭕', 'Çember'], ['🏰', 'Şekil Kalesi']],
+    t2: [['🔢', 'Rakamlar'], ['🧮', 'Abaküs'], ['💯', 'Yüzlük'], ['🏦', 'Kumbara'], ['🛒', 'Market'], ['🚀', 'Milyar Roketi']],
+    t3: [['📏', 'Cetvel'], ['🧱', 'Birim Kare'], ['🌳', 'Bahçe'], ['🏡', 'Ev Planı'], ['🪵', 'Parke'], ['🏟️', 'Stadyum']],
+    t4: [['🍕', 'Pizza'], ['🥧', 'Pasta'], ['🍫', 'Çikolata'], ['🍉', 'Karpuz'], ['🏷️', 'İndirim'], ['🎂', 'Dev Pasta']],
+    t5: [['📊', 'Sütun Grafik'], ['📋', 'Anket'], ['🗳️', 'Oylama'], ['🔍', 'Büyüteç'], ['📈', 'Çizgi Grafik'], ['🏙️', 'Grafik Şehri']],
+    t6: [['⚖️', 'Terazi'], ['🧩', 'Örüntü'], ['🔁', 'Döngü'], ['🤖', 'Algoritma'], ['🎯', 'Eşitlik'], ['🐘', 'Denge Fili']],
+    t7: [['🎲', 'Sayı Küpü'], ['🎡', 'Çark'], ['🪙', 'Yazı Tura'], ['🌈', 'Gökkuşağı'], ['🎈', 'Balon'], ['🐉', 'Şans Ejderi']]
+  };
+  const CIK_TOPLAM = Object.values(CIKARTMA).reduce((a, x) => a + x.length, 0), CIK_TEKRAR = 3, CIK_SAYFA = 30;
+  const album = () => { const a = A.st.album = A.st.album || {}; a.sahip = a.sahip || {}; a.tamam = a.tamam || {}; return a; };
+  // Bir çıkartma ver: son (parlak) çıkartma nadirdir (%12), diğerleri hepsi alındıysa her zaman gelebilir. Aynısı çıkarsa 3 elmas.
+  function cikartmaVer(tid) {
+    const L = CIKARTMA[tid]; if (!L) return null; const a = album();
+    const digerTam = L.slice(0, -1).every((_, i) => a.sahip[`${tid}_${i}`]);
+    const i = (Math.random() < 0.12 || (digerTam && !a.sahip[`${tid}_${L.length - 1}`] && Math.random() < 0.5)) ? L.length - 1 : Math.floor(Math.random() * (L.length - 1));
+    const id = `${tid}_${i}`, yeni = !a.sahip[id]; a.sahip[id] = (a.sahip[id] || 0) + 1;
+    let elmas = yeni ? 0 : CIK_TEKRAR, sayfa = false;
+    if (yeni && !a.tamam[tid] && L.every((_, k) => a.sahip[`${tid}_${k}`])) { a.tamam[tid] = Date.now(); elmas += CIK_SAYFA; sayfa = true; }
+    A.st.gems += elmas; return { tid, i, e: L[i][0], ad: L[i][1], parlak: i === L.length - 1, yeni, elmas, sayfa };
+  }
+  const cikSayisi = () => Object.keys(album().sahip).length;
+  const cikartmaHtml = (c, buyuk) => `<span class="cik ${c.parlak ? 'parlak' : ''} ${buyuk ? 'buyuk' : ''}">${c.e}</span>`;
+  const cikartmaSonuc = (c) => !c ? '' : `<div class="cik-sonuc">${cikartmaHtml(c, true)}<div><b>${c.parlak ? '✨ Parlak ' : ''}${c.ad} çıkartması!</b><div class="muted sm">${c.yeni ? 'Albümüne eklendi 📒' : `Bu sende vardı → +${CIK_TEKRAR} 💎`}${c.sayfa ? `<br><b>🎉 ${THEMES.find(t => t.id === c.tid).no}. tema sayfası tamam! +${CIK_SAYFA} 💎</b>` : ''}</div></div></div>`;
+  function albumModal() {
+    const a = album(), tid = A.albumTema || THEMES[0].id, th = THEMES.find(t => t.id === tid), L = CIKARTMA[tid];
+    const n = L.filter((_, i) => a.sahip[`${tid}_${i}`]).length;
+    return `<div class="modal album"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">📒 Çıkartma albümüm</h2><span class="tag">${cikSayisi()}/${CIK_TOPLAM}</span></div>
+      <div class="themes" style="margin:10px 0">${THEMES.map(t => { const k = CIKARTMA[t.id].filter((_, i) => a.sahip[`${t.id}_${i}`]).length; return `<button class="chip ${t.id === tid ? 'on' : ''}" data-act="album-tema" data-v="${t.id}">${t.icon} ${a.tamam[t.id] ? '✅' : k + '/6'}</button>`; }).join('')}</div>
+      <div class="album-sayfa bg-${th.color}"><div class="album-baslik">${th.no}. Tema · ${esc(th.title)}</div><div class="album-izgara">${L.map((x, i) => { const sayi = a.sahip[`${tid}_${i}`], par = i === L.length - 1;
+        return sayi ? `<div class="album-yer">${cikartmaHtml({ e: x[0], parlak: par })}<b>${x[1]}</b>${sayi > 1 ? `<small>×${sayi}</small>` : ''}</div>` : `<div class="album-yer bos ${par ? 'parlak-bos' : ''}"><span class="cik-bos">${par ? '✨' : '?'}</span><b>${par ? 'Parlak' : '???'}</b></div>`; }).join('')}</div>
+        <div class="album-alt">${a.tamam[tid] ? '🎉 Bu sayfa tamam!' : `${n}/6 · Sayfayı tamamlarsan +${CIK_SAYFA} 💎`}</div></div>
+      <p class="muted sm" style="margin:12px 0 4px">Çıkartmalar haritadaki sandıklardan ve ders sonu sandıklarından çıkar. Aynısı çıkarsa ${CIK_TEKRAR} elmasa dönüşür. ✨ Parlak çıkartmalar nadirdir.</p>
+      <button class="btn ghost" data-act="close-modal" style="margin-top:6px">Kapat</button></div>`;
+  }
   // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
   if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
 
@@ -426,6 +462,7 @@
     const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'aştın ✓' : m.kesin ? 'çalışıyoruz' : 'göz kulak'}</span></div>`).join('') || '<div class="muted sm">Henüz bir tuzak görmedik. 🙌</div>';
     return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${dolapPi(70, 'happy')}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
       <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Tema kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
+      <button class="card album-kart" data-act="album"><span class="album-ikon">📒</span><div class="grow" style="text-align:left"><b>Çıkartma albümüm</b><div class="qbar"><i style="--hedef:${Math.round(100 * cikSayisi() / CIK_TOPLAM)}%"></i><span>${cikSayisi()} / ${CIK_TOPLAM}</span></div></div><span>›</span></button>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
         <div class="kv"><div class="card"><span class="muted sm">Çalışma tarzı</span><b style="font-size:17px">${fp.pace}</b></div><div class="card"><span class="muted sm">İlk denemede doğru</span><b>${fp.ilkAcc === null ? '–' : '%' + Math.round(fp.ilkAcc * 100)}</b><small class="muted">${fp.ilkAcc === null ? 'en az 5 cevap' : fp.ilkSay.ok + '/' + fp.ilkSay.n + ' cevap'}</small></div>
         <div class="card"><span class="muted sm">Hatadan dönüş gücü</span><b>${fp.resil === null ? '–' : '%' + Math.round(fp.resil * 100)}</b></div><div class="card"><span class="muted sm">İpucu kullanımı</span><b>%${Math.round(fp.hintRate * 100)}</b></div></div>
@@ -721,13 +758,15 @@
       ${r.trophy ? (r.trophy.pass ? `<div class="card row" style="width:100%;border-color:var(--gold)"><div style="font-size:44px">🏆</div><div style="text-align:left"><b>Tema sınavını geçtin! (%${acc})</b><div class="muted sm">Kupa senin. +50 💎</div></div></div>` : `<div class="speech">Sınav için %70 gerekiyor. Zorlandığın becerileri çalışıp tekrar dene, kupa seni bekliyor! 💪</div>`) : ''}
       <div style="flex:1"></div><button class="btn" data-act="end-ok" style="max-width:420px">${(A.endSteps || []).length > 1 ? 'Devam' : 'Devam'}</button></div>`;
   }
+  // Dersin teması: oturumun teması, yoksa en çok soru gelen beceri teması
+  const dersTemasi = (ses) => { if (ses.theme && CIKARTMA[ses.theme]) return ses.theme; const say = {}; (ses.answered || []).forEach(x => { const t = (SKILLS.find(k => k.id === x.skill) || {}).theme; if (t) say[t] = (say[t] || 0) + 1; }); return Object.keys(say).sort((a, b) => say[b] - say[a])[0] || THEMES[0].id; };
   // Sandık: önce kapalı, çocuk dokununca açılır ve elmaslar çıkar (değişken ödül hissi; para ile satılmaz, elmas sadece seri koruyucuya gider)
   function viewSandik() {
     const r = A.result, acik = A.sandikAcik;
     return `<div class="end sandik-ekran ${acik ? 'acik' : ''}">
       <div class="sandik-ust">${acik ? 'Harika!' : (r.acc >= 0.9 ? 'EFSANE SANDIK' : r.acc >= 0.7 ? 'SÜPER SANDIK' : 'SANDIK')}</div>
       <button class="sandik" data-act="sandik-ac" aria-label="Sandığı aç" ${acik ? 'disabled' : ''}><img src="img/sandik_${acik ? 'acik' : 'kapali'}.webp" alt="" draggable="false" onerror="this.outerHTML='<span style=&quot;font-size:120px&quot;>${acik ? '💎' : '🎁'}</span>'"></button>
-      ${acik ? `<div class="sandik-odul">+<span data-sayac="${r.gemsWon}">0</span> 💎</div><div class="sandik-alt">Elmaslarınla seri koruyucu alabilirsin.</div>` : '<div class="sandik-alt">Açmak için dokun!</div>'}
+      ${acik ? `<div class="sandik-odul">+<span data-sayac="${r.gemsWon}">0</span> 💎</div>${r.cikartma ? cikartmaSonuc(r.cikartma) : '<div class="sandik-alt">Elmaslarınla seri koruyucu ya da Pi\'ye kostüm alabilirsin.</div>'}` : '<div class="sandik-alt">Açmak için dokun!</div>'}
       <div style="flex:1"></div>${acik ? '<button class="btn" data-act="end-ok" style="max-width:420px">Devam</button>' : ''}</div>`;
   }
   // Görev ilerlemesi: günlük görev çubukları dolar, biten görevin ödülü yazar
@@ -877,7 +916,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -895,9 +934,9 @@
         A.st.sandiklar = A.st.sandiklar || {};
         if (A.st.sandiklar[k]) { toast('Bu sandığı açtın. Yolda başka sandıklar var! 🗺️'); break; }
         if (E.crowns(E.eff(A.st.skills[sk.id])) < 1) { toast(`🔒 Önce «${sk.title}» konusunda 1 yıldız kazan, sandık açılsın.`); break; }
-        const kazanc = [5, 8, 10, 12, 15, 20][Math.floor(Math.random() * 6)]; A.st.sandiklar[k] = Date.now(); A.st.gems += kazanc; save();
+        const kazanc = [5, 8, 10, 12, 15, 20][Math.floor(Math.random() * 6)]; A.st.sandiklar[k] = Date.now(); A.st.gems += kazanc; const cik = cikartmaVer(tid); save();
         sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80]); } catch (e) { } confetti();
-        A.modal = `<div class="modal center"><img src="img/sandik_acik.webp" alt="" style="width:160px;display:block;margin:0 auto" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${kazanc} 💎</h2><p class="muted" style="margin:0 0 14px">${th.icon} Yol sandığından elmas çıktı!</p><button class="btn" data-act="close-modal">Süper!</button></div>`; render(); break; }
+        A.modal = `<div class="modal center"><img src="img/sandik_acik.webp" alt="" style="width:160px;display:block;margin:0 auto" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${kazanc} 💎</h2><p class="muted" style="margin:0 0 10px">${th.icon} Yol sandığından elmas çıktı!</p>${cikartmaSonuc(cik)}<button class="btn" data-act="close-modal" style="margin-top:12px">Süper!</button></div>`; render(); break; }
       case 'komsu': { const k = KOMSU[v]; if (!k) break; const n = komsuSay[v] = komsuSay[v] === undefined ? 0 : (komsuSay[v] + 1) % k.soz.length;
         const b = el.querySelector('.kbal'); if (b) { b.textContent = k.soz[n]; b.classList.remove('acik'); void b.offsetWidth; b.classList.add('acik'); }
         el.classList.remove('tik'); void el.offsetWidth; el.classList.add('tik'); tone(520 + 80 * n, .12, 'triangle'); tone(780 + 80 * n, .12, 'triangle', .09);
@@ -946,6 +985,8 @@
       case 'set-sound': A.st.settings.sound = el.checked; save(); break;
       case 'set-voice': A.st.settings.voice = el.checked; save(); break;
       case 'goal': A.st.dailyGoal = +v; save(); render(); break;
+      case 'album': A.albumTema = A.albumTema || A.theme || THEMES[0].id; A.modal = albumModal(); render(); break;
+      case 'album-tema': A.albumTema = v; A.modal = albumModal(); render(); break;
       case 'dolap': A.dolapSec = null; A.dolapOnay = null; A.modal = dolapModal(); render(); break;
       case 'dolap-sec': A.dolapSec = v; A.dolapOnay = null; A.modal = dolapModal(); render(); { const [t, id] = v.split(':'); if (t === 'k') tone(520, .08, 'triangle'); } break;
       case 'dolap-onay': A.dolapOnay = A.dolapSec || 'k:' + dolap().giyili; A.modal = dolapModal(); render(); break;
