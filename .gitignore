@@ -5,3 +5,6 @@ __pycache__/
 test/shots/
 *.zip
 sunucu/kurulum_sql.html
+
+# MEB kitap metni: yalnız geliştirici incelemesi, depoya girmez (telif, §1-5)
+kaynak/

@@ -671,9 +671,9 @@
      TEMA 7 — VERİDEN OLASILIĞA
      ========================================================= */
   const OLAY = [
-    ['Bir zar atıldığında 7 gelmesi', 'İmkânsız'], ['Bir zar atıldığında 1 ile 6 arasında bir sayı gelmesi', 'Kesin'], ['Madenî para atıldığında yazı gelmesi', 'Mümkün'],
+    ['Bir sayı küpü atıldığında 7 gelmesi', 'İmkânsız'], ['Bir sayı küpü atıldığında 1 ile 6 arasında bir sayı gelmesi', 'Kesin'], ['Madenî para atıldığında yazı gelmesi', 'Mümkün'],
     ['Yarın güneşin doğudan doğması', 'Kesin'], ['Bir haftanın 8 gün olması', 'İmkânsız'], ['İçinde sadece kırmızı top olan torbadan mavi top çekilmesi', 'İmkânsız'],
-    ['İçinde sadece kırmızı top olan torbadan kırmızı top çekilmesi', 'Kesin'], ['Bir zar atıldığında çift sayı gelmesi', 'Mümkün'], ['Şubat ayının 30 çekmesi', 'İmkânsız'],
+    ['İçinde sadece kırmızı top olan torbadan kırmızı top çekilmesi', 'Kesin'], ['Bir sayı küpü atıldığında çift sayı gelmesi', 'Mümkün'], ['Şubat ayının 30 çekmesi', 'İmkânsız'],
     ['Pikniğe gideceğimiz gün yağmur yağması', 'Mümkün'], ['Bir basketbolcunun üç sayılık atışını isabet ettirmesi', 'Mümkün'], ['Bir torbadan çekilen bilyenin, torbada olmayan renkte olması', 'İmkânsız'],
   ];
   GEN.p_olay = (lv) => {
@@ -685,7 +685,7 @@
     const renk = pick(['kırmızı', 'mavi', 'yeşil', 'sarı']), diger = pick(['kırmızı', 'mavi', 'yeşil', 'sarı'].filter(r => r !== renk)), n = ri(3, 12);
     const [olay, deger] = pick([
       ['Kesin bir olay', '1'], ['İmkânsız bir olay', '0'],
-      [`Bir zar atıldığında ${ri(7, 12)} gelmesi`, '0'], ['Bir zar atıldığında 7 sayısından küçük bir sayı gelmesi', '1'], ['Bir zar atıldığında 0 gelmesi', '0'],
+      [`Bir sayı küpü atıldığında ${ri(7, 12)} gelmesi`, '0'], ['Bir sayı küpü atıldığında 7 sayısından küçük bir sayı gelmesi', '1'], ['Bir sayı küpü atıldığında 0 gelmesi', '0'],
       [`İçinde sadece ${n} ${renk} top olan torbadan ${renk} top çekilmesi`, '1'], [`İçinde sadece ${n} ${renk} top olan torbadan ${diger} top çekilmesi`, '0'],
       [`Bir haftanın ${ri(8, 10)} gün olması`, '0'], ['Madenî para atıldığında yazı ya da tura gelmesi', '1'],
     ]);
