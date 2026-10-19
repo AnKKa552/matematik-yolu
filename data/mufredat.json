@@ -241,7 +241,7 @@
           "Daha kapalıysa dar açı (90°'den küçük).",
           "Tam köşe gibiyse dik açı (90°).",
           "Daha açıksa geniş açı (90°–180°).",
-          "İletkiyle ölçerken kolun başladığı 0'ın olduğu ölçeği oku."
+          "Açıölçerle ölçerken köşeyi merkeze, bir kolu 0'a koy; diğer kolun gösterdiği sayıyı oku."
         ],
         "kural": "Dar < 90° = Dik < Geniş < 180° = Doğru açı. Tam açı 360°."
       }
@@ -650,7 +650,7 @@
         "adim": [
           "Pay ile paydayı karşılaştır.",
           "Pay 1 → birim kesir.",
-          "Pay < payda → basit kesir.",
+          "Pay < payda → kesir bir bütünden küçüktür.",
           "Pay ≥ payda → bileşik kesir.",
           "Bileşiği tam sayılıya çevir: payı paydaya böl."
         ],
@@ -1178,8 +1178,8 @@
       "duzeltme": "90°'den küçükse dar, tam 90° ise dik, 90° ile 180° arasındaysa geniş açıdır. 180° doğru açı, 360° tam açıdır."
     },
     "iletki_ters": {
-      "ad": "İletkide yanlış ölçeği okuma",
-      "duzeltme": "İletkide iki sıra sayı vardır. Açının kolu hangi taraftaki 0'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90'dan küçük olmalı."
+      "ad": "Açıölçerde yanlış ölçeği okuma",
+      "duzeltme": "Açıölçerde iki sıra sayı vardır. Açının kolu hangi taraftaki 0'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90'dan küçük olmalı."
     },
     "aci_kol": {
       "ad": "Açıyı kol uzunluğuna göre karşılaştırma",
@@ -1331,7 +1331,7 @@
     },
     "adim_sira": {
       "ad": "Araştırma adımlarının sırasını karıştırma",
-      "duzeltme": "Sıra: 1) Araştırma sorusunu belirle 2) Veri topla 3) Görselleştir 4) Özetle ve yorumla."
+      "duzeltme": "Sıra: 1) Araştırma sorusunu belirleme 2) Verileri toplama ve analize hazırlama 3) Veri görselleştirme ve özetleme 4) Sonuçları yorumlama."
     },
     "grafik_okuma": {
       "ad": "Grafikten yanlış değer okuma",
@@ -1520,6 +1520,54 @@
     "iki_sonuc_esit": {
       "ad": "İki sonuç varsa olasılıkları eşit sanma",
       "duzeltme": "Sonuçların sayısı değil, her sonucu veren parçaların sayısı önemlidir. 4 yüzü mavi, 2 yüzü kırmızı küpte mavi gelme olasılığı daha fazladır."
+    },
+    "ondalik_parca": {
+      "ad": "Ondalık gösterimde tam kısım ile ondalık kısmı karıştırma",
+      "duzeltme": "Virgülün solundaki sayı tam kısım, sağındaki sayı ondalık kısımdır: 4,25'te tam kısım 4, ondalık kısım 25'tir."
+    },
+    "daire_toplam": {
+      "ad": "Daire grafiğinde dilimlerin toplamını kontrol etmeme",
+      "duzeltme": "Daire grafiğinin tamamı bütündür. Bütün dilimlerin yüzdeleri toplanınca tam %100 etmelidir; etmiyorsa grafik hatalıdır."
+    },
+    "grafik_secim": {
+      "ad": "Veriye uygun grafiği seçememe",
+      "duzeltme": "Nokta grafiğinde her veri bir noktadır; veri çok olunca çizmek ve okumak zorlaşır, sütun grafiği daha kullanışlıdır. Parça-bütün ilişkisi için daire grafiği uygundur."
+    },
+    "ayni_oncelik": {
+      "ad": "Aynı öncelikli işlemleri soldan sağa yapmama",
+      "duzeltme": "Çarpma ile bölme aynı önceliktedir; toplama ile çıkarma da aynı önceliktedir. Art arda gelince soldan sağa doğru sırayla yapılır."
+    },
+    "oruntu_kural": {
+      "ad": "Örüntünün kuralını bir adımda deneyip bırakma",
+      "duzeltme": "Kuralı bulmak için adım sayısı ile terimi karşılaştır ve kuralı birkaç adımda dene. 4, 7, 10 örüntüsünde kural: adım sayısının 3 katının 1 fazlası."
+    },
+    "oruntu_sabit": {
+      "ad": "Her örüntünün sabit artışlı olduğunu sanma",
+      "duzeltme": "Bazı örüntülerde artış her adımda değişir (1, 3, 6, 10: artış 2, 3, 4). Böyle örüntülerde \"ilk terim + (adım − 1) × artış\" kuralı kullanılamaz."
+    },
+    "aci_isim": {
+      "ad": "Açıyı adlandırırken köşe harfini yanlış yere yazma",
+      "duzeltme": "Açı üç harfle adlandırılırken köşenin harfi her zaman ortaya yazılır: köşesi B olan açı ABC ya da CBA açısıdır. Tek harfle yalnız köşe harfi yazılır: B açısı."
+    },
+    "paralel_kesen": {
+      "ad": "Paralel doğruları kesen doğrunun açılarını karıştırma",
+      "duzeltme": "İki paralel doğruyu bir doğru kestiğinde oluşan dar açıların hepsi birbirine eş, geniş açıların hepsi de birbirine eştir. Bir dar açı ile bir geniş açının toplamı 180°'dir."
+    },
+    "dis_aci": {
+      "ad": "Dış açıyı iç açıyla karıştırma",
+      "duzeltme": "Çokgende bir iç açının komşu bütünleri o köşedeki dış açıdır. İç açı ile dış açının toplamı 180°'dir."
+    },
+    "cokgen_isim": {
+      "ad": "Çokgeni adlandırırken köşeleri sırasız yazma",
+      "duzeltme": "Çokgen adlandırılırken herhangi bir köşeden başlanır ve köşe harfleri yan yana sırayla okunur. Atlayarak yazılan harfler başka bir şekil gösterir."
+    },
+    "ucgen_aci_siniri": {
+      "ad": "Bir üçgende iki dik ya da iki geniş açı olabileceğini sanma",
+      "duzeltme": "Üçgenin iç açılarının toplamı 180°'dir. Bu yüzden bir üçgende en fazla bir dik açı ya da bir geniş açı olabilir."
+    },
+    "cember_insa": {
+      "ad": "Çemberlerle inşa edilen üçgenin türünü yanlış bulma",
+      "duzeltme": "Üçgenin kenarları iki çemberin yarıçapları ve merkezler arasındaki uzaklıktır. Üçü eşitse eşkenar, ikisi eşitse ikizkenar, hepsi farklıysa çeşitkenar üçgen oluşur."
     }
   },
   "anlatim_bicimleri": {

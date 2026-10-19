@@ -183,7 +183,7 @@
     sv.querySelectorAll('text').forEach((el, k) => el.style.setProperty('--g', (0.5 + 0.1 * k).toFixed(2) + 's')); sv.classList.add('ciz');
   });
   // Metni değişen anlatım kartının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, p_spektrum_gorsel: 2, e_oncelik_hikaye: 2 };
+  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, p_spektrum_gorsel: 2, e_oncelik_hikaye: 2, g_aci_adim: 2, f_tur_adim: 2 };
   const kartSes = (id, f) => `kart_${id}_${f}${KART_SES_SURUM[id + '_' + f] ? '_' + KART_SES_SURUM[id + '_' + f] : ''}`;
   const sayCard = (id, f) => {
     const kart = document.querySelector('.modal .lcard') || document.querySelector('.lcard');
@@ -723,7 +723,7 @@
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2 };
+  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2 };
   const misSes = (id) => `mis_${id}${MIS_SES_SURUM[id] ? '_' + MIS_SES_SURUM[id] : ''}`;
   function ikinciIpucu(q, res) {
     if (res.ip) return res.ip;

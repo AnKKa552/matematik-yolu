@@ -44,7 +44,7 @@
     S('g_aci', 't1', 'Açılar ve Açı Ölçme', '39–44', {
       gorsel: { text: 'Açının büyüklüğü kolların ne kadar <b>açıldığına</b> bağlıdır, uzunluğuna değil. 90° (dik açı) referans noktandır.', vis: () => V.angle(45, { label: 'dar' }) + V.angle(90, { label: 'dik' }) + V.angle(135, { label: 'geniş' }) },
       hikaye: 'Saat tam 3\'te akrep ve yelkovan <b>dik açı</b> yapar (90°). Saat 1\'de aralarındaki açı daha kapalı: <b>dar açı</b>. Saat 5\'te iyice açılır: <b>geniş açı</b>. Saat 6\'da düz bir çizgi: <b>doğru açı</b> (180°)!',
-      adim: ['Açıyı bir dik açıyla (defter köşesi) karşılaştır.', 'Daha kapalıysa dar açı (90°\'den küçük).', 'Tam köşe gibiyse dik açı (90°).', 'Daha açıksa geniş açı (90°–180°).', 'İletkiyle ölçerken kolun başladığı 0\'ın olduğu ölçeği oku.'],
+      adim: ['Açıyı bir dik açıyla (defter köşesi) karşılaştır.', 'Daha kapalıysa dar açı (90°\'den küçük).', 'Tam köşe gibiyse dik açı (90°).', 'Daha açıksa geniş açı (90°–180°).', 'Açıölçerle ölçerken köşeyi merkeze, bir kolu 0\'a koy; diğer kolun gösterdiği sayıyı oku.'],
       kural: 'Dar < 90° = Dik < Geniş < 180° = Doğru açı. Tam açı 360°.',
     }),
     S('g_aci_iliski', 't1', 'Tümler, Bütünler, Ters Açılar', '45–56', {
@@ -131,7 +131,7 @@
     S('f_tur', 't4', 'Kesir Türleri', '17–19', {
       gorsel: { text: 'Payda bütünün kaç parçaya bölündüğünü, pay kaç parça alındığını gösterir.', vis: () => V.bar(3, 5) + V.pie(1, 4) },
       hikaye: 'Bir pizza 4 dilime bölündü. Asel 1 dilim yedi: 1/4, bu bir <b>birim kesir</b>. Kardeşlerle 5 dilim yemek istediler ama bir pizzada 4 dilim var; ikinci pizza açıldı: 5/4 = 1 tam 1/4, bu <b>bileşik kesir</b>!',
-      adim: ['Pay ile paydayı karşılaştır.', 'Pay 1 → birim kesir.', 'Pay < payda → basit kesir.', 'Pay ≥ payda → bileşik kesir.', 'Bileşiği tam sayılıya çevir: payı paydaya böl.'],
+      adim: ['Pay ile paydayı karşılaştır.', 'Pay 1 → birim kesir.', 'Pay < payda → kesir bir bütünden küçüktür.', 'Pay ≥ payda → bileşik kesir.', 'Bileşiği tam sayılıya çevir: payı paydaya böl.'],
       kural: `${fr(11, 4)} = 2 ${fr(3, 4)} (11 ÷ 4 = 2 kalan 3). Geri: 2 × 4 + 3 = 11.`,
     }),
     S('f_denk', 't4', 'Denk Kesirler', '17–18', {

@@ -38,6 +38,7 @@ for (const [name, g] of Object.entries(GEN)) {
     }
     if (q.type === 'input') {
       if (q.answer === undefined || isNaN(parseFloat(String(q.answer).replace(',','.')))) { console.log('BAD ANSWER', name, lv, q.answer); errors++; break; }
+      if (parseFloat(String(q.answer).replace(',', '.')) < 0) { console.log('NEGATİF CEVAP (5. sınıfta negatif sayı yok)', name, lv, strip(q.prompt), q.answer); errors++; break; }
       for (const m of q.inputMis||[]) { if (q.answer !== undefined && Number(String(m.v).replace(',', '.')) === Number(String(q.answer).replace(',', '.'))) { console.log('YANILGI = DOĞRU CEVAP', name, lv, strip(q.prompt), m.v); errors++; } if (!MIS[m.mis]) { console.log('UNKNOWN MIS', name, m.mis); errors++; } if (m.mis === 'genel') { console.log('GENEL ETİKET (§1-3: her yanlış bir yanılgıya bağlı olmalı)', name, lv, m.v); errors++; break; } }
     } else {
       const ok = q.options.filter(o=>o.ok).length, texts = q.options.map(o=>o.t);

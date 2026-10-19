@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 92 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 105 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -259,6 +259,18 @@ Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular içi
 **Olasılık dili kitaba göre düzeltildi (19.10.2026, 2. kitap s. 164–178 incelendi):** kitap olasılığı formülle değil **tahmin + gerekçe** ile işler (kesir, yüzde, ondalık; spektrum; "çünkü kırmızı topların sayısı fazla"). Uygulamada kalan "istenen / tüm", "bu toplama bölerim", "mavi dilim / tüm dilimler" ifadeleri parça–bütün diline çevrildi (torba atölyesi planı ve adımları, çark sorusu adımları, `olasilik_buyuk` açıklaması, spektrum görsel kartı; sesler `_2` sürümüyle yeniden üretildi). `p_spektrum` seviye 3'e kitaptaki etkinlik türlerinden esinlenen 3 yeni özgün soru eklendi: **gerekçe** (sevdiği renk / şanslı sayı gerekçe değildir), **adil oyun** (renk küpü), **spektrumda yer** (0,2 · %75 · 1…). İki yeni yanılgı: `olasilik_tercih`, `iki_sonuc_esit` (toplam 92).
 **Kitap metni (yalnız geliştirici):** iki kitabın sayfa metni Supabase `gelistirici_kitap` tablosunda (RLS açık, politika yok; yalnız servis rolü). `kitap-metin` fonksiyonu PDF'i parça parça okuyup yazar, `kitap-md` Markdown'u özel `gelistirici` deposuna koyar ve 7 günlük imzalı bağlantı verir. İndirilen kopyalar için yerel klasör `kaynak/` (gitignore). **Kitap metni depoya, uygulamaya ya da herkese açık bir yere konmaz** (§1-5). Metni çıkmayan sayfalar: 1. kitap s. 100, 2. kitap s. 144.
 
+### 5.6 İki kitapla konu konu karşılaştırma (19.10.2026)
+35 becerinin hepsi 1. ve 2. kitabın (2026-2027 baskısı) ilgili sayfalarıyla karşılaştırıldı. Kitabın kullandığı kavram, terim ve soru türü uygulamada yoksa **özgün** yeni soru eklendi (mekanizma `generators.js → EK`: `ekle(beceri, seviyeler, olasılık, üretici)`; becerinin asıl üreticisini sarar, verilen olasılıkla ek türü seçer). Yeni sorular kitap metni kopyalanmadan, yalnız matematiksel yapı alınarak yazıldı (§1-4, §1-5).
+- **Terimler kitaba uyduruldu:** "iletki" → **açıölçer**; "dik üçgen" → **dik açılı üçgen**; "basit kesir" kitapta yok → kesir türleri **birim / bileşik / tam sayılı**; araştırma adımları kitaptaki 4 adla (soru belirleme → verileri toplama ve analize hazırlama → veri görselleştirme ve özetleme → sonuçları yorumlama); düzgün çokgende "çevre" (3. tema konusu) yerine "bütün kenarlarının uzunlukları toplamı".
+- **Tema 1:** açı adlandırma (köşe harfi ortada), iki noktadan tek doğru / bir noktadan sonsuz doğru, pergel açıklığı = yarıçap, çember-daire modelleri, tek dikme ve en kısa yol, çakışık doğrular, paralel + kesen eş açılar, çokgende dış açı, çokgen adlandırma, köşegeni olmayan çokgen, kenarlarına göre üçgen, üçgende iki dik/geniş açı olamaz, çemberlerle üçgen inşası. Nokta sayma 3–5 noktaya indirildi.
+- **Tema 2:** çarpım biçiminde çözümleme, üç sayıyı sıralama, bölük kartlarıyla en büyük sayı (058 kartı), bilinmeyen bölen/bölünen/çarpan, kalanlı bölmede yukarı yuvarlama (teleferik, taksit), molalı zaman problemi. **Bulunan hata:** `n_toplacikar` seviye 3 "kalan para" sorusu bazen negatif cevap veriyordu; düzeltildi ve test artık negatif cevabı hata sayar.
+- **Tema 3:** Ç(ABCD)/A(ABCD) gösterimi, çevresi ya da alanı verilen kaç farklı dikdörtgen, çevresi tek sayı olan dikdörtgen çizilemez, alanı verilen pist için en kısa çit. Kitapta 36 birim kareden büyük alan örnekleri de var; uygulamanın 36 sınırı (§5.5) temkin için korundu.
+- **Tema 4:** tam kısım / ondalık kısım, %100'den büyük yüzdeler, tam sayılı ↔ bileşik kesir karşılaştırma, yüzde ve ondalık gösterimleri birlikte sıralama.
+- **Tema 5:** verinin değişebilirliği, araştırma sorusunun ölçütleri, çok veride nokta grafiğinin zorluğu, daire grafiğinde yüzdeler toplamı %100, yüzdeli daire grafiğinden kişi sayısı.
+- **Tema 6:** toplamı koruyan telafi, eşitliğin iki yanını aynı sayıyla çarpma, işlem özelliklerinde sembol (▲) bulma, kare/küp okunuşu, aynı öncelikte soldan sağa (64 ÷ 4 × 8), problemden sayı cümlesi (tavuk-tavşan), örüntüde "kaçıncı adım", örüntü kuralı ("adım sayısının 3 katının 1 fazlası"), artışı sabit olmayan örüntü, tekrarlı çıkarmayla bölme algoritması (sayaç), tekrarlı toplama → çarpma.
+- **Tema 7:** olasılığı kesin (%100, 1) ve imkânsız (%0, 0) olan olaylar (dil düzeltmesi §5.5'te).
+- 12 yeni yanılgı (katalog 105): `aci_isim`, `paralel_kesen`, `dis_aci`, `cokgen_isim`, `ucgen_aci_siniri`, `cember_insa`, `ondalik_parca`, `daire_toplam`, `grafik_secim`, `ayni_oncelik`, `oruntu_kural`, `oruntu_sabit`. Metni değişen sesler sürüm adıyla üretildi: `mis_iletki_ters_2`, `mis_adim_sira_2`, `kart_g_aci_adim_2`, `kart_f_tur_adim_2`.
+
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
 | Kitap kalıbı (sayfa) | Bizim varyasyonumuz | Beceri |
 |---|---|---|
@@ -348,9 +360,9 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 ```
 CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
-data/mufredat.json        ← 7 tema, 35 beceri, 67 yanılgı, 140 anlatım (makine okur)
+data/mufredat.json        ← 7 tema, 35 beceri, 105 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (90) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (105) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar

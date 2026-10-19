@@ -1480,6 +1480,86 @@
    "key": "kart_p_spektrum_gorsel_2",
    "grup": "kart",
    "text": "Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa az olası, yarısıysa eşit olası, fazlaysa çok olası."
+  },
+  {
+   "key": "mis_aci_isim",
+   "grup": "mis",
+   "text": "Açıyı adlandırırken köşe harfini yanlış yere yazma. Açı üç harfle adlandırılırken köşenin harfi her zaman ortaya yazılır: köşesi B olan açı ABC ya da CBA açısıdır. Tek harfle yalnız köşe harfi yazılır: B açısı."
+  },
+  {
+   "key": "mis_paralel_kesen",
+   "grup": "mis",
+   "text": "Paralel doğruları kesen doğrunun açılarını karıştırma. İki paralel doğruyu bir doğru kestiğinde oluşan dar açıların hepsi birbirine eş, geniş açıların hepsi de birbirine eştir. Bir dar açı ile bir geniş açının toplamı 180 derecedir."
+  },
+  {
+   "key": "mis_dis_aci",
+   "grup": "mis",
+   "text": "Dış açıyı iç açıyla karıştırma. Çokgende bir iç açının komşu bütünleri o köşedeki dış açıdır. İç açı ile dış açının toplamı 180 derecedir."
+  },
+  {
+   "key": "mis_cokgen_isim",
+   "grup": "mis",
+   "text": "Çokgeni adlandırırken köşeleri sırasız yazma. Çokgen adlandırılırken herhangi bir köşeden başlanır ve köşe harfleri yan yana sırayla okunur. Atlayarak yazılan harfler başka bir şekil gösterir."
+  },
+  {
+   "key": "mis_ucgen_aci_siniri",
+   "grup": "mis",
+   "text": "Bir üçgende iki dik ya da iki geniş açı olabileceğini sanma. Üçgenin iç açılarının toplamı 180 derecedir. Bu yüzden bir üçgende en fazla bir dik açı ya da bir geniş açı olabilir."
+  },
+  {
+   "key": "mis_cember_insa",
+   "grup": "mis",
+   "text": "Çemberlerle inşa edilen üçgenin türünü yanlış bulma. Üçgenin kenarları iki çemberin yarıçapları ve merkezler arasındaki uzaklıktır. Üçü eşitse eşkenar, ikisi eşitse ikizkenar, hepsi farklıysa çeşitkenar üçgen oluşur."
+  },
+  {
+   "key": "mis_ondalik_parca",
+   "grup": "mis",
+   "text": "Ondalık gösterimde tam kısım ile ondalık kısmı karıştırma. Virgülün solundaki sayı tam kısım, sağındaki sayı ondalık kısımdır: 4,25'te tam kısım 4, ondalık kısım 25'tir."
+  },
+  {
+   "key": "mis_daire_toplam",
+   "grup": "mis",
+   "text": "Daire grafiğinde dilimlerin toplamını kontrol etmeme. Daire grafiğinin tamamı bütündür. Bütün dilimlerin yüzdeleri toplanınca tam yüzde 100 etmelidir; etmiyorsa grafik hatalıdır."
+  },
+  {
+   "key": "mis_grafik_secim",
+   "grup": "mis",
+   "text": "Veriye uygun grafiği seçememe. Nokta grafiğinde her veri bir noktadır; veri çok olunca çizmek ve okumak zorlaşır, sütun grafiği daha kullanışlıdır. Parça-bütün ilişkisi için daire grafiği uygundur."
+  },
+  {
+   "key": "mis_ayni_oncelik",
+   "grup": "mis",
+   "text": "Aynı öncelikli işlemleri soldan sağa yapmama. Çarpma ile bölme aynı önceliktedir; toplama ile çıkarma da aynı önceliktedir. Art arda gelince soldan sağa doğru sırayla yapılır."
+  },
+  {
+   "key": "mis_oruntu_kural",
+   "grup": "mis",
+   "text": "Örüntünün kuralını bir adımda deneyip bırakma. Kuralı bulmak için adım sayısı ile terimi karşılaştır ve kuralı birkaç adımda dene. 4, 7, 10 örüntüsünde kural: adım sayısının 3 katının 1 fazlası."
+  },
+  {
+   "key": "mis_oruntu_sabit",
+   "grup": "mis",
+   "text": "Her örüntünün sabit artışlı olduğunu sanma. Bazı örüntülerde artış her adımda değişir (1, 3, 6, 10: artış 2, 3, 4). Böyle örüntülerde \"ilk terim artı (adım eksi 1) çarpı artış\" kuralı kullanılamaz."
+  },
+  {
+   "key": "mis_iletki_ters_2",
+   "grup": "mis",
+   "text": "Açıölçerde yanlış ölçeği okuma. Açıölçerde iki sıra sayı vardır. Açının kolu hangi taraftaki 0'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90'dan küçük olmalı."
+  },
+  {
+   "key": "mis_adim_sira_2",
+   "grup": "mis",
+   "text": "Araştırma adımlarının sırasını karıştırma. Sıra: 1) Araştırma sorusunu belirleme 2) Verileri toplama ve analize hazırlama 3) Veri görselleştirme ve özetleme 4) Sonuçları yorumlama."
+  },
+  {
+   "key": "kart_g_aci_adim_2",
+   "grup": "kart",
+   "text": "Açıyı bir dik açıyla (defter köşesi) karşılaştır. Daha kapalıysa dar açı (90 dereceden küçük). Tam köşe gibiyse dik açı (90 derece). Daha açıksa geniş açı (90 ile 180 derece). Açıölçerle ölçerken köşeyi merkeze, bir kolu 0'a koy; diğer kolun gösterdiği sayıyı oku."
+  },
+  {
+   "key": "kart_f_tur_adim_2",
+   "grup": "kart",
+   "text": "Pay ile paydayı karşılaştır. Pay 1, birim kesir. Pay paydadan küçükse kesir bir bütünden küçüktür. Pay büyük ya da eşit payda, bileşik kesir. Bileşiği tam sayılıya çevir: payı paydaya böl."
   }
  ]
 }
