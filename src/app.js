@@ -273,6 +273,22 @@
     return `<button class="komsu k-${k.h}" data-act="komsu" data-v="${thId}" aria-label="${esc(k.ad)}, ${esc(k.tur)}: dokun, konuşsun"><span class="kbal">${esc(k.soz[0])}</span><img src="img/komsu_${thId}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.komsu').remove()"><span class="kad">${esc(k.ad)}</span></button>`; };
   const komsuSay = {};
 
+  // Yol üstü sandık durağı: önündeki beceride en az 1 yıldız olunca açılır, bir kez elmas verir (para ile satılmaz, §1-7)
+  const sandikKey = (th, i) => `${th.id}_${i}`;
+  function sandikDuragi(th, s, i) {
+    const acik = !!(A.st.sandiklar || {})[sandikKey(th, i)], hazir = !acik && E.crowns(E.eff(A.st.skills[s.id])) >= 1;
+    return `<div class="node-wrap sandik-durak" style="transform:translateX(${[-70, 70][Math.floor(i / 3) % 2]}px)"><button class="yolsandik ${hazir ? 'hazir' : acik ? 'acildi' : 'bekliyor'}" data-act="yol-sandik" data-v="${th.id}|${i}" aria-label="${hazir ? 'Sandığı aç' : acik ? 'Açılmış sandık' : 'Kilitli sandık'}"><img src="img/sandik_${acik ? 'acik' : 'kapali'}.webp" alt="" draggable="false"></button>${hazir ? '<div class="bubble sb">AÇ!</div>' : ''}</div>`;
+  }
+  // Düğümleri birleştiren noktalı iz (ekran çizildikten sonra gerçek konumlardan)
+  function izCiz() {
+    const yol = document.querySelector('.path.harita'); if (!yol) return;
+    const old = yol.querySelector('svg.iz'); if (old) old.remove();
+    const R = yol.getBoundingClientRect(), pts = [...yol.querySelectorAll('.node, .yolsandik')].map(n => { const r = n.getBoundingClientRect(); return [r.left + r.width / 2 - R.left, r.top + r.height / 2 - R.top]; });
+    if (pts.length < 2) return;
+    let d = `M${pts[0][0]},${pts[0][1]}`; for (let k = 1; k < pts.length; k++) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k], my = (y0 + y1) / 2; d += ` C${x0},${my} ${x1},${my} ${x1},${y1}`; }
+    yol.insertAdjacentHTML('afterbegin', `<svg class="iz" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
+  }
+  addEventListener('resize', () => requestAnimationFrame(izCiz));
   function viewHome() {
     const th = THEMES.find(t => t.id === A.theme), sks = SKILLS.filter(s => s.theme === th.id);
     const done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
@@ -282,8 +298,9 @@
       const sk = A.st.skills[s.id], cr = E.crowns(E.eff(sk)), un = unlocked(s);
       const isCur = un && !curFound && cr < 3; if (isCur) curFound = true;
       const col = th.color;
-      const style = un ? `background:var(--${col});box-shadow:0 7px 0 var(--${col}-d);color:#fff` : '';
-      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>`;
+      const style = `--c:var(--${col});--cd:var(--${col}-d)`;
+      const sandik = (i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '';
+      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
     const due = E.dueSkills(A.st).length;
@@ -715,6 +732,7 @@
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     $app.innerHTML = h;
+    if (A.st.profile && A.tab === 'yol' && A.view !== 'lesson' && A.view !== 'end') { requestAnimationFrame(izCiz); setTimeout(izCiz, 400); }
   }
 
   /* =================== AKIŞ =================== */
@@ -839,6 +857,13 @@
       case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
       case 'theme': A.theme = v; sfx.tap(); render(); setTimeout(() => { const k = document.querySelector('.komsu'); if (k && komsuSay[v] === undefined) k.click(); }, 500); break;
       case 'node': A.modal = skillModal(v); render(); break;
+      case 'yol-sandik': { const [tid, i] = v.split('|'), th = THEMES.find(t => t.id === tid), sk = SKILLS.filter(x => x.theme === tid)[+i], k = `${tid}_${i}`;
+        A.st.sandiklar = A.st.sandiklar || {};
+        if (A.st.sandiklar[k]) { toast('Bu sandığı açtın. Yolda başka sandıklar var! 🗺️'); break; }
+        if (E.crowns(E.eff(A.st.skills[sk.id])) < 1) { toast(`🔒 Önce «${sk.title}» konusunda 1 yıldız kazan, sandık açılsın.`); break; }
+        const kazanc = [5, 8, 10, 12, 15, 20][Math.floor(Math.random() * 6)]; A.st.sandiklar[k] = Date.now(); A.st.gems += kazanc; save();
+        sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80]); } catch (e) { } confetti();
+        A.modal = `<div class="modal center"><img src="img/sandik_acik.webp" alt="" style="width:160px;display:block;margin:0 auto" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${kazanc} 💎</h2><p class="muted" style="margin:0 0 14px">${th.icon} Yol sandığından elmas çıktı!</p><button class="btn" data-act="close-modal">Süper!</button></div>`; render(); break; }
       case 'komsu': { const k = KOMSU[v]; if (!k) break; const n = komsuSay[v] = komsuSay[v] === undefined ? 0 : (komsuSay[v] + 1) % k.soz.length;
         const b = el.querySelector('.kbal'); if (b) { b.textContent = k.soz[n]; b.classList.remove('acik'); void b.offsetWidth; b.classList.add('acik'); }
         el.classList.remove('tik'); void el.offsetWidth; el.classList.add('tik'); tone(520 + 80 * n, .12, 'triangle'); tone(780 + 80 * n, .12, 'triangle', .09);

@@ -449,8 +449,6 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .path.harita .node-label{background:rgba(255,255,255,.92);color:#2A2660;padding:3px 10px;border-radius:12px;box-shadow:0 2px 0 rgba(30,27,75,.12)}
 .path.harita .node.locked{background:rgba(255,255,255,.9);box-shadow:0 7px 0 rgba(120,115,170,.55);color:#8E8AB8}
 .path.harita .komsu .kad{background:rgba(255,255,255,.92);color:#2A2660;border-color:rgba(255,255,255,.6)}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)} }
-:root[data-theme="dark"] .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)}
 
 /* Konuşan Pi: soru balonunun yanında, ağzı sesle senkron */
 .qrow{display:flex;gap:6px;align-items:flex-start;margin:6px 0 12px}
@@ -672,6 +670,34 @@ a.chip{min-height:44px;text-decoration:none}
 .ricgoru{margin-top:10px;padding:10px;border-radius:12px;background:var(--brand-t);font-weight:700}
 .rmetin summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .rmetin .report{margin-top:10px}
+
+/* ===== Canlı harita (19.10.2026): parlak 3B düğümler, noktalı iz, yol sandıkları ===== */
+.path.harita{background:none}
+.path.harita>*:not(svg){position:relative;z-index:1}
+.path.harita::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;background:var(--fon) center top/cover no-repeat,linear-gradient(#9FE0FF,#C8F5D6);filter:saturate(1.45) brightness(1.04) contrast(1.05)}
+.path.harita:before{background:linear-gradient(180deg,var(--bg) 0,rgba(255,255,255,0) 46px,rgba(255,255,255,0) calc(100% - 60px),var(--bg) 100%)}
+:root[data-theme="dark"] .path.harita::after{filter:saturate(1.45) brightness(.96) contrast(1.05)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .path.harita::after{filter:saturate(1.45) brightness(.96) contrast(1.05)} }
+svg.iz{position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible}
+.iz-golge{fill:none;stroke:rgba(255,255,255,.75);stroke-width:16;stroke-linecap:round}
+.iz-yol{fill:none;stroke:#FFB020;stroke-width:7;stroke-linecap:round;stroke-dasharray:2 16}
+.path.harita .node{width:86px;height:80px;font-size:36px;color:#fff;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.55) 0 14%,rgba(255,255,255,0) 42%),var(--c,#5B4BFF);box-shadow:0 8px 0 var(--cd,#4334D9),0 14px 18px rgba(20,20,60,.28);border:4px solid rgba(255,255,255,.9)}
+.path.harita .node.locked{background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.7) 0 14%,rgba(255,255,255,0) 42%),color-mix(in srgb,var(--c,#9a96c8) 32%,#fff);box-shadow:0 8px 0 color-mix(in srgb,var(--cd,#77739f) 45%,#fff),0 12px 14px rgba(20,20,60,.18);color:#fff;font-size:30px}
+.path.harita .node.cur{animation:dugumZipla 1.3s ease-in-out infinite;box-shadow:0 8px 0 var(--cd),0 0 0 8px color-mix(in srgb,var(--c) 30%,transparent),0 14px 18px rgba(20,20,60,.28)}
+@keyframes dugumZipla{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.path.harita .bubble{z-index:3}
+.path.harita .node-label{font-weight:900;font-size:14px;border:2px solid rgba(255,255,255,.9)}
+.yolsandik{background:none;border:0;padding:0;width:96px;height:84px;cursor:pointer;filter:drop-shadow(0 8px 10px rgba(20,20,60,.3))}
+.yolsandik img{width:100%;height:100%;object-fit:contain}
+.yolsandik.hazir{animation:sandikSalla 1.4s ease-in-out infinite}
+.yolsandik.bekliyor img{filter:grayscale(.75) brightness(1.08);opacity:.85}
+.yolsandik.acildi img{opacity:.7}
+.bubble.sb{position:absolute;top:-18px;left:50%;transform:translateX(-50%)}
+@keyframes sandikSalla{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg) scale(1.04)}40%{transform:rotate(6deg) scale(1.04)}60%{transform:rotate(-3deg)}}
+.sandik-zipla{animation:dugumZipla .8s ease-in-out 2}
+@media (prefers-reduced-motion: reduce){.path.harita .node.cur,.yolsandik.hazir,.sandik-zipla{animation:none}}
+.path.harita .bubble{background:#FFC531;color:#4A2E00;border:3px solid #fff;box-shadow:0 4px 0 #D99A00;font-size:14px}
+.path.harita .bubble:after{border-top-color:#FFC531}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -2656,7 +2682,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-19 9c95676', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-19 085426c', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

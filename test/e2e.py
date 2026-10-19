@@ -26,7 +26,7 @@ async def main():
             for _ in range(6):
                 await pg.evaluate("document.querySelectorAll('.sahne').forEach(e=>e.remove()); 0")
                 if not await pg.query_selector('.end'): return
-                if await pg.query_selector('[data-act=sandik-ac]:not([disabled])'): await pg.click('[data-act=sandik-ac]'); await pg.wait_for_timeout(250)
+                if await pg.query_selector('[data-act=sandik-ac]:not([disabled])'): await pg.click('[data-act=sandik-ac]', force=True); await pg.wait_for_timeout(250)
                 await pg.click('[data-act=end-ok]', force=True); await pg.wait_for_timeout(250)
         async def answer(correct_prob=0.6, shot=None):
             await pg.wait_for_function("!!document.querySelector('.qprompt') && !document.querySelector('.mid') && !document.querySelector('.sheet')", timeout=8000)
@@ -83,7 +83,7 @@ async def main():
         # bir ders: 4. tema kesirler
         await pg.click('[data-act=theme][data-v=t4]'); await pg.wait_for_timeout(200)
         await pg.screenshot(path=OUT+'06_home_t4.png')
-        await pg.click('[data-act=node][data-v=f_tur]'); await pg.wait_for_timeout(200); await pg.screenshot(path=OUT+'07_skill_modal.png')
+        await pg.click('[data-act=node][data-v=f_tur]', force=True); await pg.wait_for_timeout(200); await pg.screenshot(path=OUT+'07_skill_modal.png')
         await pg.click('[data-act=start]'); await pg.wait_for_timeout(1200)
         await pg.screenshot(path=OUT+'08_card.png')
         await pg.click('[data-act=other-fmt]'); await pg.wait_for_timeout(200); await pg.screenshot(path=OUT+'09_card2.png')
@@ -97,7 +97,7 @@ async def main():
         for t in ['t1','t2','t3','t5','t6','t7']:
             await pg.click(f'[data-act=theme][data-v={t}]'); 
             first = await pg.evaluate(f"window.MY_CUR.SKILLS.find(s=>s.theme=='{t}').id")
-            await pg.click(f'[data-act=node][data-v={first}]'); await pg.click('[data-act=start]'); await pg.wait_for_timeout(1100)
+            await pg.click(f'[data-act=node][data-v={first}]', force=True); await pg.click('[data-act=start]'); await pg.wait_for_timeout(1100)
             if await pg.evaluate("!!window.MY_APP.ses.showCard"): 
                 if t=='t1': await pg.screenshot(path=OUT+'11_card_t1.png')
                 await pg.wait_for_selector('[data-act=card-ok]'); await pg.click('[data-act=card-ok]')

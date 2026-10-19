@@ -448,8 +448,6 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .path.harita .node-label{background:rgba(255,255,255,.92);color:#2A2660;padding:3px 10px;border-radius:12px;box-shadow:0 2px 0 rgba(30,27,75,.12)}
 .path.harita .node.locked{background:rgba(255,255,255,.9);box-shadow:0 7px 0 rgba(120,115,170,.55);color:#8E8AB8}
 .path.harita .komsu .kad{background:rgba(255,255,255,.92);color:#2A2660;border-color:rgba(255,255,255,.6)}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)} }
-:root[data-theme="dark"] .path.harita:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(18,16,52,.28)}
 
 /* Konuşan Pi: soru balonunun yanında, ağzı sesle senkron */
 .qrow{display:flex;gap:6px;align-items:flex-start;margin:6px 0 12px}
@@ -671,6 +669,34 @@ a.chip{min-height:44px;text-decoration:none}
 .ricgoru{margin-top:10px;padding:10px;border-radius:12px;background:var(--brand-t);font-weight:700}
 .rmetin summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .rmetin .report{margin-top:10px}
+
+/* ===== Canlı harita (19.10.2026): parlak 3B düğümler, noktalı iz, yol sandıkları ===== */
+.path.harita{background:none}
+.path.harita>*:not(svg){position:relative;z-index:1}
+.path.harita::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;background:var(--fon) center top/cover no-repeat,linear-gradient(#9FE0FF,#C8F5D6);filter:saturate(1.45) brightness(1.04) contrast(1.05)}
+.path.harita:before{background:linear-gradient(180deg,var(--bg) 0,rgba(255,255,255,0) 46px,rgba(255,255,255,0) calc(100% - 60px),var(--bg) 100%)}
+:root[data-theme="dark"] .path.harita::after{filter:saturate(1.45) brightness(.96) contrast(1.05)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .path.harita::after{filter:saturate(1.45) brightness(.96) contrast(1.05)} }
+svg.iz{position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible}
+.iz-golge{fill:none;stroke:rgba(255,255,255,.75);stroke-width:16;stroke-linecap:round}
+.iz-yol{fill:none;stroke:#FFB020;stroke-width:7;stroke-linecap:round;stroke-dasharray:2 16}
+.path.harita .node{width:86px;height:80px;font-size:36px;color:#fff;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.55) 0 14%,rgba(255,255,255,0) 42%),var(--c,#5B4BFF);box-shadow:0 8px 0 var(--cd,#4334D9),0 14px 18px rgba(20,20,60,.28);border:4px solid rgba(255,255,255,.9)}
+.path.harita .node.locked{background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.7) 0 14%,rgba(255,255,255,0) 42%),color-mix(in srgb,var(--c,#9a96c8) 32%,#fff);box-shadow:0 8px 0 color-mix(in srgb,var(--cd,#77739f) 45%,#fff),0 12px 14px rgba(20,20,60,.18);color:#fff;font-size:30px}
+.path.harita .node.cur{animation:dugumZipla 1.3s ease-in-out infinite;box-shadow:0 8px 0 var(--cd),0 0 0 8px color-mix(in srgb,var(--c) 30%,transparent),0 14px 18px rgba(20,20,60,.28)}
+@keyframes dugumZipla{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.path.harita .bubble{z-index:3}
+.path.harita .node-label{font-weight:900;font-size:14px;border:2px solid rgba(255,255,255,.9)}
+.yolsandik{background:none;border:0;padding:0;width:96px;height:84px;cursor:pointer;filter:drop-shadow(0 8px 10px rgba(20,20,60,.3))}
+.yolsandik img{width:100%;height:100%;object-fit:contain}
+.yolsandik.hazir{animation:sandikSalla 1.4s ease-in-out infinite}
+.yolsandik.bekliyor img{filter:grayscale(.75) brightness(1.08);opacity:.85}
+.yolsandik.acildi img{opacity:.7}
+.bubble.sb{position:absolute;top:-18px;left:50%;transform:translateX(-50%)}
+@keyframes sandikSalla{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg) scale(1.04)}40%{transform:rotate(6deg) scale(1.04)}60%{transform:rotate(-3deg)}}
+.sandik-zipla{animation:dugumZipla .8s ease-in-out 2}
+@media (prefers-reduced-motion: reduce){.path.harita .node.cur,.yolsandik.hazir,.sandik-zipla{animation:none}}
+.path.harita .bubble{background:#FFC531;color:#4A2E00;border:3px solid #fff;box-shadow:0 4px 0 #D99A00;font-size:14px}
+.path.harita .bubble:after{border-top-color:#FFC531}
 </style>
 </head>
 <body>
@@ -3508,6 +3534,22 @@ a.chip{min-height:44px;text-decoration:none}
     return `<button class="komsu k-${k.h}" data-act="komsu" data-v="${thId}" aria-label="${esc(k.ad)}, ${esc(k.tur)}: dokun, konuşsun"><span class="kbal">${esc(k.soz[0])}</span><img src="img/komsu_${thId}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.komsu').remove()"><span class="kad">${esc(k.ad)}</span></button>`; };
   const komsuSay = {};
 
+  // Yol üstü sandık durağı: önündeki beceride en az 1 yıldız olunca açılır, bir kez elmas verir (para ile satılmaz, §1-7)
+  const sandikKey = (th, i) => `${th.id}_${i}`;
+  function sandikDuragi(th, s, i) {
+    const acik = !!(A.st.sandiklar || {})[sandikKey(th, i)], hazir = !acik && E.crowns(E.eff(A.st.skills[s.id])) >= 1;
+    return `<div class="node-wrap sandik-durak" style="transform:translateX(${[-70, 70][Math.floor(i / 3) % 2]}px)"><button class="yolsandik ${hazir ? 'hazir' : acik ? 'acildi' : 'bekliyor'}" data-act="yol-sandik" data-v="${th.id}|${i}" aria-label="${hazir ? 'Sandığı aç' : acik ? 'Açılmış sandık' : 'Kilitli sandık'}"><img src="img/sandik_${acik ? 'acik' : 'kapali'}.webp" alt="" draggable="false"></button>${hazir ? '<div class="bubble sb">AÇ!</div>' : ''}</div>`;
+  }
+  // Düğümleri birleştiren noktalı iz (ekran çizildikten sonra gerçek konumlardan)
+  function izCiz() {
+    const yol = document.querySelector('.path.harita'); if (!yol) return;
+    const old = yol.querySelector('svg.iz'); if (old) old.remove();
+    const R = yol.getBoundingClientRect(), pts = [...yol.querySelectorAll('.node, .yolsandik')].map(n => { const r = n.getBoundingClientRect(); return [r.left + r.width / 2 - R.left, r.top + r.height / 2 - R.top]; });
+    if (pts.length < 2) return;
+    let d = `M${pts[0][0]},${pts[0][1]}`; for (let k = 1; k < pts.length; k++) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k], my = (y0 + y1) / 2; d += ` C${x0},${my} ${x1},${my} ${x1},${y1}`; }
+    yol.insertAdjacentHTML('afterbegin', `<svg class="iz" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
+  }
+  addEventListener('resize', () => requestAnimationFrame(izCiz));
   function viewHome() {
     const th = THEMES.find(t => t.id === A.theme), sks = SKILLS.filter(s => s.theme === th.id);
     const done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
@@ -3517,8 +3559,9 @@ a.chip{min-height:44px;text-decoration:none}
       const sk = A.st.skills[s.id], cr = E.crowns(E.eff(sk)), un = unlocked(s);
       const isCur = un && !curFound && cr < 3; if (isCur) curFound = true;
       const col = th.color;
-      const style = un ? `background:var(--${col});box-shadow:0 7px 0 var(--${col}-d);color:#fff` : '';
-      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>`;
+      const style = `--c:var(--${col});--cd:var(--${col}-d)`;
+      const sandik = (i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '';
+      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
     const due = E.dueSkills(A.st).length;
@@ -3950,6 +3993,7 @@ a.chip{min-height:44px;text-decoration:none}
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     $app.innerHTML = h;
+    if (A.st.profile && A.tab === 'yol' && A.view !== 'lesson' && A.view !== 'end') { requestAnimationFrame(izCiz); setTimeout(izCiz, 400); }
   }
 
   /* =================== AKIŞ =================== */
@@ -4074,6 +4118,13 @@ a.chip{min-height:44px;text-decoration:none}
       case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
       case 'theme': A.theme = v; sfx.tap(); render(); setTimeout(() => { const k = document.querySelector('.komsu'); if (k && komsuSay[v] === undefined) k.click(); }, 500); break;
       case 'node': A.modal = skillModal(v); render(); break;
+      case 'yol-sandik': { const [tid, i] = v.split('|'), th = THEMES.find(t => t.id === tid), sk = SKILLS.filter(x => x.theme === tid)[+i], k = `${tid}_${i}`;
+        A.st.sandiklar = A.st.sandiklar || {};
+        if (A.st.sandiklar[k]) { toast('Bu sandığı açtın. Yolda başka sandıklar var! 🗺️'); break; }
+        if (E.crowns(E.eff(A.st.skills[sk.id])) < 1) { toast(`🔒 Önce «${sk.title}» konusunda 1 yıldız kazan, sandık açılsın.`); break; }
+        const kazanc = [5, 8, 10, 12, 15, 20][Math.floor(Math.random() * 6)]; A.st.sandiklar[k] = Date.now(); A.st.gems += kazanc; save();
+        sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80]); } catch (e) { } confetti();
+        A.modal = `<div class="modal center"><img src="img/sandik_acik.webp" alt="" style="width:160px;display:block;margin:0 auto" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${kazanc} 💎</h2><p class="muted" style="margin:0 0 14px">${th.icon} Yol sandığından elmas çıktı!</p><button class="btn" data-act="close-modal">Süper!</button></div>`; render(); break; }
       case 'komsu': { const k = KOMSU[v]; if (!k) break; const n = komsuSay[v] = komsuSay[v] === undefined ? 0 : (komsuSay[v] + 1) % k.soz.length;
         const b = el.querySelector('.kbal'); if (b) { b.textContent = k.soz[n]; b.classList.remove('acik'); void b.offsetWidth; b.classList.add('acik'); }
         el.classList.remove('tik'); void el.offsetWidth; el.classList.add('tik'); tone(520 + 80 * n, .12, 'triangle'); tone(780 + 80 * n, .12, 'triangle', .09);
