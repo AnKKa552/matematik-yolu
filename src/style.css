@@ -769,3 +769,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .bk-alt{font-size:13px;font-weight:700;opacity:.95} .bk-alt span{white-space:nowrap}
 .bk-kupa{font-size:30px;flex:none}
 .bg-yellow.bolge-kapi{color:#4A3500}
+/* Hatırlatma bildirimleri (Veli alanı) */
+.bil-satir{margin:4px 0 2px}
+.bil-satir .themes{padding:4px 0 8px}
+.bil-kart .chip[disabled]{opacity:.4}

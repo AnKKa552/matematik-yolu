@@ -37,7 +37,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 | Kıvrımlı öğrenme yolu (path) | Tek net "sonraki adım", ilerlemeyi görünür kılar | Tema başına zikzak beceri yolu, kitaptaki sıra, düğümde yıldız/taç | ✅ Prototipte |
 | Kısa dersler (3–5 dk) | Başlama eşiğini düşürür | 6–10 soruluk ders; uzunluk öğrencinin hızına göre ayarlanır | ✅ |
 | XP + günlük hedef | Küçük, sık ödül | Doğru 10, telafi doğru 15, 5'li seri +5, ders sonu +15, kusursuz +10; günlük hedef 20/50/80/120 | ✅ |
-| Seri (streak) + seri dondurucu | Alışkanlık oluşturma, kayıp kaçınma | Günlük seri + elmasla alınan "seri koruyucu" (ceza değil, güvence) | ✅ |
+| Seri (streak) + seri dondurucu | Alışkanlık oluşturma, kayıp kaçınma | Günlük seri + elmasla alınan "seri koruyucu" (ceza değil, güvence). Gelinmeyen günlerde kendiliğinden kullanılır, en fazla 2 taşınır (§3.2) | ✅ |
 | Haftalık ligler (10 lig, ilk sıralar yükselir) | Sosyal karşılaştırma, rekabet | 5 lig (Bronz→Elmas), 10 kişilik grup, ilk 3 yükselir | ✅ Demo rakiplerle; gerçek eşleşme sunucu fazında |
 | Elmas (gems), sandık | Değişken ödül | Ders sonu ve yol sandıklarından elmas; elmas yalnız seri koruyucuya ve Pi'nin dolabına (kostüm, iz rengi) harcanır, parayla satılmaz | ✅ |
 | Kalp/can | Dikkat, aynı zamanda abonelik satışı | **Alınmadı.** Yerine "telafi sorusu" | ❌ bilinçli |
@@ -47,7 +47,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 | "Hatalarımı çalış" | Zayıf noktayı kapatma | "Hatalarım" defteri, yanılgı bazında tekrar | ✅ |
 | Rive animasyonlu karakterler | Canlılık, düşük dosya boyutu | Prototipte CSS/SVG; üretimde Rive durum makinesi | 🔜 |
 | Sesli okuma | Okuma güçlüğü olanlara erişim | Cihaz TTS (prototip) → ElevenLabs önceden üretilmiş ses (üretim) | ✅/🔜 |
-| Bildirimler | Geri çağırma | Günde en fazla 1, saat 20.30'dan sonra yok, veli ayarlar | 🔜 |
+| Bildirimler | Geri çağırma | **Günde en fazla 2** (okul sonrası + yatmadan önce), yalnız o gün hiç ders yapılmadıysa, saat 20.30'dan sonra yok, veli açar ve saati seçer (§3.2; kural 20.10.2026'da proje sahibinin kararıyla 1'den 2'ye çıktı) | ✅ |
 
 **Bizim Duolingo'da olmayan farkımız:**
 - **Kavram yanılgısı teşhisi** (yanlış şıkkın *nedeni* bilinir ve hedefli açıklama gelir).
@@ -124,6 +124,14 @@ Uygulama, ilk kez açan bir çocuğun gözünden baştan sona gezildi (her ekran
 - **Görsel veli raporu:** Veli alanında rapor artık kartlar ve çubuklar: son 7 günün günlük dakikası, tema bazında ustalık (yalnız çalışılan konular) + güçlü/destek gereken etiketleri, cevap kanıtı çubuğu, problem çözme aşamaları + içgörü cümlesi, yanılgılar (çalışılıyor / olası / düzeltti), haftalık öneri. Paylaşılan metin değişmedi; "📝 Gönderilecek mesaj metni" kutusunda durur. Veri `E.parentReport` dönüşünde (`gunluk`, `temalar`, `act`, `olasi`, `fixed`, `probIcgoru`, `tip`).
 - **Görev sekmesinde "BUGÜN BUNU YAP":** tek, net öneri kartı (`bugunOneri` in app.js). Öncelik: hiç çalışmadıysa ilk konu (önce anlatım) → hatırlama olasılığı 0,5'in altına düşmüş konu varsa tekrar → 3+ hata birikmişse Hatalarım → yoldaki sıradaki konu (açık ve ustalığı 0,7 altı; hiç çalışılmadıysa anlatımla başlar) → hepsi iyiyse karışık pratik. Gerekçe tek cümle; günlük hedef dolduysa "Bugünkü hedefin tamam!" der, zorlamaz.
 - Not: test ortamında görülen "Unexpected token '<'" hatası uygulamadan değil, ağ engelinin supabase-js yerine HTML döndürmesinden kaynaklanır (gerçek cihazda yok).
+
+### 3.2 Hatırlatma bildirimleri, seri koruyucu, açılış ekranı (20.10.2026)
+- **Hatırlatma bildirimleri (Web Push):** veli, şifreli Veli alanında "🔔 Bildirimleri aç" der (izin + abonelik; bu, veli onayı olarak kaydedilir `st.bildirim.onay`). Saat seçimi: okul sonrası 15.30/16.30/17.30/18.30, yatmadan önce 19.00/19.30/20.00/20.30 (ikisi arasında en az 1 saat). Bildirim **yalnız o gün hiç ders yapılmadıysa** gider; günde en fazla 2; 20.30'dan sonra asla; saatinden 60 dk geçtiyse gönderilmez. Mesajlar suçlamaz, korkutmaz (§1-7): "Pi seni bekliyor 🚀", "Yatmadan önce 3 dakika? 🌙", serisi 2+ olana bazen "🔥 3 günlük serin seni bekliyor". "Pi üzgün", "serini kaybedeceksin" gibi cümle YOK; çocuğun adı bildirimde yok.
+  - Sunucu: `sunucu/supabase/bildirim.sql` (tablo `bildirim_abonelik`, RLS açık politika yok; fonksiyonlar `bildirim_kaydet/ders/sil/acik_anahtar` anon'a açık, `bildirim_vapid_al/kaydet` yalnız service_role; pg_cron `bildirim-gonder` her 10 dk UTC 12–17). Fonksiyon `functions/bildirim-gonder` (jsr:@negrel/webpush 0.5.0, admin_token ile). VAPID anahtarları sunucuda üretildi ve kasada (`vapid_keys`); özel anahtar hiçbir dosyada yok. Gidemeyen (silinmiş) abonelik kendiliğinden silinir.
+  - Saklanan veri: bildirim adresi, iki saat, son ders günü, seri sayısı. İsim/telefon/e-posta yok. Kapatınca satır silinir. **KVKK hukukçu onayı yayın öncesi gerekir** (§1-6).
+  - iPhone'da Web Push yalnız ana ekrana eklenmiş uygulamada çalışır (iOS 16.4+); kart bunu söyler. Uygulama açılınca ve her ders sonunda son ders günü sunucuya bildirilir (`bildirimDers`).
+- **Seri koruyucu kendiliğinden (`E.seriKontrol`):** uygulama açılınca, uygulamaya geri dönülünce ve ders sonunda bakılır. Gelinmeyen her gün için bir koruyucu kullanılır; koruyucular bütün boş günlere yetmiyorsa **hiç harcanmaz** ve seri 0 olur, ilk ders 1. gün sayılır. Konular, yıldızlar, XP, elmas etkilenmez. Çocuğa nazik not: "🧊 Dün gelemedin; seri koruyucun serini korudu!" ya da "🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor." En fazla 2 koruyucu taşınır (`E.KORUYUCU_EN_FAZLA`), fazlası satın alınamaz (elmas boşa gitmesin). Korunan günler `st.donmus`.
+- **Açılış ekranı:** 550 KB'lık sayfa yüklenirken ekran bomboş/koyu kalıyordu (proje sahibinin ekran görüntüsü). Artık `#app` içinde anında görünen Pi simgeli açılış ekranı var (yalnız satır içi CSS); Google yazı tipi sayfayı bekletmez (`media=print onload`). Service worker sayfayı tarayıcının HTTP önbelleğini atlayarak ister (`cache: 'no-cache'`): GitHub Pages 10 dk önbelleğe aldığı için yayından hemen sonra ilk açılışta eski sürüm gelebiliyordu.
 
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 

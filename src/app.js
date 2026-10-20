@@ -345,7 +345,7 @@
   // Üst çubuk: her simgeye dokununca ne olduğunu kısa bir cümleyle söyler (çocuk 🧊'nin ne olduğunu bilemez)
   const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
   const UST = { seri: () => `🔥 Serin <b>${A.st.streak} gün</b>. Her gün en az bir ders yaparsan büyür.`, elmas: () => `💎 <b>${A.st.gems} elmasın</b> var. Ders sonundaki ve yoldaki sandıklardan kazanırsın. Seri koruyucu alırsın ya da Pi'ye kostüm alırsın (Pi'ye dokun).`,
-    hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Bir gün ders yapamazsan serin bozulmaz.` };
+    hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Ders yapamadığın gün kendiliğinden kullanılır, serin bozulmaz. En fazla ${E.KORUYUCU_EN_FAZLA} tane taşıyabilirsin.` };
   const nav = () => `<nav class="nav">${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
 
   /* Harita mahallesi: her temanın kendine has komşusu (özgün karakterler, ses yok: konuşan tek ses Pi) */
@@ -568,6 +568,40 @@
       ${mis ? `<div class="card rkart"><h3>🧠 Kavram yanılgıları</h3>${mis}</div>` : ''}
       <div class="card rkart roneri"><h3>👨‍👩‍👧 Bu hafta için öneri</h3><p style="margin:4px 0 0">${esc(R.tip)}</p>${fp.bestFormat ? `<p class="muted sm" style="margin:8px 0 0">En iyi öğrendiği anlatım: <b>${FORMATS[fp.bestFormat].name}</b> · Çalışma tarzı: <b>${fp.pace}</b></p>` : ''}</div>`;
   }
+  /* ---------------- Hatırlatma bildirimleri (Web Push, 20.10.2026) ----------------
+     Veli açar (şifreli Veli alanı). O gün hiç ders yapılmadıysa günde en fazla 2 bildirim: okul sonrası + yatmadan önce,
+     20.30'dan sonra asla (CLAUDE.md §2). Sunucuda yalnız bildirim adresi, saatler, son ders günü ve seri sayısı durur; isim yok. */
+  const BIL_SAAT1 = ['15:30', '16:30', '17:30', '18:30'], BIL_SAAT2 = ['19:00', '19:30', '20:00', '20:30'];
+  const bilDestek = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  const bil = () => A.st.bildirim || (A.st.bildirim = { acik: false, saat1: '17:30', saat2: '20:00', abone: null });
+  const dkS = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
+  const rpc = (fn, args) => fetch(MY_CONFIG.supabaseUrl + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: MY_CONFIG.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) })
+    .then(r => r.ok ? r.text().then(t => t ? JSON.parse(t) : null) : Promise.reject(new Error('sunucu ' + r.status)));
+  const b64u = (x) => { const b = atob((x + '='.repeat((4 - x.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, c => c.charCodeAt(0)); };
+  async function bildirimAboneOl() {
+    if (!bilDestek() || !window.MY_CONFIG || !MY_CONFIG.supabaseUrl) throw new Error('destek');
+    if ((await Notification.requestPermission()) !== 'granted') throw new Error('izin');
+    const kayit = await navigator.serviceWorker.ready, pub = await rpc('bildirim_acik_anahtar');
+    if (!pub) throw new Error('anahtar');
+    const abone = (await kayit.pushManager.getSubscription()) || await kayit.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(pub) });
+    return abone.toJSON();
+  }
+  const bildirimKaydet = () => { const b = bil(); if (!b.abone) return Promise.resolve(); return rpc('bildirim_kaydet', { p_endpoint: b.abone.endpoint, p_p256dh: b.abone.keys.p256dh, p_auth: b.abone.keys.auth, p_saat1: b.saat1, p_saat2: b.saat2, p_acik: b.acik, p_son_ders: A.st.lastDay, p_seri: A.st.streak }); };
+  // Ders bitince ve uygulama açılınca: bugün çalıştıysa sunucu hatırlatma göndermez
+  const bildirimDers = () => { const b = A.st.bildirim; if (b && b.acik && b.abone && A.st.lastDay) rpc('bildirim_ders', { p_endpoint: b.abone.endpoint, p_gun: A.st.lastDay, p_seri: A.st.streak }).catch(() => { }); };
+  function bildirimKart() {
+    const b = bil(), destek = bilDestek(), ios = /iphone|ipad/i.test(navigator.userAgent), izinYok = destek && Notification.permission === 'denied';
+    const chip = (act, t, on, dis) => `<button class="chip ${on ? 'on' : ''}" data-act="${act}" data-v="${t}" ${dis ? 'disabled' : ''}>${t.replace(':', '.')}</button>`;
+    return `<div class="card bil-kart" style="margin-top:14px"><b>🔔 Hatırlatma bildirimleri</b>
+      <p class="muted sm" style="margin:6px 0 10px">Çocuğunuz o gün hiç ders yapmadıysa telefona kısa ve nazik bir hatırlatma gider: okul sonrası ve yatmadan önce. <b>Günde en fazla 2</b>, saat 20.30'dan sonra hiç. Ders yapılan gün bildirim gitmez.</p>
+      ${!destek ? `<div class="speech sm">${ios ? "iPhone'da bildirim için önce Safari'de <b>Paylaş → Ana Ekrana Ekle</b> ile uygulamayı ekleyin, sonra ana ekrandaki simgeden açıp buraya gelin." : 'Bu tarayıcı bildirimi desteklemiyor. Chrome ile açıp ana ekrana eklemeyi deneyin.'}</div>`
+      : izinYok ? `<div class="speech sm">Bildirim izni kapalı. Telefonun <b>Ayarlar → Uygulamalar → Bildirimler</b> bölümünden Matematik Yolu (ya da Chrome) için izni açın.</div>`
+      : `<div class="bil-satir"><span class="sm"><b>Okul sonrası</b></span><div class="themes">${BIL_SAAT1.map(t => chip('bil-saat1', t, b.saat1 === t)).join('')}</div></div>
+      <div class="bil-satir"><span class="sm"><b>Yatmadan önce</b></span><div class="themes">${BIL_SAAT2.map(t => chip('bil-saat2', t, b.saat2 === t, dkS(t) < dkS(b.saat1) + 60)).join('')}</div></div>
+      ${b.acik ? `<button class="btn ghost small" data-act="bil-kapat">🔕 Bildirimleri kapat</button> <button class="btn ghost small" data-act="bil-dene">Deneme bildirimi</button>` : '<button class="btn small" data-act="bil-ac">🔔 Bildirimleri aç</button>'}`}
+      <p class="muted sm" style="margin:10px 0 0">Saklanan: yalnız bu telefonun bildirim adresi, seçtiğiniz saatler, son ders günü ve seri sayısı. İsim ya da telefon numarası saklanmaz. Kapatınca sunucudan silinir.</p></div>`;
+  }
+
   function viewParent() {
     if (!A.veliAcik) return veliKapisi();
     const p = A.st.profile || {}, R = E.parentReport(A.st), txt = R.text;
@@ -579,6 +613,7 @@
       <details class="card rmetin"><summary><b>📝 Gönderilecek mesaj metni</b> <span class="muted sm">(WhatsApp/e-posta ile bu gider)</span></summary><pre class="report">${esc(txt)}</pre></details>
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
       ${cloudCard()}
+      ${bildirimKart()}
       ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
       <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div>`}
       <div class="card" style="margin-top:14px"><b>Tehlikeli bölge</b><p class="muted sm" style="margin:6px 0 10px">Çocuğun bütün ilerlemesi, rozetleri, veli bilgileri ve veli şifresi bu cihazdan silinir. Geri alınamaz.</p><button class="btn ghost small" data-act="reset" style="color:var(--bad)">Tüm verileri sıfırla</button></div></div>${nav()}`;
@@ -959,7 +994,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); bildirimDers(); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -973,6 +1008,14 @@
       case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
       case 'theme': A.theme = v; sfx.tap(); document.querySelectorAll('.bolge-atla .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v)); haritaKaydir(v, true); setTimeout(() => { const k = document.querySelector(`#bolge-${v} .komsu`); if (k && komsuSay[v] === undefined) k.click(); }, 700); break;
       case 'node': A.modal = skillModal(v); render(); break;
+      case 'bil-ac': { const b = bil(); el.disabled = true; bildirimAboneOl().then(j => { b.abone = j; b.acik = true; b.onay = Date.now(); save(); return bildirimKaydet(); })
+          .then(() => { toast('🔔 Bildirimler açık. O gün ders yapılmadıysa hatırlatma gelecek.'); render(); })
+          .catch(e => { toast(e.message === 'izin' ? 'Bildirim izni verilmedi. İstediğiniz zaman yeniden açabilirsiniz.' : e.message === 'destek' ? 'Bu tarayıcı bildirimi desteklemiyor.' : 'Şu an açılamadı. İnternet bağlantısını kontrol edip tekrar deneyin.'); render(); }); break; }
+      case 'bil-kapat': { const b = bil(), ab = b.abone; b.acik = false; b.abone = null; save(); render(); toast('🔕 Bildirimler kapatıldı.');
+          if (ab) rpc('bildirim_sil', { p_endpoint: ab.endpoint }).catch(() => { });
+          if (bilDestek()) navigator.serviceWorker.ready.then(k => k.pushManager.getSubscription()).then(s2 => s2 && s2.unsubscribe()).catch(() => { }); break; }
+      case 'bil-saat1': case 'bil-saat2': { const b = bil(); b[act === 'bil-saat1' ? 'saat1' : 'saat2'] = v; if (dkS(b.saat2) < dkS(b.saat1) + 60) b.saat2 = BIL_SAAT2.find(t => dkS(t) >= dkS(b.saat1) + 60) || '20:30'; save(); render(); if (b.acik) bildirimKaydet().catch(() => { }); break; }
+      case 'bil-dene': { if (!bilDestek()) break; navigator.serviceWorker.ready.then(k => k.showNotification('Pi seni bekliyor 🚀', { body: 'Bildirimler çalışıyor! Hatırlatmalar böyle görünecek.', icon: './img/simge2_192.png', tag: 'matematik-yolu-hatirlatma' })).catch(() => toast('Deneme bildirimi gösterilemedi.')); break; }
       case 'yol-sandik': { const [tid, i] = v.split('|'), th = THEMES.find(t => t.id === tid), sk = SKILLS.filter(x => x.theme === tid)[+i], k = `${tid}_${i}`;
         A.st.sandiklar = A.st.sandiklar || {};
         if (A.st.sandiklar[k]) { toast('Bu sandığı açtın. Yolda başka sandıklar var! 🗺️'); break; }
@@ -1051,7 +1094,7 @@
         const arr = t === 'k' ? d.sahip : d.izler; if (!arr.includes(id)) { A.st.gems -= o.fiyat; arr.push(id); }
         if (t === 'k') d.giyili = id; else d.iz = id; A.dolapOnay = null; save(); A.modal = dolapModal(); render(); sfx.badge(); confetti(); toast(t === 'k' ? `👕 Pi artık ${o.ad}!` : `✨ Haritadaki iz: ${o.ad}`); break; }
       case 'dolap-giy': { const d = dolap(), [t, id] = (A.dolapSec || '').split(':'); if (t === 'k' && d.sahip.includes(id)) d.giyili = id; else if (t === 'i' && d.izler.includes(id)) d.iz = id; save(); A.modal = dolapModal(); render(); tone(700, .12, 'triangle'); break; }
-      case 'buy-freeze': if (A.st.gems >= 50) { A.st.gems -= 50; A.st.freezes++; save(); render(); toast('🧊 Seri koruyucu alındı!'); } else toast('Yeterli elmasın yok. Ders yaparak kazanabilirsin!'); break;
+      case 'buy-freeze': if (A.st.freezes >= E.KORUYUCU_EN_FAZLA) { toast(`🧊 En fazla ${E.KORUYUCU_EN_FAZLA} seri koruyucu taşıyabilirsin. Elindekiler seni koruyor!`); break; } if (A.st.gems >= 50) { A.st.gems -= 50; A.st.freezes++; save(); render(); toast('🧊 Seri koruyucu alındı!'); } else toast('Yeterli elmasın yok. Ders yaparak kazanabilirsin!'); break;
       case 'reset': A.modal = confirmModal('Tüm veriler silinsin mi?', 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break;
       case 'reset-yes': A.modal = null; A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; render(); break;
       case 'copy': try { navigator.clipboard.writeText(E.parentReport(A.st).text).then(() => toast('Rapor kopyalandı ✓'), () => toast('Kopyalanamadı')); } catch (e) { toast('Kopyalanamadı'); } break;
@@ -1097,6 +1140,11 @@
   });
   if ('speechSynthesis' in window) try { speechSynthesis.onvoiceschanged = () => { }; speechSynthesis.getVoices(); } catch (e) { }
   try { const lr = E.rollWeek(A.st); if (lr) { save(); setTimeout(() => toast(`🏆 Haftalık lig bitti: ${lr.rank}. oldun!`), 800); } } catch (e) { }
+  // Seri koruyucu: açılışta ve uygulamaya geri dönülünce (gece yarısını geçtiyse) kendiliğinden kontrol edilir
+  const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
+    setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
+  seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') seriBak(); });
+  if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });
   if (CL && CL.ayarli) CL.baslat(() => render()).then(async () => {
     try { if (CL.oturum && A.st.profile) { await CL.ogrenciHazirla(A.st.profile); const uzak = await CL.cek(A.st); if (uzak) { A.st = Object.assign(E.fresh(), uzak); E.save(A.st); toast('☁️ İlerlemen buluttan yüklendi'); } else CL.kaydet(A.st); await CL.ligYenile(); } } catch (e) { }

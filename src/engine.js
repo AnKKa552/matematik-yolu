@@ -215,16 +215,31 @@
   };
   E.medianTime = (st) => { if (!st.times.length) return 15000; const a = st.times.slice().sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
 
+  /* ---------------- Seri koruyucu (20.10.2026) ----------------
+     Uygulama açılınca (ve ders sonunda) çağrılır. Çocuğun gelmediği her gün için bir seri koruyucu kendiliğinden kullanılır.
+     Koruyucular bütün boş günlere yetmiyorsa HİÇ harcanmaz (boşuna elmas yakılmaz) ve seri sıfırlanır; ilk ders 1. gün olur.
+     Konular, yıldızlar, XP ve elmas hiç etkilenmez: seri yalnız bir alışkanlık sayacıdır. */
+  E.KORUYUCU_EN_FAZLA = 2;
+  E.seriKontrol = (st) => {
+    const y = today(Date.now() - DAY);
+    if (!st.lastDay || st.lastDay >= y || !st.streak) return null;
+    const bos = []; for (let t = new Date(st.lastDay + 'T12:00:00').getTime() + DAY; today(t) <= y; t += DAY) bos.push(today(t));
+    if (!bos.length) return null;
+    if (st.freezes >= bos.length) {
+      st.freezes -= bos.length; st.donmus = st.donmus || {}; for (const g of bos) st.donmus[g] = 1;
+      st.lastDay = y; return { tip: 'korundu', gun: bos.length, kalan: st.freezes };
+    }
+    const eski = st.streak; st.streak = 0; return { tip: 'sifir', gun: bos.length, eski };
+  };
+
   /* ---------------- Oturum sonu, seri, rozet ---------------- */
   E.finish = (st, ses) => {
     const acc = ses.answered.length ? ses.answered.reduce((t, a) => t + (a.ok ? (a.kanit === 'ipucu' ? 0.5 : 1) : 0), 0) / ses.answered.length : 0;
     if (ses.mode !== 'placement') { ses.xp += 15; if (ses.wrong === 0 && ses.answered.length >= 5) ses.xp += 10; }
     const d = today();
+    E.seriKontrol(st);
     if (st.lastDay !== d) {
-      const y = today(Date.now() - DAY);
-      if (st.lastDay === y) st.streak++;
-      else if (st.lastDay && st.freezes > 0 && st.lastDay === today(Date.now() - 2 * DAY)) { st.freezes--; st.streak++; }
-      else st.streak = 1;
+      st.streak = st.lastDay === today(Date.now() - DAY) ? st.streak + 1 : 1;
       st.lastDay = d;
     }
     st.xp += ses.xp; st.days[d] = (st.days[d] || 0) + ses.xp;

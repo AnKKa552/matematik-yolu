@@ -8,11 +8,12 @@
 <meta name="theme-color" content="#5B4BFF">
 <!--PWA-->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>#acilis{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#F5F3FF;color:#2A2660;font:800 22px system-ui,-apple-system,"Segoe UI",sans-serif;z-index:99}#acilis img{width:112px;height:112px;border-radius:28px;box-shadow:0 10px 28px rgba(60,40,200,.3);animation:acZ 1.2s ease-in-out infinite}#acilis i{width:120px;height:6px;border-radius:6px;background:rgba(91,75,255,.18);overflow:hidden;position:relative}#acilis i:after{content:"";position:absolute;inset:0;width:40%;border-radius:6px;background:#5B4BFF;animation:acY 1s ease-in-out infinite alternate}@keyframes acZ{50%{transform:translateY(-8px)}}@keyframes acY{to{transform:translateX(150%)}}@media (prefers-color-scheme:dark){#acilis{background:#12142B;color:#fff}}@media (prefers-reduced-motion:reduce){#acilis img,#acilis i:after{animation:none}}</style>
 <style>/*CSS*/</style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app"><div id="acilis" role="status" aria-label="Matematik Yolu açılıyor"><img src="img/simge2_192.png" alt="" onerror="this.remove()"><span>Matematik Yolu</span><i></i></div></div>
 <script>/*JS*/</script>
 <!--SW-->
 </body>
