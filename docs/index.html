@@ -785,6 +785,11 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .bil-satir{margin:4px 0 2px}
 .bil-satir .themes{padding:4px 0 8px}
 .bil-kart .chip[disabled]{opacity:.4}
+/* Kostümlü konuşan Pi (21.10.2026): ağız karesi yok; konuşurken sesin şiddetine göre hafifçe büyür */
+.pikonus.kostumlu img{opacity:1;transition:transform .08s ease-out;transform-origin:50% 100%}
+.pikonus.kostumlu[data-agiz="1"] img{transform:scale(1.04) translateY(-2%)}
+.pikonus.kostumlu[data-agiz="2"] img{transform:scale(1.08) translateY(-4%)}
+@media (prefers-reduced-motion: reduce){.pikonus.kostumlu img{transition:none;transform:none!important}}
 </style>
 </head>
 <body>
@@ -1757,8 +1762,8 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
   GEN.e_oncelik = (lv) => {
     if (lv === 1) { const a = ri(2, 20), b = ri(2, 9), c = ri(2, 9); return Q({ type: 'input', prompt: `${a} + ${b} × ${c} = ?`, answer: String(a + b * c), inputMis: [{ v: (a + b) * c, mis: 'oncelik_soldan' }], steps: ['Önce çarpma!', `${b} × ${c} = ${b * c}`, `${a} + ${b * c} = ${a + b * c}`] }); }
     if (lv === 2) {
-      const a = ri(2, 9), b = ri(2, 9), c = ri(2, 6), d = ri(1, 9);
-      return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [...(c > d ? [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }] : []), { v: a + b * c - d, mis: 'oncelik_soldan' }], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
+      const a = ri(2, 9), b = ri(2, 9), c = ri(2, 6), d = ri(1, Math.min(9, (a + b) * c - 1));  // sonuç hiç eksi olmasın (5. sınıf)
+      return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [...(c > d ? [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }] : []), ...(a + b * c > d ? [{ v: a + b * c - d, mis: 'oncelik_soldan' }] : [])], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
     }
     const a = ri(2, 9), b = ri(2, 5), c = ri(2, 4);
     return Q({ type: 'input', prompt: `${a} + ${b}² × ${c} = ?`, answer: String(a + b * b * c), inputMis: [{ v: (a + b) ** 2 * c, mis: 'oncelik_soldan' }, { v: (a + b * b) * c, mis: 'oncelik_soldan' }, { v: a + 2 * b * c, mis: 'us_carpim' }], steps: [`Önce üs: ${b}² = ${b * b}`, `Sonra çarpma: ${b * b} × ${c} = ${b * b * c}`, `En son toplama: ${a} + ${b * b * c} = ${a + b * b * c}`] });
@@ -3815,9 +3820,14 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
   const PI_GORSEL = 'img/';
   window.MY_MASCOT_SVG = mascotSvg;
   // Konuşan Pi (büst): 3 ağız karesi üst üste; hangisinin görüneceğini data-agiz belirler
-  const piKonus = (w = 76, act = '') => `<button class="pikonus" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`;
+  // 21.10.2026: kostüm giyiliyse derste de kostümlü Pi görünür (çocuk aldığı kıyafeti her yerde görsün). Ağız kareleri yalnız
+  // normal Pi için var; kostümlüde konuşma, sesin şiddetiyle hafif büyüme/zıplama olarak görünür (data-agiz yine işler).
+  const piKonus = (w = 76, act = '') => { const k = dolap().giyili; if (k && k !== 'normal' && KOSTUM_KOK) return `<button class="pikonus kostumlu" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi"><img class="a0" src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='img/pi_agiz0.webp'"></button>`;
+    return `<button class="pikonus" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`; };
   const mascot = (state = '', w = 110) => PI_GORSEL
-    ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`
+    ? (() => { const k = dolap().giyili, durum = `${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp`;  // kostüm giyiliyse her yerde kostümlü; duygu zıplama/sallanma animasyonuyla görünür
+      return k && k !== 'normal' && KOSTUM_KOK ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='${durum}'"></div>`
+        : `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${durum}" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`; })()
     : mascotSvg(state, w);
   /* ---------------- Pi'nin dolabı: elmasla kostüm ve iz rengi (para ile satılmaz, §1-7) ---------------- */
   const KOSTUMLER = [

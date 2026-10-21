@@ -655,8 +655,8 @@
   GEN.e_oncelik = (lv) => {
     if (lv === 1) { const a = ri(2, 20), b = ri(2, 9), c = ri(2, 9); return Q({ type: 'input', prompt: `${a} + ${b} × ${c} = ?`, answer: String(a + b * c), inputMis: [{ v: (a + b) * c, mis: 'oncelik_soldan' }], steps: ['Önce çarpma!', `${b} × ${c} = ${b * c}`, `${a} + ${b * c} = ${a + b * c}`] }); }
     if (lv === 2) {
-      const a = ri(2, 9), b = ri(2, 9), c = ri(2, 6), d = ri(1, 9);
-      return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [...(c > d ? [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }] : []), { v: a + b * c - d, mis: 'oncelik_soldan' }], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
+      const a = ri(2, 9), b = ri(2, 9), c = ri(2, 6), d = ri(1, Math.min(9, (a + b) * c - 1));  // sonuç hiç eksi olmasın (5. sınıf)
+      return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [...(c > d ? [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }] : []), ...(a + b * c > d ? [{ v: a + b * c - d, mis: 'oncelik_soldan' }] : [])], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
     }
     const a = ri(2, 9), b = ri(2, 5), c = ri(2, 4);
     return Q({ type: 'input', prompt: `${a} + ${b}² × ${c} = ?`, answer: String(a + b * b * c), inputMis: [{ v: (a + b) ** 2 * c, mis: 'oncelik_soldan' }, { v: (a + b * b) * c, mis: 'oncelik_soldan' }, { v: a + 2 * b * c, mis: 'us_carpim' }], steps: [`Önce üs: ${b}² = ${b * b}`, `Sonra çarpma: ${b * b} × ${c} = ${b * b * c}`, `En son toplama: ${a} + ${b * b * c} = ${a + b * b * c}`] });

@@ -773,3 +773,8 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .bil-satir{margin:4px 0 2px}
 .bil-satir .themes{padding:4px 0 8px}
 .bil-kart .chip[disabled]{opacity:.4}
+/* Kostümlü konuşan Pi (21.10.2026): ağız karesi yok; konuşurken sesin şiddetine göre hafifçe büyür */
+.pikonus.kostumlu img{opacity:1;transition:transform .08s ease-out;transform-origin:50% 100%}
+.pikonus.kostumlu[data-agiz="1"] img{transform:scale(1.04) translateY(-2%)}
+.pikonus.kostumlu[data-agiz="2"] img{transform:scale(1.08) translateY(-4%)}
+@media (prefers-reduced-motion: reduce){.pikonus.kostumlu img{transition:none;transform:none!important}}

@@ -230,9 +230,14 @@
   const PI_GORSEL = 'img/';
   window.MY_MASCOT_SVG = mascotSvg;
   // Konuşan Pi (büst): 3 ağız karesi üst üste; hangisinin görüneceğini data-agiz belirler
-  const piKonus = (w = 76, act = '') => `<button class="pikonus" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`;
+  // 21.10.2026: kostüm giyiliyse derste de kostümlü Pi görünür (çocuk aldığı kıyafeti her yerde görsün). Ağız kareleri yalnız
+  // normal Pi için var; kostümlüde konuşma, sesin şiddetiyle hafif büyüme/zıplama olarak görünür (data-agiz yine işler).
+  const piKonus = (w = 76, act = '') => { const k = dolap().giyili; if (k && k !== 'normal' && KOSTUM_KOK) return `<button class="pikonus kostumlu" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi"><img class="a0" src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='img/pi_agiz0.webp'"></button>`;
+    return `<button class="pikonus" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`; };
   const mascot = (state = '', w = 110) => PI_GORSEL
-    ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`
+    ? (() => { const k = dolap().giyili, durum = `${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp`;  // kostüm giyiliyse her yerde kostümlü; duygu zıplama/sallanma animasyonuyla görünür
+      return k && k !== 'normal' && KOSTUM_KOK ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='${durum}'"></div>`
+        : `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${durum}" alt="" draggable="false" decoding="async" onerror="this.parentNode.outerHTML=window.MY_MASCOT_SVG('${state}',${w})"></div>`; })()
     : mascotSvg(state, w);
   /* ---------------- Pi'nin dolabı: elmasla kostüm ve iz rengi (para ile satılmaz, §1-7) ---------------- */
   const KOSTUMLER = [
