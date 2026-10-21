@@ -1163,7 +1163,7 @@
     },
     "cap_yaricap": {
       "ad": "Çap ile yarıçapı karıştırma",
-      "duzeltme": "Çap, merkezden geçip çemberin iki ucuna değer. Çap = 2 × yarıçap."
+      "duzeltme": "Yarıçap, merkezden çembere uzanan doğru parçasıdır. Çap ise merkezden geçen ve iki ucu çember üzerinde olan doğru parçasıdır. Çap = 2 × yarıçap."
     },
     "dik_yatay": {
       "ad": "\"Dik olmak için yatay-dikey olmalı\" sanma",

@@ -1560,6 +1560,11 @@
    "key": "kart_f_tur_adim_2",
    "grup": "kart",
    "text": "Pay ile paydayı karşılaştır. Pay 1, birim kesir. Pay paydadan küçükse kesir bir bütünden küçüktür. Pay büyük ya da eşit payda, bileşik kesir. Bileşiği tam sayılıya çevir: payı paydaya böl."
+  },
+  {
+   "key": "mis_cap_yaricap_2",
+   "grup": "mis",
+   "text": "Çap ile yarıçapı karıştırma. Yarıçap, merkezden çembere uzanan doğru parçasıdır. Çap ise merkezden geçen ve iki ucu çember üzerinde olan doğru parçasıdır. Çap eşittir 2 çarpı yarıçap."
   }
  ]
 }

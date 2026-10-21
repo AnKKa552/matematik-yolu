@@ -14,7 +14,7 @@
     isin_dogru: { t: 'Işın ile doğruyu karıştırma', fix: 'Işının bir başlangıç noktası vardır ve tek yönde sonsuza gider. Doğru ise iki yönde de sonsuza uzar.' },
     dp_dogru: { t: 'Doğru parçası ile doğruyu karıştırma', fix: 'Doğru parçasının iki uç noktası vardır, bu yüzden uzunluğu ölçülebilir. Doğrunun ucu yoktur.' },
     nokta_sayma: { t: 'Doğru parçalarını eksik sayma', fix: 'Sadece yan yana olanları değil, aradaki noktaları atlayan doğru parçalarını da say: A-C de bir doğru parçasıdır.' },
-    cap_yaricap: { t: 'Çap ile yarıçapı karıştırma', fix: 'Çap, merkezden geçip çemberin iki ucuna değer. Çap = 2 × yarıçap.' },
+    cap_yaricap: { t: 'Çap ile yarıçapı karıştırma', fix: 'Yarıçap, merkezden çembere uzanan doğru parçasıdır. Çap ise merkezden geçen ve iki ucu çember üzerinde olan doğru parçasıdır. Çap = 2 × yarıçap.' },
     dik_yatay: { t: '"Dik olmak için yatay-dikey olmalı" sanma', fix: 'İki doğru dönük çizilse de aralarındaki açı 90° ise birbirine diktir. Köşedeki küçük kare işareti bunu gösterir.' },
     paralel_kesisen: { t: 'Paralel ile kesişeni karıştırma', fix: 'Paralel doğrular ne kadar uzatılırsa uzatılsın hiç kesişmez, aralarındaki uzaklık hep aynıdır.' },
     aci_tur: { t: 'Açı türlerini karıştırma', fix: '90°\'den küçükse dar, tam 90° ise dik, 90° ile 180° arasındaysa geniş açıdır. 180° doğru açı, 360° tam açıdır.' },
@@ -897,7 +897,8 @@
       ['Bir noktadan kaç farklı doğru geçer?', 'Sonsuz sayıda doğru', [['Yalnız 1 doğru', 'dp_dogru'], ['2 doğru', 'dp_dogru'], ['4 doğru', 'dp_dogru']], 'Bir noktadan sonsuz sayıda doğru geçer; doğru her yöne çevrilebilir.']]);
     return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: [it[3]] }); });
   ekle('g_cember', [2, 3], 0.35, () => { const k = ri(2, 9), cap = Math.random() < 0.5;
-    return Q({ type: 'input', prompt: `Pergelin sivri ucu ile kalemli ucu arası ${k} cm açılarak bir çember çiziliyor. Bu çemberin ${cap ? 'çapı' : 'yarıçapı'} kaç cm'dir?`, answer: String(cap ? 2 * k : k), unit: 'cm', inputMis: cap ? [{ v: k, mis: 'cap_yaricap' }] : [{ v: 2 * k, mis: 'cap_yaricap' }],
+    return Q({ type: 'input', prompt: `Pergelin sivri ucu ile kalem ucu arasındaki açıklık ${k} cm. Bu açıklıkla bir çember çiziliyor. Çemberin ${cap ? 'çapı' : 'yarıçapı'} kaç cm'dir?`, answer: String(cap ? 2 * k : k), unit: 'cm', inputMis: cap ? [{ v: k, mis: 'cap_yaricap' }] : [{ v: 2 * k, mis: 'cap_yaricap' }].concat(k % 2 ? [] : [{ v: k / 2, mis: 'cap_yaricap' }]),
+      hint: 'Pergelin sivri ucu çemberin merkezinde durur, kalem ucu çemberin üzerinde döner. Merkez ile çember arasındaki uzaklığa ne denir?',
       steps: ['Pergelin iki ucu arasındaki açıklık, çemberin yarıçapına eşittir.', cap ? `Çap = 2 × ${k} = ${2 * k} cm` : `Yarıçap = ${k} cm`] }); });
   ekle('g_cember', [1, 2], 0.25, () => { const D = ['bozuk para', 'yuvarlak masanın üst yüzü', 'pizza'], C = ['hulahop', 'yüzük', 'bilezik'], soruDaire = Math.random() < 0.5, [dg, yn] = soruDaire ? [D, C] : [C, D];
     return Q({ prompt: `Hangisi bir ${soruDaire ? 'daire' : 'çember'} modelidir?`, options: mc(pick(dg), shuffle(yn).slice(0, 2).map(x => [x, 'cember_parca'])), steps: ['Çember yalnız kenardaki eğri çizgidir (hulahop, yüzük).', 'Daire çember ile iç bölgesidir (bozuk para, pizza).'] }); });

@@ -670,7 +670,7 @@
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'tablo' ? A.tb.every(Boolean) : q.type === 'kur' ? E.ATOLYE.kurGecerli(q, A.kur) : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
     const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Bölge sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
-    const hint = A.showHint ? `<div class="hintbox">💡 ${q.hint || (q.steps && q.steps[0]) || 'Soruyu dikkatlice tekrar oku.'}</div>` : '';
+    const hint = A.showHint ? `<div class="hintbox">💡 ${ampulIpucu(q)}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
       ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(70, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
@@ -774,8 +774,18 @@
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2 };
+  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2, cap_yaricap: 2 };
   const misSes = (id) => `mis_${id}${MIS_SES_SURUM[id] ? '_' + MIS_SES_SURUM[id] : ''}`;
+  // 💡 Ampul ipucu (21.10.2026): sorunun kendi ipucu yoksa çözümün 1. adımı GÖSTERİLMEZ (çoğu zaman cevabı söylüyordu,
+  // ör. "Pergelin açıklığı yarıçapa eşittir" → cevap). Onun yerine konunun kısa kuralı; kural cevabı içeriyorsa genel yönlendirme.
+  function ampulIpucu(q) {
+    if (q.hint) return q.hint;
+    const sk = SKILL[q.skill], kural = sk && sk.cards && sk.cards.kural, duz = (x) => String(x || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr');
+    const cevap = duz(q.type === 'input' ? q.answer : ((q.options || []).find(o => o.ok) || {}).t);
+    const ele = (t) => cevap && new RegExp('(^|[^0-9a-zçğıöşü])' + cevap.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') ).test(duz(t));  // sondaki sınır yok: «ışın» → «ışının» da yakalanır (temkinli)
+    if (kural && !ele(kural)) return `Hatırla: ${kural}`;
+    return 'Soruyu bir daha, yavaşça oku. Ne veriliyor, ne soruluyor? Önce bunları ayır.';
+  }
   function ikinciIpucu(q, res) {
     if (res.ip) return res.ip;
     if (q.ip) return q.ip;
@@ -797,7 +807,7 @@
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto" ${q.cozumGorsel ? 'open' : ''}><summary>🪜 Nasıl çözülür?</summary>${q.cozumGorsel || ''}<ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
-    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Neredeyse!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'derin', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}${tahminKarsilastir(q)}</div>${mascot('sad', 64)}</div>
+    return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Birlikte bakalım</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'derin', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}${tahminKarsilastir(q)}</div>${mascot('sad', 64)}</div>
       ${fb.ac ? `<div class="mis baglamli"><b>🧭 Neden olmadı?</b><div style="margin-top:4px">${fb.ac}</div></div>` : ''}
       ${fb.mis !== 'genel' ? `<div class="mis ${fb.ac ? 'kural' : ''}"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b>${fb.ac ? 'Genel kural: ' : ''}${esc(m.t)}</b><button class="say" data-act="say-mis" data-v="${fb.mis}" aria-label="Açıklamayı dinle">🔊</button></div><div style="margin-top:4px">${m.fix}</div></div>` : ''}
       ${steps}
