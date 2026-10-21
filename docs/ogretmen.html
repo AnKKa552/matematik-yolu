@@ -786,10 +786,11 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .bil-satir .themes{padding:4px 0 8px}
 .bil-kart .chip[disabled]{opacity:.4}
 /* Kostümlü konuşan Pi (21.10.2026): ağız karesi yok; konuşurken sesin şiddetine göre hafifçe büyür */
-.pikonus.kostumlu img{opacity:1;transition:transform .08s ease-out;transform-origin:50% 100%}
-.pikonus.kostumlu[data-agiz="1"] img{transform:scale(1.04) translateY(-2%)}
-.pikonus.kostumlu[data-agiz="2"] img{transform:scale(1.08) translateY(-4%)}
-@media (prefers-reduced-motion: reduce){.pikonus.kostumlu img{transition:none;transform:none!important}}
+/* 21.10.2026 (proje sahibi: zıplama amatörce): kostümlü Pi konuşurken zıplamaz/sallanmaz, yalnız yavaş nefes alır */
+.pikonus.kostumlu img{opacity:1}
+.pikonus.kostumlu.konusuyor{animation:piNefes 3.2s ease-in-out infinite}
+/* Derste Pi büyüdü (104 px); dar ekranda balon sıkışmasın diye küçülür */
+@media (max-width:360px){.qrow .pikonus,.lbody>.row>.pikonus{width:84px!important;height:84px!important}.qrow .pikonus.kostumlu,.lbody>.row>.pikonus.kostumlu{height:99px!important}}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -2995,7 +2996,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-21 1bc8777', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-21 be33ec7', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
