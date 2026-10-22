@@ -322,7 +322,7 @@
     return h;
   }
   const hazineDuragi = (th) => { const h = hazine(); if (h.tema !== th.id) return ''; const hazir = h.anahtar >= HAZINE_ANAHTAR && !h.acildi;
-    return `<div class="node-wrap sandik-durak" style="transform:translateX(-80px)"><button class="yolsandik hazine ${h.acildi ? 'acildi' : hazir ? 'hazir' : 'bekliyor'}" data-act="hazine-ac" aria-label="Haftanın hazine sandığı"><img src="img/sandik_${h.acildi ? 'acik' : 'kapali'}.webp" alt="" draggable="false"></button>${hazir ? '<div class="bubble sb">AÇ!</div>' : ''}<div class="hazine-etiket">${h.acildi ? 'Hazine bulundu ✓' : hazir ? '🌟 Haftanın hazinesi' : `🗝️ ${h.anahtar}/${HAZINE_ANAHTAR} anahtar`}</div></div>`; };
+    return `<div class="node-wrap sandik-durak" style="transform:translateX(-80px)"><button class="yolsandik hazine ${GORSEL_KOK ? 'altin' : ''} ${h.acildi ? 'acildi' : hazir ? 'hazir' : 'bekliyor'}" data-act="hazine-ac" aria-label="Haftanın hazine sandığı"><img src="${sandikSrc('efsane', h.acildi)}" alt="" draggable="false" onerror="this.onerror=null;this.src='img/sandik_${h.acildi ? 'acik' : 'kapali'}.webp'"></button>${hazir ? '<div class="bubble sb">AÇ!</div>' : ''}<div class="hazine-etiket">${h.acildi ? 'Hazine bulundu ✓' : hazir ? '🌟 Haftanın hazinesi' : `🗝️ ${h.anahtar}/${HAZINE_ANAHTAR} anahtar`}</div></div>`; };
   const hazineKart = () => { const h = hazine(), th = THEMES.find(t => t.id === h.tema), hazir = h.anahtar >= HAZINE_ANAHTAR && !h.acildi;
     const ana = Array.from({ length: HAZINE_ANAHTAR }, (_, i) => `<span class="anahtar ${i < h.anahtar ? 'var' : ''}">🗝️</span>`).join('');
     return `<button class="card hazine-kart ${hazir ? 'hazir' : ''}" data-act="hazine-git"><div class="hazine-ust">🗺️ HAFTANIN HAZİNE AVI</div><div class="row" style="gap:12px"><img src="img/sandik_${h.acildi ? 'acik' : 'kapali'}.webp" alt="" class="hazine-mini"><div class="grow" style="text-align:left">
@@ -348,9 +348,9 @@
   const unlocked = (sk) => { if (!sk.prereq.length) return true; const p = A.st.skills[sk.prereq[0]]; return p.lessons > 0 || E.eff(p) >= 0.5 || A.st.skills[sk.id].n > 0 || E.eff(A.st.skills[sk.id]) >= 0.3; };
   const goalRing = () => { const v = Math.min(1, todayXP() / A.st.dailyGoal), r = 15, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 38 38" aria-label="Günlük hedef ${todayXP()}/${A.st.dailyGoal} XP"><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" transform="rotate(-90 19 19)"/><text x="19" y="23" text-anchor="middle" font-size="11" font-weight="900" fill="var(--ink)">⚡</text></svg>`; };
   // Üst çubuk: her simgeye dokununca ne olduğunu kısa bir cümleyle söyler (çocuk 🧊'nin ne olduğunu bilemez)
-  const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
+  const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${(A.st.roket || {}).kalan > 0 ? '<span class="roket-rozet" aria-hidden="true">🚀</span>' : ''}${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
   const UST = { seri: () => `🔥 Serin <b>${A.st.streak} gün</b>. Her gün en az bir ders yaparsan büyür.`, elmas: () => `💎 <b>${A.st.gems} elmasın</b> var. Ders sonundaki ve yoldaki sandıklardan kazanırsın. Seri koruyucu alırsın ya da Pi'ye kostüm alırsın (Pi'ye dokun).`,
-    hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Ders yapamadığın gün kendiliğinden kullanılır, serin bozulmaz. En fazla ${E.KORUYUCU_EN_FAZLA} tane taşıyabilirsin.` };
+    hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.${(A.st.roket || {}).kalan > 0 ? `<br>🚀 Roket Gücün açık: sonraki <b>${A.st.roket.kalan} dersinde 2 kat XP</b>!` : ''}`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Ders yapamadığın gün kendiliğinden kullanılır, serin bozulmaz. En fazla ${E.KORUYUCU_EN_FAZLA} tane taşıyabilirsin.` };
   const nav = () => `<nav class="nav">${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
 
   /* Harita mahallesi: her temanın kendine has komşusu (özgün karakterler, ses yok: konuşan tek ses Pi) */
@@ -830,6 +830,9 @@
     const r = A.result, ses = A.ses, acc = Math.round(r.acc * 100), mins = Math.max(1, Math.round((Date.now() - ses.start) / 60000));
     const yildizli = !['placement', 'speed', 'hazir'].includes(ses.mode), ys = yildizSayisi(r.acc);
     const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : 'Az kaldı!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
+    // Esprili alt başlık: çocuğun bu dersteki en güzel hâlini söyler (yalnız gerçekten olduysa)
+    const sn = ses.answered.length ? (Date.now() - ses.start) / 1000 / ses.answered.length : 99;
+    const altBaslik = !yildizli ? '' : ses.wrong === 0 && ses.answered.length >= 5 ? 'Kusursuz! Tek hata bile yok 🎯' : ses.rescueOk >= 2 ? 'Hatalarından geri dönmeyi bildin 💪' : sn < 12 && r.acc >= 0.7 ? 'Şimşek gibiydin ⚡' : r.acc >= 0.9 ? 'Kafan matematik makinesi gibi çalıştı 🧠' : '';
     const resc = ses.rescueTry ? `<div class="speech">💪 ${ses.rescueTry} hatandan sonra <b>${ses.rescueOk}</b> kez doğruya döndün. Hata yapmak öğrenmenin parçası!</div>` : '';
     // Yay göstergesi: doğruluk oranı kadar dolar; 3 işaret = yıldız eşikleri (%0 bitirme, %70, %90)
     const R = 92, C = 2 * Math.PI * R, yay = C * 0.75, dolu = yay * Math.max(0.04, r.acc);
@@ -837,24 +840,52 @@
     const gosterge = yildizli ? `<div class="skor"><svg viewBox="0 0 220 200" aria-hidden="true"><circle cx="110" cy="110" r="${R}" class="yay-bos" stroke-dasharray="${yay} ${C}" transform="rotate(135 110 110)"/><circle cx="110" cy="110" r="${R}" class="yay-dolu" style="--yay:${yay};--dolu:${dolu}" stroke-dasharray="${dolu} ${C}" transform="rotate(135 110 110)"/>${isaret(0.0001)}${isaret(0.7)}${isaret(0.9)}</svg>
       <div class="skor-ic"><div class="skor-et">Puan</div><div class="skor-sayi" data-sayac="${ses.xp}">0</div></div>
       <div class="yildizlar">${[1, 2, 3].map(i => `<span class="yildiz ${i <= ys ? 'on' : ''}" style="animation-delay:${0.9 + i * 0.35}s">★</span>`).join('')}</div></div>` : mascot('happy', 130);
-    return `<div class="end">${gosterge}<h1>${title}</h1>
+    return `<div class="end">${gosterge}<h1>${title}</h1>${altBaslik ? `<div class="end-alt">${altBaslik}</div>` : ''}
       <div class="tiles"><div class="tile gold"><div class="h">XP</div><div class="v">⚡ ${ses.xp}</div></div><div class="tile okt"><div class="h">Doğruluk</div><div class="v">🎯 %${acc}</div></div><div class="tile bl"><div class="h">Süre</div><div class="v">⏱ ${mins} dk</div></div></div>
-      ${resc}${r.newBadges.map(b => `<div class="card row" style="width:100%"><div style="font-size:40px">${b.icon}</div><div style="text-align:left"><b>Yeni rozet: ${b.name}</b><div class="muted sm">${b.desc}</div></div></div>`).join('')}
+      ${r.roket ? `<div class="roket-not">🚀 Roket Gücü: ${r.roket} → <b>${ses.xp} XP</b>${(A.st.roket || {}).kalan ? ` · ${A.st.roket.kalan} ders daha` : ''}</div>` : ''}${resc}${r.newBadges.map(b => `<div class="card row" style="width:100%"><div style="font-size:40px">${b.icon}</div><div style="text-align:left"><b>Yeni rozet: ${b.name}</b><div class="muted sm">${b.desc}</div></div></div>`).join('')}
       ${ses.mode === 'speed' && ses.correct >= A.st.speedBest ? '<div class="tag warm">🏅 Yeni rekor!</div>' : ''}
       ${r.trophy ? (r.trophy.pass ? `<div class="card row" style="width:100%;border-color:var(--gold)"><div style="font-size:44px">🏆</div><div style="text-align:left"><b>Bölge sınavını geçtin! (%${acc})</b><div class="muted sm">Kupa senin. +50 💎</div></div></div>` : `<div class="speech">Sınav için %70 gerekiyor. Zorlandığın becerileri çalışıp tekrar dene, kupa seni bekliyor! 💪</div>`) : ''}
       <div style="flex:1"></div><button class="btn" data-act="end-ok" style="max-width:420px">${(A.endSteps || []).length > 1 ? 'Devam' : 'Devam'}</button></div>`;
   }
   // Dersin teması: oturumun teması, yoksa en çok soru gelen beceri teması
   const dersTemasi = (ses) => { if (ses.theme && CIKARTMA[ses.theme]) return ses.theme; const say = {}; (ses.answered || []).forEach(x => { const t = (SKILLS.find(k => k.id === x.skill) || {}).theme; if (t) say[t] = (say[t] || 0) + 1; }); return Object.keys(say).sort((a, b) => say[b] - say[a])[0] || THEMES[0].id; };
-  // Sandık: önce kapalı, çocuk dokununca açılır ve elmaslar çıkar (değişken ödül hissi; para ile satılmaz, elmas sadece seri koruyucuya gider)
-  function viewSandik() {
-    const r = A.result, acik = A.sandikAcik;
-    return `<div class="end sandik-ekran ${acik ? 'acik' : ''}">
-      <div class="sandik-ust">${acik ? 'Harika!' : (r.acc >= 0.9 ? 'EFSANE SANDIK' : r.acc >= 0.7 ? 'SÜPER SANDIK' : 'SANDIK')}</div>
-      <button class="sandik" data-act="sandik-ac" aria-label="Sandığı aç" ${acik ? 'disabled' : ''}><img src="img/sandik_${acik ? 'acik' : 'kapali'}.webp" alt="" draggable="false" onerror="this.outerHTML='<span style=&quot;font-size:120px&quot;>${acik ? '💎' : '🎁'}</span>'"></button>
-      ${acik ? `<div class="sandik-odul">+<span data-sayac="${r.gemsWon}">0</span> 💎</div>${r.cikartma ? cikartmaSonuc(r.cikartma) : '<div class="sandik-alt">Elmaslarınla seri koruyucu ya da Pi\'ye kostüm alabilirsin.</div>'}` : '<div class="sandik-alt">Açmak için dokun!</div>'}
-      <div style="flex:1"></div>${acik ? '<button class="btn" data-act="end-ok" style="max-width:420px">Devam</button>' : ''}</div>`;
+  /* ---------- Sandık sahnesi (17.10 → 22.10.2026): dokun, dokun, aç! Ders sonu, yol sandığı ve hazine aynı sahneyi kullanır.
+     Nadirlik öğrenmeyi ödüllendirir (E.sandikNadirlik). Ödül sandık AÇILMADAN belirlenir ve kaydedilir: dokunmak heyecan içindir,
+     şans oyunu değildir; çocuk sahneyi yarıda bıraksa da ödülü kaybolmaz. Sandık ve elmas ASLA parayla satılmaz (§1-7). */
+  const GORSEL_KOK = KOSTUM_KOK ? KOSTUM_KOK.replace(/kostum_$/, '') : '';
+  const NADIR = { ahsap: { ad: 'SANDIK', img: 'sandik_ahsap' }, nadir: { ad: 'NADİR SANDIK', img: '' }, efsane: { ad: 'EFSANE SANDIK', img: 'sandik_altin' } };
+  const sandikSrc = (n, acik) => { const x = NADIR[n] || NADIR.nadir; return x.img && GORSEL_KOK ? `${GORSEL_KOK}${x.img}_${acik ? 'acik' : 'kapali'}.png` : `img/sandik_${acik ? 'acik' : 'kapali'}.webp`; };
+  const SANDIK_DOKUN = 3, CIK_SANS = { ahsap: 0.25, nadir: 0.4, efsane: 0.7 };
+  // Sürpriz ek ödül: efsane sandıkta her zaman, nadirde %25. Roket Gücü (sonraki 2 derste 2 kat XP) ya da seri koruyucu (en fazla 2 taşınır).
+  function sandikBonus(n, od) {
+    if (Math.random() >= ({ efsane: 1, nadir: 0.25 }[n] || 0)) return od;
+    const r = A.st.roket = A.st.roket || { kalan: 0 }, kor = A.st.freezes < E.KORUYUCU_EN_FAZLA;
+    if (r.kalan <= 0 && (!kor || Math.random() < 0.6)) { r.kalan = E.ROKET_DERS; od.push({ tip: 'roket' }); }
+    else if (kor) { A.st.freezes++; od.push({ tip: 'koruyucu' }); }
+    else { A.st.gems += 10; od[0].v += 10; }
+    return od;
   }
+  function sandikOdulleri(n, elmas, tid, cikSans) {
+    const od = [{ tip: 'elmas', v: elmas }];
+    if (tid && Math.random() < cikSans) { const c = cikartmaVer(tid); if (c) od.push({ tip: 'cik', c }); }
+    return sandikBonus(n, od);
+  }
+  function sandikSahneHtml(s, bitir) {
+    const N = NADIR[s.n] || NADIR.nadir, nok = [...Array(SANDIK_DOKUN)].map((_, i) => `<i class="${i < s.dokun ? 'on' : ''}"></i>`).join('');
+    const odul = (o, i) => { const d = `style="animation-delay:${(0.2 + i * 0.5).toFixed(2)}s"`;
+      if (o.tip === 'elmas') return `<div class="ss-odul ss-elmas" ${d}>+<span data-sayac="${o.v}">${o.v}</span> 💎</div>`;
+      if (o.tip === 'cik') return `<div class="ss-odul" ${d}>${cikartmaSonuc(o.c)}</div>`;
+      const [ik, b, alt] = o.tip === 'roket' ? ['🚀', 'Roket Gücü!', `Sonraki ${E.ROKET_DERS} dersinde 2 kat XP`] : ['🧊', '+1 Seri koruyucu', 'Gelemediğin bir gün serini korur'];
+      return `<div class="ss-odul ss-kart ${o.tip}" ${d}><span class="ss-ik">${ik}</span><div><b>${b}</b><div class="sm">${alt}</div></div></div>`; };
+    const tekElmas = s.od.length === 1 ? `<div class="ss-odul ss-not" style="animation-delay:.7s">Elmaslarınla seri koruyucu ya da Pi'ye kostüm alabilirsin.</div>` : '';
+    return `<div class="end ss ss-${s.n} ${s.acik ? 'acik' : ''}" data-dokun="${s.dokun}">
+      ${s.ust ? `<div class="ss-ust">${s.ust}</div>` : ''}<div class="ss-serit">${s.acik ? 'Harika!' : N.ad}</div>
+      <div class="ss-sahne"><div class="ss-halka" aria-hidden="true"></div><div class="ss-isik" aria-hidden="true"></div>
+        <button class="ss-sandik" data-act="sandik-dokun" aria-label="Sandığa dokun" ${s.acik ? 'disabled' : ''}><img src="${sandikSrc(s.n, s.acik)}" alt="" draggable="false" onerror="this.onerror=null;this.src='img/sandik_${s.acik ? 'acik' : 'kapali'}.webp'"></button></div>
+      ${s.acik ? `<div class="ss-oduller">${s.od.map(odul).join('')}${tekElmas}</div>` : `<div class="ss-dokun">${s.dokun ? 'Bir daha!' : 'Dokun! Dokun!'}</div><div class="ss-nokta" aria-hidden="true">${nok}</div>`}
+      <div style="flex:1"></div>${s.acik ? `<button class="btn" data-act="${bitir}" style="max-width:420px">${s.btn || 'Devam'}</button>` : ''}</div>`;
+  }
+  const viewSandik = () => sandikSahneHtml(A.dersSandik, 'end-ok');
   // Görev ilerlemesi: günlük görev çubukları dolar, biten görevin ödülü yazar
   function viewGorevIlerleme() {
     const r = A.result, Q = E.quests(A.st), got = new Set(r.quests.got.map(q => q.ad)), mo = Q.month;
@@ -890,6 +921,7 @@
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
+    if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
     const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
     $app.innerHTML = h;
@@ -953,7 +985,7 @@
   const sahneBlob = {};
   // MP4 (H.264) daha küçük ve telefonların hepsinde oynar; oynatamayan tarayıcıda WebM (VP9)
   const SAHNE_UZANTI = (() => { try { const v = document.createElement('video'); return v.canPlayType('video/mp4; codecs="avc1.4D401E"') ? '.mp4' : '.webm'; } catch (e) { return '.mp4'; } })();
-  const sahneHazirla = () => ['sandik_kapali', 'sandik_acik'].forEach(k => { const im = new Image(); im.src = 'img/' + k + '.webp'; }) || Object.keys(SAHNE).forEach(k => { if (sahneBlob[k]) return; fetch('img/sahne_' + k + SAHNE_UZANTI).then(r => r.ok ? r.blob() : null).then(b => { if (b) sahneBlob[k] = URL.createObjectURL(b); }).catch(() => { }); });
+  const sahneHazirla = () => ['ahsap', 'nadir', 'efsane'].forEach(n => [0, 1].forEach(a => { const im = new Image(); im.src = sandikSrc(n, a); })) || Object.keys(SAHNE).forEach(k => { if (sahneBlob[k]) return; fetch('img/sahne_' + k + SAHNE_UZANTI).then(r => r.ok ? r.blob() : null).then(b => { if (b) sahneBlob[k] = URL.createObjectURL(b); }).catch(() => { }); });
   const sahneOyna = (ad, bitince) => {
     const azalt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (azalt || !sahneBlob[ad]) { if (bitince) bitince(); return false; }
@@ -1009,7 +1041,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); bildirimDers(); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } if (A.result.gemsWon && !['speed', 'placement', 'hazir'].includes(A.ses.mode) && Math.random() < 0.4) A.result.cikartma = cikartmaVer(dersTemasi(A.ses)); A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; A.sandikAcik = false; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); bildirimDers(); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } A.dersSandik = A.result.sandik ? { n: A.result.sandik, dokun: 0, acik: false, od: sandikOdulleri(A.result.sandik, A.result.gemsWon, ['speed', 'placement', 'hazir'].includes(A.ses.mode) ? null : dersTemasi(A.ses), CIK_SANS[A.result.sandik]) } : null; A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -1035,9 +1067,8 @@
         A.st.sandiklar = A.st.sandiklar || {};
         if (A.st.sandiklar[k]) { toast('Bu sandığı açtın. Yolda başka sandıklar var! 🗺️'); break; }
         if (E.crowns(E.eff(A.st.skills[sk.id])) < 1) { toast(`🔒 Önce «${sk.title}» konusunda 1 yıldız kazan, sandık açılsın.`); break; }
-        const kazanc = [5, 8, 10, 12, 15, 20][Math.floor(Math.random() * 6)]; A.st.sandiklar[k] = Date.now(); A.st.gems += kazanc; const cik = cikartmaVer(tid); save();
-        sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80]); } catch (e) { } confetti();
-        A.modal = `<div class="modal center"><img src="img/sandik_acik.webp" alt="" style="width:160px;display:block;margin:0 auto" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${kazanc} 💎</h2><p class="muted" style="margin:0 0 10px">${th.icon} Yol sandığından elmas çıktı!</p>${cikartmaSonuc(cik)}<button class="btn" data-act="close-modal" style="margin-top:12px">Süper!</button></div>`; render(); break; }
+        const kazanc = E.sandikElmas('nadir'); A.st.sandiklar[k] = Date.now(); A.st.gems += kazanc;
+        A.sahne = { n: 'nadir', dokun: 0, acik: false, ust: `${th.icon} ${bolgeAd(tid)} · yol sandığı`, btn: 'Süper!', od: sandikOdulleri('nadir', kazanc, tid, 1) }; save(); sfx.tap(); render(); break; }
       case 'komsu': { const k = KOMSU[v]; if (!k) break; const n = komsuSay[v] = komsuSay[v] === undefined ? 0 : (komsuSay[v] + 1) % k.soz.length;
         const b = el.querySelector('.kbal'); if (b) { b.textContent = k.soz[n]; b.classList.remove('acik'); void b.offsetWidth; b.classList.add('acik'); }
         el.classList.remove('tik'); void el.offsetWidth; el.classList.add('tik'); tone(520 + 80 * n, .12, 'triangle'); tone(780 + 80 * n, .12, 'triangle', .09);
@@ -1073,7 +1104,14 @@
       case 'explain-other': { const f = E.pickFormat(A.st, [E.formatRank(A.st)[0].f]); A.modal = explainModal(A.q.skill, f); render(); sayCard(A.q.skill, f); break; }
       case 'quit': A.modal = confirmModal('Dersten çıkmak istiyor musun?', 'Cevapladığın sorular kaydedildi, ama ders tamamlanmış sayılmayacak ve ders XP\'si verilmeyecek.', 'quit-yes', 'Çık', 'Derse devam'); render(); break;
       case 'quit-yes': clearInterval(A.timer); stopVoice(); A.modal = null; A.view = 'home'; A.ses = null; A.fb = null; render(); break;
-      case 'sandik-ac': if (A.sandikAcik) break; A.sandikAcik = true; sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80]); } catch (e) { } render(); confetti(); setTimeout(sayacBaslat, 50); break;
+      case 'sandik-dokun': { const ss = A.sahne || (A.view === 'end' ? A.dersSandik : null); if (!ss || ss.acik) break; ss.dokun++;
+        const kok = el.closest('.ss'), titre = (d) => { if (navigator.vibrate) try { navigator.vibrate(d); } catch (e) { } };
+        if (ss.dokun < SANDIK_DOKUN) { tone(392 + ss.dokun * 196, .14, 'triangle'); tone(587 + ss.dokun * 262, .12, 'sine', .07); titre(18 + ss.dokun * 22);
+          if (kok) { kok.dataset.dokun = ss.dokun; kok.classList.remove('vur'); void kok.offsetWidth; kok.classList.add('vur'); kok.querySelectorAll('.ss-nokta i').forEach((x, i) => x.classList.toggle('on', i < ss.dokun)); const t = kok.querySelector('.ss-dokun'); if (t) t.textContent = ss.dokun === SANDIK_DOKUN - 1 ? 'Son bir kez!' : 'Bir daha!'; }
+          break; }
+        ss.acik = true; if (kok) kok.classList.add('patla'); sfx.badge(); titre([30, 30, 80, 30, 140]);
+        setTimeout(() => { render(); confetti(); if (ss.n === 'efsane') setTimeout(confetti, 450); setTimeout(sayacBaslat, 250); if (ss.od.some(o => o.tip === 'roket')) setTimeout(() => tone(523, .5, 'sawtooth', 0, .05), 900); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420); break; }
+      case 'sahne-kapat': A.sahne = null; render(); break;
       case 'end-ok': if (A.endSteps && A.endStep < A.endSteps.length - 1) { A.endStep++; sfx.tap(); render(); setTimeout(() => { sayacBaslat(); if (A.endSteps[A.endStep] === 'gorev') sfx.ok(); }, 60); break; }
         document.querySelectorAll('#confetti').forEach(c => c.remove()); A.view = 'home'; A.ses = null; render(); window.scrollTo(0, 0); break;
       case 'p-mistakes': if (A.st.mistakes.length) startSession('mistakes', A.st.mistakes[0].skill); break;
@@ -1098,8 +1136,8 @@
         let cik = null, ek = 0;
         if (eksik === undefined) { ek = 10; A.st.gems += ek; } else { a.sahip[`${th.id}_${eksik}`] = 1; cik = { tid: th.id, i: eksik, e: L[eksik][0], ad: L[eksik][1], parlak: eksik === son, yeni: true, elmas: 0, sayfa: false };
           if (!a.tamam[th.id] && L.every((_, k) => a.sahip[`${th.id}_${k}`])) { a.tamam[th.id] = Date.now(); A.st.gems += CIK_SAYFA; cik.sayfa = true; } }
-        save(); sfx.badge(); if (navigator.vibrate) try { navigator.vibrate([30, 30, 80, 30, 120]); } catch (e) { } confetti(); setTimeout(confetti, 500);
-        A.modal = `<div class="modal center hazine-modal"><div class="hazine-ust">🗺️ HAFTANIN HAZİNESİ</div><img src="img/sandik_acik.webp" alt="" style="width:170px;display:block;margin:6px auto 0" class="sandik-zipla"><h2 style="margin:8px 0 4px">+${HAZINE_ELMAS + ek} 💎</h2><p class="muted" style="margin:0 0 10px">Hazine sandığını buldun! Bu hafta çok çalıştın. 🌟</p>${cikartmaSonuc(cik)}<button class="btn" data-act="close-modal" style="margin-top:12px">Harika!</button></div>`; render(); break; }
+        A.sahne = { n: 'efsane', dokun: 0, acik: false, ust: '🗺️ Haftanın hazinesi', btn: 'Harika!', od: sandikBonus('efsane', [{ tip: 'elmas', v: HAZINE_ELMAS + ek }, ...(cik ? [{ tip: 'cik', c: cik }] : [])]) };
+        save(); sfx.tap(); render(); break; }
       case 'dolap': A.dolapSec = null; A.dolapOnay = null; A.modal = dolapModal(); render(); break;
       case 'dolap-sec': A.dolapSec = v; A.dolapOnay = null; A.modal = dolapModal(); render(); { const [t, id] = v.split(':'); if (t === 'k') tone(520, .08, 'triangle'); } break;
       case 'dolap-onay': A.dolapOnay = A.dolapSec || 'k:' + dolap().giyili; A.modal = dolapModal(); render(); break;

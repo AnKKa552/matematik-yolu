@@ -26,7 +26,13 @@ async def main():
             for _ in range(6):
                 await pg.evaluate("document.querySelectorAll('.sahne').forEach(e=>e.remove()); 0")
                 if not await pg.query_selector('.end'): return
-                if await pg.query_selector('[data-act=sandik-ac]:not([disabled])'): await pg.click('[data-act=sandik-ac]', force=True); await pg.wait_for_timeout(250)
+                k = 0
+                while await pg.query_selector('[data-act=sandik-dokun]:not([disabled])') and k < 5:
+                    if k == 0 and not os.path.exists(OUT+'10b_sandik.png'): await pg.screenshot(path=OUT+'10b_sandik.png')
+                    await pg.click('[data-act=sandik-dokun]', force=True); await pg.wait_for_timeout(300); k += 1
+                if k:
+                    await pg.wait_for_timeout(1600)
+                    if not os.path.exists(OUT+'10c_sandik_acik.png'): await pg.screenshot(path=OUT+'10c_sandik_acik.png')
                 await pg.click('[data-act=end-ok]', force=True); await pg.wait_for_timeout(250)
         async def answer(correct_prob=0.6, shot=None):
             await pg.wait_for_function("!!document.querySelector('.qprompt') && !document.querySelector('.mid') && !document.querySelector('.sheet')", timeout=8000)
@@ -93,6 +99,13 @@ async def main():
             await answer(0.6, 'l%d'%n if n<4 else None); n+=1
         await pg.wait_for_timeout(500); await pg.screenshot(path=OUT+'10_end.png')
         await bitir()
+        # haftanın hazinesi: tam ekran efsane sandık sahnesi (dokun, dokun, aç)
+        await pg.evaluate("(()=>{const A=window.MY_APP;A.view='home';A.tab='yol';const h=A.st.hazine;if(h){h.anahtar=3;h.acildi=0;}window.MY_APP_RENDER();})()")
+        if await pg.query_selector('[data-act=hazine-ac]'):
+            await pg.click('[data-act=hazine-ac]', force=True); await pg.wait_for_timeout(300); await pg.screenshot(path=OUT+'10d_hazine.png')
+            for _ in range(3): await pg.click('.ss-tam [data-act=sandik-dokun]', force=True); await pg.wait_for_timeout(300)
+            await pg.wait_for_timeout(1800); await pg.screenshot(path=OUT+'10e_hazine_acik.png')
+            await pg.click('[data-act=sahne-kapat]', force=True); await pg.wait_for_timeout(200)
         # her tema için birer ders (hata kontrolü)
         for t in ['t1','t2','t3','t5','t6','t7']:
             await pg.click(f'[data-act=theme][data-v={t}]'); 

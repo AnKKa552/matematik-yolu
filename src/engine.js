@@ -233,9 +233,18 @@
   };
 
   /* ---------------- Oturum sonu, seri, rozet ---------------- */
+  // Sandık nadirliği öğrenmeyi ödüllendirir: doğruluk yükseldikçe daha iyi sandık; küçük bir sürpriz payı her zaman var.
+  // Elmas aralıkları: ahşap 5–10, nadir 10–20, efsane 20–35. Sandık ve elmas ASLA parayla satılmaz (§1-7).
+  E.SANDIK_ELMAS = { ahsap: [5, 10], nadir: [10, 20], efsane: [20, 35] };
+  E.sandikNadirlik = (acc, r = Math.random()) => acc >= 0.9 ? (r < 0.75 ? 'efsane' : 'nadir') : acc >= 0.7 ? (r < 0.1 ? 'efsane' : 'nadir') : (r < 0.15 ? 'nadir' : 'ahsap');
+  E.sandikElmas = (n, r = Math.random()) => { const [a, b] = E.SANDIK_ELMAS[n] || E.SANDIK_ELMAS.ahsap; return a + Math.floor(r * (b - a + 1)); };
+  E.ROKET_DERS = 2;
   E.finish = (st, ses) => {
     const acc = ses.answered.length ? ses.answered.reduce((t, a) => t + (a.ok ? (a.kanit === 'ipucu' ? 0.5 : 1) : 0), 0) / ses.answered.length : 0;
     if (ses.mode !== 'placement') { ses.xp += 15; if (ses.wrong === 0 && ses.answered.length >= 5) ses.xp += 10; }
+    // Roket Gücü (sandıktan çıkar): sonraki N derste 2 kat XP. Saate değil ders sayısına bağlı: çocuğa süre baskısı yok.
+    let roket = 0;
+    if (st.roket && st.roket.kalan > 0 && !['placement', 'hazir'].includes(ses.mode)) { roket = ses.xp; ses.xp *= 2; st.roket.kalan--; }
     const d = today();
     E.seriKontrol(st);
     if (st.lastDay !== d) {
@@ -247,14 +256,15 @@
     st.week.xp += ses.xp;
     if (ses.skill && st.skills[ses.skill] && (ses.mode === 'lesson' || ses.mode === 'learn')) st.skills[ses.skill].lessons++;
     if (ses.skill && SKILL[ses.skill]) { const t = SKILL[ses.skill].theme; if (!st.themesTried.includes(t)) st.themesTried.push(t); }
-    const gemsWon = ses.mode === 'placement' ? 0 : (acc >= 0.9 ? 15 : acc >= 0.7 ? 10 : 5); st.gems += gemsWon;
+    const sandik = ses.mode === 'placement' ? null : E.sandikNadirlik(acc);
+    const gemsWon = sandik ? E.sandikElmas(sandik) : 0; st.gems += gemsWon;
     st.sessions.unshift({ at: Date.now(), mode: ses.mode, skill: ses.skill, n: ses.answered.length, acc, ms: Date.now() - ses.start, xp: ses.xp, hints: ses.hintsUsed, rescue: [ses.rescueOk, ses.rescueTry] });
     st.sessions = st.sessions.slice(0, 150);
     let trophy = null;
     if (ses.mode === 'exam' && ses.theme) { const pass = acc >= 0.7; if (pass && !st.trophies[ses.theme]) { st.trophies[ses.theme] = { at: Date.now(), acc }; st.gems += 50; } trophy = { pass, acc }; }
     const quests = E.questTick(st, ses, acc);
     const newBadges = E.checkBadges(st, ses, acc);
-    return { acc, gemsWon, newBadges, trophy, quests };
+    return { acc, gemsWon, sandik, roket, newBadges, trophy, quests };
   };
   const BADGES = [
     { id: 'ilk', icon: '🌱', name: 'İlk Adım', desc: 'İlk dersini bitirdin.', test: (st) => st.sessions.some(s => s.mode === 'lesson') },
