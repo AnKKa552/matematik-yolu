@@ -296,7 +296,7 @@
     let once;
     if (ok.kaynak === 'elle') { const i = SKILLS.findIndex(s => s.id === ok.sk[0]); once = SKILLS.slice(0, Math.max(0, i)).map(s => s.id); }
     else { const g = gunAnahtar(now); once = []; for (const w of OKUL_TAKVIM) { if (w.bas > g) break; (w.sk || []).forEach(x => { if (!ok.sk.includes(x) && !once.includes(x)) once.push(x); }); } }
-    return once.filter(id => st.skills[id] && st.skills[id].n === 0);
+    return once.filter(id => st.skills[id] && st.skills[id].n === 0); // hiç soru çözülmemiş (seviye belirlemenin tahmini sayılmaz)
   };
 
   /* ---------------- Haftalık plan (24.10.2026) ----------------
@@ -326,6 +326,7 @@
       let v = 0;
       if (h.tip === 'gun') v = gunler;
       else if (h.tip === 'tekrar') v = (st.sessions || []).filter(x => x.at >= P.hafta && ['review', 'mistakes'].includes(x.mode)).length;
+      else if (h.tip === 'geride') v = st.skills[h.sk].n >= 3 ? 1 : 0;   // "bir ders yap": gerçekten çalışılınca tamam
       else v = E.crowns(E.eff(st.skills[h.sk]));
       return Object.assign({}, h, { v: Math.min(v, h.hedef), tamam: v >= h.hedef });
     });

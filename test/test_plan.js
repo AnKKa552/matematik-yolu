@@ -40,3 +40,8 @@ const R = E.parentReport(st); ok(/Ön bilgi kontrolü/.test(R.text) && /Bu hafta
 console.log(R.text.split('\n').filter(l => /🏫|🧱|📋|📌|Öneri/.test(l)).join('\n'));
 // Sağlam temel: 14 gün yeniden yoklanmaz
 st.temel.f_denk.n_carpbol = { sonuc: 'saglam', at: Date.now() }; ok(E.temelAday(st, 'f_denk') === null || E.temelAday(st, 'f_denk') !== 'n_carpbol', 'Sağlam temel 14 gün yoklanmaz');
+// Okulda geride kalan konu: seviye belirlemenin tahmini yıldızı 'çalışıldı' sayılmaz
+st.plan = { hafta: 0 }; st.skills.g_cember.pL = 0.6; st.skills.g_cember.n = 0;
+let P2 = E.haftalikPlan(st, T('2026-10-24')); st.plan.hedefler = [{ tip: 'geride', sk: 'g_cember', hedef: 1 }]; P2 = E.haftalikPlan(st, T('2026-10-24'));
+ok(!P2.liste[0].tamam && E.okulGeride(st).includes('g_cember'), 'Geride konu, tahmini yıldızla tamam sayılmaz');
+st.skills.g_cember.n = 3; ok(E.haftalikPlan(st, T('2026-10-24')).liste[0].tamam && !E.okulGeride(st).includes('g_cember'), 'Çalışılınca tamam');
