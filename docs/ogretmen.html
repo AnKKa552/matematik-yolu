@@ -846,6 +846,37 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 @keyframes ssNabiz{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes ssGel{0%{opacity:0;transform:translateY(18px) scale(.8)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.ss-halka,.ss-sandik,.ss-sandik img,.ss-isik,.ss-dokun,.roket-rozet,.end-alt{animation:none!important}.ss-odul{animation:none!important;opacity:1}}
+
+/* ---------- Kişisel plan: okul takvimi, ön bilgi yoklaması, haftalık plan (24.10.2026) ---------- */
+.okul-kart{display:flex;align-items:stretch;gap:8px;margin:8px 0 4px;background:linear-gradient(90deg,#E6F4FF,#EEE9FF);border:2px solid #C9DDFF;border-radius:16px;padding:6px;color:#1E2A55}
+.okul-kart.bos{align-items:center;gap:10px;padding:10px 12px;font-size:14px;cursor:pointer;width:100%;text-align:left;font-family:inherit}
+.okul-git{display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:none;border:0;padding:6px 8px;text-align:left;cursor:pointer;font-family:inherit;color:inherit;min-height:44px}
+.okul-git b{font-size:16px}
+.okul-ust{font-size:11px;font-weight:900;letter-spacing:.08em;color:#3156C9}
+.okul-degis{flex:none;border:0;border-radius:12px;background:#fff;color:#3156C9;font-weight:900;padding:0 14px;min-height:44px;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 #C9DDFF}
+.okul-kucuk{margin:6px 0 2px;border:2px dashed var(--line);background:none;border-radius:999px;padding:8px 14px;font-weight:800;color:var(--muted);cursor:pointer;font-family:inherit;min-height:44px}
+.node-label.okul{color:#3156C9;font-weight:900}
+.okul-modal{max-height:86vh;overflow:auto}
+.okul-grup{margin-top:10px}
+.okul-grup-ad{font-weight:900;font-size:13px;color:var(--muted);margin-bottom:6px}
+.okul-izgara{display:flex;flex-wrap:wrap;gap:6px}
+.okul-sec{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:8px 10px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;text-align:left}
+.okul-sec.on{border-color:var(--brand);background:var(--brand-t);color:var(--brand)}
+.okul-sec.genis{width:100%;font-size:14px;line-height:1.35}
+.temel-not{background:#EAF3FF;border:2px solid #BFD8FF;color:#1E3A7A;border-radius:14px;padding:10px 12px;font-size:14px;margin-bottom:10px}
+.temel-sonuc{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;border:2px solid #FFD9A0;background:#FFF8EC;color:#5A3A00}
+.temel-sonuc.iyi{border-color:#BFE9CF;background:#F0FBF4;color:#14532D}
+.temel-ic{font-size:34px;line-height:1}
+.plan-kart{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.plan-ust{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:12px;letter-spacing:.05em;color:var(--brand,#5B4BFF)}
+.plan-satir{display:flex;gap:10px;align-items:center;border:0;background:var(--bg2,rgba(0,0,0,.03));border-radius:14px;padding:8px 10px;text-align:left;font-family:inherit;color:var(--ink);width:100%;cursor:pointer;min-height:44px}
+div.plan-satir{cursor:default}
+.plan-satir .grow{display:flex;flex-direction:column;gap:1px;min-width:0}
+.plan-satir .qbar{height:14px;margin-top:4px}
+.plan-satir.tamam{opacity:.75}
+.plan-satir.tamam .qbar i{background:var(--ok,#22C55E)}
+.plan-ic{font-size:24px;width:34px;text-align:center;flex:none}
+.plan-not{text-align:center}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -3033,11 +3064,43 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
   };
   // Önkoşul: aynı temadaki bir önceki beceri
   SKILLS.forEach((s, i) => { s.prereq = (i > 0 && SKILLS[i - 1].theme === s.theme) ? [SKILLS[i - 1].id] : []; });
+  /* Ön bilgi haritası (24.10.2026): bir konuda zorlanmanın kaynağı çoğu zaman ALTINDAKİ konudur (kesirleri karşılaştıramayan
+     çocuk bazen çarpmada takılıyordur). Temalar arası da geçerli. Motor, çocuk bir konuda zorlanınca bu listedeki zayıf ya da
+     hiç ölçülmemiş temeli 2 kısa soruyla yoklar (E.temelAday). Sıra önemlidir: en olası kaynak önce. */
+  const ONKOSUL = {
+    g_cember: ['g_temel'], g_dikme_paralel: ['g_temel'], g_aci: ['g_temel'], g_aci_iliski: ['g_aci', 'n_toplacikar'],
+    g_cokgen: ['g_aci', 'g_temel'], g_ucgen: ['g_aci', 'n_toplacikar', 'g_cokgen'],
+    n_basamak: ['n_okuma'], n_karsilastir: ['n_basamak', 'n_okuma'], n_toplacikar: ['n_basamak'], n_carpbol: ['n_toplacikar'],
+    n_problem: ['n_toplacikar', 'n_carpbol'], n_tahmin: ['n_basamak', 'n_karsilastir'],
+    a_cevre: ['n_toplacikar', 'n_carpbol'], a_alan: ['n_carpbol'], a_cevre_alan: ['a_cevre', 'a_alan'],
+    f_denk: ['f_tur', 'n_carpbol'], f_ondalik: ['f_tur', 'n_basamak'], f_yuzde: ['f_ondalik', 'f_denk'],
+    f_karsilastir: ['f_denk', 'f_tur'], f_ondalik_karsilastir: ['f_ondalik', 'f_yuzde', 'n_karsilastir'],
+    s_tablo_sutun: ['s_arastirma', 'n_karsilastir'], s_daire: ['s_tablo_sutun', 'f_yuzde'], s_okuryazar: ['s_tablo_sutun'],
+    e_esitlik: ['n_toplacikar', 'n_carpbol'], e_ozellik: ['n_carpbol', 'n_toplacikar'], e_us: ['n_carpbol'], e_oncelik: ['e_us', 'n_carpbol'],
+    e_oruntu: ['n_toplacikar', 'n_carpbol'], e_algoritma: ['n_toplacikar'], p_spektrum: ['p_olay', 'f_ondalik', 'f_yuzde'],
+  };
+  SKILLS.forEach(s => { s.temel = ONKOSUL[s.id] || []; });
+  /* Okul takvimi (24.10.2026): MEB 2026-2027 5. sınıf matematik TASLAK çerçeve yıllık planı (tymm.meb.gov.tr, Eylül 2026).
+     Her satır: o haftanın pazartesisi → planda işlenen konu(lar). Tatil haftalarında bir önceki konu sürer (tatil: true).
+     Taslak plandır; öğretmenler farklı sırada işleyebilir, bu yüzden çocuk/veli konuyu elle de seçebilir. */
+  const OKUL_YIL = '2026-2027';
+  const OKUL_TAKVIM = [
+    ['2026-09-14', ['g_temel', 'g_cember']], ['2026-09-21', ['g_dikme_paralel']], ['2026-09-28', ['g_aci']], ['2026-10-05', ['g_aci_iliski']],
+    ['2026-10-12', ['g_cokgen']], ['2026-10-19', ['g_cokgen']], ['2026-10-26', ['g_ucgen']], ['2026-11-02', ['g_ucgen']],
+    ['2026-11-09', ['n_okuma']], ['2026-11-16', null, 'Ara tatil'], ['2026-11-23', ['n_basamak', 'n_karsilastir']], ['2026-11-30', ['n_toplacikar']],
+    ['2026-12-07', ['n_carpbol']], ['2026-12-14', ['n_problem', 'n_tahmin']], ['2026-12-21', ['n_problem', 'a_cevre']], ['2026-12-28', ['a_cevre']],
+    ['2027-01-04', ['a_alan']], ['2027-01-11', ['a_cevre_alan']], ['2027-01-18', ['a_cevre_alan']], ['2027-01-25', null, 'Yarıyıl tatili'], ['2027-02-01', null, 'Yarıyıl tatili'],
+    ['2027-02-08', ['f_tur']], ['2027-02-15', ['f_denk']], ['2027-02-22', ['f_ondalik']], ['2027-03-01', ['f_yuzde']], ['2027-03-08', null, 'Bayram tatili'],
+    ['2027-03-15', ['f_karsilastir']], ['2027-03-22', ['f_ondalik_karsilastir']], ['2027-03-29', ['f_ondalik_karsilastir']],
+    ['2027-04-05', ['s_arastirma']], ['2027-04-12', ['s_tablo_sutun']], ['2027-04-19', ['s_daire']], ['2027-04-26', ['s_okuryazar']], ['2027-05-03', ['s_okuryazar', 'e_esitlik']],
+    ['2027-05-10', ['e_esitlik', 'e_ozellik']], ['2027-05-17', ['e_us', 'e_oncelik']], ['2027-05-24', ['e_oruntu']], ['2027-05-31', ['e_algoritma']],
+    ['2027-06-07', ['e_algoritma', 'p_olay']], ['2027-06-14', ['p_spektrum']], ['2027-06-21', null, 'Sosyal etkinlik haftası'],
+  ].map(([bas, sk, tatil]) => ({ bas, sk, tatil: tatil || null }));
   const SKILL = Object.fromEntries(SKILLS.map(s => [s.id, s]));
   const FORMATS = { gorsel: { name: 'Görsel model', icon: '🖼️' }, hikaye: { name: 'Hikâye ile', icon: '📖' }, adim: { name: 'Adım adım', icon: '🪜' }, kural: { name: 'Kısa ve net', icon: '⚡' } };
 
-  G.MY_CUR = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV };
-  if (typeof module !== 'undefined') module.exports = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV };
+  G.MY_CUR = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV, ONKOSUL, OKUL_TAKVIM, OKUL_YIL };
+  if (typeof module !== 'undefined') module.exports = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV, ONKOSUL, OKUL_TAKVIM, OKUL_YIL };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* =========================================================
@@ -3051,7 +3114,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-22 253a472', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-24 ef66f06', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

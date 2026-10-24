@@ -295,9 +295,41 @@
   };
   // Önkoşul: aynı temadaki bir önceki beceri
   SKILLS.forEach((s, i) => { s.prereq = (i > 0 && SKILLS[i - 1].theme === s.theme) ? [SKILLS[i - 1].id] : []; });
+  /* Ön bilgi haritası (24.10.2026): bir konuda zorlanmanın kaynağı çoğu zaman ALTINDAKİ konudur (kesirleri karşılaştıramayan
+     çocuk bazen çarpmada takılıyordur). Temalar arası da geçerli. Motor, çocuk bir konuda zorlanınca bu listedeki zayıf ya da
+     hiç ölçülmemiş temeli 2 kısa soruyla yoklar (E.temelAday). Sıra önemlidir: en olası kaynak önce. */
+  const ONKOSUL = {
+    g_cember: ['g_temel'], g_dikme_paralel: ['g_temel'], g_aci: ['g_temel'], g_aci_iliski: ['g_aci', 'n_toplacikar'],
+    g_cokgen: ['g_aci', 'g_temel'], g_ucgen: ['g_aci', 'n_toplacikar', 'g_cokgen'],
+    n_basamak: ['n_okuma'], n_karsilastir: ['n_basamak', 'n_okuma'], n_toplacikar: ['n_basamak'], n_carpbol: ['n_toplacikar'],
+    n_problem: ['n_toplacikar', 'n_carpbol'], n_tahmin: ['n_basamak', 'n_karsilastir'],
+    a_cevre: ['n_toplacikar', 'n_carpbol'], a_alan: ['n_carpbol'], a_cevre_alan: ['a_cevre', 'a_alan'],
+    f_denk: ['f_tur', 'n_carpbol'], f_ondalik: ['f_tur', 'n_basamak'], f_yuzde: ['f_ondalik', 'f_denk'],
+    f_karsilastir: ['f_denk', 'f_tur'], f_ondalik_karsilastir: ['f_ondalik', 'f_yuzde', 'n_karsilastir'],
+    s_tablo_sutun: ['s_arastirma', 'n_karsilastir'], s_daire: ['s_tablo_sutun', 'f_yuzde'], s_okuryazar: ['s_tablo_sutun'],
+    e_esitlik: ['n_toplacikar', 'n_carpbol'], e_ozellik: ['n_carpbol', 'n_toplacikar'], e_us: ['n_carpbol'], e_oncelik: ['e_us', 'n_carpbol'],
+    e_oruntu: ['n_toplacikar', 'n_carpbol'], e_algoritma: ['n_toplacikar'], p_spektrum: ['p_olay', 'f_ondalik', 'f_yuzde'],
+  };
+  SKILLS.forEach(s => { s.temel = ONKOSUL[s.id] || []; });
+  /* Okul takvimi (24.10.2026): MEB 2026-2027 5. sınıf matematik TASLAK çerçeve yıllık planı (tymm.meb.gov.tr, Eylül 2026).
+     Her satır: o haftanın pazartesisi → planda işlenen konu(lar). Tatil haftalarında bir önceki konu sürer (tatil: true).
+     Taslak plandır; öğretmenler farklı sırada işleyebilir, bu yüzden çocuk/veli konuyu elle de seçebilir. */
+  const OKUL_YIL = '2026-2027';
+  const OKUL_TAKVIM = [
+    ['2026-09-14', ['g_temel', 'g_cember']], ['2026-09-21', ['g_dikme_paralel']], ['2026-09-28', ['g_aci']], ['2026-10-05', ['g_aci_iliski']],
+    ['2026-10-12', ['g_cokgen']], ['2026-10-19', ['g_cokgen']], ['2026-10-26', ['g_ucgen']], ['2026-11-02', ['g_ucgen']],
+    ['2026-11-09', ['n_okuma']], ['2026-11-16', null, 'Ara tatil'], ['2026-11-23', ['n_basamak', 'n_karsilastir']], ['2026-11-30', ['n_toplacikar']],
+    ['2026-12-07', ['n_carpbol']], ['2026-12-14', ['n_problem', 'n_tahmin']], ['2026-12-21', ['n_problem', 'a_cevre']], ['2026-12-28', ['a_cevre']],
+    ['2027-01-04', ['a_alan']], ['2027-01-11', ['a_cevre_alan']], ['2027-01-18', ['a_cevre_alan']], ['2027-01-25', null, 'Yarıyıl tatili'], ['2027-02-01', null, 'Yarıyıl tatili'],
+    ['2027-02-08', ['f_tur']], ['2027-02-15', ['f_denk']], ['2027-02-22', ['f_ondalik']], ['2027-03-01', ['f_yuzde']], ['2027-03-08', null, 'Bayram tatili'],
+    ['2027-03-15', ['f_karsilastir']], ['2027-03-22', ['f_ondalik_karsilastir']], ['2027-03-29', ['f_ondalik_karsilastir']],
+    ['2027-04-05', ['s_arastirma']], ['2027-04-12', ['s_tablo_sutun']], ['2027-04-19', ['s_daire']], ['2027-04-26', ['s_okuryazar']], ['2027-05-03', ['s_okuryazar', 'e_esitlik']],
+    ['2027-05-10', ['e_esitlik', 'e_ozellik']], ['2027-05-17', ['e_us', 'e_oncelik']], ['2027-05-24', ['e_oruntu']], ['2027-05-31', ['e_algoritma']],
+    ['2027-06-07', ['e_algoritma', 'p_olay']], ['2027-06-14', ['p_spektrum']], ['2027-06-21', null, 'Sosyal etkinlik haftası'],
+  ].map(([bas, sk, tatil]) => ({ bas, sk, tatil: tatil || null }));
   const SKILL = Object.fromEntries(SKILLS.map(s => [s.id, s]));
   const FORMATS = { gorsel: { name: 'Görsel model', icon: '🖼️' }, hikaye: { name: 'Hikâye ile', icon: '📖' }, adim: { name: 'Adım adım', icon: '🪜' }, kural: { name: 'Kısa ve net', icon: '⚡' } };
 
-  G.MY_CUR = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV };
-  if (typeof module !== 'undefined') module.exports = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV };
+  G.MY_CUR = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV, ONKOSUL, OKUL_TAKVIM, OKUL_YIL };
+  if (typeof module !== 'undefined') module.exports = { THEMES, SKILLS, SKILL, FORMATS, KITAP, GOREV, ONKOSUL, OKUL_TAKVIM, OKUL_YIL };
 })(typeof window !== 'undefined' ? window : globalThis);

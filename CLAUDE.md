@@ -34,7 +34,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 | Duolingo mekaniği | Psikolojik işlevi | Matematik Yolu uyarlaması | Durum |
 |---|---|---|---|
-| Kıvrımlı öğrenme yolu (path) | Tek net "sonraki adım", ilerlemeyi görünür kılar | Tema başına zikzak beceri yolu, kitaptaki sıra, düğümde yıldız/taç | ✅ Prototipte |
+| Kıvrımlı öğrenme yolu (path) | Tek net "sonraki adım", ilerlemeyi görünür kılar | Tek harita (Matematik Diyarı), kitaptaki sıra, düğümde yıldız/taç; okul konusu «🏫» ile işaretli (§3.4) | ✅ Prototipte |
 | Kısa dersler (3–5 dk) | Başlama eşiğini düşürür | 6–10 soruluk ders; uzunluk öğrencinin hızına göre ayarlanır | ✅ |
 | XP + günlük hedef | Küçük, sık ödül | Doğru 10, telafi doğru 15, 5'li seri +5, ders sonu +15, kusursuz +10; günlük hedef 20/50/80/120 | ✅ |
 | Seri (streak) + seri dondurucu | Alışkanlık oluşturma, kayıp kaçınma | Günlük seri + elmasla alınan "seri koruyucu" (ceza değil, güvence). Gelinmeyen günlerde kendiliğinden kullanılır, en fazla 2 taşınır (§3.2) | ✅ |
@@ -138,6 +138,13 @@ Uygulama, ilk kez açan bir çocuğun gözünden baştan sona gezildi (her ekran
 - Hata: sorunun kendi ipucu (`q.hint`) yoksa 💡 ampul **çözümün 1. adımını** gösteriyordu. Soruların ~%87'sinde ayrı ipucu yok; 30 000 örnekte ~1 700'ünde 1. adım cevabı doğrudan söylüyordu (ör. pergel sorusunda "Pergelin açıklığı yarıçapa eşittir" → cevap 7 cm).
 - Düzeltme (`ampulIpucu` in app.js): sırayla `q.hint` → becerinin "Kısa ve net" kural kartı ("Hatırla: …") → kural kartı cevabı içeriyorsa (ek alan hâli dahil, ör. «ışın» → «ışının») genel yönlendirme "Ne veriliyor, ne soruluyor?". Çözüm adımları yalnız yanlıştan sonra "Nasıl çözülür?" kutusunda görünür. **Yeni üretici yazarken mümkünse `hint` ekle; ipucu cevabı ya da cevabı veren kuralı söylememeli.**
 - Pergel sorusu: dil düzeltildi ("Pergelin sivri ucu ile kalem ucu arasındaki açıklık 7 cm. Bu açıklıkla bir çember çiziliyor."), kendi ipucu eklendi (merkez–çember uzaklığına ne denir?), yarıya bölme de `cap_yaricap` yanılgısına bağlandı. `cap_yaricap` açıklaması netleşti (ses `mis_cap_yaricap_2`). İkinci yanlıştan sonraki başlık "Neredeyse!" yerine "Birlikte bakalım" (cevap uzaksa "neredeyse" yanlış bilgi veriyordu).
+
+### 3.4 Kişisel öğrenme planı (24.10.2026, proje sahibinin isteği: "her öğrencinin öğrenme yetisini keşfedip ona yönelik program")
+Üç parça; hepsi çocuğun **cevaplarından** çalışır, anket ya da stil etiketi yok (§3).
+- **Okul takvimi** (`OKUL_TAKVIM` in curriculum.js, `E.okulHafta`, `E.okulKonusu`, `E.okulGeride`): MEB **2026-2027 5. sınıf matematik taslak çerçeve yıllık planı** (tymm.meb.gov.tr, "Ortaokul Matematik Dersi Yıllık Planlar" ZIP'i, Eylül 2026; geliştirici fonksiyonu `plan-oku` ile okundu) haftalara bölündü: her pazartesi → planda işlenen beceri(ler); tatil haftalarında son konu sürer. Varsayılan bu takvimdir; öğretmen farklı sırada işleyebileceği için çocuk/veli haritadaki «🏫 Okulda bu hafta» kartından **konuyu elle seçebilir** ya da eşleştirmeyi kapatabilir (`st.okul = {mod: 'takvim'|'elle'|'kapali', sk}`). Okul konusu haritada «🏫» ile işaretlenir, kilitliyse açılır, "Bugün bunu yap" önerisinde öne çıkar (ilk ders de okul konusundan başlar). Okulda işlenmiş ama hiç çalışılmamış konular plana ve veli raporuna "📌" ile girer. **Taslak plandır**; yıl değişince takvim güncellenmeli (`OKUL_YIL`). Takvim dışında (yaz) okul kartı "Seç" der.
+- **Ön bilgi haritası ve yoklaması** (`ONKOSUL` in curriculum.js → `s.temel`, `E.temelAday`, `E.temelTetikle`, `E.temelKaydet`, `E.temelEksikler`): her becerinin temalar arası temelleri, en olası kaynak önce (ör. denk kesir ← kesir türleri, çarpma-bölme; daire grafiği ← sütun grafiği, yüzde). Çocuk bir derste **aynı konuda 2 kez çözüm görürse** (iki denemesi de yanlış) ve zayıf ya da hiç ölçülmemiş bir temel varsa, telafiden sonra o temelden **2 kolay soru** gelir («🔎 Kısa bir kontrol»). Ders sayacını ilerletmez, telafi doğurmaz, ders yoklama bitmeden kapanmaz. İkisi ilk denemede doğruysa **sağlam** (14 gün yeniden yoklanmaz), değilse **eksik**: ders sonunda "🧱 Pi bir şey fark etti" kartı, "Bugün bunu yap"ta en üst öncelik (unutulan tekrardan sonra), haftalık planda "Temeli güçlendir", veli raporunda "🧱 Ön bilgi kontrolü" satırı ve öneri. Ders başına en fazla bir yoklama. Durum `st.temel[beceri][temel] = {sonuc, at, ok, n}`.
+- **Haftalık plan** (`E.haftalikPlan`, `planKart` in app.js): her pazartesi 3 hedef seçilir ve hafta boyu sabit kalır, ilerleme canlı: (1) okul konusu (yoksa yoldaki konu) → 2 yıldız; (2) bulunan temel eksiği → 1 yıldız, yoksa en zayıf çalışılmış konu, yoksa okulda geride kalan konu, yoksa tekrar; (3) alışkanlık: haftada N gün (geçen haftanın 1 fazlası, 3–5). Görev sekmesinde "Bugün bunu yap"ın altında; her satır dokununca o işi başlatır. Üçü bitince bir kez +25 elmas (`E.PLAN_ODUL`). Veli alanında "🎯 Kişisel plan" kartı ve rapor metninde "📋 Bu haftanın planı".
+- Test: `node test/test_plan.js` (takvim tarihleri, elle seçim, yoklamanın tetiklenmesi/sayaç/telafi kuralları, plan ve rapor).
 
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 
@@ -392,6 +399,7 @@ src/style.css             ← tasarım belirteçleri (açık/koyu tema)
 build.py                  ← dist/index.html (PWA) + dist/artifact.html
 test/test_generators.js   ← 63 000 soruluk doğrulama
 test/sim_engine.js        ← farklı öğrenci tipleriyle motor simülasyonu
+test/test_plan.js         ← okul takvimi, ön bilgi yoklaması, haftalık plan testleri
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
 ```
 
@@ -443,7 +451,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `python3 build.py` → (mümkünse) `python3 test/e2e.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → (mümkünse) `python3 test/e2e.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.

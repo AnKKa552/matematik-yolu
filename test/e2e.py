@@ -86,6 +86,10 @@ async def main():
         await pg.wait_for_timeout(400); await pg.screenshot(path=OUT+'04_placement_end.png')
         await bitir(); await pg.wait_for_timeout(300)
         await pg.screenshot(path=OUT+'05_home.png', full_page=True)
+        # okul takvimi kartı ve konu seçimi
+        if await pg.query_selector('[data-act=okul]'):
+            await pg.click('[data-act=okul]', force=True); await pg.wait_for_timeout(250); await pg.screenshot(path=OUT+'05b_okul_modal.png')
+            await pg.click('[data-act=close-modal].btn', force=True); await pg.wait_for_timeout(150)
         # bir ders: 4. tema kesirler
         await pg.click('[data-act=theme][data-v=t4]'); await pg.wait_for_timeout(200)
         await pg.screenshot(path=OUT+'06_home_t4.png')

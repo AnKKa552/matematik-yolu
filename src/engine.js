@@ -10,7 +10,7 @@
   'use strict';
   const isNode = typeof module !== 'undefined';
   const { GEN, MIS, KES_CHECK, HATA, ATOLYE } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, HATA: G.MY_HATA, ATOLYE: G.MY_ATOLYE };
-  const { SKILLS, SKILL, THEMES, FORMATS } = isNode ? require('./curriculum.js') : G.MY_CUR;
+  const { SKILLS, SKILL, THEMES, FORMATS, OKUL_TAKVIM, OKUL_YIL } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
   const KEY = 'matematik_yolu_v1';
@@ -131,6 +131,8 @@
   E.nextQ0 = (st, ses) => {
     // telafi: yanlıştan sonra aynı beceride bir alt seviye
     if (ses.lastWrong && ses.lastSkill) { const q = E.makeQ(ses.lastSkill, Math.max(1, ses.lastLevel - 1), 'telafi'); q.rescue = true; q.rescueOf = ses.lastMis; return q; }
+    // Ön bilgi yoklaması: çocuk bu konuda zorlanınca altındaki temel konudan 2 kısa soru (ders sayacını ilerletmez)
+    const tk = ses.temelKontrol; if (tk && tk.n < E.TEMEL_SORU) { const q = E.makeQ(tk.pre, 1, 'telafi'); q.temel = { pre: tk.pre, sk: tk.sk, sira: tk.n + 1 }; return q; }
     let id = ses.skill;
     if (ses.mode === 'mistakes' && st.mistakes.length) { const m = st.mistakes[ses.i % st.mistakes.length]; const q = E.makeQ(m.skill, m.lv); q.replay = true; return q; }
     if (ses.mode === 'review' || ses.mode === 'mix') { const due = E.dueSkills(st); const pool = due.length ? due.map(d => d.id) : SKILLS.filter(s => st.skills[s.id].n > 0).map(s => s.id); id = pool.length ? pool[ses.i % pool.length] : SKILLS[0].id; }
@@ -209,8 +211,9 @@
     else if (res.ok && kanit === 'ipucu' && !q.rescue) { ses.correct++; gain = 5; }
     else if (res.ok) { ses.correct++; ses.streak++; ses.best = Math.max(ses.best, ses.streak); gain = q.rescue ? 15 : 10; if (ses.streak >= 5) gain += 5; }
     else { ses.wrong++; ses.streak = 0; }
-    ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !['placement', 'speed', 'exam', 'hazir', 'atolye'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
-    if (!q.rescue) ses.i++;
+    ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !q.temel && !['placement', 'speed', 'exam', 'hazir', 'atolye'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
+    if (q.temel) E.temelKaydet(st, ses, kanit === 'ilk');
+    else { if (!q.rescue) ses.i++; E.temelTetikle(st, ses, q, kanit); }
     return gain;
   };
   E.medianTime = (st) => { if (!st.times.length) return 15000; const a = st.times.slice().sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
@@ -233,6 +236,103 @@
   };
 
   /* ---------------- Oturum sonu, seri, rozet ---------------- */
+  /* ---------------- Ön bilgi yoklaması (24.10.2026) ----------------
+     Çocuk bir derste aynı konuda 2 kez çözümü görmek zorunda kalırsa (iki deneme de yanlış), sorun konunun altındaki temel bilgide
+     olabilir. Ön bilgi haritasındaki (ONKOSUL) zayıf ya da hiç ölçülmemiş temelden 2 kolay soru sorulur. İkisi de ilk denemede
+     doğruysa temel sağlam: zorluk bu konunun kendisinde. Değilse temel eksik: haftalık plana ve veli raporuna "önce temel" girer.
+     Etiket yok, tek oturumda tek yoklama; 14 gün içinde sağlam çıkan temel yeniden yoklanmaz. */
+  E.TEMEL_SORU = 2; E.TEMEL_TAZE = 14 * DAY;
+  E.temelAday = (st, id, now = Date.now()) => {
+    const kayit = (st.temel || {})[id] || {};
+    const aday = ((SKILL[id] || {}).temel || []).filter(pre => st.skills[pre]).map(pre => {
+      const sk = st.skills[pre], k = kayit[pre];
+      if (k && k.sonuc === 'saglam' && now - k.at < E.TEMEL_TAZE) return null;
+      const m = sk.n >= 3 ? E.eff(sk) : 0.4;            // hiç ölçülmemiş temel: belirsiz say
+      return m < 0.7 ? { pre, m } : null;
+    }).filter(Boolean);
+    return aday.length ? aday.sort((a, b) => a.m - b.m)[0].pre : null;
+  };
+  E.temelTetikle = (st, ses, q, kanit) => {
+    if (!['lesson', 'learn'].includes(ses.mode) || ses.temelKontrol || q.skill !== ses.skill || q.rescue || kanit !== 'cozum') return;
+    const cozum = ses.answered.filter(a => a.skill === ses.skill && !a.rescue && a.kanit === 'cozum').length;
+    if (cozum < 2) return;
+    const pre = E.temelAday(st, ses.skill); if (!pre) return;
+    ses.temelKontrol = { sk: ses.skill, pre, n: 0, ok: 0, yeni: true };
+  };
+  E.temelKaydet = (st, ses, ilk) => {
+    const tk = ses.temelKontrol; if (!tk) return; tk.n++; if (ilk) tk.ok++;
+    if (tk.n < E.TEMEL_SORU) return;
+    tk.sonuc = tk.ok >= E.TEMEL_SORU ? 'saglam' : 'eksik';
+    const T = st.temel || (st.temel = {}); (T[tk.sk] || (T[tk.sk] = {}))[tk.pre] = { sonuc: tk.sonuc, at: Date.now(), ok: tk.ok, n: tk.n };
+  };
+  // Son 30 günde bulunan, hâlâ zayıf olan temel eksikleri (plan, öneri ve veli raporu için)
+  E.temelEksikler = (st, now = Date.now()) => {
+    const L = []; for (const [sk, o] of Object.entries(st.temel || {})) for (const [pre, k] of Object.entries(o))
+      if (k.sonuc === 'eksik' && now - k.at < 30 * DAY && E.eff(st.skills[pre]) < 0.5) L.push({ sk, pre, at: k.at });
+    return L.sort((a, b) => b.at - a.at);
+  };
+
+  /* ---------------- Okul takvimi (24.10.2026) ----------------
+     Varsayılan: MEB taslak yıllık planındaki o haftanın konusu. Çocuk/veli "Okulda şu an bu konudayız" diye elle de seçebilir
+     (öğretmenler sırayı değiştirebilir) ya da kapatabilir. st.okul = { mod: 'takvim' | 'elle' | 'kapali', sk, at }. */
+  E.OKUL_YIL = OKUL_YIL;
+  const gunAnahtar = (t) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  E.okulHafta = (now = Date.now()) => {
+    const g = gunAnahtar(now), T = OKUL_TAKVIM || []; if (!T.length || g < T[0].bas) return null;
+    let i = -1; for (let k = 0; k < T.length; k++) if (T[k].bas <= g) i = k;
+    const son = new Date(T[T.length - 1].bas + 'T12:00:00').getTime() + 7 * DAY; if (now > son) return null;
+    let j = i; while (j >= 0 && !T[j].sk) j--;               // tatilde: son işlenen konu sürer
+    return j < 0 ? null : { sk: T[j].sk, tatil: T[i].tatil, hafta: i + 1, bas: T[i].bas };
+  };
+  E.okulKonusu = (st, now = Date.now()) => {
+    const o = st.okul || { mod: 'takvim' };
+    if (o.mod === 'kapali') return null;
+    if (o.mod === 'elle' && o.sk && SKILL[o.sk]) return { sk: [o.sk], kaynak: 'elle' };
+    const h = E.okulHafta(now); return h ? { sk: h.sk, kaynak: 'takvim', tatil: h.tatil } : null;
+  };
+  // Okulda işlenmiş (bu haftadan önceki) ama hiç çalışılmamış konular: geride kalmasın
+  E.okulGeride = (st, now = Date.now()) => {
+    const ok = E.okulKonusu(st, now); if (!ok) return [];
+    let once;
+    if (ok.kaynak === 'elle') { const i = SKILLS.findIndex(s => s.id === ok.sk[0]); once = SKILLS.slice(0, Math.max(0, i)).map(s => s.id); }
+    else { const g = gunAnahtar(now); once = []; for (const w of OKUL_TAKVIM) { if (w.bas > g) break; (w.sk || []).forEach(x => { if (!ok.sk.includes(x) && !once.includes(x)) once.push(x); }); } }
+    return once.filter(id => st.skills[id] && st.skills[id].n === 0);
+  };
+
+  /* ---------------- Haftalık plan (24.10.2026) ----------------
+     Her pazartesi çocuğun kendi verisinden 3 hedef çıkar ve hafta boyu sabit kalır (ilerleme canlı hesaplanır):
+     1) okul konusu (ya da yoldaki sıradaki konu) → en az 2 yıldız; 2) bulunan temel eksiği ya da en zayıf çalışılmış konu ya da
+     okulda geride kalan konu ya da tekrar; 3) alışkanlık: haftada N gün (geçen haftaya göre 3–5). Üçü bitince bir kez +25 elmas. */
+  E.PLAN_ODUL = 25;
+  E.haftalikPlan = (st, now = Date.now()) => {
+    const hafta = weekStart(now);
+    if (!st.plan || st.plan.hafta !== hafta) {
+      const H = [], var_ = new Set(), ekle = (h) => { if (h && !var_.has(h.sk || h.tip)) { var_.add(h.sk || h.tip); H.push(h); } };
+      const ok = E.okulKonusu(st, now), okSk = ok && ok.sk.find(id => E.eff(st.skills[id]) < 0.7);
+      if (okSk) ekle({ tip: 'okul', sk: okSk, hedef: 2 });
+      else { const s2 = SKILLS.find(s => st.skills[s.id].n > 0 && E.eff(st.skills[s.id]) < 0.5) || SKILLS.find(s => E.eff(st.skills[s.id]) < 0.7); if (s2) ekle({ tip: 'yol', sk: s2.id, hedef: 2 }); }
+      const te = E.temelEksikler(st, now)[0];
+      if (te) ekle({ tip: 'temel', sk: te.pre, icin: te.sk, hedef: 1 });
+      if (H.length < 2) { const zayif = SKILLS.filter(s => st.skills[s.id].n >= 4 && E.eff(st.skills[s.id]) < 0.5).sort((a, b) => E.eff(st.skills[a.id]) - E.eff(st.skills[b.id]))[0]; if (zayif) ekle({ tip: 'guclen', sk: zayif.id, hedef: 2 }); }
+      if (H.length < 2) { const g = E.okulGeride(st, now)[0]; if (g) ekle({ tip: 'geride', sk: g, hedef: 1 }); }
+      if (H.length < 2 && SKILLS.some(s => st.skills[s.id].n > 0)) ekle({ tip: 'tekrar', hedef: 2 });
+      if (H.length < 2) { const s3 = SKILLS.find(s => !var_.has(s.id) && E.eff(st.skills[s.id]) < 0.7); if (s3) ekle({ tip: 'yol', sk: s3.id, hedef: 1 }); }
+      const gecen = new Set(Object.keys(st.days || {}).filter(d => { const t = new Date(d + 'T12:00:00').getTime(); return t >= hafta - 7 * DAY && t < hafta; })).size;
+      H.push({ tip: 'gun', hedef: Math.min(5, Math.max(3, gecen + 1)) });
+      st.plan = { hafta, hedefler: H, bas: { tekrar: (st.sessions || []).filter(x => x.at >= hafta && ['review', 'mistakes'].includes(x.mode)).length }, odul: false };
+    }
+    const P = st.plan, gunler = new Set(Object.keys(st.days || {}).filter(d => { const t = new Date(d + 'T12:00:00').getTime(); return t >= P.hafta && t < P.hafta + 7 * DAY && st.days[d] > 0; })).size;
+    const liste = P.hedefler.map(h => {
+      let v = 0;
+      if (h.tip === 'gun') v = gunler;
+      else if (h.tip === 'tekrar') v = (st.sessions || []).filter(x => x.at >= P.hafta && ['review', 'mistakes'].includes(x.mode)).length;
+      else v = E.crowns(E.eff(st.skills[h.sk]));
+      return Object.assign({}, h, { v: Math.min(v, h.hedef), tamam: v >= h.hedef });
+    });
+    return { hafta: P.hafta, liste, tamam: liste.every(h => h.tamam), odul: P.odul };
+  };
+  E.planOdul = (st) => { const p = E.haftalikPlan(st); if (!p.tamam || st.plan.odul) return 0; st.plan.odul = Date.now(); st.gems += E.PLAN_ODUL; return E.PLAN_ODUL; };
+
   // Sandık nadirliği öğrenmeyi ödüllendirir: doğruluk yükseldikçe daha iyi sandık; küçük bir sürpriz payı her zaman var.
   // Elmas aralıkları: ahşap 5–10, nadir 10–20, efsane 20–35. Sandık ve elmas ASLA parayla satılmaz (§1-7).
   E.SANDIK_ELMAS = { ahsap: [5, 10], nadir: [10, 20], efsane: [20, 35] };
@@ -264,7 +364,8 @@
     if (ses.mode === 'exam' && ses.theme) { const pass = acc >= 0.7; if (pass && !st.trophies[ses.theme]) { st.trophies[ses.theme] = { at: Date.now(), acc }; st.gems += 50; } trophy = { pass, acc }; }
     const quests = E.questTick(st, ses, acc);
     const newBadges = E.checkBadges(st, ses, acc);
-    return { acc, gemsWon, sandik, roket, newBadges, trophy, quests };
+    const planOdul = E.planOdul(st);
+    return { acc, gemsWon, sandik, roket, newBadges, trophy, quests, planOdul, temel: ses.temelKontrol && ses.temelKontrol.sonuc ? ses.temelKontrol : null };
   };
   const BADGES = [
     { id: 'ilk', icon: '🌱', name: 'İlk Adım', desc: 'İlk dersini bitirdin.', test: (st) => st.sessions.some(s => s.mode === 'lesson') },
@@ -347,16 +448,28 @@
       if (probIcgoru) L.push(`   → ${probIcgoru}`);
       if (fp.problem.bagimsiz) L.push(`   → Benzer yeni problemi tek başına çözme: ilk denemede %${Math.round(fp.problem.bagimsiz.acc * 100)} (${fp.problem.bagimsiz.ok}/${fp.problem.bagimsiz.n}${fp.problem.bagimsiz.n < 5 ? ', ön değerlendirme' : ''}). Öğrenmenin en güçlü kanıtı budur.`);
     }
+    // Okul, ön bilgi ve haftalık plan (24.10.2026)
+    const okul = E.okulKonusu(st), geride = E.okulGeride(st).slice(0, 4);
+    if (okul) L.push(`🏫 Okulda ${okul.tatil ? 'son işlenen' : 'bu hafta'}: ${okul.sk.map(id => `${SKILL[id].title} (${E.crowns(E.eff(st.skills[id]))}/5 yıldız)`).join(', ')} · ${okul.kaynak === 'elle' ? 'sizin seçiminiz' : 'MEB taslak yıllık planına göre'}`);
+    if (geride.length) L.push(`📌 Okulda işlenmiş ama uygulamada henüz çalışılmamış: ${geride.map(id => SKILL[id].title).join(', ')}`);
+    const temelL = []; for (const [sk, o] of Object.entries(st.temel || {})) for (const [pre, k] of Object.entries(o)) if (Date.now() - k.at < 30 * DAY) temelL.push({ sk, pre, sonuc: k.sonuc, at: k.at, simdi: E.eff(st.skills[pre]) });
+    temelL.sort((a, b) => b.at - a.at);
+    temelL.slice(0, 3).forEach(t => L.push(t.sonuc === 'eksik'
+      ? `🧱 Ön bilgi kontrolü: «${SKILL[t.sk].title}» konusunda zorlanınca temeli olan «${SKILL[t.pre].title}» 2 soruyla yoklandı; eksik görünüyor${t.simdi >= 0.5 ? ', ardından çalışılıp toparlandı ✓' : ', önce o konu çalışılıyor'}.`
+      : `🧱 Ön bilgi kontrolü: «${SKILL[t.sk].title}» için temel olan «${SKILL[t.pre].title}» sağlam çıktı; zorluk konunun kendisinde, pratikle oturacak.`));
+    const plan = E.haftalikPlan(st), PY = { okul: 'okul konusu', yol: 'sıradaki konu', temel: 'temel', guclen: 'güçlendirme', geride: 'okulda geçilen konu', tekrar: 'tekrar', gun: 'gün' };
+    L.push(`📋 Bu haftanın planı (${plan.liste.filter(h => h.tamam).length}/${plan.liste.length} tamam): ${plan.liste.map(h => `${h.tamam ? '✅' : '◻️'} ${h.sk ? SKILL[h.sk].title : h.tip === 'gun' ? `haftada ${h.hedef} gün` : `${h.hedef} ${PY[h.tip]}`}`).join(' · ')}`);
     if (fp.bestFormat) L.push(`🧠 En iyi öğrendiği anlatım biçimi: ${FORMATS[fp.bestFormat].name}`);
     L.push(`🧭 Çalışma tarzı: ${fp.pace}${fp.resil !== null ? `, hatadan sonra doğruya dönme oranı %${Math.round(fp.resil * 100)}` : ''}`);
     L.push('ℹ️ Yüzdeler ilk denemedeki cevaplardan hesaplanır; ipucuyla ya da ikinci denemede bulunan cevaplar ayrı sayılır. XP çalışmayı, ustalık ise öğrenmeyi gösterir.');
     L.push('');
-    const tip = fp.weak.length ? `Bu hafta evde "${fp.weak[0].title}" konusunu günlük hayattan bir örnekle konuşmanız (ör. market fişi, saat, ölçme) çok faydalı olur.` : 'Harika gidiyor! Günde 10-15 dakikalık düzenli çalışmayı sürdürmesini destekleyin.';
+    const te0 = E.temelEksikler(st)[0];
+    const tip = te0 ? `"${SKILL[te0.sk].title}" konusundaki zorluğun kaynağı "${SKILL[te0.pre].title}" olabilir. Bu hafta o temeli günlük hayattan örneklerle (market, saat, ölçme) birlikte konuşmanız çok işe yarar.` : fp.weak.length ? `Bu hafta evde "${fp.weak[0].title}" konusunu günlük hayattan bir örnekle konuşmanız (ör. market fişi, saat, ölçme) çok faydalı olur.` : 'Harika gidiyor! Günde 10-15 dakikalık düzenli çalışmayı sürdürmesini destekleyin.';
     L.push(`👨‍👩‍👧 Öneri: ${tip}`);
     // Görsel rapor için: son 7 günün günlük dakikası ve tema bazında ustalık (yalnız çalışılan beceriler)
     const gunluk = []; for (let i = 6; i >= 0; i--) { const t0 = new Date(); t0.setHours(0, 0, 0, 0); const bas = t0.getTime() - i * DAY, son = bas + DAY; gunluk.push({ at: bas, dk: Math.round(st.sessions.filter(s => s.at >= bas && s.at < son).reduce((a, s) => a + s.ms, 0) / 60000) }); }
     const temalar = (typeof THEMES !== 'undefined' ? THEMES : []).map(th => { const sk = SKILLS.filter(s => s.theme === th.id && st.skills[s.id].n > 0); return { id: th.id, no: th.no, ad: th.title, ikon: th.icon, renk: th.color, n: sk.length, top: SKILLS.filter(s => s.theme === th.id).length, m: sk.length ? sk.reduce((a, s) => a + E.eff(st.skills[s.id]), 0) / sk.length : null }; });
-    return { text: L.join('\n'), mins, xp, acc, daysActive, lessons: ses.length, qn, fp, act, olasi, fixed, probIcgoru, tip, gunluk, temalar };
+    return { text: L.join('\n'), mins, xp, acc, daysActive, lessons: ses.length, qn, fp, act, olasi, fixed, probIcgoru, tip, gunluk, temalar, okul, geride, temelL, plan };
   };
 
 

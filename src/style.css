@@ -834,3 +834,34 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 @keyframes ssNabiz{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes ssGel{0%{opacity:0;transform:translateY(18px) scale(.8)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.ss-halka,.ss-sandik,.ss-sandik img,.ss-isik,.ss-dokun,.roket-rozet,.end-alt{animation:none!important}.ss-odul{animation:none!important;opacity:1}}
+
+/* ---------- Kişisel plan: okul takvimi, ön bilgi yoklaması, haftalık plan (24.10.2026) ---------- */
+.okul-kart{display:flex;align-items:stretch;gap:8px;margin:8px 0 4px;background:linear-gradient(90deg,#E6F4FF,#EEE9FF);border:2px solid #C9DDFF;border-radius:16px;padding:6px;color:#1E2A55}
+.okul-kart.bos{align-items:center;gap:10px;padding:10px 12px;font-size:14px;cursor:pointer;width:100%;text-align:left;font-family:inherit}
+.okul-git{display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:none;border:0;padding:6px 8px;text-align:left;cursor:pointer;font-family:inherit;color:inherit;min-height:44px}
+.okul-git b{font-size:16px}
+.okul-ust{font-size:11px;font-weight:900;letter-spacing:.08em;color:#3156C9}
+.okul-degis{flex:none;border:0;border-radius:12px;background:#fff;color:#3156C9;font-weight:900;padding:0 14px;min-height:44px;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 #C9DDFF}
+.okul-kucuk{margin:6px 0 2px;border:2px dashed var(--line);background:none;border-radius:999px;padding:8px 14px;font-weight:800;color:var(--muted);cursor:pointer;font-family:inherit;min-height:44px}
+.node-label.okul{color:#3156C9;font-weight:900}
+.okul-modal{max-height:86vh;overflow:auto}
+.okul-grup{margin-top:10px}
+.okul-grup-ad{font-weight:900;font-size:13px;color:var(--muted);margin-bottom:6px}
+.okul-izgara{display:flex;flex-wrap:wrap;gap:6px}
+.okul-sec{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:8px 10px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;min-height:44px;text-align:left}
+.okul-sec.on{border-color:var(--brand);background:var(--brand-t);color:var(--brand)}
+.okul-sec.genis{width:100%;font-size:14px;line-height:1.35}
+.temel-not{background:#EAF3FF;border:2px solid #BFD8FF;color:#1E3A7A;border-radius:14px;padding:10px 12px;font-size:14px;margin-bottom:10px}
+.temel-sonuc{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;border:2px solid #FFD9A0;background:#FFF8EC;color:#5A3A00}
+.temel-sonuc.iyi{border-color:#BFE9CF;background:#F0FBF4;color:#14532D}
+.temel-ic{font-size:34px;line-height:1}
+.plan-kart{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.plan-ust{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:12px;letter-spacing:.05em;color:var(--brand,#5B4BFF)}
+.plan-satir{display:flex;gap:10px;align-items:center;border:0;background:var(--bg2,rgba(0,0,0,.03));border-radius:14px;padding:8px 10px;text-align:left;font-family:inherit;color:var(--ink);width:100%;cursor:pointer;min-height:44px}
+div.plan-satir{cursor:default}
+.plan-satir .grow{display:flex;flex-direction:column;gap:1px;min-width:0}
+.plan-satir .qbar{height:14px;margin-top:4px}
+.plan-satir.tamam{opacity:.75}
+.plan-satir.tamam .qbar i{background:var(--ok,#22C55E)}
+.plan-ic{font-size:24px;width:34px;text-align:center;flex:none}
+.plan-not{text-align:center}

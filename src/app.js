@@ -345,7 +345,8 @@
   }
 
   /* =================== GÖRÜNÜMLER =================== */
-  const unlocked = (sk) => { if (!sk.prereq.length) return true; const p = A.st.skills[sk.prereq[0]]; return p.lessons > 0 || E.eff(p) >= 0.5 || A.st.skills[sk.id].n > 0 || E.eff(A.st.skills[sk.id]) >= 0.3; };
+  const okulSet = () => new Set((E.okulKonusu(A.st) || { sk: [] }).sk);
+  const unlocked = (sk) => { if (!sk.prereq.length || okulSet().has(sk.id)) return true; const p = A.st.skills[sk.prereq[0]]; return p.lessons > 0 || E.eff(p) >= 0.5 || A.st.skills[sk.id].n > 0 || E.eff(A.st.skills[sk.id]) >= 0.3; };
   const goalRing = () => { const v = Math.min(1, todayXP() / A.st.dailyGoal), r = 15, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 38 38" aria-label="Günlük hedef ${todayXP()}/${A.st.dailyGoal} XP"><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" transform="rotate(-90 19 19)"/><text x="19" y="23" text-anchor="middle" font-size="11" font-weight="900" fill="var(--ink)">⚡</text></svg>`; };
   // Üst çubuk: her simgeye dokununca ne olduğunu kısa bir cümleyle söyler (çocuk 🧊'nin ne olduğunu bilemez)
   const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${(A.st.roket || {}).kalan > 0 ? '<span class="roket-rozet" aria-hidden="true">🚀</span>' : ''}${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
@@ -391,12 +392,13 @@
   function bolgeHtml(th, curRef) {
     const sks = SKILLS.filter(s => s.theme === th.id), done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
     const offs = [0, 62, 88, 62, 0, -62, -88, -62];
+    const OK = okulSet();
     const nodes = sks.map((s, i) => {
       const sk = A.st.skills[s.id], cr = E.crowns(E.eff(sk)), un = unlocked(s);
       const isCur = un && !curRef.found && cr < 3; if (isCur) curRef.found = th.id;
       const style = `--c:var(--${th.color});--cd:var(--${th.color}-d)`;
       const sandik = ((i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '') + (i === Math.min(3, sks.length - 2) ? hazineDuragi(th) : '');
-      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label">${esc(s.title)}</div></div>${sandik}`;
+      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label ${OK.has(s.id) ? 'okul' : ''}">${OK.has(s.id) ? '🏫 ' : ''}${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const kupa = A.st.trophies[th.id], acik = kupa || done === sks.length;
     return `<section class="bolge" id="bolge-${th.id}" style="--fon:url(img/fon_${th.id}.webp)">
@@ -412,9 +414,27 @@
     return `${topbar()}<div class="scroll">
       <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
       <div class="diyar-bas"><div><b>🗺️ ${DIYAR}</b><span class="muted sm"> · ${done}/${SKILLS.length} konu · ${Object.keys(A.st.trophies).length}/7 kupa</span></div><div class="bar"><i style="width:${Math.round(100 * done / SKILLS.length)}%"></i></div></div>
+      ${okulKart()}
       <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
       <div class="path harita tek">${bolgeler}</div>
     </div>${nav()}`;
+  }
+  /* Okul takvimi kartı: MEB taslak yıllık planına göre o haftanın konusu ya da çocuğun/velinin seçtiği konu.
+     Dokununca haritada o konuya gider; «Değiştir» okul konusunu seçtirir. */
+  function okulKart() {
+    const ok = E.okulKonusu(A.st), o = A.st.okul || { mod: 'takvim' };
+    if (!ok) return o.mod === 'kapali' ? '<button class="okul-kucuk" data-act="okul">🏫 Okulla eşleştir</button>' : `<button class="okul-kart bos" data-act="okul">🏫 <span class="grow">Okulda hangi konudasınız? <b>Seç</b>, haritan okulla aynı yerden gitsin.</span></button>`;
+    const ad = ok.sk.map(id => SKILL[id].title).join(' · ');
+    return `<div class="okul-kart"><button class="okul-git grow" data-act="okul-git" data-v="${ok.sk[0]}"><span class="okul-ust">🏫 OKULDA ${ok.tatil ? 'SON İŞLENEN' : 'BU HAFTA'}</span><b>${esc(ad)}</b><span class="muted sm">${ok.kaynak === 'elle' ? 'Senin seçimin' : `MEB yıllık planına göre${ok.tatil ? ` · ${ok.tatil}` : ''}`}</span></button><button class="okul-degis" data-act="okul">Değiştir</button></div>`;
+  }
+  function okulModal() {
+    const o = A.st.okul || { mod: 'takvim' }, h = E.okulHafta();
+    const konu = (s) => `<button class="okul-sec ${o.mod === 'elle' && o.sk === s.id ? 'on' : ''}" data-act="okul-sec" data-v="${s.id}">${esc(s.title)}</button>`;
+    return `<div class="modal okul-modal"><h2 style="margin:0 0 4px">🏫 Okulda hangi konudasınız?</h2><p class="muted sm" style="margin:0 0 10px">Seçtiğin konu haritada «🏫» ile görünür ve önerilerde öne çıkar. Okulda işlenmiş ama çalışmadığın konular da plana girer.</p>
+      <button class="okul-sec genis ${o.mod === 'takvim' || !o.mod ? 'on' : ''}" data-act="okul-mod" data-v="takvim">📅 <b>MEB yıllık planına göre ilerlesin</b><br><span class="muted sm">${h ? `Bu hafta: ${h.sk.map(id => SKILL[id].title).join(' · ')}${h.tatil ? ` (${h.tatil})` : ''}` : `${E.OKUL_YIL} planı şu an dışında`}. Öğretmenin farklı sırada işliyorsa aşağıdan seç.</span></button>
+      ${THEMES.map(t => `<div class="okul-grup"><div class="okul-grup-ad">${t.icon} ${t.no}. Tema · ${esc(t.title)}</div><div class="okul-izgara">${SKILLS.filter(s => s.theme === t.id).map(konu).join('')}</div></div>`).join('')}
+      <button class="btn ghost small" data-act="okul-mod" data-v="kapali" style="margin-top:10px">Okulla eşleştirme olmasın</button>
+      <button class="btn" data-act="close-modal" style="margin-top:8px">Tamam</button></div>`;
   }
   // Harita açılınca çocuğun bulunduğu yere (sıradaki düğüm) kaydır; bölge düğmesi o bölgeye götürür
   function haritaKaydir(hedef, yumusak) {
@@ -428,12 +448,34 @@
     const st = A.st, calisilan = SKILLS.filter(s => st.skills[s.id].n > 0), due = E.dueSkills(st), ms = st.mistakes.length;
     const siradaki = SKILLS.find(s => unlocked(s) && E.eff(st.skills[s.id]) < 0.7) || SKILLS.find(s => E.eff(st.skills[s.id]) < 0.85);
     const hedefTamam = todayXP() >= st.dailyGoal;
+    const okul = E.okulKonusu(st), okulSk = okul && okul.sk.map(id => SKILL[id]).find(s => E.eff(st.skills[s.id]) < 0.7), te = E.temelEksikler(st)[0];
+    if (!calisilan.length && okulSk) return { act: 'learn', v: okulSk.id, ic: '🏫', t: okulSk.title, n: 'Okulda bu hafta bu konu işleniyor. Pi önce anlatacak, sonra 5 soru.' };
     if (!calisilan.length) return siradaki ? { act: 'learn', v: siradaki.id, ic: '🌱', t: siradaki.title, n: 'İlk konunla başla. Pi önce anlatacak, sonra 5 soru.' } : null;
     if (due.length && due[0].r < 0.5) return { act: 'p-review', ic: '⏰', t: `Tekrar: ${SKILL[due[0].id].title}`, n: due.length > 1 ? `${due.length} konu unutulmaya başladı. Kısa bir tekrarla tazele.` : 'Bu konu unutulmaya başladı. Kısa bir tekrarla tazele.' };
+    if (te) { const yeni = st.skills[te.pre].n < 3; return { act: yeni ? 'learn' : 'start', v: te.pre, ic: '🧱', t: `Önce temel: ${SKILL[te.pre].title}`, n: `«${SKILL[te.sk].title}» konusunda zorlanmanın sebebi bu olabilir. Temeli sağlamlaşınca o konu da kolaylaşır.` }; }
     if (ms >= 3) return { act: 'p-mistakes', ic: '🕵️', t: `Hatalarımı Çalış (${ms})`, n: 'Birkaç tuzak birikti. Onları birlikte aşalım.' };
     if (hedefTamam && due.length) return { act: 'p-review', ic: '⏰', t: `Tekrar: ${SKILL[due[0].id].title}`, n: 'Bugünkü hedefin tamam! İstersen bir konuyu tazele.' };
+    if (okulSk && !hedefTamam) { const yeni = st.skills[okulSk.id].n === 0; return { act: yeni ? 'learn' : 'start', v: okulSk.id, ic: '🏫', t: okulSk.title, n: okul.kaynak === 'elle' ? 'Okulda şu an bu konudasınız. Evde de çalışınca daha iyi oturur.' : 'Okulda bu hafta bu konu işleniyor (MEB yıllık planı). Evde de çalışınca daha iyi oturur.' }; }
     if (siradaki) { const yeni = st.skills[siradaki.id].n === 0; return { act: yeni ? 'learn' : 'start', v: siradaki.id, ic: yeni ? '✨' : '📘', t: siradaki.title, n: hedefTamam ? 'Bugünkü hedefin tamam! Devam etmek istersen sıradaki konu bu.' : yeni ? 'Yolundaki sıradaki yeni konu. Pi önce anlatacak.' : 'Yolundaki sıradaki konu. Biraz daha çalışınca yıldızı dolacak.' }; }
     return { act: 'p-mix', ic: '🎲', t: 'Karışık Pratik', n: 'Bütün konularda çok iyisin! Karışık sorularla formunu koru.' };
+  }
+  /* Haftalık plan kartı: pazartesi çocuğun verisinden çıkan 3 hedef. Her satır dokununca o işi başlatır. */
+  const PLAN_YAZI = {
+    okul: (h) => ['🏫', `Okul konusu: ${SKILL[h.sk].title}`, `${h.hedef} yıldıza çıkar`],
+    yol: (h) => ['🗺️', SKILL[h.sk].title, `${h.hedef} yıldıza çıkar`],
+    temel: (h) => ['🧱', `Temeli güçlendir: ${SKILL[h.sk].title}`, `«${SKILL[h.icin].title}» için · ${h.hedef} yıldız`],
+    guclen: (h) => ['💪', `Güçlendir: ${SKILL[h.sk].title}`, `${h.hedef} yıldıza çıkar`],
+    geride: (h) => ['📌', `Okulda geçtiniz: ${SKILL[h.sk].title}`, 'Bir ders yap, geride kalmasın'],
+    tekrar: (h) => ['⏰', 'Tekrar dersi', `${h.hedef} tekrar ya da hata dersi`],
+    gun: (h) => ['📅', `Haftada ${h.hedef} gün çalış`, 'Kısa da olsa her gün biraz'],
+  };
+  const planHedefAct = (h) => h.sk ? `data-act="${A.st.skills[h.sk].n < 3 ? 'learn' : 'start'}" data-v="${h.sk}"` : h.tip === 'tekrar' ? `data-act="${A.st.mistakes.length ? 'p-mistakes' : 'p-review'}"` : '';
+  function planKart() {
+    const once = A.st.plan && A.st.plan.hafta, P = E.haftalikPlan(A.st); if (A.st.plan.hafta !== once) save();
+    const bitti = P.liste.filter(h => h.tamam).length;
+    const satir = (h) => { const [ic, t, alt] = PLAN_YAZI[h.tip](h), act = h.tamam ? '' : planHedefAct(h);
+      return `<${act ? 'button' : 'div'} class="plan-satir ${h.tamam ? 'tamam' : ''}" ${act}><span class="plan-ic">${h.tamam ? '✅' : ic}</span><span class="grow"><b>${esc(t)}</b><span class="muted sm">${esc(alt)}</span><span class="qbar"><i style="width:${Math.round(100 * h.v / h.hedef)}%"></i><span>${h.v} / ${h.hedef}</span></span></span></${act ? 'button' : 'div'}>`; };
+    return `<div class="card plan-kart"><div class="plan-ust"><span>📋 BU HAFTAKİ PLANIN</span><span>${bitti}/${P.liste.length}${P.odul ? ' · +' + E.PLAN_ODUL + '💎 alındı' : ` · bitince +${E.PLAN_ODUL}💎`}</span></div>${P.liste.map(satir).join('')}<div class="muted sm plan-not">Plan her pazartesi senin cevaplarına göre yenilenir.</div></div>`;
   }
   function viewPractice() {
     const due = E.dueSkills(A.st), ms = A.st.mistakes.length, any = SKILLS.some(s => A.st.skills[s.id].n > 0);
@@ -443,6 +485,7 @@
     const O = bugunOneri();
     return `${topbar()}<div class="scroll">
       ${O ? `<button class="card bugun" data-act="${O.act}" ${O.v ? `data-v="${O.v}"` : ''}><div class="sm bugun-ust">BUGÜN BUNU YAP</div><div class="row"><div class="bugun-ic">${O.ic}</div><div class="grow"><h3>${esc(O.t)}</h3><div class="muted sm">${O.n}</div></div><div class="bugun-git">Başla ›</div></div></button>` : ''}
+      ${planKart()}
       ${hazineKart()}
       <div class="mbanner"><div class="grow"><div class="sm" style="font-weight:900;opacity:.9">${left} GÜN KALDI</div><h2>${mo.ad}</h2><div class="sm" style="font-weight:800">Günlük görevleri tamamla, ${mo.hedef} göreve ulaş!</div><div class="qbar light"><i style="width:${Math.min(100, Math.round(100 * mo.done / mo.hedef))}%"></i><span>${mo.done} / ${mo.hedef}</span></div></div>${mascot(mo.claimed ? 'happy' : '', 70)}</div>
       <h2 class="sect">Günlük Görevler <span class="muted sm">· gece yarısı yenilenir</span></h2><div class="card list" style="gap:4px">${Q.list.map(qrow).join('')}</div>
@@ -555,6 +598,14 @@
       <div class="row" style="margin-top:10px"><button class="btn small" data-act="veli-kaydet">Kaydet</button><button class="btn ghost small" data-act="veli-vazgec">Vazgeç</button></div></div>`;
   }
   // Veli raporunun görsel hali: kartlar ve çubuklar. Metin hali (paylaşılan) değişmedi, altta açılır kutuda.
+  // Veli: okul konusu, ön bilgi kontrolleri ve haftalık plan (24.10.2026)
+  function veliPlanKart(R) {
+    const ok = R.okul ? `<div class="rsat"><span class="sm"><b>🏫 Okulda ${R.okul.tatil ? 'son işlenen' : 'bu hafta'}</b> <span class="muted">(${R.okul.kaynak === 'elle' ? 'sizin seçiminiz' : 'MEB taslak yıllık planı'})</span></span> ${R.okul.sk.map(id => `<span class="tag">${esc(SKILL[id].title)} · ${E.crowns(E.eff(A.st.skills[id]))}/5 ⭐</span>`).join(' ')}</div>` : '';
+    const ger = R.geride.length ? `<div class="rsat"><span class="sm"><b>📌 Okulda geçildi, uygulamada henüz çalışılmadı</b></span> ${R.geride.map(id => `<span class="tag warm">${esc(SKILL[id].title)}</span>`).join(' ')}</div>` : '';
+    const tem = R.temelL.length ? `<div class="rsat"><span class="sm"><b>🧱 Ön bilgi kontrolleri</b> <span class="muted">(zorlandığı konunun temeli 2 soruyla yoklanır)</span></span><ul class="rmis">${R.temelL.slice(0, 3).map(t => `<li>${t.sonuc === 'eksik' ? `«${esc(SKILL[t.sk].title)}» → temeli «${esc(SKILL[t.pre].title)}» <b>eksik görünüyor</b>${t.simdi >= 0.5 ? ' (sonra toparlandı ✓)' : ''}` : `«${esc(SKILL[t.sk].title)}» → temeli «${esc(SKILL[t.pre].title)}» <b>sağlam</b>`}</li>`).join('')}</ul></div>` : '';
+    const pl = `<div class="rsat"><span class="sm"><b>📋 Bu haftanın planı</b> <span class="muted">(${R.plan.liste.filter(h => h.tamam).length}/${R.plan.liste.length} tamam)</span></span><ul class="rmis">${R.plan.liste.map(h => { const [ic, t] = PLAN_YAZI[h.tip](h); return `<li>${h.tamam ? '✅' : ic} ${esc(t)} <span class="muted">${h.v}/${h.hedef}</span></li>`; }).join('')}</ul></div>`;
+    return `<div class="card rkart"><h3>🎯 Kişisel plan</h3>${ok}${ger}${tem}${pl}</div>`;
+  }
   function veliGorsel(R) {
     const fp = R.fp, yz = x => Math.round(x * 100), GUN = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
     const enCok = Math.max(10, ...R.gunluk.map(g => g.dk));
@@ -570,6 +621,7 @@
       <div class="card rkart"><h3>📚 Konulara göre ustalık</h3>${tema}${konular}</div>
       <div class="card rkart"><h3>🧾 Cevaplar nasıl geldi?</h3>${kanit}</div>
       ${prob}
+      ${veliPlanKart(R)}
       ${mis ? `<div class="card rkart"><h3>🧠 Kavram yanılgıları</h3>${mis}</div>` : ''}
       <div class="card rkart roneri"><h3>👨‍👩‍👧 Bu hafta için öneri</h3><p style="margin:4px 0 0">${esc(R.tip)}</p>${fp.bestFormat ? `<p class="muted sm" style="margin:8px 0 0">En iyi öğrendiği anlatım: <b>${FORMATS[fp.bestFormat].name}</b> · Çalışma tarzı: <b>${fp.pace}</b></p>` : ''}</div>`;
   }
@@ -674,7 +726,7 @@
     }
     const ready = q.type === 'input' ? A.input.length > 0 : q.type === 'match' ? false : q.type === 'tablo' ? A.tb.every(Boolean) : q.type === 'kur' ? E.ATOLYE.kurGecerli(q, A.kur) : q.type === 'kes' ? (q.model === 'line' ? A.kes.konum !== null : A.kes.on.some(Boolean)) : A.sel !== null;
     const isNew = A.ses.mode === 'lesson' && A.st.skills[q.skill].lessons === 0 && A.ses.i < 3 && !q.rescue;
-    const badge = isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Bölge sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
+    const badge = q.temel ? `<div class="temel-not">🔎 <b>Kısa bir kontrol (${q.temel.sira}/${E.TEMEL_SORU})</b>: «${esc(SKILL[q.temel.pre].title)}» konusundan. «${esc(SKILL[q.temel.sk].title)}» konusunun temeline bakıyoruz.</div>` : isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Bölge sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${ampulIpucu(q)}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
       ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(104, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
@@ -842,6 +894,8 @@
       <div class="yildizlar">${[1, 2, 3].map(i => `<span class="yildiz ${i <= ys ? 'on' : ''}" style="animation-delay:${0.9 + i * 0.35}s">★</span>`).join('')}</div></div>` : mascot('happy', 130);
     return `<div class="end">${gosterge}<h1>${title}</h1>${altBaslik ? `<div class="end-alt">${altBaslik}</div>` : ''}
       <div class="tiles"><div class="tile gold"><div class="h">XP</div><div class="v">⚡ ${ses.xp}</div></div><div class="tile okt"><div class="h">Doğruluk</div><div class="v">🎯 %${acc}</div></div><div class="tile bl"><div class="h">Süre</div><div class="v">⏱ ${mins} dk</div></div></div>
+      ${r.temel ? (r.temel.sonuc === 'eksik' ? `<div class="card temel-sonuc"><div class="temel-ic">🧱</div><div><b>Pi bir şey fark etti!</b><div class="sm">«${esc(SKILL[r.temel.sk].title)}» konusundaki zorluğun sebebi «${esc(SKILL[r.temel.pre].title)}» olabilir. Onu haftalık planına ekledim. Temel sağlamlaşınca bu konu da kolaylaşacak.</div></div></div>` : `<div class="card temel-sonuc iyi"><div class="temel-ic">💪</div><div><b>Temelin sağlam!</b><div class="sm">«${esc(SKILL[r.temel.pre].title)}» sorularını doğru yaptın. «${esc(SKILL[r.temel.sk].title)}» biraz daha pratikle oturacak.</div></div></div>`) : ''}
+      ${r.planOdul ? `<div class="roket-not">📋 Haftalık planın tamam! +${r.planOdul} 💎</div>` : ''}
       ${r.roket ? `<div class="roket-not">🚀 Roket Gücü: ${r.roket} → <b>${ses.xp} XP</b>${(A.st.roket || {}).kalan ? ` · ${A.st.roket.kalan} ders daha` : ''}</div>` : ''}${resc}${r.newBadges.map(b => `<div class="card row" style="width:100%"><div style="font-size:40px">${b.icon}</div><div style="text-align:left"><b>Yeni rozet: ${b.name}</b><div class="muted sm">${b.desc}</div></div></div>`).join('')}
       ${ses.mode === 'speed' && ses.correct >= A.st.speedBest ? '<div class="tag warm">🏅 Yeni rekor!</div>' : ''}
       ${r.trophy ? (r.trophy.pass ? `<div class="card row" style="width:100%;border-color:var(--gold)"><div style="font-size:44px">🏆</div><div style="text-align:left"><b>Bölge sınavını geçtin! (%${acc})</b><div class="muted sm">Kupa senin. +50 💎</div></div></div>` : `<div class="speech">Sınav için %70 gerekiyor. Zorlandığın becerileri çalışıp tekrar dene, kupa seni bekliyor! 💪</div>`) : ''}
@@ -967,8 +1021,9 @@
     }, ms);
   }
   function nextQuestion() {
-    if (A.ses.mode !== 'speed' && A.ses.i >= A.ses.len && !A.ses.lastWrong) return finishSession();
-    if (!A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
+    const temelBekliyor = A.ses.temelKontrol && A.ses.temelKontrol.n < E.TEMEL_SORU;
+    if (A.ses.mode !== 'speed' && A.ses.i >= A.ses.len && !A.ses.lastWrong && !temelBekliyor) return finishSession();
+    if (!temelBekliyor && !A.ses.halfShown && ['lesson', 'review', 'mix', 'learn'].includes(A.ses.mode) && A.ses.i >= Math.ceil(A.ses.len / 2) && A.ses.i < A.ses.len && !A.ses.lastWrong) { A.ses.halfShown = true; return interstitial(); }
     A.q = E.nextQ(A.st, A.ses); A.sel = null; A.input = '';
     A.tb = A.q.type === 'tablo' ? A.q.satirlar.map(() => null) : null; A.kur = A.q.type === 'kur' ? [] : null;
     A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
@@ -1081,6 +1136,10 @@
       case 'book': A.book = +v; render(); break;
       case 'mt': if (!A.fb) matchTap(v); break;
       case 'close-modal': A.modal = null; render(); break;
+      case 'okul': A.modal = okulModal(); render(); break;
+      case 'okul-git': { const n = document.querySelector(`.path.harita [data-act=node][data-v="${v}"]`); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => { A.modal = skillModal(v); render(); }, n ? 350 : 0); break; }
+      case 'okul-mod': A.st.okul = { mod: v, at: Date.now() }; save(); A.modal = v === 'kapali' ? null : okulModal(); render(); toast(v === 'kapali' ? 'Okul eşleştirmesi kapandı. İstediğin zaman haritadan açabilirsin.' : '📅 Haritan MEB yıllık planına göre ilerleyecek.'); break;
+      case 'okul-sec': A.st.okul = { mod: 'elle', sk: v, at: Date.now() }; save(); A.modal = null; render(); toast(`🏫 Okulda «${SKILL[v].title}» konusundasınız. Haritada işaretledim.`); break;
       case 'start': startSession('lesson', v); break;
       case 'learn': startSession('learn', v); break;
       case 'fmt': A.ses.formatTried.push(A.ses.format); A.ses.format = v; render(); sayCard(A.ses.skill, v); break;
