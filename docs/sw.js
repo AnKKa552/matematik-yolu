@@ -1,7 +1,7 @@
 // Çevrimdışı çalışma. Sayfanın kendisi, config.js ve ses listesi ÖNCE AĞDAN gelir (güncellemeler hemen ulaşır),
 // ağ yoksa önbellekten açılır. Sayfa tarayıcının HTTP önbelleğini atlar (no-cache): GitHub Pages 10 dk önbelleğe aldığı için
 // yayından hemen sonra ilk açılışta eski sürüm gelebiliyordu. Sesler ve diğer dosyalar önbellekten hızlı gelir.
-const C = 'matematik-yolu-v42';
+const C = 'matematik-yolu-v43';
 self.addEventListener('install', e => e.waitUntil(caches.open(C).then(c => c.addAll(['./', './index.html', './manifest.webmanifest', './img/simge2_192.png'])).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {

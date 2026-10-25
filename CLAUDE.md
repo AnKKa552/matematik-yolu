@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 105 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 107 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -235,6 +235,15 @@ Sayma ya da şekil gerektiren sorularda, yanlış cevaptan sonra "🪜 Nasıl ç
 - Nerede: `f_tur` (boya; sayı doğrusu 0–1; bileşik kesir 0–2), `f_denk` (12 parçalık şeritte 3/4 boya; kendin böl ve boya), `f_ondalik` (10 parçalık şeritte 0,7 boya). Bu becerilerde soruların %25'i. Hız yarışında gelmez (dokunmak zaman alır). BKT tahmin olasılığı 0,1.
 - Test: `test_generators.js` her `kes` sorusunda doğru cevabın kabulünü ve olası **bütün** yanlış durumların bilinen bir yanılgıya düştüğünü dener.
 
+### 5.1.1b Parmakla açıölçer ve sütun grafiği (`type: 'olc'`, `type: 'graf'`, 25.10.2026)
+Kitabın uygulamalı kazanımları (açıölçerle açı çizme, sıklık tablosundan sütun grafiği çizme) için. Çocuk şıktan seçmez, kendi eliyle kurar; cevap **kodla** değerlendirilir, her yanlış durum bir yanılgıya bağlıdır.
+- **Açıölçer** (`g_aci`, seviye 2–3'te soruların %30'u): çizimi `V.olcer` (core.js): yarım daire, 5°'lik çizgiler, iki sıra sayı (dış sıra 0'ı solda, iç sıra 0'ı sağda), merkez açının köşesinde. Sabit kol rastgele **sağa ya da sola** bakar; asıl öğretilen, hangi sıranın okunacağıdır.
+  - *Çiz* (`type: 'olc'`, `hedef`, `taban: 'sag'|'sol'`): çocuk turuncu noktayı parmağıyla sürükler (pointer olayları, `olcKonum` in app.js; kol 5°'ye oturur) ya da ◀ ▶ ile 5° çevirir. Ekranda derece **yazmaz** (yazsa okumayı öğretmez). Seviye 2: 10'un katları, seviye 3: 5'in katları. `OLC_CHECK`: öbür sıradaki sayı (180 − hedef) → `iletki_ters`; dar/geniş türü yanlış → `aci_tur`; aynı türde yanlış çizgi → `aci_olcme` (yeni). Geri bildirimde doğru kol yeşil kesik çizgiyle gösterilir.
+  - *Oku* (`type: 'input'`, seviye 2): açıölçer açının üstüne yerleştirilmiş gelir, çocuk ölçüyü yazar; 180 − d → `iletki_ters`.
+- **Sütun grafiği çiz** (`type: 'graf'`, `s_tablo_sutun`, soruların %25'i): sıklık tablosu üstte, boş grafik altta. Çocuk her sütunda tepenin çıkacağı çizgiye dokunur (aynı çizgiye yeniden dokunursa sütun silinir). Eksen seviye 1'de 1'er, 2'de 2'şer, 3'te 5'er ya da 10'ar artar (ölçeği okumak öğretilir). `GRAF_CHECK`: boylar doğru ama yerleri karışık → `grafik_okuma`; başka her yanlış → `grafik_cizim` (yeni). Geri bildirimde doğru boylar yeşil kesik çerçeveyle görünür.
+- İkisi de hız yarışında ve telafi sorusunda gelmez; BKT tahmin olasılığı 0,1; ikinci şans vardır (çizim yerinde kalır, çocuk düzeltir).
+- Test: `test_generators.js` her açıölçer sorusunda 0–180 arası bütün açıları, her grafik sorusunda her sütunun her yanlış boyunu ve yer değiştirmeyi dener. `e2e.py` bu soruları da çözer. Yeni kelimeler için soru sesi sözlüğü güncellendi ve `soru-sesi` yeniden yüklendi.
+
 ### 5.1.2 Hata Avcısı — muhakeme soruları (17.10.2026)
 Maarif programının alan becerilerinden **matematiksel muhakeme** için: çocuk cevabı bulmakla kalmaz, başkasının çözümünü değerlendirir. Kaynak `generators.js → SEN` (21 beceri, 7 temanın hepsi).
 - **Senaryo** = problem + kodla kurulmuş doğru çözüm adımları (en fazla 3) + belgelenmiş bir yanılgıdan türetilmiş hatalı çözüm(ler) (`H(mis, at, satirlar, sonuc)`). Hatalı adım = sonucun bozulmaya başladığı **ilk** adım; ondan önceki satırlar doğru çözümle birebir aynıdır. Hatalı çözümün aritmetiği de doğrudur: yanılgı **kavramsaldır** (ör. "Tümler açıların toplamı 180°", ardından 180 − 35 = 145 doğru hesaplanır).
@@ -396,7 +405,7 @@ CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
 data/mufredat.json        ← 7 tema, 35 beceri, 105 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (105) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (107) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar
@@ -460,7 +469,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 - Lig rakipleri demo (ekranda "(demo)" yazar).
 - Veli raporu tek dokunuşla WhatsApp/Telegram/e-posta açar; **otomatik** haftalık gönderim sunucu ister.
 - BKT parametreleri literatürdeki tipik değerlerle elle ayarlandı; gerçek öğrenci verisiyle (pyBKT) yeniden kalibre edilecek.
-- Performans görevleri, anket yapma, iletki/pergel ile çizim gibi **uygulamalı** kazanımlar ekranda tam karşılanamaz; uygulama bunlar için kitaptaki sayfaya ve sınıf etkinliğine yönlendirir. Kesirde parmakla bölme/boyama ve sayı doğrusu eklendi (§5.1.1); sürükle-bırak açı ölçer ve grafik çizme etkileşimleri A2'de eklenecek.
+- Performans görevleri, anket yapma, iletki/pergel ile çizim gibi **uygulamalı** kazanımlar ekranda tam karşılanamaz; uygulama bunlar için kitaptaki sayfaya ve sınıf etkinliğine yönlendirir. Kesirde parmakla bölme/boyama ve sayı doğrusu (§5.1.1), parmakla açıölçer ve sütun grafiği çizme (§5.1.1b) eklendi; pergelle çizim ve nokta/daire grafiği çizme henüz yok.
 
 ---
 

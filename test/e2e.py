@@ -29,7 +29,7 @@ async def main():
                 k = 0
                 while await pg.query_selector('[data-act=sandik-dokun]:not([disabled])') and k < 5:
                     if k == 0 and not os.path.exists(OUT+'10b_sandik.png'): await pg.screenshot(path=OUT+'10b_sandik.png')
-                    await pg.click('[data-act=sandik-dokun]', force=True); await pg.wait_for_timeout(300); k += 1
+                    await pg.evaluate("(()=>{const b=document.querySelector('[data-act=sandik-dokun]'); if(b) b.click();})()"); await pg.wait_for_timeout(300); k += 1  # sallanan sandık bazen ekran dışına taşar; doğrudan tıklanır
                 if k:
                     await pg.wait_for_timeout(1600)
                     if not os.path.exists(OUT+'10c_sandik_acik.png'): await pg.screenshot(path=OUT+'10c_sandik_acik.png')
@@ -56,6 +56,8 @@ async def main():
                     b = n*P//d if good else P - n*P//d
                     if b == n*P//d: b = max(1, b-1) if b > 1 else b+1
                     for i in range(b): await pg.click(f'[data-act=kes-dilim][data-v="{i}"]')
+            elif q['type'] in ('olc','graf'):
+                await pg.evaluate("(g)=>{const A=window.MY_APP,q=A.q; if(q.type==='olc') A.olc.aci=g?q.hedef:180-q.hedef; else A.graf=q.degerler.map((v,i)=>g?v/q.adim:(i?v/q.adim:(v/q.adim%q.ust)+1)); window.MY_APP_RENDER();}", good)
             elif q['type']=='input':
                 val = q['answer'].replace('.',',') if good else '9'
                 if val==q['answer']: val='8'
@@ -73,7 +75,7 @@ async def main():
                     v2 = q2['answer'].replace('.',',') if good2 else '7'
                     if v2 == q2['answer']: v2 = '6'
                     for ch in v2: await pg.click(f'[data-act=key][data-v="{ch}"]')
-                elif q2['type']=='kes':
+                elif q2['type'] in ('kes','olc','graf'):
                     pass
                 else:
                     cand = [i for i in range(q2['n']) if i not in q2['el'] and (i == q2['ok'] if good2 else i != q2['ok'])] or [q2['ok']]

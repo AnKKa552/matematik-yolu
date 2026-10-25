@@ -19,6 +19,7 @@
     paralel_kesisen: { t: 'Paralel ile kesişeni karıştırma', fix: 'Paralel doğrular ne kadar uzatılırsa uzatılsın hiç kesişmez, aralarındaki uzaklık hep aynıdır.' },
     aci_tur: { t: 'Açı türlerini karıştırma', fix: '90°\'den küçükse dar, tam 90° ise dik, 90° ile 180° arasındaysa geniş açıdır. 180° doğru açı, 360° tam açıdır.' },
     iletki_ters: { t: 'Açıölçerde yanlış ölçeği okuma', fix: 'Açıölçerde iki sıra sayı vardır. Açının kolu hangi taraftaki 0\'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90\'dan küçük olmalı.' },
+    aci_olcme: { t: 'Açıölçerle ölçerken yanlış çizgiyi okuma', fix: 'Açıölçerin merkezini açının köşesine, 0 çizgisini sabit kola koy. Diğer kolun geçtiği çizgiye kadar, sabit koldaki 0\'dan başlayarak 10\'ar 10\'ar say, sonra 5\'leri ekle.' },
     aci_kol: { t: 'Açıyı kol uzunluğuna göre karşılaştırma', fix: 'Açının büyüklüğü kolların ne kadar uzun olduğuna değil, kolların ne kadar açıldığına bağlıdır.' },
     tumler_butunler: { t: 'Tümler ile bütünleri karıştırma', fix: 'Tümler açıların toplamı 90°, bütünler açıların toplamı 180°\'dir. Akılda kalsın: "Tümler: Tek dik açı".' },
     ters_aci: { t: 'Ters açıları eşit görmeme', fix: 'Kesişen iki doğrunun karşı karşıya duran açılarına ters açı denir ve ölçüleri her zaman eşittir.' },
@@ -73,6 +74,7 @@
     adim_sira: { t: 'Araştırma adımlarının sırasını karıştırma', fix: 'Sıra: 1) Araştırma sorusunu belirleme 2) Verileri toplama ve analize hazırlama 3) Veri görselleştirme ve özetleme 4) Sonuçları yorumlama.' },
     daire_toplam: { t: 'Daire grafiğinde dilimlerin toplamını kontrol etmeme', fix: 'Daire grafiğinin tamamı bütündür. Bütün dilimlerin yüzdeleri toplanınca tam %100 etmelidir; etmiyorsa grafik hatalıdır.' },
     grafik_secim: { t: 'Veriye uygun grafiği seçememe', fix: 'Nokta grafiğinde her veri bir noktadır; veri çok olunca çizmek ve okumak zorlaşır, sütun grafiği daha kullanışlıdır. Parça-bütün ilişkisi için daire grafiği uygundur.' },
+    grafik_cizim: { t: 'Sütun grafiğinde sütun boyunu yanlış çizme', fix: 'Her sütunun tepesi, tablodaki sayının eksende yazdığı çizgiye kadar çıkmalı. Eksendeki sayılar 1\'er değil 2\'şer ya da 5\'er artabilir; çizgileri değil, yazan sayıları oku.' },
     grafik_okuma: { t: 'Grafikten yanlış değer okuma', fix: 'Sütunun tepesinden sola doğru düz bir çizgi çekip eksendeki değeri oku. Hangi kategoriye baktığını kontrol et.' },
     fark_toplam: { t: '"Fark" sorulduğunda toplama yapma', fix: '"Kaç fazla / fark" soruları çıkarma ister; "toplam / hepsi" soruları toplama ister.' },
     dilim_oran: { t: 'Daire grafiğinde dilim oranını yanlış belirleme', fix: 'Bütün daire = tüm veri. Yarım daire 1/2, çeyrek daire 1/4\'tür. Kişi sayısı = toplam × dilimin oranı.' },
@@ -234,7 +236,7 @@
     }
     if (lv === 2) {
       const d = pick([20, 35, 40, 50, 55, 65, 70, 80, 100, 110, 125, 140, 150, 160]);
-      return Q({ prompt: 'Şekildeki açının ölçüsü aşağıdakilerden hangisi olabilir? (Gözünle tahmin et: dar mı, geniş mi?)', visual: V.angle(d), options: mc(d + '°', [[(180 - d) + '°', 'iletki_ters'], [(d < 90 ? 90 + d : d - 60) + '°', 'aci_tur']], [[(d + 180) + '°', 'aci_tur']]), steps: [d < 90 ? 'Açı dik açıdan (köşe gibi) daha kapalı → dar açı, ölçüsü 90°\'den küçük.' : 'Açı dik açıdan daha açık → geniş açı, ölçüsü 90°\'den büyük.', `İletkinin doğru ölçeği ${d}° gösterir; ${180 - d}° diğer ölçektir.`] });
+      return Q({ prompt: 'Şekildeki açının ölçüsü aşağıdakilerden hangisi olabilir? (Gözünle tahmin et: dar mı, geniş mi?)', visual: V.angle(d), options: mc(d + '°', [[(180 - d) + '°', 'iletki_ters'], [(d < 90 ? 90 + d : d - 60) + '°', 'aci_tur']], [[(d + 180) + '°', 'aci_tur']]), steps: [d < 90 ? 'Açı dik açıdan (köşe gibi) daha kapalı → dar açı, ölçüsü 90°\'den küçük.' : 'Açı dik açıdan daha açık → geniş açı, ölçüsü 90°\'den büyük.', `Açıölçerin doğru sırası ${d}° gösterir; ${180 - d}° öbür sıradaki sayıdır.`] });
     }
     const it = pick([
       () => { const k = ri(2, 4); return Q({ type: 'input', prompt: `${k} tane dik açının ölçüleri toplamı kaç derecedir?`, answer: String(90 * k), unit: '°', inputMis: [{ v: 180 * k, mis: 'aci_tur' }], steps: ['Bir dik açı 90°', `${k} × 90 = ${90 * k}°`] }); },
@@ -880,6 +882,37 @@
     if (b * n === d * p || (p === n && b > 0)) return { ok: false, mis: 'pay_payda_ters' };
     return { ok: false, mis: 'kesir_model' };
   };
+  /* ---------- Açıölçerle açı çiz (type 'olc') ve sütun grafiği çiz (type 'graf'), 25.10.2026 ----------
+     Çocuk şıktan seçmez, parmağıyla kurar; cevap kodla değerlendirilir, her yanlış durum bir yanılgıya bağlıdır. */
+  const OLC_CHECK = (q, a) => { const x = a.aci, d = q.hedef; if (x === d) return { ok: true, mis: null };
+    if (x === 180 - d) return { ok: false, mis: 'iletki_ters' }; if (ACI_TUR(x) !== ACI_TUR(d)) return { ok: false, mis: 'aci_tur' }; return { ok: false, mis: 'aci_olcme' }; };
+  const OLC = {};
+  OLC.g_aci = [(lv) => {
+    const taban = pick(['sag', 'sol']), sira = taban === 'sag' ? 'sağdaki 0\'dan başlayan (iç) sıra' : 'soldaki 0\'dan başlayan (dış) sıra';
+    if (lv === 2 && Math.random() < 0.5) { let d; do { d = ri(2, 16) * 10; } while (d === 90);
+      return Q({ type: 'input', prompt: 'Açıölçer açının üzerine yerleştirildi. Açının ölçüsü kaç derecedir?', visual: V.olcer({ taban, aci: d, aria: 'açıölçerin üzerinde bir açı' }), answer: String(d), unit: '°', inputMis: [{ v: 180 - d, mis: 'iletki_ters' }],
+        hint: 'Sabit kol hangi taraftaki 0\'ın üstünde? O 0\'dan başlayan sayıları oku.', steps: [`Sabit kol ${taban === 'sag' ? 'sağa' : 'sola'} bakıyor: ${sira} okunur.`, `Diğer kol ${d} çizgisinden geçiyor: ${d}°.`, d < 90 ? 'Kontrol: açı dar görünüyor, ölçüsü 90°\'den küçük olmalı ✓' : 'Kontrol: açı geniş görünüyor, ölçüsü 90°\'den büyük olmalı ✓'] }); }
+    let d; do { d = ri(lv === 3 ? 3 : 2, lv === 3 ? 33 : 16) * (lv === 3 ? 5 : 10); } while (d === 90 || d === 180);
+    return Q({ type: 'olc', prompt: `Açıölçeri kullanarak ölçüsü ${d}° olan bir açı çiz. Turuncu noktayı sürükle!`, hedef: d, taban, cevap: `${d}°`,
+      hint: 'Sabit kol hangi taraftaki 0\'ın üstünde? O 0\'dan başlayan sayıları say.', steps: [`Sabit kol ${taban === 'sag' ? 'sağa' : 'sola'} bakıyor: ${sira} kullanılır.`, `0'dan başlayıp ${d} çizgisine kadar say ve kolu oraya çevir.`, d < 90 ? 'Kontrol: dar bir açı çıkmalı.' : 'Kontrol: geniş bir açı çıkmalı.'] });
+  }];
+  const GRAF_CHECK = (q, a) => { const h = a.h || [], w = q.degerler.map(v => v / q.adim);
+    if (h.length === w.length && h.every((x, i) => x === w[i])) return { ok: true, mis: null };
+    const yanlis = h.map((x, i) => x !== w[i] ? i : -1).filter(i => i >= 0);
+    if ([...h].sort((x, y) => x - y).join() === [...w].sort((x, y) => x - y).join()) return { ok: false, mis: 'grafik_okuma', yanlis };
+    return { ok: false, mis: 'grafik_cizim', yanlis }; };
+  const GRAF = {};
+  GRAF.s_tablo_sutun = [(lv) => {
+    const adim = lv === 1 ? 1 : lv === 2 ? 2 : pick([5, 10]), ust = lv === 1 ? 7 : 6, ci = ri(0, CATS.length - 1), kat = shuffle(CATS[ci]).slice(0, 4);
+    let k; do { k = kat.map(() => ri(1, ust)); } while (new Set(k).size < 3);
+    const degerler = k.map(x => x * adim), konu = ['En sevilen meyve', 'En sevilen spor', 'En sevilen hayvan', 'En sevilen kitap türü'][ci];
+    return Q({ type: 'graf', prompt: `Sıklık tablosundaki verilere göre sütun grafiğini çiz. Her sütunun tepesine dokun!`, kategoriler: kat, degerler, adim, ust, baslik: konu,
+      grid: kat.map((c, i) => [c, String(degerler[i])]), cevap: kat.map((c, i) => `${c}: ${degerler[i]}`).join(' · '),
+      hint: adim > 1 ? `Eksendeki sayılar ${adim}'${adim === 10 ? 'ar' : adim === 5 ? 'er' : 'şer'} artıyor. Çizgileri değil, yazan sayıyı oku.` : 'Her sütun, tablodaki sayının yazdığı çizgiye kadar çıkmalı.',
+      steps: [`Dikey eksen 0'dan başlıyor, ${adim}'${adim === 10 ? 'ar' : adim === 5 ? 'er' : adim === 2 ? 'şer' : 'er'} artıyor.`, ...kat.map((c, i) => `${c}: ${degerler[i]} → ${degerler[i]} yazan çizgiye kadar.`).slice(0, 2), 'Diğer sütunları da aynı yolla çiz.'] });
+  }];
+  for (const [id, list] of Object.entries(OLC)) { const base = GEN[id]; GEN[id] = (lv) => (lv >= 2 && Math.random() < 0.3 ? pick(list)(lv) : base(lv)); }
+  for (const [id, list] of Object.entries(GRAF)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.25 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(KES)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.25 ? pick(list)(lv) : base(lv)); }
   for (const [id, list] of Object.entries(MATCH)) { const base = GEN[id]; GEN[id] = (lv) => (Math.random() < 0.22 ? pick(list)(lv) : base(lv)); }
   /* =========================================================
@@ -1557,7 +1590,7 @@
   };
   const ATOLYE = { tabloKontrol: TABLO_CHECK, kurKontrol: KUR_CHECK, kurGecerli, kurIfade, ifadeHesapla, ifadeParcala, sayiYaz, TABLO_AD, ids: Object.keys(PROB), skillOf: (id) => ({ market: 'n_problem', bahce: 'a_cevre', parke: 'a_alan', okuma: 's_tablo_sutun', terazi: 'e_esitlik', kumbara: 'e_oruntu', gezi: 'n_carpbol', torba: 'p_spektrum', ucgen: 'g_ucgen', pizza: 'f_karsilastir' })[id], sorular: atolyeSorulari, ASAMA, PROB };
 
-  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK; G.MY_HATA = HATA; G.MY_ATOLYE = ATOLYE;
+  G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK; G.MY_OLC = OLC_CHECK; G.MY_GRAF = GRAF_CHECK; G.MY_HATA = HATA; G.MY_ATOLYE = ATOLYE;
   for (const [id, e] of Object.entries(EK)) { const base = GEN[id]; GEN[id] = (lv) => { const L = e.L[lv]; return L && Math.random() < e.p ? pick(L)(lv) : base(lv); }; }
-  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK, HATA, ATOLYE };
+  if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK, OLC_CHECK, GRAF_CHECK, HATA, ATOLYE };
 })(typeof window !== 'undefined' ? window : globalThis);

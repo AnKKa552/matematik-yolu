@@ -408,6 +408,37 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @keyframes kUc{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
 @media (prefers-reduced-motion: reduce){.komsu img,.komsu:after{animation:none!important}}
 
+/* Açıölçer (type 'olc') ve sütun grafiği çizme (type 'graf'), 25.10.2026 */
+.olc-svg{width:100%;max-width:360px;height:auto;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer;user-select:none}
+.olc-govde{fill:color-mix(in srgb,var(--brand) 9%,var(--surface));stroke:var(--brand);stroke-width:2}
+.olc-ic{fill:none;stroke:var(--brand);stroke-width:1.2;opacity:.5}
+.olc-cizgi{stroke:var(--brand);stroke-width:1.3}
+.olc-dis{font:800 9px Nunito,sans-serif;fill:var(--ink);text-anchor:middle}
+.olc-isayi{font:700 8px Nunito,sans-serif;fill:var(--muted);text-anchor:middle}
+.olc-merkez{fill:var(--ink)}
+.olc-kol{stroke:var(--ink);stroke-width:3.5;stroke-linecap:round}
+.olc-kol.cocuk{stroke:var(--accent,#FF8A00)}
+.olc-kol.dogru{stroke:var(--ok);stroke-dasharray:7 5}
+.olc-kol.yanlis{stroke:var(--bad)}
+.olc-yay{fill:none;stroke:var(--accent,#FF8A00);stroke-width:2.5}
+.olc-yay.dogru{stroke:var(--ok)}.olc-yay.yanlis{stroke:var(--bad)}
+.olc-tut{fill:var(--accent,#FF8A00);opacity:.35}
+.olc-tut-ic{fill:var(--accent,#FF8A00)}
+.gr-svg{width:100%;max-width:360px;height:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.gr-baslik{font:900 12px Nunito,sans-serif;fill:var(--ink);text-anchor:middle}
+.gr-izgara{stroke:var(--line,#ddd);stroke-width:1}
+.gr-eksen{font:800 11px Nunito,sans-serif;fill:var(--muted);text-anchor:end}
+.gr-kat{font:800 11px Nunito,sans-serif;fill:var(--ink);text-anchor:middle}
+.gr-ana{stroke:var(--ink);stroke-width:2.2}
+.gr-svg .c0{fill:var(--c0)}.gr-svg .c1{fill:var(--c1)}.gr-svg .c2{fill:var(--c2)}.gr-svg .c3{fill:var(--c3)}
+.gr-sutun.yanlis{stroke:var(--bad);stroke-width:3}
+.gr-hedef{fill:none;stroke:var(--ok);stroke-width:2.5;stroke-dasharray:6 4}
+.gr-hedef-alan{fill:transparent;cursor:pointer}
+.gr-hedef-alan:active{fill:color-mix(in srgb,var(--brand) 14%,transparent)}
+.gr-tablo{border-collapse:collapse;font-weight:800;font-size:14px;max-width:360px;width:100%}
+.gr-tablo th,.gr-tablo td{border:1.5px solid var(--line,#ddd);padding:6px 4px;text-align:center}
+.gr-tablo th{background:color-mix(in srgb,var(--brand) 10%,var(--surface));font-size:12px}
+
 /* Parmakla kesir (type 'kes') */
 .kes{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0 4px}
 .kes-svg{width:100%;max-width:340px;height:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}

@@ -9,7 +9,7 @@
 (function (G) {
   'use strict';
   const isNode = typeof module !== 'undefined';
-  const { GEN, MIS, KES_CHECK, HATA, ATOLYE } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, HATA: G.MY_HATA, ATOLYE: G.MY_ATOLYE };
+  const { GEN, MIS, KES_CHECK, OLC_CHECK, GRAF_CHECK, HATA, ATOLYE } = isNode ? require('./generators.js') : { GEN: G.MY_GEN, MIS: G.MY_MIS, KES_CHECK: G.MY_KES, OLC_CHECK: G.MY_OLC, GRAF_CHECK: G.MY_GRAF, HATA: G.MY_HATA, ATOLYE: G.MY_ATOLYE };
   const { SKILLS, SKILL, THEMES, FORMATS, OKUL_TAKVIM, OKUL_YIL } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
@@ -36,7 +36,7 @@
 
   /* ---------------- 1) BKT ---------------- */
   const P = { T: 0.07, S: 0.10 };
-  const guessOf = (q) => ['match', 'kes', 'tablo', 'kur'].includes(q.type) ? 0.1 : q.type === 'input' ? 0.15 : q.type === 'tf' ? 0.5 : (1 / Math.max(2, (q.options || []).length));
+  const guessOf = (q) => ['match', 'kes', 'tablo', 'kur', 'olc', 'graf'].includes(q.type) ? 0.1 : q.type === 'input' ? 0.15 : q.type === 'tf' ? 0.5 : (1 / Math.max(2, (q.options || []).length));
   E.bkt = (pL, correct, guess, hinted) => {
     const S = P.S, Gs = guess;
     let post = correct ? pL * (1 - S) / (pL * (1 - S) + (1 - pL) * Gs) : pL * S / (pL * S + (1 - pL) * (1 - Gs));
@@ -75,7 +75,7 @@
     return lv;
   };
   // sade: true → hız yarışı (parmakla kesir ve Hata Avcısı gelmez); 'telafi' → Hata Avcısı gelmez (telafi sorusu sade olmalı)
-  E.makeQ = (id, lv, sade) => { const uygun = (q) => !(sade && q.hata) && !(sade === true && q.type === 'kes'); let q = GEN[id](lv); for (let t = 0; !uygun(q) && t < 30; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
+  E.makeQ = (id, lv, sade) => { const uygun = (q) => !(sade && q.hata) && !(sade === true && ['kes', 'olc', 'graf'].includes(q.type)); let q = GEN[id](lv); for (let t = 0; !uygun(q) && t < 30; t++) q = GEN[id](lv); q.skill = id; q.level = lv; q.uid = Math.random().toString(36).slice(2); return q; };
 
   // Hata Avcısı modu: çalıştığı becerilerden (yoksa ilk temalardan) muhakeme soruları; biçimler sırayla döner
   E.hataBecerileri = (st) => { const cal = HATA.ids.filter(id => st.skills[id] && st.skills[id].n > 0); return cal.length >= 2 ? cal : HATA.ids.filter(id => ['a_cevre', 'g_ucgen', 'n_toplacikar', 'e_oncelik', 'f_karsilastir', 'g_cember'].includes(id)); };
@@ -154,6 +154,8 @@
   /* ---------------- Cevap değerlendirme ---------------- */
   E.check = (q, ans) => {
     if (q.type === 'kes') return KES_CHECK(q, ans);
+    if (q.type === 'olc') return OLC_CHECK(q, ans);
+    if (q.type === 'graf') return GRAF_CHECK(q, ans);
     if (q.type === 'tablo') return ATOLYE.tabloKontrol(q, ans);
     if (q.type === 'kur') return ATOLYE.kurKontrol(q, ans);
     if (q.type === 'input') {
@@ -165,7 +167,7 @@
   };
   /* İkinci şans: yanlıştan sonra cevabı vermeyen ipucu + bir yeniden deneme.
      Yok: hız yarışı, seviye belirleme, sınav, hazır mıyız (ölçme anları); eşleştirme; iki şıklı sorular (ikinci denemede cevap belli olur). */
-  E.ikinciSansUygun = (ses, q) => !['speed', 'placement', 'exam', 'hazir'].includes(ses.mode) && q.type !== 'match' && q.type !== 'tf' && !(q.options && q.type !== 'input' && q.type !== 'kes' && q.options.length < 3);
+  E.ikinciSansUygun = (ses, q) => !['speed', 'placement', 'exam', 'hazir'].includes(ses.mode) && q.type !== 'match' && q.type !== 'tf' && !(q.options && q.type !== 'input' && !['kes', 'olc', 'graf'].includes(q.type) && q.options.length < 3);
   // İlk denemedeki yanılgı da veridir: deftere yazılır (ustalık hesabı son denemede yapılır)
   E.yanilgiNotu = (st, q, mis) => {
     if (!mis) return; const now = Date.now();

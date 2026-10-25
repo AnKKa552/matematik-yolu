@@ -209,6 +209,24 @@
     s += `<line x1="${x0}" y1="${y0}" x2="${W - 6}" y2="${y0}" class="ln"/><line x1="${x0}" y1="${top - 6}" x2="${x0}" y2="${y0}" class="ln"/>`;
     return svg(W, H, s, opts.aria || 'sütun grafiği');
   };
+  // Açıölçer (25.10.2026): yarım daire, iki sıra sayı. Dış sıra 0'ı solda, iç sıra 0'ı sağda.
+  // o.taban: sabit kolun yönü 'sag' | 'sol'. o.aci: çocuğun kolu (sabit koldan ölçülen derece, null = yok).
+  // o.dogru: geri bildirimde doğru kol (derece). o.icerik: true ise yalnız iç kısım döner (etkileşimli tahtada svg'nin içi yenilenir).
+  V.olcer = (o = {}) => {
+    const cx = 150, cy = 158, R = 128, taban = o.taban === 'sol' ? 'sol' : 'sag';
+    const ekran = (m) => taban === 'sag' ? m : 180 - m; // sabit koldan ölçülen → ekran açısı (sağ = 0, saat yönünün tersi)
+    const P = (t, r) => [(cx + r * Math.cos(rad(t))).toFixed(1), (cy - r * Math.sin(rad(t))).toFixed(1)];
+    let s = `<path d="M${cx - R},${cy} A${R},${R} 0 0 1 ${cx + R},${cy} Z" class="olc-govde"/><path d="M${cx - 30},${cy} A30,30 0 0 1 ${cx + 30},${cy}" class="olc-ic"/>`;
+    for (let t = 0; t <= 180; t += 5) { const uz = t % 10 === 0 ? 11 : 6, [x1, y1] = P(t, R), [x2, y2] = P(t, R - uz); s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="olc-cizgi"/>`; }
+    for (let t = 0; t <= 180; t += 10) { const uc = t === 0 || t === 180 ? -9 : 3, [xd, yd] = P(t, R - 20), [xi, yi] = P(t, R - 37); s += `<text x="${xd}" y="${(+yd + uc).toFixed(1)}" class="olc-dis">${180 - t}</text><text x="${xi}" y="${(+yi + uc).toFixed(1)}" class="olc-isayi">${t}</text>`; }
+    s += `<circle cx="${cx}" cy="${cy}" r="3.5" class="olc-merkez"/>`;
+    const kol = (m, cls) => { const [x, y] = P(ekran(m), 146); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" class="olc-kol ${cls}"/>`; };
+    const [bx] = P(ekran(0), 146); s += `<line x1="${cx}" y1="${cy}" x2="${bx}" y2="${cy}" class="olc-kol taban"/>`;
+    const yay = (m, cls) => { if (!m) return ''; const a0 = ekran(0), a1 = ekran(m), [x0, y0] = P(a0, 24), [x1, y1] = P(a1, 24); return `<path d="M${x0},${y0} A24,24 0 0 ${taban === 'sag' ? 0 : 1} ${x1},${y1}" class="olc-yay ${cls}"/>`; };
+    if (o.dogru != null) s += yay(o.dogru, 'dogru') + kol(o.dogru, 'dogru');
+    if (o.aci != null) { s += yay(o.aci, o.yanlis ? 'yanlis' : '') + kol(o.aci, o.yanlis ? 'yanlis' : 'cocuk'); if (o.tutamak) { const [hx, hy] = P(ekran(o.aci), 146); s += `<circle cx="${hx}" cy="${hy}" r="13" class="olc-tut"/><circle cx="${hx}" cy="${hy}" r="5" class="olc-tut-ic"/>`; } }
+    return o.icerik ? s : svg(300, 172, s, o.aria || 'açıölçer');
+  };
   // Daire grafiği (oranlar toplamı 1)
   V.pieChart = (cats, parts) => {
     const cx = 80, cy = 80, R = 70; let s = '', a = -90;

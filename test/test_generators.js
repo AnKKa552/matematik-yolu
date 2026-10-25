@@ -1,6 +1,6 @@
 const { U } = require('../src/core.js');
-const { GEN, MIS, KES_CHECK } = require('../src/generators.js');
-let kesN = 0;
+const { GEN, MIS, KES_CHECK, OLC_CHECK, GRAF_CHECK } = require('../src/generators.js');
+let kesN = 0, olcN = 0, grafN = 0;
 let errors = 0, total = 0; const samples = {};
 const strip = (s) => String(s).replace(/<[^>]+>/g, ' ');
 // bağımsız sözcük→sayı çözücü (U.words doğrulaması)
@@ -18,6 +18,26 @@ for (const [name, g] of Object.entries(GEN)) {
     if (q.type === 'match') {
       const A = q.pairs.map(p => p.a), B = q.pairs.map(p => p.b);
       if (q.pairs.length < 3 || new Set(A).size !== A.length || new Set(B).size !== B.length || !MIS[q.mis]) { console.log('BAD MATCH', name, lv, A, B); errors++; break; }
+      continue;
+    }
+    if (q.type === 'olc') {
+      olcN++; const bad = (m) => { console.log('BAD OLC', name, lv, m, JSON.stringify(q)); errors++; };
+      if (!(q.hedef > 0 && q.hedef < 180 && q.hedef % 5 === 0) || !['sag', 'sol'].includes(q.taban) || !q.cevap) { bad('alan'); break; }
+      if (!OLC_CHECK(q, { aci: q.hedef }).ok) { bad('doğru cevap kabul edilmedi'); break; }
+      for (let x = 0; x <= 180; x += 5) { const r = OLC_CHECK(q, { aci: x }); if (x !== q.hedef && (r.ok || !MIS[r.mis])) { bad('yanlış açı ' + x); break; } }
+      if (OLC_CHECK(q, { aci: 180 - q.hedef }).mis !== 'iletki_ters') { bad('öbür sıra iletki_ters değil'); break; }
+      continue;
+    }
+    if (q.type === 'graf') {
+      grafN++; const bad = (m) => { console.log('BAD GRAF', name, lv, m, JSON.stringify(q)); errors++; };
+      const w = q.degerler.map(v => v / q.adim);
+      if (q.kategoriler.length !== q.degerler.length || w.some(x => !Number.isInteger(x) || x < 1 || x > q.ust) || q.grid.length !== w.length) { bad('alan'); break; }
+      if (!GRAF_CHECK(q, { h: w }).ok) { bad('doğru cevap kabul edilmedi'); break; }
+      let hata = false;
+      for (let i = 0; i < w.length && !hata; i++) for (let k = 1; k <= q.ust; k++) { if (k === w[i]) continue; const h = w.slice(); h[i] = k; const r = GRAF_CHECK(q, { h }); if (r.ok || !MIS[r.mis]) { bad('yanlış boy ' + i + ':' + k); hata = true; break; } }
+      if (hata) break;
+      const sw = w.slice(); const j = sw.findIndex((x, i) => i && x !== sw[0]); [sw[0], sw[j]] = [sw[j], sw[0]];
+      if (GRAF_CHECK(q, { h: sw }).mis !== 'grafik_okuma') { bad('yer değiştirme grafik_okuma değil'); break; }
       continue;
     }
     if (q.type === 'kes') {
@@ -146,6 +166,6 @@ const SKILLS_OK = (id) => id in GEN;
   if (eksik.size > 3 || uzun) { console.log('SORU SESİ SÖZLÜĞÜ ESKİ: node tools/soru_sozluk.js çalıştır ve soru-sesi fonksiyonunu yeniden yükle.', [...eksik].slice(0, 10), 'uygunsuz metin:', uzun); errors++; }
   else if (eksik.size) console.log('Uyarı: sözlükte olmayan nadir kelime(ler):', [...eksik]); }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);
-console.log('Beceri sayısı:', Object.keys(GEN).length, '· parmakla kesir sorusu:', kesN);
+console.log('Beceri sayısı:', Object.keys(GEN).length, '· parmakla kesir sorusu:', kesN, '· açıölçer:', olcN, '· grafik çizme:', grafN);
 for (const [k,v] of Object.entries(samples)) console.log(k, JSON.stringify(v));
 process.exit(errors?1:0);
