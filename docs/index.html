@@ -889,6 +889,14 @@ div.plan-satir{cursor:default}
 .aile-ozet span{background:var(--brand-t);border-radius:999px;padding:4px 10px;font-weight:800;font-size:14px}
 .warn-t{color:#B45309}
 .aile-kart a.btn{text-decoration:none;display:grid;place-items:center}
+/* Adım adım sahneler: ek parçalar (25.10.2026) */
+.vis.ds .ds-nokta{fill:var(--ink)} .vis.ds .ds-dolu{fill:var(--accent);stroke:#fff;stroke-width:2}
+.vis.ds .ds-okucu{fill:var(--ink)} .vis.ds .ds-okucu.ds-vurgu{fill:var(--accent);stroke:none}
+.vis.ds .ds-kare-isaret{fill:none;stroke:var(--accent);stroke-width:2.5}
+.vis.ds .ds-kutu-r{fill:var(--surface);stroke:var(--line);stroke-width:2} .vis.ds .ds-kutu-r.on{fill:var(--brand-t);stroke:var(--accent);stroke-width:3}
+.vis.ds .ds-cerceve{fill:none;stroke:var(--accent);stroke-width:2.5}
+.vis.ds .ds-gri{fill:var(--muted)} .vis.ds .ds-mono{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+.vis.ds .tx.sm{font-size:12px}
 </style>
 </head>
 <body>
@@ -3985,7 +3993,9 @@ div.plan-satir{cursor:default}
   /* Adım adım canlanan sahneler: "Adım adım" kartında Pi hangi adımı anlatıyorsa şekil o adıma geçer.
      Sayılar burada sabit örnektir ve elle doğrulanmıştır (8+4=12, 12×2=24; 5×3=15; (3+5)×2²−4=28; 15 702 436 018). */
   const DS = (w, h, ic) => `<svg class="vis ds" viewBox="0 0 ${w} ${h}" role="img" aria-label="adım adım şekil">${ic}</svg>`;
-  const dsYazi = (x, y, t, k = '') => `<text x="${x}" y="${y}" text-anchor="middle" class="tx ds-tx ${k}">${t}</text>`;
+  // Uzun yazı kutudan taşmasın: tahmini genişlik sığmıyorsa textLength ile sıkıştırılır (yazı tipi küçülmez, harf aralığı daralır)
+  const dsSig = (t, k, yer) => { const n = String(t).replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '·').length, w = n * (/ds-ifade/.test(k) ? 15 : /ds-buyuk/.test(k) ? 11.5 : /\bsm\b/.test(k) ? 6.6 : 8.8); return w > yer ? ` textLength="${Math.max(40, yer).toFixed(0)}" lengthAdjust="spacingAndGlyphs"` : ''; };
+  const dsYazi = (x, y, t, k = '') => `<text x="${x}" y="${y}" text-anchor="middle" class="tx ds-tx ${k}"${dsSig(t, k, 2 * Math.min(x, 300 - x) - 8)}>${t}</text>`;
   const DERS_SAHNE = {
     a_cevre: (i) => {
       const R = 'M60,40 H240 V130 H60 Z', ust = i >= 1 ? 'ds-vurgu' : '', hepsi = i >= 2 ? 'ds-vurgu' : '';
@@ -4023,6 +4033,192 @@ div.plan-satir{cursor:default}
       return DS(300, 150, dsYazi(150, 45, 'yedi milyon altı', 'ds-gel') + dsYazi(150, 85, '↓', 'ds-parla') + dsYazi(150, 125, '7 <tspan class="ds-kutu">000 00</tspan>6', 'ds-buyuk ds-gel'));
     },
   };
+  /* ---------- Kalan 30 konunun adım adım sahneleri (25.10.2026) ----------
+     Her sahne kartın "Adım adım" maddeleriyle aynı sırada ilerler (i = Pi'nin anlattığı adım). Örnek sayılar elle hesaplandı;
+     test/test_sahne.js her sahnenin her adımda geçerli SVG ürettiğini ve yazdığı işlemlerin doğru olduğunu denetler. */
+  const dsY = (x, y, t, k = '') => dsYazi(x, y, t, k);
+  const dsSol = (x, y, t, k = '') => `<text x="${x}" y="${y}" class="tx ds-tx ${k}"${dsSig(t, k, 300 - x - 6)}>${t}</text>`;
+  const dsOk = (x1, y1, x2, y2, k = '') => { const a = Math.atan2(y2 - y1, x2 - x1), u = 9, p = (d) => `${(x2 - u * Math.cos(a + d)).toFixed(1)},${(y2 - u * Math.sin(a + d)).toFixed(1)}`; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="ln ${k}"/><polygon points="${x2},${y2} ${p(0.45)} ${p(-0.45)}" class="ds-okucu ${k}"/>`; };
+  const dsNokta = (x, y, ad, k = '') => `<circle cx="${x}" cy="${y}" r="5" class="ds-nokta ${k}"/>${ad ? `<text x="${x}" y="${y + 22}" text-anchor="middle" class="tx ds-tx sm">${ad}</text>` : ''}`;
+  const dsKol = (x, y, a, L = 100) => [x + L * Math.cos(a * Math.PI / 180), y - L * Math.sin(a * Math.PI / 180)].map(v => +v.toFixed(1));
+  const dsYay = (x, y, a1, a2, r = 30, k = '') => { const [x1, y1] = dsKol(x, y, a1, r), [x2, y2] = dsKol(x, y, a2, r); return `<path d="M${x1},${y1} A${r},${r} 0 ${a2 - a1 > 180 ? 1 : 0} 0 ${x2},${y2}" class="ln thin ${k}"/>`; };
+  const dsSerit = (x, y, w, n, b, k = 'f1') => { let r = ''; for (let j = 0; j < n; j++) r += `<rect x="${(x + j * w / n).toFixed(1)}" y="${y}" width="${(w / n).toFixed(1)}" height="26" class="${j < b ? k : 'f0'}"/>`; return r; };
+  const dsKutu = (x, y, w, h, t, k = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" class="ds-kutu-r ${k}"/>${dsY(x + w / 2, y + h / 2 + 6, t, k.includes('on') ? 'ds-parla' : '')}`;
+  const dsPasta = (cx, cy, r, n, boya, k = 'f1') => { let s = ''; for (let j = 0; j < n; j++) { const a1 = -90 + j * 360 / n, a2 = a1 + 360 / n, p = (a) => `${(cx + r * Math.cos(a * Math.PI / 180)).toFixed(1)},${(cy + r * Math.sin(a * Math.PI / 180)).toFixed(1)}`; s += `<path d="M${cx},${cy} L${p(a1)} A${r},${r} 0 0 1 ${p(a2)} Z" class="${boya.includes(j) ? k : 'f0'}"/>`; } return s; };
+  Object.assign(DERS_SAHNE, {
+    g_temel: (i) => {
+      const s = (n) => i === n ? 'ds-vurgu' : '';
+      return DS(300, 190, `${dsNokta(60, 40, 'A')}<line x1="60" y1="40" x2="220" y2="40" class="ln ${s(1)} ${s(4)}"/>${dsNokta(220, 40, 'B')}${dsSol(236, 46, i === 4 ? '|AB| = 5 cm' : '[AB]', i === 1 || i === 4 ? 'ds-parla' : '')}
+        ${dsNokta(60, 100, 'A')}${dsOk(60, 100, 230, 100, s(2))}${dsNokta(150, 100, 'B')}${dsSol(240, 106, '[AB', i === 2 ? 'ds-parla' : '')}
+        ${dsOk(150, 160, 40, 160, s(3))}${dsOk(150, 160, 230, 160, s(3))}${dsNokta(100, 160, '')}${dsNokta(190, 160, '')}${dsSol(240, 166, 'AB', i === 3 ? 'ds-parla' : '')}
+        ${i === 0 ? dsY(150, 192, 'Uçlara bak: nokta mı, ok mu?', 'ds-parla ds-gel') : ''}`).replace('viewBox="0 0 300 190"', 'viewBox="0 0 300 200"');
+    },
+    g_cember: (i) => DS(300, 200, `<circle cx="150" cy="95" r="65" class="ln"/>
+      ${i >= 2 ? `<line x1="85" y1="95" x2="215" y2="95" class="ln ds-vurgu"/>` : i >= 1 ? `<line x1="150" y1="95" x2="215" y2="95" class="ln ds-vurgu"/>` : ''}
+      ${dsNokta(150, 95, 'O', i === 0 ? 'ds-dolu' : '')}
+      ${dsY(150, 188, ['Merkez: O', 'Yarıçap r = 3 cm', 'Çap R = 2 × 3 = 6 cm', 'Çap 8 cm → 8 ÷ 2 = 4 cm'][Math.min(i, 3)], `ds-buyuk ds-gel ${i === 3 ? 'ds-yesil' : i ? 'ds-parla' : ''}`)}`),
+    g_dikme_paralel: (i) => {
+      if (i <= 1) return DS(300, 180, `<line x1="30" y1="50" x2="270" y2="50" class="ln ${i === 1 ? 'ds-vurgu' : ''}"/><line x1="30" y1="110" x2="270" y2="110" class="ln ${i === 1 ? 'ds-vurgu' : ''}"/>
+        ${i === 1 ? [70, 150, 230].map(x => `<line x1="${x}" y1="50" x2="${x}" y2="110" class="ln dash"/>`).join('') + dsY(150, 160, 'Hiç kesişmez, arası hep aynı → //', 'ds-buyuk ds-gel ds-yesil') : dsY(150, 160, 'Kesişiyorlar mı?', 'ds-buyuk ds-parla')}`);
+      const rot = i === 4 ? 'transform="rotate(-30 150 90)"' : '';
+      return DS(300, 180, `<g ${rot}><line x1="40" y1="90" x2="260" y2="90" class="ln"/><line x1="150" y1="20" x2="150" y2="160" class="ln"/>
+        ${i >= 3 ? '<rect x="150" y="72" width="18" height="18" class="ds-kare-isaret"/>' : `<circle cx="150" cy="90" r="14" class="ln thin ds-vurgu"/>`}</g>
+        ${dsY(150, 176, i === 2 ? 'Kesişme noktasındaki açıya bak' : i === 3 ? '90° → dik (⊥)' : 'Döndürsen de dik: ⊥', `ds-gel ${i >= 3 ? 'ds-yesil ds-buyuk' : 'ds-parla'}`)}`);
+    },
+    g_aci: (i) => {
+      const V = [115, 150], a = [60, 50, 90, 130, 50][Math.min(i, 4)], [x, y] = dsKol(V[0], V[1], a, 100);
+      const tur = ['Dik açıyla karşılaştır', 'Dar açı: 50° &lt; 90°', 'Dik açı: 90°', 'Geniş açı: 130°', 'Açıölçer 50° gösteriyor'][Math.min(i, 4)];
+      const olcer = i === 4 ? `<path d="M${V[0] - 88},${V[1]} A88,88 0 0 1 ${V[0] + 88},${V[1]}" class="ln thin"/>${[0, 30, 60, 90, 120, 150, 180].map(t => { const [tx, ty] = dsKol(V[0], V[1], t, 98); return `<text x="${tx}" y="${ty + 4}" text-anchor="middle" class="tx sm">${t}</text>`; }).join('')}` : '';
+      return DS(300, 190, `${olcer}${i === 0 ? `<line x1="${V[0]}" y1="${V[1]}" x2="${V[0]}" y2="${V[1] - 110}" class="ln dash"/>` : ''}
+        <line x1="${V[0]}" y1="${V[1]}" x2="${V[0] + 140}" y2="${V[1]}" class="ln"/><line x1="${V[0]}" y1="${V[1]}" x2="${x}" y2="${y}" class="ln ds-vurgu"/>
+        ${a === 90 ? `<rect x="${V[0]}" y="${V[1] - 18}" width="18" height="18" class="ds-kare-isaret"/>` : dsYay(V[0], V[1], 0, a, 32, 'ds-vurgu')}
+        ${dsY(150, 182, tur, `ds-gel ${i >= 1 ? 'ds-buyuk' : 'ds-parla'}`)}`);
+    },
+    g_aci_iliski: (i) => {
+      if (i === 0) return DS(300, 160, dsY(150, 55, 'Tümler → toplam 90°', 'ds-buyuk ds-gel') + dsY(150, 105, 'Bütünler → toplam 180°', 'ds-buyuk ds-gel'));
+      const V = [80, 140];
+      if (i === 1) { const [x, y] = dsKol(V[0], V[1], 35, 120); return DS(300, 190, `<line x1="80" y1="140" x2="230" y2="140" class="ln"/><line x1="80" y1="140" x2="80" y2="20" class="ln"/><line x1="80" y1="140" x2="${x}" y2="${y}" class="ln ds-vurgu"/><rect x="80" y="122" width="18" height="18" class="ds-kare-isaret"/>${dsSol(150, 132, '35°')}${dsSol(96, 70, '?', 'ds-parla')}${dsY(150, 180, '90 − 35 = 55°', 'ds-buyuk ds-gel ds-yesil')}`); }
+      if (i === 2) { const [x, y] = dsKol(150, 140, 120, 110); return DS(300, 190, `<line x1="30" y1="140" x2="270" y2="140" class="ln"/><line x1="150" y1="140" x2="${x}" y2="${y}" class="ln ds-vurgu"/>${dsYay(150, 140, 0, 120, 28)}${dsSol(178, 118, '120°')}${dsSol(100, 128, '?', 'ds-parla')}${dsY(150, 180, '180 − 120 = 60°', 'ds-buyuk ds-gel ds-yesil')}`); }
+      return DS(300, 190, `<line x1="40" y1="40" x2="260" y2="150" class="ln"/><line x1="40" y1="150" x2="260" y2="40" class="ln"/>${dsSol(138, 75, '60°', 'ds-parla')}${dsSol(138, 130, '60°', 'ds-parla ds-gel')}${dsSol(80, 100, '120°')}${dsSol(190, 100, '120°')}${dsY(150, 182, 'Ters açılar eşit', 'ds-buyuk ds-gel ds-yesil')}`);
+    },
+    g_cokgen: (i) => {
+      const n = i === 3 ? 6 : 5, P = Array.from({ length: n }, (_, k) => dsKol(150, 92, 90 + k * 360 / n, 65));
+      const kenar = P.map((p, k) => { const q = P[(k + 1) % n]; return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" class="ln ${i === 0 || i === 3 ? 'ds-vurgu' : ''}"/>${i === 0 ? `<text x="${((p[0] + q[0]) / 2 + (p[0] + q[0] - 300) / 9).toFixed(0)}" y="${((p[1] + q[1]) / 2 + (p[1] + q[1] - 184) / 9 + 5).toFixed(0)}" text-anchor="middle" class="tx sm ds-parla">${k + 1}</text>` : ''}`; }).join('');
+      const kose = i === 1 ? P.map(p => dsNokta(p[0], p[1], '', 'ds-dolu')).join('') : '';
+      const kosegen = i === 2 ? `<line x1="${P[0][0]}" y1="${P[0][1]}" x2="${P[2][0]}" y2="${P[2][1]}" class="ln ds-vurgu"/>` : '';
+      const alt = ['5 kenar → beşgen', '5 köşe, 5 iç açı', 'Turuncu: köşegen · Siyah: kenar', 'Düzgün altıgen: kenarlar eşit, açılar eşit'][i];
+      return DS(300, 190, kenar + kose + kosegen + dsY(150, 182, alt, 'ds-gel ds-buyuk'));
+    },
+    g_ucgen: (i) => {
+      const A = [70, 150], B = [230, 150], C = [165, 37];
+      return DS(300, 200, `<polygon points="${A} ${B} ${C}" class="f2"/>${dsSol(86, 142, '50°')}${dsSol(198, 142, '60°')}${dsY(165, 66, i >= 1 ? '70°' : '?', i >= 2 ? 'ds-parla ds-buyuk' : 'ds-parla')}
+        ${dsY(150, 190, ['50 + 60 = 110', '180 − 110 = 70°', 'En büyük açı: 70°', '70° &lt; 90° → dar açılı üçgen'][Math.min(i, 3)], `ds-buyuk ds-gel ${i >= 3 ? 'ds-yesil' : ''}`)}`);
+    },
+    n_basamak: (i) => {
+      const r = ['5', '3', '8', '2'], ad = ['binler', 'yüzler', 'onlar', 'birler'], d = ['1 000', '100', '10', '1'], x = [60, 120, 180, 240];
+      return DS(300, 190, r.map((c, k) => `<rect x="${x[k] - 24}" y="22" width="48" height="48" rx="10" class="${k === 1 ? 'ds-kutu-r on' : 'ds-kutu-r'}"/>${dsY(x[k], 56, c, 'ds-buyuk')}${dsY(x[k], 90, ad[k], 'sm')}${i >= 1 ? dsY(x[k], 110, d[k], `sm ds-gel ${k === 1 ? 'ds-parla' : ''}`) : ''}`).join('')
+        + dsY(150, 160, ['3 sağdan 3. basamakta: yüzler', '3 yüzler basamağında: 100', '3 × 100 = 300', '5 382 = 5 000 + 300 + 80 + 2'][Math.min(i, 3)], `ds-buyuk ds-gel ${i >= 3 ? 'ds-yesil' : ''}`));
+    },
+    n_karsilastir: (i) => {
+      if (i <= 1) return DS(300, 160, dsY(150, 50, '45 210 → 5 basamak', 'ds-buyuk') + dsY(150, 90, '9 870 → 4 basamak', 'ds-buyuk') + (i === 1 ? dsY(150, 140, '45 210 > 9 870', 'ds-buyuk ds-gel ds-yesil') : ''));
+      const a = '72418', b = '72391', x = [70, 110, 150, 190, 230];
+      return DS(300, 170, [...a].map((c, k) => dsY(x[k], 50, c, `ds-buyuk ${k < 2 ? 'ds-gri' : k === 2 && i === 3 ? 'ds-parla' : ''}`)).join('') + [...b].map((c, k) => dsY(x[k], 90, c, `ds-buyuk ${k < 2 ? 'ds-gri' : k === 2 && i === 3 ? 'ds-parla' : ''}`)).join('')
+        + dsY(150, 140, i === 2 ? 'Soldan başla: 7 = 7, 2 = 2…' : '4 > 3 → 72 418 > 72 391', `ds-buyuk ds-gel ${i === 3 ? 'ds-yesil' : ''}`));
+    },
+    n_toplacikar: (i) => {
+      if (i <= 2) { const s = (r, k = '') => dsSol(120, r[1], r[0], `ds-buyuk ds-mono ${k}`);
+        return DS(300, 190, `${i === 2 ? dsSol(120, 22, ' 1 1', 'sm ds-parla ds-mono') : ''}${s(['  368', 50])}${s(['+ 254', 82])}<line x1="110" y1="94" x2="200" y2="94" class="ln"/>${i === 2 ? s(['  622', 124], 'ds-yesil ds-gel') : ''}
+          ${i === 1 ? '<rect x="170" y="30" width="26" height="60" rx="6" class="ds-cerceve"/>' + dsY(150, 170, 'Birler: 8 + 4 = 12', 'ds-parla ds-gel') : i === 2 ? dsY(150, 170, '12 → 2 yaz, 1 elde · 6 + 5 + 1 = 12 → 2 yaz, 1 elde', 'sm ds-gel') : dsY(150, 170, 'Birler birlerin, onlar onların altına', 'ds-parla')}`); }
+      if (i === 3) return DS(300, 190, `${dsSol(120, 22, '  4 12', 'sm ds-parla ds-mono')}<text x="120" y="50" class="tx ds-tx ds-buyuk ds-mono">  <tspan class="ds-cizik">52</tspan></text>${dsSol(120, 82, '− 27', 'ds-buyuk ds-mono')}<line x1="110" y1="94" x2="190" y2="94" class="ln"/>${dsSol(120, 124, '  25', 'ds-buyuk ds-mono ds-yesil ds-gel')}${dsY(150, 170, '2 &lt; 7 → onluk boz: 12 − 7 = 5, 4 − 2 = 2', 'sm ds-gel')}`);
+      return DS(300, 160, dsY(150, 55, '? + 27 = 52', 'ds-buyuk') + dsY(150, 95, '52 − 27 = 25', 'ds-buyuk ds-gel ds-parla') + dsY(150, 135, 'Kontrol: 25 + 27 = 52 ✓', 'ds-gel ds-yesil'));
+    },
+    n_carpbol: (i) => {
+      if (i === 0) return DS(300, 150, `<text x="150" y="60" text-anchor="middle" class="tx ds-tx ds-ifade">4<tspan class="ds-kutu">0</tspan> × 3<tspan class="ds-kutu">00</tspan></text>${dsY(150, 110, '1 + 2 = 3 sıfır', 'ds-buyuk ds-gel')}`);
+      if (i === 1) return DS(300, 150, dsY(150, 50, '4 × 3 = 12', 'ds-buyuk') + `<text x="150" y="100" text-anchor="middle" class="tx ds-tx ds-ifade ds-gel">12<tspan class="ds-kutu">000</tspan></text>` + dsY(150, 135, '40 × 300 = 12 000', 'ds-gel ds-yesil'));
+      if (i === 2) return DS(300, 150, `<text x="150" y="50" text-anchor="middle" class="tx ds-tx ds-ifade">6 00<tspan class="ds-cizik">0</tspan> ÷ 3<tspan class="ds-cizik">0</tspan></text>${dsY(150, 95, '600 ÷ 3 = 200', 'ds-buyuk ds-gel')}${dsY(150, 135, '6 000 ÷ 30 = 200', 'ds-gel ds-yesil')}`);
+      return DS(300, 200, `${dsSol(130, 30, '   23', 'ds-buyuk ds-mono')}${dsSol(130, 58, '×  14', 'ds-buyuk ds-mono')}<line x1="120" y1="68" x2="200" y2="68" class="ln"/>${dsSol(130, 96, '   92', 'ds-buyuk ds-mono ds-gel')}${dsSol(130, 124, '  23', 'ds-buyuk ds-mono ds-gel ds-parla')}<line x1="120" y1="134" x2="200" y2="134" class="ln"/>${dsSol(130, 162, '  322', 'ds-buyuk ds-mono ds-yesil ds-gel')}${dsY(150, 192, '23 × 1 sonucu bir basamak sola', 'sm ds-parla')}`);
+    },
+    n_problem: (i) => {
+      const s = [['Verilen: 3 defter, tanesi 15 TL, 100 TL ödendi', 'İstenen: para üstü'], ['Önce çarpma (toplam tutar),', 'sonra çıkarma (para üstü)'], ['3 × 15 = 45 TL', 'ara sonuç: toplam tutar'], ['100 − 45 = 55 TL', 'para üstü'], ['Kontrol: 55 + 45 = 100 ✓', 'mantıklı: para üstü 100 TL\'den az']][Math.min(i, 4)];
+      return DS(300, 160, `<text x="150" y="28" text-anchor="middle" class="tx sm">📒 3 defter × 15 TL · 💵 100 TL</text>${dsY(150, 80, s[0], `ds-gel ${i >= 2 ? 'ds-buyuk' : ''} ${i === 3 ? 'ds-yesil' : ''}`)}${dsY(150, 115, s[1], 'sm ds-gel ds-parla')}`);
+    },
+    n_tahmin: (i) => {
+      const r = ['4', '6', '8', '3'], x = [90, 130, 170, 210], k = (j) => (i === 0 && j === 1) || (i === 1 && j === 2) ? 'ds-parla' : '';
+      return DS(300, 170, (i <= 2 ? r.map((c, j) => dsY(x[j], 60, c, `ds-ifade ${k(j)}`)).join('') + (i >= 0 ? dsY(130, 88, '▲ yüzler', i === 0 ? 'sm ds-parla' : 'sm') : '') : dsY(150, 60, '4 700', 'ds-ifade ds-yesil ds-gel'))
+        + dsY(150, 140, ['Yüzlüğe yuvarla: yüzler basamağı 6', 'Sağındaki rakam: 8', '8 ≥ 5 → 6 bir artar: 7', 'Sağdakiler 0 olur: 4 683 ≈ 4 700'][Math.min(i, 3)], `ds-buyuk ds-gel ${i === 3 ? 'ds-yesil' : ''}`));
+    },
+    a_cevre_alan: (i) => DS(300, 190, `<rect x="60" y="30" width="180" height="110" class="${i === 2 ? 'ds-kare' : 'f0'}"/>
+      <rect x="60" y="30" width="180" height="110" class="ln ${i === 1 ? 'ds-vurgu' : ''}" fill="none"/>${dsY(150, 22, '6 m', 'sm')}<text x="248" y="90" class="tx sm">4 m</text>
+      ${i === 0 ? dsY(150, 92, 'Etrafı mı? İçi mi?', 'ds-buyuk ds-parla') : ''}${i === 1 ? dsY(150, 92, 'Çit → çevre', 'ds-buyuk ds-parla ds-gel') : ''}${i === 2 ? dsY(150, 92, 'Halı → alan', 'ds-buyuk ds-parla ds-gel') : ''}
+      ${i === 3 ? dsY(150, 165, 'Ç = 2 × (6 + 4) = 20 m', 'ds-gel') + dsY(150, 186, 'A = 6 × 4 = 24 m²', 'ds-gel ds-yesil') : ''}`),
+    f_tur: (i) => {
+      if (i === 0) return DS(300, 150, `<text x="150" y="80" text-anchor="middle" class="tx ds-tx ds-ifade"><tspan class="ds-kutu">3</tspan></text><line x1="132" y1="92" x2="168" y2="92" class="ln"/><text x="150" y="124" text-anchor="middle" class="tx ds-tx ds-ifade"><tspan class="ds-kutu">5</tspan></text>${dsSol(185, 80, '← pay', 'sm')}${dsSol(185, 124, '← payda', 'sm')}`);
+      if (i === 1) return DS(300, 130, dsSerit(50, 30, 200, 4, 1) + dsY(150, 95, '1/4 → pay 1: birim kesir', 'ds-buyuk ds-gel'));
+      if (i === 2) return DS(300, 130, dsSerit(50, 30, 200, 5, 3) + dsY(150, 95, '3/5 → 3 &lt; 5: bir bütünden küçük', 'ds-buyuk ds-gel'));
+      return DS(300, 160, dsSerit(20, 30, 120, 4, 4) + dsSerit(160, 30, 120, 4, 3) + dsY(150, 90, '7/4 → 7 ≥ 4: bileşik kesir', `ds-buyuk ds-gel ${i === 3 ? '' : 'ds-gri'}`) + (i === 4 ? dsY(150, 135, '7 ÷ 4 → bölüm 1, kalan 3 → 1 tam 3/4', 'ds-buyuk ds-gel ds-yesil') : ''));
+    },
+    f_ondalik: (i) => {
+      if (i <= 1) return DS(300, 160, dsSerit(50, 20, 200, 10, 6) + dsY(150, 90, i === 0 ? '3/5 = 6/10 (pay ve payda × 2)' : '6/10 = 0,6', `ds-buyuk ds-gel ${i === 1 ? 'ds-yesil' : ''}`) + (i === 1 ? dsY(150, 125, 'Payda 10 → virgülden sonra 1 basamak', 'sm ds-parla') : ''));
+      if (i === 2) return DS(300, 160, dsY(150, 60, '27/100 = 0,27', 'ds-ifade ds-gel') + dsY(150, 110, 'Payda 100 → virgülden sonra 2 basamak', 'sm ds-parla'));
+      return DS(300, 160, dsY(150, 55, '0,6 → sıfır tam onda altı', 'ds-buyuk ds-gel') + dsY(150, 105, '0,27 → sıfır tam yüzde yirmi yedi', 'ds-buyuk ds-gel'));
+    },
+    f_yuzde: (i) => {
+      let k = ''; for (let r = 0; r < 10; r++) for (let c = 0; c < 10; c++) k += `<rect x="${20 + c * 13}" y="${20 + r * 13}" width="13" height="13" class="${r * 10 + c < 75 && i >= 1 ? 'ds-kare' : 'ds-bos'}"/>`;
+      return DS(300, 160, k + dsSol(160, 60, ['3/4 = 75/100', '75/100 = %75', '%75 = 75 ÷ 100'][Math.min(i, 2)], 'ds-buyuk ds-gel') + dsSol(160, 92, ['(pay, payda × 25)', '75 kare boyalı', '= 0,75'][Math.min(i, 2)], `ds-gel ${i === 2 ? 'ds-buyuk ds-yesil' : 'sm ds-parla'}`));
+    },
+    f_karsilastir: (i) => {
+      if (i === 0) return DS(300, 150, dsSerit(40, 20, 210, 7, 3) + dsSerit(40, 60, 210, 7, 5) + dsSol(256, 38, '3/7', 'sm') + dsSol(256, 78, '5/7', 'sm ds-parla') + dsY(150, 130, 'Paydalar eşit: 5 > 3 → 5/7 büyük', 'ds-buyuk ds-gel ds-yesil'));
+      if (i === 1) return DS(300, 150, dsSerit(40, 20, 210, 3, 2) + dsSerit(40, 60, 210, 5, 2) + dsSol(256, 38, '2/3', 'sm ds-parla') + dsSol(256, 78, '2/5', 'sm') + dsY(150, 130, 'Paylar eşit: parçası büyük olan 2/3', 'ds-buyuk ds-gel ds-yesil'));
+      return DS(300, 150, dsSerit(40, 20, 210, 12, 8) + dsSerit(40, 60, 210, 12, 9) + dsSol(256, 38, '8/12', 'sm') + dsSol(256, 78, '9/12', `sm ${i === 3 ? 'ds-parla' : ''}`) + dsY(150, 130, i === 2 ? '2/3 = 8/12 · 3/4 = 9/12' : '9 > 8 → 3/4 > 2/3', `ds-buyuk ds-gel ${i === 3 ? 'ds-yesil' : ''}`));
+    },
+    f_ondalik_karsilastir: (i) => {
+      const s = [['3,45', '2,9', '3 > 2 → 3,45 büyük'], ['4,72', '4,58', 'Tam eşit; onda birler 7 > 5'], ['6,38', '6,35', 'Onda birler eşit; yüzde birler 8 > 5'], ['0,50', '0,45', '0,5 = 0,50 → 50 > 45'], ['0,40', '0,35', '%40 = 0,40 → 0,40 > 0,35']][Math.min(i, 4)];
+      return DS(300, 160, dsY(150, 50, s[0], 'ds-ifade') + dsY(150, 95, s[1], 'ds-ifade') + (i === 4 ? dsSol(200, 50, '← %40', 'sm ds-parla') : i === 3 ? dsSol(200, 50, '← 0,5', 'sm ds-parla') : '') + dsY(150, 140, s[2], 'ds-buyuk ds-gel ds-yesil'));
+    },
+    s_arastirma: (i) => {
+      const a = [['❓', 'Soru belirle'], ['📋', 'Veri topla'], ['📊', 'Görselleştir'], ['💬', 'Yorumla']], ornek = ['"En sevdiğin meyve hangisi?"', '20 arkadaşına sor, çetele tut', 'Sıklık tablosu ve sütun grafiği', '"En çok elma seçildi"'];
+      return DS(300, 180, a.map((b, k) => `<rect x="${10 + k * 72}" y="20" width="64" height="70" rx="12" class="ds-kutu-r ${k === Math.min(i, 3) ? 'on' : ''}"/>${dsY(42 + k * 72, 50, b[0])}${dsY(42 + k * 72, 78, b[1], 'sm')}`).join('') + dsY(150, 140, ornek[Math.min(i, 3)], 'ds-buyuk ds-gel'));
+    },
+    s_tablo_sutun: (i) => {
+      const v = [['Elma', 8], ['Muz', 5], ['Kiraz', 6]], H = 12, y0 = 150;
+      return DS(300, 200, `${dsY(170, 18, 'En sevilen meyve', i === 0 ? 'ds-parla' : 'sm')}<line x1="60" y1="${y0}" x2="280" y2="${y0}" class="ln ${i === 0 ? 'ds-vurgu' : ''}"/><line x1="60" y1="${y0}" x2="60" y2="30" class="ln ${i === 0 ? 'ds-vurgu' : ''}"/>
+        ${[0, 2, 4, 6, 8].map(t => `<text x="52" y="${y0 - t * H + 4}" text-anchor="end" class="tx sm">${t}</text>`).join('')}
+        ${v.map((b, k) => `<rect x="${85 + k * 65}" y="${y0 - b[1] * H}" width="40" height="${b[1] * H}" class="${(i >= 1 && k === 0) || (i === 3 && k === 1) ? 'ds-kare' : 'f2'}"/>${dsY(105 + k * 65, y0 + 18, b[0], 'sm')}`).join('')}
+        ${i >= 2 ? `<line x1="60" y1="${y0 - 8 * H}" x2="85" y2="${y0 - 8 * H}" class="ln dash"/>` : ''}
+        ${dsY(170, 192, ['Başlık ve eksenleri oku', 'Elma sütununu bul', 'Tepeden yatay bak: 8 kişi', 'Elma − Muz = 8 − 5 = 3 kişi'][Math.min(i, 3)], `ds-gel ${i === 3 ? 'ds-yesil ds-buyuk' : 'ds-parla'}`)}`);
+    },
+    s_daire: (i) => DS(300, 200, `${dsPasta(150, 62, 52, 8, [0, 1, 2])}${dsSol(208, 30, '40 kişi', 'sm')}${dsSol(208, 46, '⚽ futbol', 'sm')}
+      ${dsY(150, 150, ['Futbol: bütünün 3/8\'i', '40 ÷ 8 = 5 (1 dilim = 5 kişi)', '5 × 3 = 15 kişi futbol', 'Futbol 15 + diğerleri 25 = 40'][Math.min(i, 3)], `ds-buyuk ds-gel ${i >= 2 ? 'ds-yesil' : 'ds-parla'}`)}
+      ${i === 3 ? dsY(150, 180, 'Dilimler birlikte bütünü verir ✓', 'ds-gel ds-yesil') : ''}`),
+    s_okuryazar: (i) => {
+      const y0 = 150, olc = (v) => y0 - (v - 50) * 18;
+      return DS(300, 200, `${dsY(170, 18, 'Bir haftada okunan kitap', 'sm')}<line x1="70" y1="${y0}" x2="270" y2="${y0}" class="ln"/><line x1="70" y1="${y0}" x2="70" y2="30" class="ln ${i === 1 ? 'ds-vurgu' : ''}"/>
+        ${[50, 52, 54, 56].map(t => `<text x="62" y="${olc(t) + 4}" text-anchor="end" class="tx sm ${t === 50 && i === 1 ? 'ds-parla' : ''}">${t}</text>`).join('')}
+        <rect x="110" y="${olc(52)}" width="45" height="${y0 - olc(52)}" class="f2"/><rect x="190" y="${olc(56)}" width="45" height="${y0 - olc(56)}" class="f2"/>${dsY(132, y0 + 18, 'A sınıfı', 'sm')}${dsY(212, y0 + 18, 'B sınıfı', 'sm')}
+        ${dsY(170, 192, ['Grafik neyi gösteriyor?', 'Eksen 50\'den başlıyor! Fark büyük görünür', 'Söylenebilir: B, A\'dan 4 kitap fazla', '"Herkes kitap sever" denemez ✗'][Math.min(i, 3)], `ds-gel ${i === 3 ? 'ds-kirmizi' : i === 2 ? 'ds-yesil' : 'ds-parla'}`)}`);
+    },
+    e_esitlik: (i) => {
+      const sol = i === 3 ? '7 + 5 + 3' : '7 + 5', sag = i === 3 ? '4 + 8 + 3' : i >= 2 ? '4 + 8' : '4 + ?';
+      return DS(300, 190, `<line x1="150" y1="40" x2="150" y2="150" class="ln"/><polygon points="130,160 170,160 150,145" class="f2"/><line x1="50" y1="60" x2="250" y2="60" class="ln"/>
+        <line x1="70" y1="60" x2="70" y2="95" class="ln thin"/><line x1="230" y1="60" x2="230" y2="95" class="ln thin"/><rect x="25" y="95" width="90" height="34" rx="8" class="f2"/><rect x="185" y="95" width="90" height="34" rx="8" class="f2"/>
+        ${dsY(70, 118, sol, i === 0 ? 'ds-parla' : '')}${dsY(230, 118, sag, i === 2 ? 'ds-parla' : '')}
+        ${dsY(150, 182, ['Sol: 7 + 5 = 12', 'Sağ da 12 olmalı', '12 − 4 = 8 → ? = 8', 'İki yana +3: 15 = 15, denge bozulmaz'][Math.min(i, 3)], `ds-buyuk ds-gel ${i >= 2 ? 'ds-yesil' : ''}`)}`);
+    },
+    e_ozellik: (i) => {
+      const s = [['4 + 9 = 9 + 4', 'Yerler değişti → değişme'], ['(2 + 5) + 3 = 2 + (5 + 3)', 'Parantez kaydı → birleşme'], ['3 × (4 + 2) = 3 × 4 + 3 × 2', 'Dağıldı → 18 = 12 + 6 → dağılma'], ['8 − 3 ≠ 3 − 8 · 12 ÷ 4 ≠ 4 ÷ 12', 'Çıkarma ve bölmede değişme YOK']][Math.min(i, 3)];
+      return DS(300, 150, dsY(150, 60, s[0], `ds-buyuk ds-gel ${i === 3 ? 'ds-kirmizi' : ''}`) + dsY(150, 105, s[1], `ds-gel ${i === 3 ? 'ds-kirmizi' : 'ds-parla'}`));
+    },
+    e_us: (i) => {
+      if (i === 0) { let k = ''; for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) k += `<rect x="${30 + c * 26}" y="${30 + r * 26}" width="26" height="26" class="ds-kare" style="animation-delay:${(r * 4 + c) * 0.05}s"/>`; return DS(300, 170, k + dsSol(160, 70, '4² = 4 × 4', 'ds-buyuk') + dsSol(160, 105, '= 16', 'ds-buyuk ds-yesil ds-gel')); }
+      if (i === 1) return DS(300, 170, `<polygon points="40,60 100,60 100,120 40,120" class="f2"/><polygon points="40,60 65,38 125,38 100,60" class="f2"/><polygon points="100,60 125,38 125,98 100,120" class="f2"/>` + dsSol(150, 70, '2³ = 2 × 2 × 2', 'ds-buyuk') + dsSol(150, 105, '= 8', 'ds-buyuk ds-yesil ds-gel'));
+      return DS(300, 150, dsY(150, 55, '5² = 5 × 5 = 25 ✓', 'ds-buyuk ds-yesil ds-gel') + dsY(150, 100, '5² = 5 × 2 = 10 ✗', 'ds-buyuk ds-kirmizi ds-gel'));
+    },
+    e_oruntu: (i) => {
+      const t = [3, 7, 11, 15], x = [60, 120, 180, 240];
+      return DS(300, 180, t.map((v, k) => dsY(x[k], 50, v, `ds-ifade ${(i === 1 && k === 0) || (i === 3 && k === 1) ? 'ds-parla' : ''}`)).join('') + (i === 0 ? [0, 1, 2].map(k => dsY(x[k] + 30, 85, '+4', 'ds-parla ds-gel')).join('') : '')
+        + dsY(150, 140, ['Artış: her adımda +4', 'İlk terim: 3', '10. terim = 3 + (10 − 1) × 4 = 39', 'Kontrol: 2. terim = 3 + 1 × 4 = 7 ✓'][Math.min(i, 3)], `ds-buyuk ds-gel ${i >= 2 ? 'ds-yesil' : ''}`));
+    },
+    e_algoritma: (i) => {
+      const k = (n) => i === 0 && n < 3 ? 'on' : (i === 2 && n === 3) ? 'on' : '';
+      return DS(300, 210, `${dsKutu(20, 10, 80, 30, 'Başla', k(0))}${dsKutu(20, 55, 80, 30, 'Toplam = 0', k(1))}${dsKutu(20, 100, 80, 30, '+5 ekle', k(2))}
+        <polygon points="60,145 105,165 60,185 15,165" class="ds-kutu-r ${k(3)}"/>${dsY(60, 170, '= 15?', 'sm')}${dsKutu(130, 150, 70, 30, 'Bitir')}
+        <line x1="60" y1="40" x2="60" y2="55" class="ln thin"/><line x1="60" y1="85" x2="60" y2="100" class="ln thin"/><line x1="60" y1="130" x2="60" y2="145" class="ln thin"/><line x1="105" y1="165" x2="130" y2="165" class="ln thin"/>${dsSol(108, 158, 'evet', 'sm')}
+        <path d="M15,165 H5 V115 H20" class="ln thin ${i === 3 ? 'ds-vurgu' : ''}"/>${dsSol(0, 140, 'hayır', 'sm')}
+        ${dsSol(140, 40, ['Sırayla uygula', 'Değeri not et: 0 → 5', '5 = 15? Hayır → geri dön', '3 tur: 5, 10, 15 → Bitir'][Math.min(i, 3)], `ds-gel ${i === 3 ? 'ds-yesil' : 'ds-parla'}`)}
+        ${i >= 1 ? dsSol(140, 70, i === 1 ? 'Toplam: 5' : i === 2 ? 'Toplam: 5 (tur 1)' : 'Tur 3: toplam 15', 'sm ds-gel') : ''}`);
+    },
+    p_olay: (i) => {
+      const yer = [270, 30, 150][Math.min(i, 2)], m = [['Güneş doğudan doğar', 'Kesin → 1'], ['Sayı küpünden 7 gelir', 'İmkânsız → 0'], ['Para atınca tura gelir', 'Mümkün: olabilir de, olmayabilir de']][Math.min(i, 2)];
+      return DS(300, 170, `<line x1="30" y1="60" x2="270" y2="60" class="ln"/>${dsY(30, 90, '0', 'sm')}${dsY(270, 90, '1', 'sm')}${dsY(30, 108, 'imkânsız', 'sm')}${dsY(270, 108, 'kesin', 'sm')}<circle cx="${yer}" cy="60" r="10" class="ds-dolu ds-gel"/>
+        ${dsY(150, 30, m[0], 'ds-buyuk ds-gel')}${dsY(150, 150, m[1], `ds-gel ${i === 2 ? 'ds-parla' : 'ds-yesil ds-buyuk'}`)}`);
+    },
+    p_spektrum: (i) => {
+      const yaz = (j, k) => { const [x, y] = dsKol(150, 62, 90 - 22.5 - j * 45, 34); return `<text x="${x}" y="${y + 5}" text-anchor="middle" class="tx ${k}">${j + 1}</text>`; };
+      return DS(300, 210, `${dsPasta(150, 62, 52, 8, [0, 1, 2])}${i === 0 ? [0, 1, 2].map(j => yaz(j, 'w')).join('') : ''}${i === 1 ? Array.from({ length: 8 }, (_, j) => yaz(j, j < 3 ? 'w sm' : 'sm')).join('') : ''}
+        ${dsY(150, 145, ['Mavi: 3 dilim (parça)', 'Bütün: 8 dilim', 'Mavi, bütünün 3/8\'i', '3/8 &lt; 4/8 (yarım) → az olası'][Math.min(i, 3)], `ds-buyuk ds-gel ${i === 3 ? 'ds-yesil' : 'ds-parla'}`)}
+        ${i === 3 ? `<line x1="40" y1="180" x2="260" y2="180" class="ln thin"/><circle cx="${(40 + 220 * 3 / 8).toFixed(1)}" cy="180" r="7" class="ds-dolu ds-gel"/>${dsY(40, 200, '0', 'sm')}${dsY(150, 200, '½', 'sm')}${dsY(260, 200, '1', 'sm')}` : ''}`);
+    },
+  });
   const parcala = (html) => String(html).replace(/([.!?])\s+(?=[A-ZÇĞİÖŞÜ0-9<"(])/g, '$1\u0001').split('\u0001').map(x => `<span class="dp">${x}</span>`).join(' ');
   const cizimHazirla = (kok) => (kok || document).querySelectorAll('.visbox.cizim svg').forEach(sv => {
     let i = 0; sv.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse').forEach(el => { if (!el.classList.contains('dash')) el.setAttribute('pathLength', '1'); el.style.setProperty('--g', (0.15 + 0.12 * i++).toFixed(2) + 's'); });

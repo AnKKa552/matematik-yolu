@@ -877,3 +877,11 @@ div.plan-satir{cursor:default}
 .aile-ozet span{background:var(--brand-t);border-radius:999px;padding:4px 10px;font-weight:800;font-size:14px}
 .warn-t{color:#B45309}
 .aile-kart a.btn{text-decoration:none;display:grid;place-items:center}
+/* Adım adım sahneler: ek parçalar (25.10.2026) */
+.vis.ds .ds-nokta{fill:var(--ink)} .vis.ds .ds-dolu{fill:var(--accent);stroke:#fff;stroke-width:2}
+.vis.ds .ds-okucu{fill:var(--ink)} .vis.ds .ds-okucu.ds-vurgu{fill:var(--accent);stroke:none}
+.vis.ds .ds-kare-isaret{fill:none;stroke:var(--accent);stroke-width:2.5}
+.vis.ds .ds-kutu-r{fill:var(--surface);stroke:var(--line);stroke-width:2} .vis.ds .ds-kutu-r.on{fill:var(--brand-t);stroke:var(--accent);stroke-width:3}
+.vis.ds .ds-cerceve{fill:none;stroke:var(--accent);stroke-width:2.5}
+.vis.ds .ds-gri{fill:var(--muted)} .vis.ds .ds-mono{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+.vis.ds .tx.sm{font-size:12px}
