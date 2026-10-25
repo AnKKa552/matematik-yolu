@@ -1133,8 +1133,20 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     const cx = 90, cy = 85, R = 66;
     let s = `<circle cx="${cx}" cy="${cy}" r="${R}" class="f2 ln"/><circle cx="${cx}" cy="${cy}" r="4" class="dot"/><text x="${cx - 6}" y="${cy + 20}" class="tx">O</text>`;
     if (show === 'r') s += `<line x1="${cx}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln"/><text x="${cx + R / 2}" y="${cy - 8}" class="tx" text-anchor="middle">${val}</text>`;
-    if (show === 'd') s += `<line x1="${cx - R}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln"/><text x="${cx + R / 2}" y="${cy - 8}" class="tx" text-anchor="middle">${val}</text>`;
+    // Çap etiketi çap çizgisinin tam ortasında (önceden sağ yarının üstündeydi ve yarıçapı gösteriyormuş gibi duruyordu)
+    if (show === 'd') s += `<line x1="${cx - R}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln"/><circle cx="${cx - R}" cy="${cy}" r="3.5" class="dot"/><circle cx="${cx + R}" cy="${cy}" r="3.5" class="dot"/><text x="${cx}" y="${cy - 10}" class="tx" text-anchor="middle">${val}</text>`;
     return svg(180, 172, s, 'çember');
+  };
+  // Aynı merkezli iki çember: birincinin çapı (yazılı), ikincinin yarıçapı (?) kesikli
+  V.ikiCember = (r1, r2, capYazi) => {
+    const cx = 130, cy = 92, k = 76 / Math.max(r1, r2), R1 = r1 * k, R2 = r2 * k;
+    let s = `<circle cx="${cx}" cy="${cy}" r="${R1}" class="f2 ln"/><circle cx="${cx}" cy="${cy}" r="${R2}" fill="none" class="ln" stroke-dasharray="6 5"/>`;
+    s += `<line x1="${cx - R1}" y1="${cy}" x2="${cx + R1}" y2="${cy}" class="ln"/><circle cx="${cx - R1}" cy="${cy}" r="3.5" class="dot"/><circle cx="${cx + R1}" cy="${cy}" r="3.5" class="dot"/><text x="${cx}" y="${cy - 9}" class="tx" text-anchor="middle">${capYazi}</text>`;
+    const a = rad(55), x = cx + R2 * Math.cos(a), y = cy + R2 * Math.sin(a);
+    s += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="ln" stroke-dasharray="5 4"/><text x="${(cx + x) / 2 + 10}" y="${(cy + y) / 2 - 2}" class="tx">?</text>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="4" class="dot"/><text x="${cx - 20}" y="${cy + 20}" class="tx">O</text>`;
+    s += `<text x="8" y="16" class="tx sm">— 1. çember</text><text x="8" y="32" class="tx sm">- - 2. çember</text>`;
+    return svg(260, 184, s, 'aynı merkezli iki çember');
   };
   // Dikdörtgen (a x b), opsiyonel kareli
   V.rect = (a, b, unit, grid) => {
@@ -1395,6 +1407,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     kontrol_yuzeysel: { t: 'Cevabın büyüklüğünü kontrol sanma', fix: 'Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin.' },
     ara_sonuc: { t: 'Ara sonucu cevap sanma', fix: 'Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et.' },
     kalan_yok: { t: 'Bölmede kalanı hesaba katmama', fix: 'Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır.' },
+    hata_ilk: { t: 'Hatanın başladığı yeri değil, sonucunu seçme', fix: 'İlk hatadan sonraki adımlar o hatayı taşıdığı için onlar da yanlış görünür. Hatanın başladığı yeri bulmak için adımları baştan sırayla kontrol et: ilk yanlış olan hangisi?' },
     hata_yeri: { t: 'Doğru bir adımı hatalı sanma', fix: 'Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır.' },
     aci_isim: { t: 'Açıyı adlandırırken köşe harfini yanlış yere yazma', fix: 'Açı üç harfle adlandırılırken köşenin harfi her zaman ortaya yazılır: köşesi B olan açı ABC ya da CBA açısıdır. Tek harfle yalnız köşe harfi yazılır: B açısı.' },
     paralel_kesen: { t: 'Paralel doğruları kesen doğrunun açılarını karıştırma', fix: 'İki paralel doğruyu bir doğru kestiğinde oluşan dar açıların hepsi birbirine eş, geniş açıların hepsi de birbirine eştir. Bir dar açı ile bir geniş açının toplamı 180°\'dir.' },
@@ -1483,8 +1496,13 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       ]);
       return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Çember: sadece kenar çizgisi. Daire: çember + içi.', 'Yarıçap: merkez → çember. Çap: çemberden çembere, merkezden geçerek.'] });
     }
-    const d = 2 * ri(4, 12) * 2, r2 = d / 4;
-    return Q({ type: 'input', prompt: `Çapı ${d} cm olan bir çemberle aynı merkezli ikinci bir çemberin yarıçapı, birinci çemberin yarıçapının yarısı kadardır. İkinci çemberin ÇAPI kaç cm'dir?`, answer: String(2 * r2), unit: 'cm', inputMis: [{ v: r2, mis: 'cap_yaricap' }, { v: d, mis: 'cap_yaricap' }], steps: [`1. çemberin yarıçapı: ${d} ÷ 2 = ${d / 2} cm`, `2. çemberin yarıçapı: ${d / 2} ÷ 2 = ${r2} cm`, `2. çemberin çapı: 2 × ${r2} = ${2 * r2} cm`] });
+    // Aynı merkezli çember (25.10.2026): eski sürümde cevap hep birinci çemberin yarıçapına eşit çıkıyordu (çapı 16 → 8);
+    // çapla yarıçapı karıştıran çocuk da doğruyu buluyordu. Şimdi ikinci yarıçap = birinci yarıçap ± k.
+    const r1 = ri(5, 12), uzun = Math.random() < 0.5, k = ri(2, uzun ? 5 : Math.min(4, r1 - 3)), r2 = uzun ? r1 + k : r1 - k, d = 2 * r1, cev = 2 * r2;
+    return Q({ type: 'input', prompt: `Çapı ${d} cm olan bir çemberle aynı merkezli ikinci bir çemberin yarıçapı, birinci çemberin yarıçapından ${k} cm daha ${uzun ? 'uzundur' : 'kısadır'}. İkinci çemberin ÇAPI kaç cm'dir?`,
+      visual: V.ikiCember(r1, r2, d + ' cm'), answer: String(cev), unit: 'cm',
+      inputMis: [{ v: r2, mis: 'cap_yaricap' }, { v: uzun ? d + k : d - k, mis: 'cap_yaricap' }, { v: uzun ? r1 * 4 + k : r1 * 4 - k, mis: 'cap_yaricap' }],
+      steps: [`1. çemberin yarıçapı = ${d} ÷ 2 = ${r1} cm`, `2. çemberin yarıçapı = ${r1} ${uzun ? '+' : '−'} ${k} = ${r2} cm`, `2. çemberin çapı = 2 × ${r2} = ${cev} cm`] });
   };
   GEN.g_dikme_paralel = (lv) => {
     if (lv === 1 || lv === 2) {
@@ -2534,12 +2552,13 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   const HSORU = (sc) => `<span class="hsoru">${sc.soru}</span><br>`;
   const hataBul = (sc, ad) => {
     const temiz = Math.random() < 0.2, h = pick(sc.hatalar), sat = temiz ? sc.dogru : h.satirlar;
-    const options = sat.map((s, i) => (!temiz && i === h.at) ? { t: ADIM(i, s), ok: true } : { t: ADIM(i, s), ok: false, mis: 'hata_yeri' });
+    // İlk hatadan SONRAKİ satırlar da yanlıştır (hatayı taşır); onları seçmek "doğru adımı hatalı sanma" değil, "hatanın başladığı yeri kaçırma"dır
+    const options = sat.map((s, i) => (!temiz && i === h.at) ? { t: ADIM(i, s), ok: true } : { t: ADIM(i, s), ok: false, mis: (!temiz && i > h.at) ? 'hata_ilk' : 'hata_yeri' });
     options.push(temiz ? { t: HATA_YOK, ok: true } : { t: HATA_YOK, ok: false, mis: h.mis });
-    return Q({ hata: 'bul', ad, fixed: true, prompt: `${HSORU(sc)}<b>${ad}</b> böyle çözdü. Çözümde hatalı bir adım var mı?`, options,
+    return Q({ hata: 'bul', ad, fixed: true, prompt: `${HSORU(sc)}<b>${ad}</b> böyle çözdü. Hata ilk hangi adımda başlıyor? Hiç hata yoksa son şıkkı seç.`, options,
       hataAt: temiz ? null : h.at, duzeltme: temiz ? null : sc.dogru[h.at],
       hint: 'Her adımı kendin yeniden hesapla. Sonucu bozan ilk adımı ara.',
-      steps: temiz ? ['Bu çözümde hata yok, her adım doğru.', `Doğru sonuç: ${sc.sonuc}`] : [`Hata ${h.at + 1}. adımda: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`, `Doğru sonuç: ${sc.sonuc}`] });
+      steps: temiz ? ['Bu çözümde hata yok, her adım doğru.', `Doğru sonuç: ${sc.sonuc}`] : [`Hata ${h.at + 1}. adımda başlıyor: ${h.satirlar[h.at]}`, `Doğrusu: ${sc.dogru[h.at]}`].concat(h.at < sat.length - 1 ? [`Sonraki adımlar bu hatayı taşıdığı için onlar da yanlış.`] : []).concat([`Doğru sonuç: ${sc.sonuc}`]) });
   };
   const kimHakli = (sc, a1, a2) => {
     const h = pick(sc.hatalar), ilkDogru = Math.random() < 0.5;
@@ -5306,7 +5325,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   function defterHTML(q) {
     return `<div class="defterler ${q.defter.length > 1 ? 'iki' : ''}">${q.defter.map(d => `<div class="defter"><div class="dad">✏️ ${esc(U.wk(d.ad, 'in'))} defteri</div><ol>${d.satirlar.map((x, i) => `<li class="${d.isaret === i || (A.fb && d.hata === i) ? 'isaret' : ''}">${x}</li>`).join('')}</ol></div>`).join('')}</div>`;
   }
-  const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
+  const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.filter(x => !/^Doğru sonuç/.test(x)).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
   const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2, cap_yaricap: 2 };
@@ -5551,7 +5570,9 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (navigator.vibrate) try { navigator.vibrate(tier === 'normal' || tier === 'calm' ? 25 : [30, 40, 60]); } catch (e) { }
     if (A.ses.mode === 'speed') return;
     const sh = seriSahnesi(st); if (sh && !q.rescue) setTimeout(() => sahneOyna(sh), 350);
-    if (tier === 'fire') piSay('seri3'); else if (tier === 'unstop') piSay('seri5'); else if (tier === 'legend') piSay('seri8'); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
+    // Sayı söyleyen replik ("Üç doğru üst üste!") yalnız seri tam o sayıdayken; 4, 6, 7… doğruda sayısız replik (25.10.2026)
+    const seriSoyle = (grup, sayili, n) => { const arr = PI[grup] || [], sayisiz = arr.map((_, i) => i).filter(i => i !== sayili), i = st === n ? Math.floor(Math.random() * arr.length) : pick(sayisiz); if (arr[i]) say(`pi_${grup}_${i + 1}`, arr[i], false); };
+    if (tier === 'fire') seriSoyle('seri3', 0, 3); else if (tier === 'unstop') seriSoyle('seri5', 1, 5); else if (tier === 'legend') seriSoyle('seri8', -1, 8); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   function checkAnswer() {

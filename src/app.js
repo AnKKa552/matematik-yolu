@@ -1160,7 +1160,7 @@
   function defterHTML(q) {
     return `<div class="defterler ${q.defter.length > 1 ? 'iki' : ''}">${q.defter.map(d => `<div class="defter"><div class="dad">✏️ ${esc(U.wk(d.ad, 'in'))} defteri</div><ol>${d.satirlar.map((x, i) => `<li class="${d.isaret === i || (A.fb && d.hata === i) ? 'isaret' : ''}">${x}</li>`).join('')}</ol></div>`).join('')}</div>`;
   }
-  const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.slice(0, 2).join('<br>')}</div>` : '';
+  const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.filter(x => !/^Doğru sonuç/.test(x)).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
   const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2, cap_yaricap: 2 };
@@ -1405,7 +1405,9 @@
     if (navigator.vibrate) try { navigator.vibrate(tier === 'normal' || tier === 'calm' ? 25 : [30, 40, 60]); } catch (e) { }
     if (A.ses.mode === 'speed') return;
     const sh = seriSahnesi(st); if (sh && !q.rescue) setTimeout(() => sahneOyna(sh), 350);
-    if (tier === 'fire') piSay('seri3'); else if (tier === 'unstop') piSay('seri5'); else if (tier === 'legend') piSay('seri8'); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
+    // Sayı söyleyen replik ("Üç doğru üst üste!") yalnız seri tam o sayıdayken; 4, 6, 7… doğruda sayısız replik (25.10.2026)
+    const seriSoyle = (grup, sayili, n) => { const arr = PI[grup] || [], sayisiz = arr.map((_, i) => i).filter(i => i !== sayili), i = st === n ? Math.floor(Math.random() * arr.length) : pick(sayisiz); if (arr[i]) say(`pi_${grup}_${i + 1}`, arr[i], false); };
+    if (tier === 'fire') seriSoyle('seri3', 0, 3); else if (tier === 'unstop') seriSoyle('seri5', 1, 5); else if (tier === 'legend') seriSoyle('seri8', -1, 8); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   function checkAnswer() {

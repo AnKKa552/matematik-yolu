@@ -193,8 +193,20 @@
     const cx = 90, cy = 85, R = 66;
     let s = `<circle cx="${cx}" cy="${cy}" r="${R}" class="f2 ln"/><circle cx="${cx}" cy="${cy}" r="4" class="dot"/><text x="${cx - 6}" y="${cy + 20}" class="tx">O</text>`;
     if (show === 'r') s += `<line x1="${cx}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln"/><text x="${cx + R / 2}" y="${cy - 8}" class="tx" text-anchor="middle">${val}</text>`;
-    if (show === 'd') s += `<line x1="${cx - R}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln"/><text x="${cx + R / 2}" y="${cy - 8}" class="tx" text-anchor="middle">${val}</text>`;
+    // Çap etiketi çap çizgisinin tam ortasında (önceden sağ yarının üstündeydi ve yarıçapı gösteriyormuş gibi duruyordu)
+    if (show === 'd') s += `<line x1="${cx - R}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln"/><circle cx="${cx - R}" cy="${cy}" r="3.5" class="dot"/><circle cx="${cx + R}" cy="${cy}" r="3.5" class="dot"/><text x="${cx}" y="${cy - 10}" class="tx" text-anchor="middle">${val}</text>`;
     return svg(180, 172, s, 'çember');
+  };
+  // Aynı merkezli iki çember: birincinin çapı (yazılı), ikincinin yarıçapı (?) kesikli
+  V.ikiCember = (r1, r2, capYazi) => {
+    const cx = 130, cy = 92, k = 76 / Math.max(r1, r2), R1 = r1 * k, R2 = r2 * k;
+    let s = `<circle cx="${cx}" cy="${cy}" r="${R1}" class="f2 ln"/><circle cx="${cx}" cy="${cy}" r="${R2}" fill="none" class="ln" stroke-dasharray="6 5"/>`;
+    s += `<line x1="${cx - R1}" y1="${cy}" x2="${cx + R1}" y2="${cy}" class="ln"/><circle cx="${cx - R1}" cy="${cy}" r="3.5" class="dot"/><circle cx="${cx + R1}" cy="${cy}" r="3.5" class="dot"/><text x="${cx}" y="${cy - 9}" class="tx" text-anchor="middle">${capYazi}</text>`;
+    const a = rad(55), x = cx + R2 * Math.cos(a), y = cy + R2 * Math.sin(a);
+    s += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="ln" stroke-dasharray="5 4"/><text x="${(cx + x) / 2 + 10}" y="${(cy + y) / 2 - 2}" class="tx">?</text>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="4" class="dot"/><text x="${cx - 20}" y="${cy + 20}" class="tx">O</text>`;
+    s += `<text x="8" y="16" class="tx sm">— 1. çember</text><text x="8" y="32" class="tx sm">- - 2. çember</text>`;
+    return svg(260, 184, s, 'aynı merkezli iki çember');
   };
   // Dikdörtgen (a x b), opsiyonel kareli
   V.rect = (a, b, unit, grid) => {
