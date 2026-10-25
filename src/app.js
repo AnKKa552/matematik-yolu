@@ -122,14 +122,19 @@
     }
     return (AUDIO.blob[url] = URL.createObjectURL(await res.blob()));
   };
+  const SIRA_AD = ['Bir', 'İki', 'Üç', 'Dört', 'Beş'];
+  const sikMetinleri = (q) => !A.st.settings.siklar || !q.options || ['cmp', 'tf'].includes(q.type) || q.hata === 'kim' || q.cards ? []
+    : q.options.map((o, i) => (A.elenen || []).includes(i) ? null : `${SIRA_AD[i] || i + 1}: ${U.sikSesi(o.t)}`).filter(Boolean).filter(t => t.length <= 250);
   const soruOku = () => {
     const q = A.q; if (!q || !A.st.settings.voice) return;
     const metin = q.okuma || q.prompt, yedek = metin + '. ' + (['input', 'kes', 'match', 'tablo', 'kur', 'olc', 'graf'].includes(q.type) ? '' : q.type === 'cmp' ? `${q.cmp[0]} ile ${q.cmp[1]}` : (q.options || []).map(o => o.t).join('. '));
     if (!CL || !CL.soruDepo || !window.crypto || !crypto.subtle) return speak(yedek);
     stopVoice(); const tok = AUDIO.tok, pk = () => document.querySelectorAll('.pikonus');
     pk().forEach(e => e.classList.add('dusunuyor'));
-    zamanli(soruSesiAl(U.soruSesi(metin)), 8000)
-      .then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); })
+    // "Pi şıkları da okusun" açıksa her şık ayrı bir kısa kayıt olur ("İki: Dar açı."); aynı şık başka soruda gelince kredi harcanmaz
+    const parcalar = [U.soruSesi(metin)].concat(sikMetinleri(q));
+    zamanli(Promise.all(parcalar.map(soruSesiAl)), 8000 + 2500 * (parcalar.length - 1))
+      .then(async (ul) => { for (const u of ul) { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); await new Promise((ok) => { a.onended = ok; a.onerror = ok; a.play().catch(ok); }); await new Promise(r => setTimeout(r, 250)); } })
       .catch(() => { if (tok === AUDIO.tok) say(null, yedek); })
       .finally(() => pk().forEach(e => e.classList.remove('dusunuyor')));
   };
@@ -746,6 +751,8 @@
       <h2 class="sect">Ayarlar</h2><div class="card list">
         <label class="check"><input type="checkbox" data-act="set-sound" ${A.st.settings.sound ? 'checked' : ''}> Ses efektleri</label>
         <label class="check"><input type="checkbox" data-act="set-voice" ${A.st.settings.voice ? 'checked' : ''}> Sesli anlatım (Pi soruları okusun)</label>
+        <label class="check"><input type="checkbox" data-act="set-siklar" ${A.st.settings.siklar ? 'checked' : ''} ${A.st.settings.voice ? '' : 'disabled'}> <span>Pi şıkları da okusun <span class="muted sm">(🔊'ya dokununca)</span></span></label>
+        <label class="check"><input type="checkbox" data-act="set-kolay" ${A.st.settings.kolay ? 'checked' : ''}> <span>Okuma kolaylığı <span class="muted sm">(büyük ve aralıklı yazı)</span></span></label>
         ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
@@ -1296,7 +1303,13 @@
   }
 
   /* =================== RENDER =================== */
+  // Okuma kolaylığı: daha büyük yazı, geniş harf/kelime/satır aralığı, Lexend yazı tipi (yalnız açılınca indirilir; yoksa Nunito kalır)
+  function kolayUygula() {
+    const on = !!(A.st && A.st.settings && A.st.settings.kolay); document.documentElement.classList.toggle('kolay', on);
+    if (on && !document.getElementById('lexend')) { const l = document.createElement('link'); l.id = 'lexend'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap'; document.head.appendChild(l); }
+  }
   function render() {
+    kolayUygula();
     let h = '';
     if (!A.st.profile) h = viewOnboard();
     else if (A.view === 'lesson') h = viewLesson();
@@ -1512,7 +1525,9 @@
       case 'p-mix': startSession('mix', SKILLS.find(s => A.st.skills[s.id].n > 0).id); break;
       case 'p-place': startSession('placement', null); break;
       case 'set-sound': A.st.settings.sound = el.checked; save(); break;
-      case 'set-voice': A.st.settings.voice = el.checked; save(); break;
+      case 'set-voice': A.st.settings.voice = el.checked; save(); render(); break;
+      case 'set-siklar': A.st.settings.siklar = el.checked; save(); if (el.checked) toast('Soruda 🔊\'ya dokununca Pi şıkları da okuyacak.'); break;
+      case 'set-kolay': A.st.settings.kolay = el.checked; save(); kolayUygula(); break;
       case 'goal': A.st.dailyGoal = +v; save(); render(); break;
       case 'album': A.albumTema = A.albumTema || A.theme || THEMES[0].id; A.modal = albumModal(); render(); break;
       case 'album-tema': A.albumTema = v; A.modal = albumModal(); render(); break;

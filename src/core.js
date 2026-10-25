@@ -93,6 +93,12 @@
   U.soruSesi = (html) => U.toSpeech(html)
     .replace(/\bcm\b'?/g, 'santimetre').replace(/\bmm\b'?/g, 'milimetre').replace(/\bkm\b'?/g, 'kilometre').replace(/(\d) ?m\b'?/g, '$1 metre')
     .replace(/\bkg\b'?/g, 'kilogram').replace(/\bTL'd[iı]r/g, 'liradır').replace(/\bTL'l[iı]k/g, 'liralık').replace(/\bTL'y[ea]/g, 'liraya').replace(/\bTL's[iı]/g, 'lirası').replace(/\bTL'n[iı]n/g, 'liranın').replace(/\bTL\b'?/g, 'lira').replace(/eşittir \?/g, 'eşittir kaç?').replace(/\d*▢[▢\s\d]*/g, ' kutulu ').replace(/\(([^()]*\d[^()]*)\)/g, ' parantez aç, $1 parantez kapa, ').replace(/\(([^()]*)\)/g, ', $1, ').replace(/→/g, ', ').replace(/[\[\]|]/g, ' ').replace(/\s+/g, ' ').trim();
+  // Şık okuması (25.10.2026): soru-sesi sunucusunun kabul ettiği harflere indirger. Soru kökünde kullanılmaz
+  // (soru kökü sesleri metnin özetiyle saklandığı için metni değişirse eski kayıtlar boşa gider).
+  U.sikSesi = (html) => U.soruSesi(html).replace(/\b[A-Z]{2,8}\b/g, (m) => m.split('').join(' '))
+    .replace(/\s*<\s*/g, ' küçüktür ').replace(/\s*>\s*/g, ' büyüktür ').replace(/\s*=\s*/g, ' eşittir ')
+    .replace(/([A-Za-zÇÖÜçöüĞğİıŞş])\/([A-Za-zÇÖÜçöüĞğİıŞş])/g, '$1 ya da $2').replace(/\//g, ' ').replace(/;/g, ',')
+    .replace(/[^ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]/g, ' ').replace(/\s+([,.!?])/g, '$1').replace(/\s+/g, ' ').trim();
   U.cap = (s) => s.charAt(0).toLocaleUpperCase('tr-TR') + s.slice(1);
 
   /* =================== SVG GÖRSELLER =================== */

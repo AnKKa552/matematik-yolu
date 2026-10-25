@@ -14,7 +14,7 @@ ok(E.okulGeride(st).includes('n_okuma') && !E.okulGeride(st).includes('n_carpbol
 st.okul = { mod: 'kapali' }; ok(E.okulKonusu(st) === null, 'Kapalı');
 st.okul = { mod: 'takvim' };
 // Temel yoklaması: çarpması zayıf çocuk, denk kesirde zorlanıyor
-st.skills.f_tur.pL = 0.9; st.skills.f_tur.n = 10; st.skills.f_tur.recent = [1,1,1,1,1,1,1,1,1,1];
+st.skills.f_tur.pL = 0.9; st.skills.f_tur.n = 10; st.skills.f_tur.recent = [1,1,1,1,1,1,1,1,1,1]; st.skills.f_tur.last = Date.now(); // yeni çalışılmış: arada tekrar sorusu gelip senaryoyu bozmasın
 ok(E.temelAday(st, 'f_denk') === 'n_carpbol', 'Aday: hiç ölçülmemiş çarpma (kesir türleri sağlam)');
 const ses = E.newSession(st, 'lesson', 'f_denk');
 const yanlis = (q) => E.record(st, ses, q, { ok: false, mis: 'genel' }, 9000, false, 'cozum');

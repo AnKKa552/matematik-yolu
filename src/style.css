@@ -916,3 +916,9 @@ div.plan-satir{cursor:default}
 .vis.ds .ds-cerceve{fill:none;stroke:var(--accent);stroke-width:2.5}
 .vis.ds .ds-gri{fill:var(--muted)} .vis.ds .ds-mono{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre}
 .vis.ds .tx.sm{font-size:12px}
+
+/* Okuma kolaylığı (25.10.2026): ayarlardan açılır. Büyük yazı ve geniş aralıklar; Lexend gelmezse Nunito kalır. */
+html.kolay body{font-family:'Lexend','Nunito',system-ui,sans-serif;font-size:19px;line-height:1.65;letter-spacing:.02em;word-spacing:.12em}
+html.kolay .speech,html.kolay .opt,html.kolay .hintbox,html.kolay .ikinci,html.kolay .sheet{font-size:1.06em;line-height:1.6;letter-spacing:.02em;word-spacing:.12em}
+html.kolay .opt{text-align:left;padding-top:14px;padding-bottom:14px}
+html.kolay .card p,html.kolay .muted{line-height:1.65}

@@ -163,6 +163,11 @@ const SKILLS_OK = (id) => id in GEN;
   const eksik = new Set(); let uzun = 0;
   for (const g of Object.values(GEN)) for (const lv of [1, 2, 3]) for (let r = 0; r < 200; r++) { const m = U.soruSesi(g(lv).prompt); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) uzun++; (m.toLocaleLowerCase('tr-TR').match(/[a-zçğıöşüâîû]+/g) || []).forEach(w => { if (!SZ.has(w)) eksik.add(w); }); }
   { const { ATOLYE } = require('../src/generators.js'); for (const id of ATOLYE.ids) for (let r = 0; r < 100; r++) for (const q of ATOLYE.sorular(id)) (U.soruSesi(q.okuma || q.prompt).toLocaleLowerCase('tr-TR').match(/[a-zçğıöşüâîû]+/g) || []).forEach(w => { if (!SZ.has(w)) eksik.add(w); }); }
+  // Şıklar ("Pi şıkları da okusun"): uygulamanın gönderdiği biçim "İki: <şık>" (U.sikSesi) sunucunun kabul ettiği harflerle yazılmalı
+  { const { HATA: HA, ATOLYE: AT } = require('../src/generators.js'); const sik = (q) => { if (!q.options || ['cmp', 'tf'].includes(q.type)) return; for (const o of q.options) { const m = 'İki: ' + U.sikSesi(o.t); if (m.length > 260 || !/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(m)) uzun++; (m.toLocaleLowerCase('tr-TR').match(/[a-zçğıöşüâîû]+/g) || []).forEach(w => { if (!SZ.has(w)) eksik.add(w); }); } };
+    for (const g of Object.values(GEN)) for (const lv of [1, 2, 3]) for (let r = 0; r < 150; r++) sik(g(lv));
+    for (const id of HA.ids) for (const lv of [2, 3]) for (const tur of ['bul', 'neden']) for (let r = 0; r < 20; r++) sik(HA.q(id, lv, tur));
+    for (const id of AT.ids) for (let r = 0; r < 40; r++) for (const q of AT.sorular(id)) sik(q); }
   if (eksik.size > 3 || uzun) { console.log('SORU SESİ SÖZLÜĞÜ ESKİ: node tools/soru_sozluk.js çalıştır ve soru-sesi fonksiyonunu yeniden yükle.', [...eksik].slice(0, 10), 'uygunsuz metin:', uzun); errors++; }
   else if (eksik.size) console.log('Uyarı: sözlükte olmayan nadir kelime(ler):', [...eksik]); }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);

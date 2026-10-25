@@ -6,7 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import { SOZLUK } from "./sozluk.ts";
 
 const VOICE = "A2XgcJ6lQVEFeIaIUyrc", MODEL = "eleven_v4", AYAR = { stability: 0.5, similarity_boost: 0.8, use_speaker_boost: true };
-const CIHAZ_ADET = +(Deno.env.get("SORU_SESI_CIHAZ_ADET") ?? 40);
+const CIHAZ_ADET = +(Deno.env.get("SORU_SESI_CIHAZ_ADET") ?? 100);
 const TOPLAM_KARAKTER = +(Deno.env.get("SORU_SESI_TOPLAM_KARAKTER") ?? 6000);
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "content-type, apikey, authorization, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const yanit = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
