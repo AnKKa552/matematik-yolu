@@ -865,3 +865,15 @@ div.plan-satir{cursor:default}
 .plan-satir.tamam .qbar i{background:var(--ok,#22C55E)}
 .plan-ic{font-size:24px;width:34px;text-align:center;flex:none}
 .plan-not{text-align:center}
+
+/* ---------- Aile kodu ile bulut yedeği (25.10.2026) ---------- */
+.aile-kart{margin-top:14px}
+.aile-kod{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:900;letter-spacing:.08em;text-align:center;background:var(--brand-t);color:var(--brand);border:2px dashed var(--brand);border-radius:14px;padding:12px 8px;user-select:all;word-break:break-all}
+.aile-onay{display:flex;gap:10px;align-items:flex-start;margin-top:8px;cursor:pointer}
+.aile-onay input{width:22px;height:22px;flex:none;margin-top:2px}
+.aile-detay summary{cursor:pointer;min-height:32px;display:flex;align-items:center}
+.aile-bulunan{margin-top:12px;border:2px solid var(--brand)}
+.aile-ozet{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.aile-ozet span{background:var(--brand-t);border-radius:999px;padding:4px 10px;font-weight:800;font-size:14px}
+.warn-t{color:#B45309}
+.aile-kart a.btn{text-decoration:none;display:grid;place-items:center}

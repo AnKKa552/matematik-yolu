@@ -146,6 +146,17 @@ Uygulama, ilk kez açan bir çocuğun gözünden baştan sona gezildi (her ekran
 - **Haftalık plan** (`E.haftalikPlan`, `planKart` in app.js): her pazartesi 3 hedef seçilir ve hafta boyu sabit kalır, ilerleme canlı: (1) okul konusu (yoksa yoldaki konu) → 2 yıldız; (2) bulunan temel eksiği → 1 yıldız, yoksa en zayıf çalışılmış konu, yoksa okulda geride kalan konu, yoksa tekrar; (3) alışkanlık: haftada N gün (geçen haftanın 1 fazlası, 3–5). Görev sekmesinde "Bugün bunu yap"ın altında; her satır dokununca o işi başlatır. Üçü bitince bir kez +25 elmas (`E.PLAN_ODUL`). Veli alanında "🎯 Kişisel plan" kartı ve rapor metninde "📋 Bu haftanın planı".
 - Test: `node test/test_plan.js` (takvim tarihleri, elle seçim, yoklamanın tetiklenmesi/sayaç/telafi kuralları, plan ve rapor).
 
+### 3.5 Aile kodu ile bulut yedeği (25.10.2026)
+Telefon değişince ilerleme kaybolmasın diye; satış öncesi zorunlu. **E-posta, şifre, hesap yok.**
+- **Neden e-postalı giriş değil:** eski yol (`cloud.js`, Supabase sihirli bağlantı) üç sorun taşıyordu: (1) yeni telefonda çocuk önce kayıt oluyor, boş kayıt "daha yeni" sayılıp buluttakinin **üstüne yazılıyordu** (veri kaybı; düzeltildi: artık toplam XP'si fazla olan tutulur); (2) Supabase'in hazır e-posta servisi saatte birkaç e-posta atar ve yalnız proje ekibine gönderir, gerçek velilere ulaşmaz (özel SMTP + alan adı gerekir); (3) e-postadaki bağlantı kurulu uygulamayı değil tarayıcıyı açar (iPhone'da her zaman). E-postalı giriş kodu duruyor ama arayüzde yalnız zaten giriş yapmış hesaba görünür.
+- **Akış:** Veli alanında (şifreli) "☁️ İlerlemeyi yedekle" kartı → onay kutusu (velinin açık onayı, metin sürümü `aile-yedek-v1`) → cihaz 16 karakterlik **aile kodu** üretir (`crypto.getRandomValues`, alfabe `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, karışan I L O 0 1 yok, ~79 bit, `ABCD-EFGH-JKMN-PQRS` biçiminde gösterilir). Kart kodu gösterir: Kopyala, "Kendime gönder" (WhatsApp), son yedek zamanı, Şimdi yedekle, Yedeği sil. Yeni telefonda karşılama ekranında **"📲 Başka telefonda kullanıyordum"** (ya da Veli alanında "kodum var") → kod → önce **özet** (ad, XP, konu, seri) → "Evet, yükle". Yazarken küçük harf, boşluk, O/0 ve I/L/1 karışıklığı tolere edilir.
+- **Buluta ne gider:** `aileTemiz`: çocuğun durum nesnesi; **çıkarılanlar:** veli adı, telefon, e-posta, onay alanı, veli şifresi (`st.veli`), bildirim aboneliği, aile kodunun kendisi. Geri yüklerken bu telefondaki veli bilgileri, şifre ve bildirim korunur.
+- **Sunucu** (`sunucu/supabase/aile_yedek.sql`): tablo `aile_yedek` (anahtar = kodun SHA-256 özeti; kod saklanmaz), `aile_yedek_deneme` (ağ özeti başına günde 30 başarısız deneme sınırı). Fonksiyonlar `aile_yedek_kaydet / getir / sil` (SECURITY DEFINER, anon'a açık, tabloya doğrudan erişim yok), 600 KB sınırı, 18 ay dokunulmayan yedek her ay silinir (pg_cron `aile-yedek-temizle`).
+- **Eşitleme:** her `save()`'den 4 sn sonra gönderilir (`kirli` bayrağı), uygulama arka plana geçince hemen; açılışta ve geri dönünce sürüm bakılır, başka cihaz daha yeni kaydettiyse yüklenir. **Çakışma** (iki cihaz arada ayrı ayrı ilerledi): sunucu üstüne yazmayı reddeder (`p_onceki`), uygulama toplam XP'si fazla olanı tutar. Tek çocukta nadirdir; iki cihazdaki ayrı ilerleme birleştirilmez (bilinçli basitlik).
+- Kart, sunucuda fonksiyonlar kurulu değilse görünmez (`aileSunucuBak`: geçersiz kodla `aile_yedek_sil` → yan etkisiz yoklama).
+- Test: `python3 test/e2e_aile.py` (iki telefon, sahte sunucu aynı kurallarla: onaysız açılmaz, veli bilgisi gitmez, yanlış kod, özet, geri yükleme, iki yönlü eşitleme, çakışma, silme).
+- **KVKK:** onay metni ve "Neler saklanır?" açıklaması yayın öncesi hukukçuya onaylatılmalı (§1-6).
+
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 
 ### 4.1 Ustalık: Bayesian Knowledge Tracing (BKT)
@@ -400,6 +411,7 @@ build.py                  ← dist/index.html (PWA) + dist/artifact.html
 test/test_generators.js   ← 63 000 soruluk doğrulama
 test/sim_engine.js        ← farklı öğrenci tipleriyle motor simülasyonu
 test/test_plan.js         ← okul takvimi, ön bilgi yoklaması, haftalık plan testleri
+test/e2e_aile.py          ← aile kodu ile yedek: iki telefonlu uçtan uca test (sahte sunucu)
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
 ```
 
@@ -442,7 +454,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 12. Prototipte bilinçli olarak eksik bırakılanlar
-- Veriler yalnızca cihazda; cihaz değişince ilerleme taşınmaz (Faz B).
+- Veriler cihazda; veli isterse aile koduyla buluta yedeklenir ve yeni telefona taşınır (§3.5). Gerçek hesap (e-postalı giriş) özel SMTP ister.
 - Lig rakipleri demo (ekranda "(demo)" yazar).
 - Veli raporu tek dokunuşla WhatsApp/Telegram/e-posta açar; **otomatik** haftalık gönderim sunucu ister.
 - BKT parametreleri literatürdeki tipik değerlerle elle ayarlandı; gerçek öğrenci verisiyle (pyBKT) yeniden kalibre edilecek.
@@ -451,7 +463,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → (mümkünse) `python3 test/e2e.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → (mümkünse) `python3 test/e2e.py` ve `python3 test/e2e_aile.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.

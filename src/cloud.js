@@ -51,8 +51,9 @@
   C.cek = async (yerel) => {
     if (!C.ogrenci) return null;
     const { data } = await sb.from('ogrenci_durum').select('durum, surum').eq('ogrenci_id', C.ogrenci).maybeSingle();
-    if (data && data.surum > (yerel.savedAt || 0)) return data.durum;
-    return null;
+    // Hangisinin tutulacağına uygulama karar verir (toplam XP'si fazla olan). Eskiden yalnız 'daha yeni' olan alınıyordu:
+    // yeni telefonda boş kayıt daha yeni sayılıp buluttaki gerçek ilerlemenin üstüne yazılıyordu (25.10.2026 düzeltmesi).
+    return data ? data.durum : null;
   };
   // Kaydet (3 sn gecikmeli, art arda kayıtları birleştirir)
   C.kaydet = (st) => {

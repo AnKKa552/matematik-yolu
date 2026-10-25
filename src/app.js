@@ -9,7 +9,7 @@
   const A = { st: E.load(), view: 'home', tab: 'yol', theme: 't1', ses: null, q: null, sel: null, input: '', hinted: false, showHint: false, fb: null, modal: null, onb: { step: 0, data: {} }, t0: 0, timer: null, mstate: '' };
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const CL = window.MY_CLOUD;
-  const save = () => { E.save(A.st); if (CL) CL.kaydet(A.st); };
+  const save = () => { E.save(A.st); if (CL) CL.kaydet(A.st); if (A.st.aile && A.st.aile.kod) { A.st.aile.kirli = true; aileZamanla(); } };
   const todayXP = () => A.st.days[(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })()] || 0;
 
   /* ---------------- Ses efektleri (WebAudio, dosyasız) ---------------- */
@@ -634,6 +634,102 @@
   const dkS = (t) => +t.slice(0, 2) * 60 + +t.slice(3);
   const rpc = (fn, args) => fetch(MY_CONFIG.supabaseUrl + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: MY_CONFIG.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) })
     .then(r => r.ok ? r.text().then(t => t ? JSON.parse(t) : null) : Promise.reject(new Error('sunucu ' + r.status)));
+  /* ---------------- Aile kodu ile bulut yedeği (25.10.2026) ----------------
+     E-posta/şifre yok. Veli onay verir, cihaz tahmin edilemez 16 karakterlik bir kod üretir; sunucu yalnız kodun özetini saklar.
+     Yeni telefonda kod girilince ilerleme geri gelir. Veli adı, telefon, e-posta, veli şifresi ve bildirim adresi buluta GİTMEZ.
+     Eşitleme: her kayıttan 4 sn sonra gönderilir; açılışta ve uygulamaya dönülünce başka cihazın daha yeni kaydı var mı bakılır.
+     İki cihaz arada ayrı ayrı ilerlediyse (çakışma) toplam XP'si fazla olan tutulur (tek çocuk için nadir durum). */
+  const AILE_RIZA = 'aile-yedek-v1', AILE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // karışan harfler yok: I L O 0 1
+  const aileAyarli = () => !!(window.MY_CONFIG && MY_CONFIG.supabaseUrl && MY_CONFIG.anonKey);
+  // Sunucuda yedek fonksiyonları kurulu mu? (yan etkisi olmayan çağrı: geçersiz kodla silme → false). Kurulu değilse kart görünmez.
+  let aileSunucu = null;
+  const aileSunucuBak = () => aileAyarli() ? rpc('aile_yedek_sil', { p_kod: 'x' }).then(() => { const ilk = aileSunucu !== true; aileSunucu = true; if (ilk && A.view !== 'lesson') render(); }, () => { aileSunucu = false; }) : Promise.resolve();
+  const aileHazir = () => aileAyarli() && (aileSunucu === true || !!(A.st.aile && A.st.aile.kod));
+  const aileKodUret = () => { let k = ''; while (k.length < 16) { const b = new Uint8Array(32); crypto.getRandomValues(b); for (const x of b) if (x < 248 && k.length < 16) k += AILE_ABC[x % 31]; } return k; };
+  const aileKodYaz = (k) => (k || '').match(/.{1,4}/g).join('-');
+  const aileKodTemiz = (k) => String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+  const aileKodGecerli = (k) => /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{16}$/.test(k);
+  // Buluta giden kopya: veliye ait iletişim ve güvenlik bilgileri çıkarılır
+  const aileTemiz = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.veli; delete c.bildirim; delete c.aile;
+    if (c.profile) { delete c.profile.parentName; delete c.profile.parentPhone; delete c.profile.parentEmail; delete c.profile.kvkk; } return c; };
+  const aileOzet = (d) => ({ ad: (d.profile || {}).name || '—', xp: d.xp || 0, konu: SKILLS.filter(s => d.skills && d.skills[s.id] && d.skills[s.id].n > 0).length, seri: d.streak || 0 });
+  let aileZaman = null, aileGidiyor = false;
+  const aileZamanla = () => { clearTimeout(aileZaman); aileZaman = setTimeout(() => aileGonder().catch(() => { }), 4000); };
+  // Yereli buluttan gelenle değiştir: bu cihaza ait veli bilgileri, şifre, bildirim ve aile kodu korunur
+  function aileYukle(uzak, kod, surum) {
+    const yerel = A.st, p = yerel.profile || {};
+    A.st = Object.assign(E.fresh(), uzak);
+    A.st.profile = Object.assign({}, uzak.profile || {}, { parentName: p.parentName, parentPhone: p.parentPhone, parentEmail: p.parentEmail, kvkk: p.kvkk });
+    if (yerel.veli) A.st.veli = yerel.veli; if (yerel.bildirim) A.st.bildirim = yerel.bildirim;
+    A.st.aile = { kod, onay: (yerel.aile && yerel.aile.onay) || Date.now(), surum, son: Date.now(), kirli: false };
+    E.save(A.st);
+  }
+  async function aileGonder(zorla) {
+    const a = A.st.aile; if (!a || !a.kod || !aileHazir() || aileGidiyor) return;
+    if (!a.kirli && !zorla) return;
+    aileGidiyor = true; a.kirli = false; const surum = A.st.savedAt || Date.now();
+    try {
+      const r = await rpc('aile_yedek_kaydet', { p_kod: a.kod, p_durum: aileTemiz(A.st), p_surum: surum, p_onceki: a.surum || 0, p_riza: AILE_RIZA, p_zorla: !!zorla });
+      if (r && r.ok) { a.surum = r.surum; a.son = Date.now(); a.hata = null; E.save(A.st); }
+      else if (r && r.cakisma) await aileCakisma();
+      else { a.kirli = true; a.hata = (r && r.hata) || 'bilinmiyor'; E.save(A.st); }
+    } catch (e) { a.kirli = true; a.hata = 'ag'; E.save(A.st); }
+    finally { aileGidiyor = false; }
+  }
+  // Başka cihaz arada kaydetti: toplam XP'si fazla olan tutulur
+  async function aileCakisma() {
+    const a = A.st.aile, r = await rpc('aile_yedek_getir', { p_kod: a.kod, p_ozet: false });
+    if (!r || !r.ok) return;
+    if ((r.durum.xp || 0) > (A.st.xp || 0)) { aileYukle(r.durum, a.kod, r.surum); if (A.view !== 'lesson') render(); toast('☁️ Diğer cihazdaki daha ileri ilerlemen yüklendi.'); }
+    else { a.surum = r.surum; a.kirli = true; aileGidiyor = false; await aileGonder(true); }
+  }
+  // Açılışta ve geri dönünce: başka cihaz daha yeni bir kayıt yaptı mı?
+  async function aileKontrol() {
+    const a = A.st.aile; if (!a || !a.kod || !aileHazir() || A.view === 'lesson') return;
+    try {
+      const r = await rpc('aile_yedek_getir', { p_kod: a.kod, p_ozet: true });
+      if (!r || !r.ok) { if (r && r.hata === 'yok') { a.hata = 'yok'; E.save(A.st); } return; }
+      if (r.surum > (a.surum || 0)) { if (a.kirli) return aileCakisma(); const t = await rpc('aile_yedek_getir', { p_kod: a.kod, p_ozet: false }); if (t && t.ok) { aileYukle(t.durum, a.kod, t.surum); render(); toast('☁️ Diğer cihazdaki ilerlemen yüklendi.'); } }
+      else if (a.kirli) aileGonder();
+    } catch (e) { }
+  }
+  async function aileAc() {
+    if (!aileHazir()) return toast('Sunucu bağlantısı yok. İnternetini kontrol et.');
+    const kod = aileKodUret(); A.st.aile = { kod, onay: Date.now(), surum: 0, kirli: true }; save();
+    await aileGonder(true); render();
+    if (A.st.aile && A.st.aile.son) toast('☁️ Yedek açıldı. Aile kodunu güvenli bir yere kaydedin.'); else toast('Yedek kaydedilemedi, internet gelince tekrar denenecek.');
+  }
+  // Kodla geri yükleme: önce özet gösterilir, onaylanınca yüklenir
+  async function aileKodBul(ham) {
+    const kod = aileKodTemiz(ham);
+    if (!aileKodGecerli(kod)) { toast('Aile kodu 16 karakter olmalı (ör. ABCD-EFGH-JKMN-PQRS).'); return null; }
+    if (!aileHazir()) { toast('Sunucu bağlantısı yok.'); return null; }
+    try { const r = await rpc('aile_yedek_getir', { p_kod: kod, p_ozet: false });
+      if (r && r.ok) return { kod, surum: r.surum, durum: r.durum };
+      toast(r && r.hata === 'cok_deneme' ? 'Bugün çok fazla deneme yapıldı. Yarın tekrar deneyin.' : 'Bu koda ait bir yedek bulunamadı. Kodu kontrol edin.'); }
+    catch (e) { toast('Sunucuya ulaşılamadı. İnternetini kontrol et.'); }
+    return null;
+  }
+  const aileBulunanKart = (b, iptal) => { const o = aileOzet(b.durum); return `<div class="card aile-bulunan"><b>☁️ Yedek bulundu</b><div class="aile-ozet"><span>👤 ${esc(o.ad)}</span><span>⚡ ${o.xp} XP</span><span>📚 ${o.konu} konu</span><span>🔥 ${o.seri} gün</span></div><p class="muted sm" style="margin:6px 0 10px">Bu ilerleme bu telefona yüklenecek${A.st.profile && (A.st.xp || 0) > 0 ? `; bu telefondaki ilerlemenin (⚡ ${A.st.xp} XP) yerini alacak` : ''}.</p><button class="btn" data-act="aile-yukle">Evet, yükle</button><button class="btn ghost small" data-act="${iptal}" style="margin-top:6px">Vazgeç</button></div>`; };
+  function aileKart() {
+    if (!aileHazir()) return '';
+    const a = A.st.aile;
+    if (A.aileBulunan) return aileBulunanKart(A.aileBulunan, 'aile-vazgec');
+    if (!a || !a.kod) return `<div class="card aile-kart"><b>☁️ İlerlemeyi yedekle (aile kodu)</b>
+      <p class="muted sm" style="margin:6px 0 8px">Telefon değişirse ya da uygulama silinirse çocuğunuzun ilerlemesi kaybolmasın. E-posta ya da şifre gerekmez: size özel bir <b>aile kodu</b> oluşturulur, yeni telefonda bu kodu yazmanız yeterli.</p>
+      <details class="aile-detay"><summary class="sm"><b>Neler saklanır?</b></summary><p class="sm muted" style="margin:6px 0 0">Saklanan: çocuğunuzun adı ve uygulamadaki öğrenme durumu (konular, yıldızlar, cevap istatistikleri, rozetler). <b>Saklanmayan:</b> sizin adınız, telefonunuz, e-postanız, veli şifreniz. Kodun kendisi sunucuda tutulmaz, yalnız şifrelenmiş özeti tutulur. 18 ay kullanılmayan yedek kendiliğinden silinir; dilediğiniz an "Yedeği sil" ile silebilirsiniz.</p></details>
+      <label class="aile-onay"><input type="checkbox" id="f-aile-onay"> <span class="sm">Velisi olarak, çocuğumun öğrenme verisinin bu amaçla sunucuda saklanmasına onay veriyorum.</span></label>
+      <button class="btn" data-act="aile-ac" style="margin-top:8px">Yedeği aç ve aile kodu oluştur</button>
+      <details class="aile-detay" style="margin-top:10px"><summary class="sm"><b>Başka telefonda kullanıyordum, kodum var</b></summary><div class="field"><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div><button class="btn ghost small" data-act="aile-bul" data-v="veli">Yedeği bul</button></details></div>`;
+    const ne = a.hata === 'yok' ? '⚠️ Bu kodun yedeği sunucuda yok (silinmiş olabilir). "Şimdi yedekle" ile yeniden oluşturun.' : a.hata ? '⏳ Son yedekleme olmadı; internet gelince tekrar denenecek.' : a.son ? `✓ Son yedek: ${new Date(a.son).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}` : '⏳ Yedekleniyor…';
+    const mesaj = encodeURIComponent(`Matematik Yolu aile kodu: ${aileKodYaz(a.kod)}\nYeni telefonda uygulamayı açıp "Başka telefonda kullanıyordum" deyin ve bu kodu yazın. Kodu kimseyle paylaşmayın.`);
+    return `<div class="card aile-kart"><b>☁️ Yedek açık</b>
+      <p class="muted sm" style="margin:6px 0 6px">Aile kodunuz. Kaybetmemek için kendinize gönderin ya da bir yere yazın. <b>Kodu bilen, ilerlemeyi yükleyebilir; kimseyle paylaşmayın.</b></p>
+      <div class="aile-kod" aria-label="Aile kodu">${aileKodYaz(a.kod)}</div>
+      <div class="row" style="gap:8px;margin-top:8px"><button class="btn ghost small grow" data-act="aile-kopyala">📋 Kopyala</button><a class="btn ghost small grow" href="https://wa.me/?text=${mesaj}" target="_blank" rel="noopener">💬 Kendime gönder</a></div>
+      <p class="sm ${a.hata ? 'warn-t' : 'muted'}" style="margin:8px 0 6px">${ne}</p>
+      <div class="row" style="gap:8px"><button class="btn ghost small grow" data-act="aile-simdi">🔄 Şimdi yedekle</button><button class="btn ghost small grow" data-act="aile-sil">🗑️ Yedeği sil</button></div></div>`;
+  }
   const b64u = (x) => { const b = atob((x + '='.repeat((4 - x.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, c => c.charCodeAt(0)); };
   async function bildirimAboneOl() {
     if (!bilDestek() || !window.MY_CONFIG || !MY_CONFIG.supabaseUrl) throw new Error('destek');
@@ -669,7 +765,8 @@
       ${veliGorsel(R)}
       <details class="card rmetin"><summary><b>📝 Gönderilecek mesaj metni</b> <span class="muted sm">(WhatsApp/e-posta ile bu gider)</span></summary><pre class="report">${esc(txt)}</pre></details>
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
-      ${cloudCard()}
+      ${aileKart()}
+      ${CL && CL.oturum ? cloudCard() : ''}
       ${bildirimKart()}
       ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
       <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div>`}
@@ -956,7 +1053,10 @@
   /* ---------------- Karşılama / kayıt ---------------- */
   function viewOnboard() {
     const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
-    if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button></div>`;
+    if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
+    if (o.step === 'kod') return `<div class="onb">${dots}<h2>Aile kodunla devam et</h2><p class="muted">Velinin aldığı aile kodunu yaz. İlerlemen bu telefona gelsin.</p>
+      ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'onb-kod-geri') : `<div class="field"><label>Aile kodu</label><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div>
+      <p class="muted sm">Kod, eski telefonda Veli alanındaki "Yedek açık" kartında yazar.</p><div style="flex:1"></div><button class="btn" data-act="aile-bul" data-v="onb">Yedeği bul</button><button class="btn ghost" data-act="onb-kod-geri">Geri</button>`}</div>`;
     if (o.step === 1) return `<div class="onb">${dots}<h2>Seni tanıyalım</h2>
       <div class="field"><label>Sana ne diyelim?</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela" autocomplete="off" maxlength="30"></div>
       <p class="muted sm" style="margin:4px 0 0">Sadece adın yeter. Pi seni bu adla çağıracak. 🙂</p>
@@ -1238,6 +1338,16 @@
         o.step = o.step === 1 ? 3 : o.step + 1; render(); break; }
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
+      case 'onb-kod': A.onb.step = 'kod'; A.aileBulunan = null; render(); break;
+      case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
+      case 'aile-ac': { const c = document.getElementById('f-aile-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } aileAc(); break; }
+      case 'aile-bul': { const inp = document.getElementById('f-aile-kod'); el.disabled = true; aileKodBul(inp && inp.value).then(b => { el.disabled = false; if (b) { A.aileBulunan = b; render(); } }); break; }
+      case 'aile-vazgec': A.aileBulunan = null; render(); break;
+      case 'aile-yukle': { const b = A.aileBulunan; if (!b) break; aileYukle(b.durum, b.kod, b.surum); A.aileBulunan = null; A.onb = { step: 0, data: {} }; A.view = 'home'; A.tab = A.tab === 'veli' ? 'veli' : 'yol'; render(); toast(`☁️ Hoş geldin ${esc((A.st.profile || {}).name || '')}! İlerlemen bu telefona geldi.`); break; }
+      case 'aile-kopyala': { const k = aileKodYaz(A.st.aile && A.st.aile.kod); (navigator.clipboard ? navigator.clipboard.writeText(k) : Promise.reject()).then(() => toast('📋 Aile kodu kopyalandı.'), () => toast('Kopyalanamadı. Kodu elle yazın: ' + k)); break; }
+      case 'aile-simdi': if (A.st.aile) { A.st.aile.kirli = true; A.st.aile.hata = null; aileGonder(true).then(() => { render(); toast(A.st.aile && !A.st.aile.hata ? '☁️ Yedeklendi.' : 'Yedeklenemedi, internetini kontrol et.'); }); } break;
+      case 'aile-sil': A.modal = confirmModal('Bulut yedeği silinsin mi?', 'Sunucudaki yedek kalıcı olarak silinir ve aile kodu geçersiz olur. Bu telefondaki ilerleme silinmez.', 'aile-sil-evet', 'Evet, yedeği sil', 'Vazgeç'); render(); break;
+      case 'aile-sil-evet': { const k = A.st.aile && A.st.aile.kod; A.modal = null; if (!k) break; rpc('aile_yedek_sil', { p_kod: k }).then(() => { delete A.st.aile; save(); render(); toast('🗑️ Bulut yedeği silindi.'); }, () => toast('Silinemedi, internetini kontrol et.')); break; }
       case 'pi-hello': piSay('hosgeldin'); break;
       case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
@@ -1255,11 +1365,12 @@
   // Seri koruyucu: açılışta ve uygulamaya geri dönülünce (gece yarısını geçtiyse) kendiliğinden kontrol edilir
   const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
     setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
-  seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') seriBak(); });
+  seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); } else if (A.st.aile && A.st.aile.kirli) aileGonder(); });
+  aileSunucuBak().then(() => setTimeout(aileKontrol, 800));
   if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });
   if (CL && CL.ayarli) CL.baslat(() => render()).then(async () => {
-    try { if (CL.oturum && A.st.profile) { await CL.ogrenciHazirla(A.st.profile); const uzak = await CL.cek(A.st); if (uzak) { A.st = Object.assign(E.fresh(), uzak); E.save(A.st); toast('☁️ İlerlemen buluttan yüklendi'); } else CL.kaydet(A.st); await CL.ligYenile(); } } catch (e) { }
+    try { if (CL.oturum && A.st.profile) { await CL.ogrenciHazirla(A.st.profile); const uzak = await CL.cek(A.st); if (uzak && (uzak.xp || 0) > (A.st.xp || 0)) { A.st = Object.assign(E.fresh(), uzak); E.save(A.st); toast('☁️ İlerlemen buluttan yüklendi'); } else CL.kaydet(A.st); await CL.ligYenile(); } } catch (e) { }
     render();
   });
   window.MY_APP = A; window.MY_MASCOT = mascot; window.MY_APP_RENDER = render; window.MY_DERS_SAHNE = DERS_SAHNE;
