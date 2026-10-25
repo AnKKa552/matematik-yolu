@@ -64,7 +64,7 @@ Mekanikler (fikir/işleyiş) alındı; görsel tasarım, karakterler, metinler v
 |---|---|
 | "Çiftleri eşleştir" (dokun-dokun, doğru çift yeşil damga ile kaybolur, yanlış kırmızı titrer) | `type: 'match'` — kesir↔ondalık/yüzde/model, açı↔tür, çokgen↔ad, sayı↔okunuş, üs↔değer, olasılık↔spektrum. 3 çift, kontrol butonu yok, son çiftte otomatik biter |
 | "Örüntüyü takip et" (tablo + eksik hücre + kart seçenekler) | `q.grid` — örüntü kuralı, denk kesir örüntüsü, kare/küp örüntüsü |
-| Sarı "İyi, ama tam olmadı" ara geri bildirim | Eşleştirmede 1 hata = kısmi doğru: +5 XP, ustalığa zayıf kanıt, seri bozulmaz |
+| Sarı "İyi, ama tam olmadı" ara geri bildirim | Eşleştirmede 1 hata = kısmi doğru: +5 XP, ustalığa zayıf kanıt, seri bozulmaz. **25.10.2026:** proje sahibi sarı/kahverengi ekranı sert buldu; artık yeşil, sevinçli Pi ile «👍 Güzel eşleştirdin! Bir çifti ikinci denemede buldun» (tek takılma başarıdır, uyarı değil) |
 | Üstte "KOMBO xN" sayacı | "⚡ KOMBO xN", 5+ sıcak renk; 3/5/8 kademeli kutlama (§6.2) |
 | Doğru kartta parlayan şerit | Doğru seçenek ve eşleşen kartta ışık süpürme animasyonu |
 | Ders ortasında maskotlu "Bravo!" ara ekranı | Yarı yolda 1,5 sn Pi ara ekranı, doğruluğa göre mesaj |
@@ -198,7 +198,7 @@ Telefon değişince ilerleme kaybolmasın diye; satış öncesi zorunlu. **E-pos
 - Mod'lar: `lesson`, `learn` (önce anlatım, 5 soru), `review`, `mistakes`, `mix`, `speed` (60 sn), `placement` (7 temadan birer soru → başlangıç ustalığı), `hata` (Hata Avcısı, 6 soru, §5.1.2), `atolye` (Problem Atölyesi, 2 problem × 6–8 adım, §5.1.3).
 
 ### 4.7 Üç kademeli kanıt (17.10.2026)
-Her cevap `kanit` ile kaydedilir: **ilk** (ipucusuz ilk denemede doğru) · **ipucu** (💡 ipucuyla ya da ikinci denemede doğru) · **cozum** (çözüm gösterildi). Beceri (`sk.kanit`), toplam (`st.kanit`) ve atölye aşaması bazında tutulur. Profilde "Cevaplarım nasıl geldi?" çubuğu, veli raporunda "🧾 Cevapların: ilk denemede doğru %… · ipucuyla %… · çözüm gösterildi %…" satırı. "Doğruluk" artık **ilk denemede doğru** oranıdır. XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır (rapor bunu açıkça yazar).
+Her cevap `kanit` ile kaydedilir: **ilk** (ipucusuz ilk denemede doğru) · **ipucu** (💡 ipucuyla ya da ikinci denemede doğru) · **cozum** (çözüm gösterildi). Beceri (`sk.kanit`), toplam (`st.kanit`) ve atölye aşaması bazında tutulur. Profilde "Cevaplarım nasıl geldi?" çubuğu (renkler: ilk deneme yeşil, ipucuyla **mavi** (25.10.2026'da sarıdan değişti, uyarı gibi görünmesin), çözüm kırmızı), veli raporunda "🧾 Cevapların: ilk denemede doğru %… · ipucuyla %… · çözüm gösterildi %…" satırı. "Doğruluk" artık **ilk denemede doğru** oranıdır. XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır (rapor bunu açıkça yazar).
 - **Olası güçlük ↔ yanılgı (17.10.2026):** bir yanılgı tek soruda görüldüyse "olası güçlük" (profilde "olası · 1 kez", raporda "🔎 Olası güçlükler… izleniyor"); en az 2 FARKLI soruda görüldüyse "yanılgı" olarak raporlanır (`st.mis[id].q` = gözlendiği soru kimlikleri). Seçilen şıktan yapılan teşhis olasılığa dayanır; tek gözlemle çocuğa etiket konmaz.
 - **Sayılar sayılarıyla:** her yüzdenin yanında dayandığı sayı yazar ("%75 3/4", "12 cevaba göre"); bir aşamada 5'ten az veri varsa "ön değerlendirme" denir.
 - **Dürüst gösterge kuralı:** ölçülmemiş bir şey sayı gibi gösterilmez. Anlatım biçimi en az 2 kart sonrası ölçülmüş sayılır, öncesinde "henüz ölçülmedi". Profilde "ℹ️ Bu sayılar nasıl hesaplanıyor?" açıklaması var.

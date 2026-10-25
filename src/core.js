@@ -215,6 +215,14 @@
     s += `<line x1="${x0}" y1="${y0}" x2="${W - 6}" y2="${y0}" class="ln"/><line x1="${x0}" y1="${top - 6}" x2="${x0}" y2="${y0}" class="ln"/>`;
     return svg(W, H, s, opts.aria || 'sütun grafiği');
   };
+  // Köşeleri harfli çokgen (adlandırma soruları için): düzgün olmayan, harfler köşenin dışında
+  V.cokgenAdli = (H) => {
+    const n = H.length, cx = 130, cy = 82, oyna = [1, .86, 1.05, .9, 1, .93];
+    const P = H.map((_, i) => { const a = rad(-90 - 360 * i / n + (n === 4 ? 12 : 0)), r = 58 * oyna[i % 6]; return [cx + r * 1.25 * Math.cos(a), cy + r * Math.sin(a)]; });
+    let s = `<polygon points="${P.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" class="f2 ln"/>`;
+    P.forEach(([x, y], i) => { const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy) || 1; s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" class="dot"/><text x="${(x + dx / d * 16).toFixed(1)}" y="${(y + dy / d * 16 + 5).toFixed(1)}" text-anchor="middle" class="tx">${H[i]}</text>`; });
+    return svg(260, 165, s, `köşeleri sırasıyla ${H.join(', ')} olan çokgen`);
+  };
   // Açıölçer (25.10.2026): yarım daire, iki sıra sayı. Dış sıra 0'ı solda, iç sıra 0'ı sağda.
   // o.taban: sabit kolun yönü 'sag' | 'sol'. o.aci: çocuğun kolu (sabit koldan ölçülen derece, null = yok).
   // o.dogru: geri bildirimde doğru kol (derece). o.icerik: true ise yalnız iç kısım döner (etkileşimli tahtada svg'nin içi yenilenir).

@@ -629,7 +629,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 /* Kanıt kademeleri */
 .kanitbar{display:flex;height:14px;border-radius:8px;overflow:hidden;background:var(--surface2);margin:6px 0}
 .kanitbar i{display:block;height:100%}
-.k1{background:var(--ok)} .k2{background:var(--gold)} .k3{background:var(--bad)}
+.k1{background:var(--ok)} .k2{background:var(--blue)} .k3{background:var(--bad)}
 .kanitlej{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted);font-weight:700}
 .kanitlej b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
 .nasil{margin-top:14px;font-size:14px;color:var(--muted)}
@@ -1198,6 +1198,14 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     cats.forEach((c, i) => { const h = (vals[i] - min) / (max - min) * (y0 - top); s += `<rect x="${x0 + i * bw + bw * 0.18}" y="${y0 - h}" width="${bw * 0.64}" height="${h}" rx="3" class="c${i % 6}"/><text x="${x0 + i * bw + bw / 2}" y="${y0 + 16}" class="tx sm" text-anchor="middle">${c}</text>`; });
     s += `<line x1="${x0}" y1="${y0}" x2="${W - 6}" y2="${y0}" class="ln"/><line x1="${x0}" y1="${top - 6}" x2="${x0}" y2="${y0}" class="ln"/>`;
     return svg(W, H, s, opts.aria || 'sütun grafiği');
+  };
+  // Köşeleri harfli çokgen (adlandırma soruları için): düzgün olmayan, harfler köşenin dışında
+  V.cokgenAdli = (H) => {
+    const n = H.length, cx = 130, cy = 82, oyna = [1, .86, 1.05, .9, 1, .93];
+    const P = H.map((_, i) => { const a = rad(-90 - 360 * i / n + (n === 4 ? 12 : 0)), r = 58 * oyna[i % 6]; return [cx + r * 1.25 * Math.cos(a), cy + r * Math.sin(a)]; });
+    let s = `<polygon points="${P.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" class="f2 ln"/>`;
+    P.forEach(([x, y], i) => { const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy) || 1; s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" class="dot"/><text x="${(x + dx / d * 16).toFixed(1)}" y="${(y + dy / d * 16 + 5).toFixed(1)}" text-anchor="middle" class="tx">${H[i]}</text>`; });
+    return svg(260, 165, s, `köşeleri sırasıyla ${H.join(', ')} olan çokgen`);
   };
   // Açıölçer (25.10.2026): yarım daire, iki sıra sayı. Dış sıra 0'ı solda, iç sıra 0'ı sağda.
   // o.taban: sabit kolun yönü 'sag' | 'sol'. o.aci: çocuğun kolu (sabit koldan ölçülen derece, null = yok).
@@ -2233,7 +2241,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
     return Q({ type: 'input', prompt: `Bir çokgenin bir köşesindeki iç açı ${ic}°. Bu köşedeki dış açı kaç derecedir?`, answer: String(180 - ic), unit: '°', inputMis: [{ v: ic, mis: 'dis_aci' }, { v: 360 - ic, mis: 'dis_aci' }],
       steps: ['Dış açı, iç açının komşu bütünleridir.', `180 − ${ic} = ${180 - ic}°`] }); });
   ekle('g_cokgen', [1, 2], 0.25, () => { const n = pick([4, 5, 6]), H = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, n), k = ri(1, n - 1), dogru = H.slice(k).concat(H.slice(0, k)).join(''), ters = [H[0], ...H.slice(1).reverse()].join('');
-    return Q({ prompt: `Köşeleri sırasıyla ${H.join(', ')} olan ${CG[n].toLocaleLowerCase('tr-TR')} nasıl adlandırılabilir?`, options: mc(`${dogru} ${CG[n].toLocaleLowerCase('tr-TR')}i`, (() => { const gecerli = new Set(); for (let i = 0; i < n; i++) { const r = H.slice(i).concat(H.slice(0, i)); gecerli.add(r.join('')); gecerli.add([...r].reverse().join('')); }
+    return Q({ prompt: `Şekildeki gibi köşeleri sırasıyla ${H.join(', ')} olan ${CG[n].toLocaleLowerCase('tr-TR')} nasıl adlandırılabilir?`, visual: V.cokgenAdli(H), hint: 'Parmağınla şeklin kenarları boyunca dolaş. Hangi harfler yan yana geliyor? Bir köşeden diğerine atlamak yok.', options: mc(`${dogru} ${CG[n].toLocaleLowerCase('tr-TR')}i`, (() => { const gecerli = new Set(); for (let i = 0; i < n; i++) { const r = H.slice(i).concat(H.slice(0, i)); gecerli.add(r.join('')); gecerli.add([...r].reverse().join('')); }
         const y = new Set(); let g = 0; while (y.size < 3 && g++ < 200) { const p = shuffle(H).join(''); if (!gecerli.has(p)) y.add(p); } return [...y].map(x => [`${x} ${CG[n].toLocaleLowerCase('tr-TR')}i`, 'cokgen_isim']); })()),
       steps: ['Herhangi bir köşeden başla, köşeleri yan yana sırayla oku.', `Örneğin ${H.join('')}, ${dogru} ya da ${ters} ${CG[n].toLocaleLowerCase('tr-TR')}i.`] }); });
   ekle('g_cokgen', [3], 0.25, () => Q({ prompt: 'Hangi çokgenin hiç köşegeni yoktur?', options: mc('Üçgen', [['Dörtgen', 'kosegen_kenar'], ['Beşgen', 'kosegen_kenar'], ['Altıgen', 'kosegen_kenar']]), steps: ['Üçgende her köşe diğer iki köşeyle yan yanadır.', 'Yan yana olmayan köşe yok, bu yüzden köşegen de yok.'] }));
@@ -3228,7 +3236,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-25 17e4957', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-10-25 af5fad2', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

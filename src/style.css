@@ -617,7 +617,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 /* Kanıt kademeleri */
 .kanitbar{display:flex;height:14px;border-radius:8px;overflow:hidden;background:var(--surface2);margin:6px 0}
 .kanitbar i{display:block;height:100%}
-.k1{background:var(--ok)} .k2{background:var(--gold)} .k3{background:var(--bad)}
+.k1{background:var(--ok)} .k2{background:var(--blue)} .k3{background:var(--bad)}
 .kanitlej{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted);font-weight:700}
 .kanitlej b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
 .nasil{margin-top:14px;font-size:14px;color:var(--muted)}
