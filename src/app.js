@@ -402,7 +402,8 @@
     else if (AUDIO.keys && AUDIO.keys.has(key)) sesli(); else zamanla();
   };
   const PI = window.MY_PI_LINES;
-  const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
+  // haric: o anki duruma uymayan repliklerin sırası (ör. cevap uzakken "Neredeyse!", en kolay seviyede "daha kolay bir soru") (25.10.2026)
+  const piSay = (group, haric = []) => { const arr = PI[group]; if (!arr) return null; const uygun = arr.map((_, j) => j).filter(j => !haric.includes(j)); if (!uygun.length) return null; const i = uygun[Math.floor(Math.random() * uygun.length)]; say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
 
   /* ---------------- Maskot: Pi ---------------- */
   const mascotSvg = (state = '', w = 110) => `<div class="mascot ${state}" style="width:${w}px" aria-hidden="true"><svg viewBox="0 0 120 124"><g class="m-body">
@@ -523,6 +524,8 @@
       <div class="anahtarlar">${ana}</div></div>${h.acildi ? '' : '<div class="bugun-git">Git ›</div>'}</div></button>`; };
   // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
   if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
+  // Sahip olunan kostümler önceden indirilir: çevrimdışı katman saklar, internet yokken de alınan kostüm görünür
+  setTimeout(() => { try { (dolap().sahip || []).filter(k => k !== 'normal').forEach(k => { const im = new Image(); im.src = kostumSrc(k); }); } catch (e) { } }, 2500);
 
   const PRAISE = window.MY_PI_LINES.dogru;
   const PRAISE_RESCUE = window.MY_PI_LINES.telafi;
@@ -574,7 +577,7 @@
     const R = yol.getBoundingClientRect(), pts = [...yol.querySelectorAll('.node, .yolsandik')].map(n => { const r = n.getBoundingClientRect(); return [r.left + r.width / 2 - R.left, r.top + r.height / 2 - R.top]; });
     if (pts.length < 2) return;
     let d = `M${pts[0][0]},${pts[0][1]}`; for (let k = 1; k < pts.length; k++) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k], my = (y0 + y1) / 2; d += ` C${x0},${my} ${x1},${my} ${x1},${y1}`; }
-    yol.insertAdjacentHTML('afterbegin', `<svg class="iz iz-${dolap().iz}" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><defs><linearGradient id="gkIz" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${yol.scrollHeight}"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".25" stop-color="#FFB020"/><stop offset=".5" stop-color="#3DDC84"/><stop offset=".75" stop-color="#2EC5FF"/><stop offset="1" stop-color="#8B5CFF"/></linearGradient></defs><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
+    yol.insertAdjacentHTML('afterbegin', `<svg class="iz iz-${dolap().iz}" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><defs><linearGradient id="gkIz" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="324" spreadMethod="repeat"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".2" stop-color="#FFB020"/><stop offset=".4" stop-color="#3DDC84"/><stop offset=".6" stop-color="#2EC5FF"/><stop offset=".8" stop-color="#8B5CFF"/><stop offset="1" stop-color="#FF4D4D"/></linearGradient></defs><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
   }
   addEventListener('resize', () => requestAnimationFrame(izCiz));
   // Tek harita: «Matematik Diyarı». Kitabın 7 teması burada 7 bölge olarak arka arkaya dizilir (aynı yol, aynı iz).
@@ -1214,10 +1217,10 @@
     if (adim === 'gorev') return viewGorevIlerleme();
     const r = A.result, ses = A.ses, acc = Math.round(r.acc * 100), mins = Math.max(1, Math.round((Date.now() - ses.start) / 60000));
     const yildizli = !['placement', 'speed', 'hazir'].includes(ses.mode), ys = yildizSayisi(r.acc);
-    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : 'Az kaldı!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
+    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : acc >= 50 ? 'Az kaldı!' : 'Bir dahakine olacak!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
     // Esprili alt başlık: çocuğun bu dersteki en güzel hâlini söyler (yalnız gerçekten olduysa)
     const sn = ses.answered.length ? (Date.now() - ses.start) / 1000 / ses.answered.length : 99;
-    const altBaslik = !yildizli ? '' : ses.wrong === 0 && ses.answered.length >= 5 ? 'Kusursuz! Tek hata bile yok 🎯' : ses.rescueOk >= 2 ? 'Hatalarından geri dönmeyi bildin 💪' : sn < 12 && r.acc >= 0.7 ? 'Şimşek gibiydin ⚡' : r.acc >= 0.9 ? 'Kafan matematik makinesi gibi çalıştı 🧠' : '';
+    const altBaslik = !yildizli ? '' : ses.answered.length >= 5 && ses.answered.every(a => a.ok && a.kanit === 'ilk' && !a.partial) ? 'Kusursuz! Tek hata bile yok 🎯' : ses.rescueOk >= 2 ? 'Hatalarından geri dönmeyi bildin 💪' : sn < 12 && r.acc >= 0.7 ? 'Şimşek gibiydin ⚡' : r.acc >= 0.9 ? 'Kafan matematik makinesi gibi çalıştı 🧠' : '';
     const resc = ses.rescueTry ? `<div class="speech">💪 ${ses.rescueTry} hatandan sonra <b>${ses.rescueOk}</b> kez doğruya döndün. Hata yapmak öğrenmenin parçası!</div>` : '';
     // Yay göstergesi: doğruluk oranı kadar dolar; 3 işaret = yıldız eşikleri (%0 bitirme, %70, %90)
     const R = 92, C = 2 * Math.PI * R, yay = C * 0.75, dolu = yay * Math.max(0.04, r.acc);
@@ -1372,7 +1375,7 @@
     A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
     A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.deneme = 1; A.elenen = []; A.ikinci = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
-    if (A.q.rescue) setTimeout(() => piSay('telafi_soru'), 250);
+    if (A.q.rescue) setTimeout(() => piSay('telafi_soru', (A.ses.lastLevel || 1) <= 1 ? [0] : []), 250);  // en kolay seviyede telafi daha kolay değildir
     idleKur();
   }
   // Doğru cevap kutlaması: seviye seriye göre yükselir
@@ -1410,6 +1413,8 @@
     if (tier === 'fire') seriSoyle('seri3', 0, 3); else if (tier === 'unstop') seriSoyle('seri5', 1, 5); else if (tier === 'legend') seriSoyle('seri8', -1, 8); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
+  // Sayı cevabı doğruya gerçekten yakın mı? ("Neredeyse!", "Az kaldı!" yalnız o zaman söylenir)
+  const cevapYakin = (q) => { if (q.type !== 'input') return false; const v = parseFloat(String(A.input).replace(',', '.')), a = parseFloat(String(q.answer).replace(',', '.')); return isFinite(v) && isFinite(a) && v !== a && Math.abs(v - a) <= Math.max(1, Math.abs(a) * 0.1); };
   function checkAnswer() {
     const q = A.q, ans = q.type === 'tablo' ? A.tb.slice() : q.type === 'kur' ? A.kur.slice() : q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : q.type === 'olc' ? { aci: A.olc.aci } : q.type === 'graf' ? { h: A.graf.slice() } : A.sel; if (ans === null || ans === '') return;
     const res = E.check(q, ans), ms = Date.now() - A.t0;
@@ -1420,19 +1425,19 @@
     }
     // İkinci şans: cevabı söylemeden hedefli ipucu, bir yeniden deneme
     if (!res.ok && (A.deneme || 1) === 1 && E.ikinciSansUygun(A.ses, q)) {
-      E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;
+      const yakin = cevapYakin(q); E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;
       const once = q.type === 'input' ? A.input.replace('.', ',') : q.type === 'kur' ? `${kurMetin(q, A.kur)}${res.deger ? ' = ' + res.deger : ''}` : null;
       if (q.type === 'tablo') (res.yanlisSatir || []).forEach(i => { A.tb[i] = null; }); // yanlış satırlar boşalır, doğrular kalır
       else if (q.type === 'kur') A.kur = [];
       else if (q.type !== 'input' && !['kes', 'olc', 'graf'].includes(q.type)) { A.elenen.push(A.sel); A.sel = null; } else if (q.type === 'input') A.input = '';
       A.ikinci = { ipucu: ikinciIpucu(q, res), once }; save();
       sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(60); } catch (e) { }
-      piSay('tekrar_dene'); render(); const s = document.querySelector('.ikinci'); if (s) s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); idleKur(); return;
+      piSay('tekrar_dene', yakin ? [] : [0]); render(); const s = document.querySelector('.ikinci'); if (s) s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); idleKur(); return;
     }
     const kanit = res.ok ? ((A.deneme === 2 || A.hinted) ? 'ipucu' : 'ilk') : 'cozum';
     const gain = E.record(A.st, A.ses, q, res, ms, A.hinted || A.deneme === 2, kanit);
     A.fb = { ok: res.ok, mis: res.mis, ac: res.ac, gain, kanit }; save();
-    if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis'); }
+    if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis', cevapYakin(q) ? [] : [2]); }
     if (A.ses.mode === 'speed') { A.fb = null; render(); const lb = document.getElementById('lbody'); if (!res.ok) toast(`Doğrusu: ${q.type === 'input' ? esc(q.answer) : q.type === 'cmp' ? esc(q.options.find(o => o.ok).t) : q.options.find(o => o.ok).t}`); A.ses.lastWrong = false; return nextQuestion(); }
     render();
     if (!res.ok) { const s = document.querySelector('.lbody'); if (s) { s.classList.add('shake'); } }

@@ -1565,6 +1565,21 @@
    "key": "mis_cap_yaricap_2",
    "grup": "mis",
    "text": "Çap ile yarıçapı karıştırma. Yarıçap, merkezden çembere uzanan doğru parçasıdır. Çap ise merkezden geçen ve iki ucu çember üzerinde olan doğru parçasıdır. Çap eşittir 2 çarpı yarıçap."
+  },
+  {
+   "key": "mis_aci_olcme",
+   "grup": "mis",
+   "text": "Açıölçerle ölçerken yanlış çizgiyi okuma. Açıölçerin merkezini açının köşesine, sıfır çizgisini sabit kola koy. Diğer kolun geçtiği çizgiye kadar, sabit koldaki sıfırdan başlayarak onar onar say, sonra beşleri ekle."
+  },
+  {
+   "key": "mis_grafik_cizim",
+   "grup": "mis",
+   "text": "Sütun grafiğinde sütun boyunu yanlış çizme. Her sütunun tepesi, tablodaki sayının eksende yazdığı çizgiye kadar çıkmalı. Eksendeki sayılar birer değil, ikişer ya da beşer artabilir. Çizgileri değil, yazan sayıları oku."
+  },
+  {
+   "key": "mis_hata_ilk",
+   "grup": "mis",
+   "text": "Hatanın başladığı yeri değil, sonucunu seçme. İlk hatadan sonraki adımlar o hatayı taşıdığı için onlar da yanlış görünür. Hatanın başladığı yeri bulmak için adımları baştan sırayla kontrol et. İlk yanlış olan hangisi?"
   }
  ]
 }

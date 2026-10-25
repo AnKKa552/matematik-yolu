@@ -176,8 +176,66 @@
       s += `<path d="M${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} L${cx + r * Math.SQRT2 * Math.cos(aq)},${cy + r * Math.SQRT2 * Math.sin(aq)} L${cx + r * Math.cos(a1)},${cy + r * Math.sin(a1)}" class="ln thin" fill="none"/>`;
     }
     if (rel === 'kesisen') s = seg(rot) + seg(rot + (kesAci || 55));
-    s += `<text x="16" y="20" class="tx">${h1}</text><text x="250" y="20" class="tx">${h2}</text>`;
+    // Harf, ait olduğu doğrunun ucunda durur (25.10.2026: köşelerde duran harf hangi doğruya ait belli değildi)
+    const etiket = (ang, ox, oy, t, dis) => { const a = rad(ang), d = 96, n = dis != null ? dis : rad(ang - 90); let x = cx + ox + d * Math.cos(a) + 13 * Math.cos(n), y = cy + oy + d * Math.sin(a) + 13 * Math.sin(n) + 5;
+      x = Math.min(268, Math.max(10, x)); y = Math.min(164, Math.max(16, y)); return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="tx" text-anchor="middle">${t}</text>`; };
+    if (rel === 'paralel') { const a = rad(rot + 90), ox = 32 * Math.cos(a), oy = 32 * Math.sin(a); s += etiket(rot, ox, oy, h1, a) + etiket(rot, -ox, -oy, h2, a + Math.PI); }  // paralelde harf dışa doğru: iki doğrunun arasında kalmasın
+    else s += etiket(rot, 0, 0, h1) + etiket(rot + (rel === 'dik' ? 90 : (kesAci || 55)), 0, 0, h2);
     return svg(280, 170, s, 'iki doğru');
+  };
+  // ---- Yazıyla canlandırılması zor sorular için şekiller (25.10.2026) ----
+  // Doğru üzerinde sıralı noktalar (kaç doğru parçası?): yalnız noktalar, parçalar çizilmez (cevabı söylemesin)
+  V.noktaDogru = (set) => {
+    const n = set.length, W = 300, x0 = 34, x1 = W - 34, y = 46, X = (i) => x0 + (x1 - x0) * i / (n - 1);
+    let s = `<line x1="8" y1="${y}" x2="${W - 8}" y2="${y}" class="ln"/><path d="M8,${y} l10,-6 v12 Z M${W - 8},${y} l-10,-6 v12 Z" class="ok-uc"/>`;
+    set.forEach((h, i) => { s += `<circle cx="${X(i).toFixed(1)}" cy="${y}" r="5" class="dot"/><text x="${X(i).toFixed(1)}" y="${y + 26}" text-anchor="middle" class="tx">${h}</text>`; });
+    return svg(W, 84, s, `doğru üzerinde sırasıyla ${set.join(', ')} noktaları`);
+  };
+  // Köşesi b, kolları ba ve bc ışınları olan açı (harfler kolların ucunda)
+  V.aciAdli = (a, b, c) => {
+    const cx = 70, cy = 130, A = [cx + 170, cy - 8], C = [cx + 95, cy - 105];
+    let s = `<line x1="${cx}" y1="${cy}" x2="${A[0]}" y2="${A[1]}" class="ln"/><line x1="${cx}" y1="${cy}" x2="${C[0]}" y2="${C[1]}" class="ln"/>`;
+    s += `<path d="M${cx + 28},${cy - 1.3} A28,28 0 0 0 ${(cx + 28 * Math.cos(rad(-48))).toFixed(1)},${(cy + 28 * Math.sin(rad(-48))).toFixed(1)}" class="arc"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="4" class="dot"/><circle cx="${A[0] - 30}" cy="${A[1] + 1.4}" r="4" class="dot"/><circle cx="${C[0] - 17}" cy="${C[1] + 19}" r="4" class="dot"/>`;
+    s += `<text x="${cx - 16}" y="${cy + 6}" class="tx">${b}</text><text x="${A[0] - 34}" y="${A[1] + 24}" class="tx">${a}</text><text x="${C[0] - 40}" y="${C[1] + 16}" class="tx">${c}</text>`;
+    return svg(260, 150, s, `köşesi ${b}, kolları ${b}${a} ve ${b}${c} olan açı`);
+  };
+  // İkizkenar üçgen: tepe açısı yazılı, taban açıları «?»; eşit kenarlarda çentik
+  V.ikizkenar = (tepe) => {
+    const W = 260, H = 176, by = 156, yarim = Math.max(30, Math.min(105, 120 * Math.tan(rad(tepe / 2)))), h = Math.min(130, yarim / Math.tan(rad(tepe / 2)));
+    const T = [W / 2, by - h], L = [W / 2 - yarim, by], R = [W / 2 + yarim, by];
+    let s = `<polygon points="${[T, L, R].map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" class="f2 ln"/>`;
+    const centik = (P, Q) => { const mx = (P[0] + Q[0]) / 2, my = (P[1] + Q[1]) / 2, dx = Q[0] - P[0], dy = Q[1] - P[1], d = Math.hypot(dx, dy), nx = -dy / d * 7, ny = dx / d * 7; return `<line x1="${(mx - nx).toFixed(1)}" y1="${(my - ny).toFixed(1)}" x2="${(mx + nx).toFixed(1)}" y2="${(my + ny).toFixed(1)}" class="ln"/>`; };
+    s += centik(T, L) + centik(T, R);
+    s += `<text x="${T[0]}" y="${T[1] + Math.min(38, h * 0.55)}" text-anchor="middle" class="tx sm">${tepe}°</text>${[[L, R], [R, L]].map(([K, O]) => { const x = K[0] + (T[0] - K[0]) * 0.2 + (O[0] - K[0]) * 0.1, y = K[1] + (T[1] - K[1]) * 0.2 - 2; return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" class="tx sm">?</text>`; }).join('')}`;
+    return svg(W, H, s, `tepe açısı ${tepe} derece olan ikizkenar üçgen`);
+  };
+  // Paralel iki doğru ve onları kesen doğru: bir dar açı yazılı, sorulan açı «?»
+  V.paralelKesen = (aci, sorGenis) => {
+    const W = 290, H = 180, y1 = 58, y2 = 128, t = rad(aci), k = 1 / Math.tan(t);  // kesen doğru: yatayla «aci» derece
+    const xAt = (y) => 145 + (93 - y) * k;
+    let s = `<line x1="10" y1="${y1}" x2="${W - 10}" y2="${y1}" class="ln"/><line x1="10" y1="${y2}" x2="${W - 10}" y2="${y2}" class="ln"/>`;
+    s += `<line x1="${xAt(10).toFixed(1)}" y1="10" x2="${xAt(H - 10).toFixed(1)}" y2="${H - 10}" class="ln"/>`;
+    s += `<path d="M${W - 30},${y1 - 6} l8,6 l-8,6 M${W - 30},${y2 - 6} l8,6 l-8,6" class="ln thin" fill="none"/>`;  // paralel işareti
+    const yay = (cx, cy, a0, a1) => { const r = 22, p0 = [cx + r * Math.cos(rad(a0)), cy - r * Math.sin(rad(a0))], p1 = [cx + r * Math.cos(rad(a1)), cy - r * Math.sin(rad(a1))]; return `<path d="M${p0[0].toFixed(1)},${p0[1].toFixed(1)} A${r},${r} 0 0 0 ${p1[0].toFixed(1)},${p1[1].toFixed(1)}" class="arc"/>`; };
+    const x1 = xAt(y1), x2 = xAt(y2), yaz = (x, y, a, t2) => `<text x="${(x + 38 * Math.cos(rad(a))).toFixed(1)}" y="${(y - 38 * Math.sin(rad(a)) + 5).toFixed(1)}" text-anchor="middle" class="tx sm">${t2}</text>`;
+    s += yay(x1, y1, 0, aci) + yaz(x1, y1, aci / 2, aci + '°');                 // üst kesişim, sağ üst: dar açı
+    if (sorGenis) s += yay(x2, y2, aci, 180) + yaz(x2, y2, (aci + 180) / 2, '?'); // alt kesişim, sol üst: geniş açı
+    else s += yay(x2, y2, 180, 180 + aci) + yaz(x2, y2, 180 + aci / 2, '?');      // alt kesişim, sol alt: dar açı
+    return svg(W, H, s, 'paralel iki doğru ve onları kesen bir doğru');
+  };
+  // Çemberlerle üçgen inşası: A ve B merkezli çemberler, kesişim noktası C, üçgen kesik çizgiyle.
+  // Yarıçaplar AC/BC üzerine YAZILMAZ (soru zaten bunu soruyor); başka yöne çizilmiş yarıçapta yazar.
+  V.cemberInsa = (r1, r2, d) => {
+    const k = 15, W = 300, cy = 104, ax = W / 2 - d * k / 2, bx = W / 2 + d * k / 2;
+    const px = (d * d + r1 * r1 - r2 * r2) / (2 * d), py = Math.sqrt(Math.max(0, r1 * r1 - px * px)), C = [ax + px * k, cy - py * k];
+    let s = `<circle cx="${ax}" cy="${cy}" r="${r1 * k}" class="ln" fill="none"/><circle cx="${bx}" cy="${cy}" r="${r2 * k}" class="ln" fill="none" stroke-dasharray="6 4"/>`;
+    s += `<polygon points="${ax},${cy} ${bx},${cy} ${C[0].toFixed(1)},${C[1].toFixed(1)}" class="ucgen-insa"/>`;
+    s += `<line x1="${ax}" y1="${cy}" x2="${(ax - r1 * k * 0.7071).toFixed(1)}" y2="${(cy + r1 * k * 0.7071).toFixed(1)}" class="ln thin"/><text x="${(ax - r1 * k * 0.42 - 16).toFixed(1)}" y="${(cy + r1 * k * 0.42 + 4).toFixed(1)}" class="tx sm" text-anchor="end">${r1} cm</text>`;
+    s += `<line x1="${bx}" y1="${cy}" x2="${(bx + r2 * k * 0.7071).toFixed(1)}" y2="${(cy + r2 * k * 0.7071).toFixed(1)}" class="ln thin"/><text x="${(bx + r2 * k * 0.42 + 16).toFixed(1)}" y="${(cy + r2 * k * 0.42 + 4).toFixed(1)}" class="tx sm">${r2} cm</text>`;
+    s += `<text x="${W / 2}" y="${cy + 18}" text-anchor="middle" class="tx sm">${d} cm</text>`;
+    s += [[ax, cy, 'A', -16, 5], [bx, cy, 'B', 8, 5], [C[0], C[1], 'C', -5, -10]].map(([x, y, h, dx, dy]) => `<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="4" class="dot"/><text x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" class="tx">${h}</text>`).join('');
+    return svg(W, 208, s, 'A ve B merkezli iki çember ve kesişim noktası C');
   };
   // Düzgün çokgen
   V.polygon = (n, diag) => {
@@ -219,9 +277,11 @@
   };
   // Sütun grafiği
   V.barChart = (cats, vals, opts = {}) => {
-    const W = 300, H = 200, x0 = 34, y0 = 166, top = 16, max = opts.max || Math.max(...vals), min = opts.min || 0;
+    const W = 300, H = 200, x0 = 34, y0 = 166, top = 16, min = opts.min || 0; let max = opts.max || Math.max(...vals);
     const bw = (W - x0 - 10) / cats.length; let s = '';
-    const steps = opts.step ? Math.round((max - min) / opts.step) : 4;
+    let steps = opts.step ? Math.round((max - min) / opts.step) : 4;
+    // Adım verilmediyse tam sayılı, yuvarlak bir adım seç (kişi sayısı ekseninde 2,5 / 7,5 görünmesin)
+    if (!opts.step && !Number.isInteger((max - min) / 4)) { const st = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000].find(x => (max - min) / x <= 6) || 1000; steps = Math.ceil((max - min) / st); max = min + steps * st; }
     for (let i = 0; i <= steps; i++) { const v = min + (max - min) * i / steps, y = y0 - (y0 - top) * i / steps; s += `<line x1="${x0}" y1="${y}" x2="${W - 6}" y2="${y}" class="ln grid"/><text x="${x0 - 5}" y="${y + 4}" class="tx sm" text-anchor="end">${String(+v.toFixed(1)).replace('.', ',')}</text>`; }
     cats.forEach((c, i) => { const h = (vals[i] - min) / (max - min) * (y0 - top); s += `<rect x="${x0 + i * bw + bw * 0.18}" y="${y0 - h}" width="${bw * 0.64}" height="${h}" rx="3" class="c${i % 6}"/><text x="${x0 + i * bw + bw / 2}" y="${y0 + 16}" class="tx sm" text-anchor="middle">${c}</text>`; });
     s += `<line x1="${x0}" y1="${y0}" x2="${W - 6}" y2="${y0}" class="ln"/><line x1="${x0}" y1="${top - 6}" x2="${x0}" y2="${y0}" class="ln"/>`;
@@ -262,6 +322,9 @@
       s += p >= 0.999 ? `<circle cx="${cx}" cy="${cy}" r="${R}" class="c${i}"/>` : `<path d="M${cx},${cy} L${x0},${y0} A${R},${R} 0 ${la} 1 ${x1},${y1} Z" class="c${i} sep"/>`;
       a = a1;
     });
+    // Dilimler çeyrek/sekizlik ise ince bölme çizgileri: çocuk 3/8'i gözle sayabilsin
+    const k = [2, 4, 8].find(k => parts.every(p => Math.abs(p * k - Math.round(p * k)) < 1e-6));
+    if (k >= 4) for (let j = 0; j < k; j++) { const t = rad(-90 + 360 * j / k); s += `<line x1="${cx}" y1="${cy}" x2="${(cx + R * Math.cos(t)).toFixed(1)}" y2="${(cy + R * Math.sin(t)).toFixed(1)}" class="pie-bol"/>`; }
     cats.forEach((c, i) => { s += `<rect x="172" y="${18 + i * 24}" width="14" height="14" rx="3" class="c${i}"/><text x="192" y="${30 + i * 24}" class="tx sm">${c}</text>`; });
     return svg(300, 164, s, 'daire grafiği');
   };

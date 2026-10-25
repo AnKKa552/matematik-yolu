@@ -180,6 +180,17 @@ const SKILLS_OK = (id) => id in GEN;
   if (yok.size) { console.log('İPUCUSUZ SORU (generators.js → IPUCU tablosuna ekle):', [...yok].slice(0, 10)); errors++; }
   if (ele.size) { console.log('İPUCU CEVABI SÖYLÜYOR:', [...ele].slice(0, 10)); errors++; }
   console.log('İpucu denetimi: ipucusuz', yok.size, '· cevabı söyleyen', ele.size); }
+// Yanılgı = doğru cevap (25.10.2026): bir yanılgının sonucu doğru cevaba eşit çıkıyorsa o yanılgıya sahip çocuk doğru bulur
+// ve teşhis kaybolur (aynı merkezli çember sorusunda her seferinde oluyordu). Beceri-seviye başına %5'i geçmesin.
+{ const gg = typeof globalThis !== 'undefined' ? globalThis : global; let cur = ''; const say = {}, tot = {};
+  gg.MY_CARPISMA = (mis) => { const k = cur + ' ' + mis; say[k] = (say[k] || 0) + 1; };
+  for (const [id, g] of Object.entries(GEN)) for (const lv of [1, 2, 3]) { cur = id + '/' + lv; tot[cur] = 800; for (let r = 0; r < 800; r++) g(lv); }
+  delete gg.MY_CARPISMA;
+  // Aşağı yuvarlanan sayıda kesip atmak gerçekten doğru sonucu verir (doğal); o sorularda "hep yukarı" şıkkı teşhis eder.
+  const IZIN = ['n_tahmin/1 yuvarlama_kesme', 'n_tahmin/2 yuvarlama_kesme'];
+  const kotu = Object.entries(say).filter(([k, v]) => !IZIN.includes(k) && v / tot[k.split(' ')[0]] > 0.05).map(([k, v]) => k + ' %' + (100 * v / tot[k.split(' ')[0]]).toFixed(0));
+  if (kotu.length) { console.log('YANILGI DOĞRU CEVABA EŞİT ÇIKIYOR (sayı aralığını değiştir):', kotu); errors++; }
+  console.log('Yanılgı = cevap çakışması: %5 üstü', kotu.length); }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);
 console.log('Beceri sayısı:', Object.keys(GEN).length, '· parmakla kesir sorusu:', kesN, '· açıölçer:', olcN, '· grafik çizme:', grafN);
 for (const [k,v] of Object.entries(samples)) console.log(k, JSON.stringify(v));

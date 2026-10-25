@@ -1,12 +1,18 @@
 // Çevrimdışı çalışma. Sayfanın kendisi, config.js ve ses listesi ÖNCE AĞDAN gelir (güncellemeler hemen ulaşır),
 // ağ yoksa önbellekten açılır. Sayfa tarayıcının HTTP önbelleğini atlar (no-cache): GitHub Pages 10 dk önbelleğe aldığı için
 // yayından hemen sonra ilk açılışta eski sürüm gelebiliyordu. Sesler ve diğer dosyalar önbellekten hızlı gelir.
-const C = 'matematik-yolu-v47';
+const C = 'matematik-yolu-v48';
+const GORSEL = 'pi-gorsel-v1';  // kostüm ve sandık resimleri: sürüm değişince silinmez (alınan kostüm çevrimdışı da görünsün)
 self.addEventListener('install', e => e.waitUntil(caches.open(C).then(c => c.addAll(['./', './index.html', './manifest.webmanifest', './img/simge2_192.png'])).then(() => self.skipWaiting())));
-self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())));
+self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C && k !== GORSEL).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
+  // Depodaki resimler (kostüm, sandık): önce telefondaki kopya, yoksa ağdan alıp sakla
+  if (u.pathname.includes('/storage/v1/object/public/gorsel/') && !e.request.headers.has('range')) {
+    e.respondWith(caches.open(GORSEL).then(c => c.match(e.request).then(r => r || fetch(e.request).then(res => { if (res.ok || res.type === 'opaque') c.put(e.request, res.clone()).catch(() => {}); return res; }))));
+    return;
+  }
   // Ses/medya ve parça (range) isteklerine karışma: Pi'nin sesleri uygulama içinde ayrıca saklanıyor
   if (e.request.headers.has('range') || e.request.destination === 'audio' || u.pathname.includes('/storage/')) return;
   const sayfa = e.request.mode === 'navigate' || u.pathname.endsWith('/') || u.pathname.endsWith('index.html');

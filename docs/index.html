@@ -127,9 +127,11 @@ h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
 .vis .f0{fill:var(--surface);stroke:var(--ink);stroke-width:2} .vis .f1{fill:var(--brand);stroke:var(--ink);stroke-width:2} .vis .f2{fill:var(--brand-t)}
 .vis polygon.f2,.vis circle.f2,.vis rect.f2{stroke:var(--ink);stroke-width:2.5}
 .vis .dot{fill:var(--ink)} .vis .arc{stroke:var(--accent);stroke-width:3}
+.vis .arc{fill:none} .vis .ok-uc{fill:var(--ink)} .vis .ucgen-insa{fill:rgba(91,75,255,.10);stroke:var(--accent);stroke-width:2.5;stroke-dasharray:7 5}
 .vis .tx{fill:var(--ink);font:800 16px 'Nunito',sans-serif} .vis .tx.sm{font-size:12px} .vis .tx.w{fill:#fff}
 .vis .c0{fill:var(--c0)} .vis .c1{fill:var(--c1)} .vis .c2{fill:var(--c2)} .vis .c3{fill:var(--c3)} .vis .c4{fill:var(--c4)} .vis .c5{fill:var(--c5)}
 .vis .c1.sep,.vis .c0b.sep,.vis .sep{stroke:var(--surface);stroke-width:2}
+.vis .pie-bol{stroke:rgba(255,255,255,.75);stroke-width:1.2;stroke-dasharray:3 3}
 .vis .c0b{fill:var(--surface2)}
 .vis .sb{fill:var(--blue);stroke:var(--surface);stroke-width:2}
 .fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-weight:900;line-height:1.05;margin:0 3px}
@@ -712,7 +714,7 @@ a.chip{min-height:44px;text-decoration:none}
 svg.iz{position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible}
 .iz-golge{fill:none;stroke:rgba(255,255,255,.75);stroke-width:16;stroke-linecap:round}
 .iz-yol{fill:none;stroke:#FFB020;stroke-width:7;stroke-linecap:round;stroke-dasharray:2 16}
-svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-gokkusagi .iz-yol{stroke:url(#gkIz)}
+svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-gokkusagi .iz-yol{stroke:url(#gkIz);stroke-width:9}
 .path.harita .node{width:86px;height:80px;font-size:36px;color:#fff;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.55) 0 14%,rgba(255,255,255,0) 42%),var(--c,#5B4BFF);box-shadow:0 8px 0 var(--cd,#4334D9),0 14px 18px rgba(20,20,60,.28);border:4px solid rgba(255,255,255,.9)}
 .path.harita .node.locked{background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.7) 0 14%,rgba(255,255,255,0) 42%),color-mix(in srgb,var(--c,#9a96c8) 32%,#fff);box-shadow:0 8px 0 color-mix(in srgb,var(--cd,#77739f) 45%,#fff),0 12px 14px rgba(20,20,60,.18);color:#fff;font-size:30px}
 .path.harita .node.cur{animation:dugumZipla 1.3s ease-in-out infinite;box-shadow:0 8px 0 var(--cd),0 0 0 8px color-mix(in srgb,var(--c) 30%,transparent),0 14px 18px rgba(20,20,60,.28)}
@@ -1116,8 +1118,66 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       s += `<path d="M${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} L${cx + r * Math.SQRT2 * Math.cos(aq)},${cy + r * Math.SQRT2 * Math.sin(aq)} L${cx + r * Math.cos(a1)},${cy + r * Math.sin(a1)}" class="ln thin" fill="none"/>`;
     }
     if (rel === 'kesisen') s = seg(rot) + seg(rot + (kesAci || 55));
-    s += `<text x="16" y="20" class="tx">${h1}</text><text x="250" y="20" class="tx">${h2}</text>`;
+    // Harf, ait olduğu doğrunun ucunda durur (25.10.2026: köşelerde duran harf hangi doğruya ait belli değildi)
+    const etiket = (ang, ox, oy, t, dis) => { const a = rad(ang), d = 96, n = dis != null ? dis : rad(ang - 90); let x = cx + ox + d * Math.cos(a) + 13 * Math.cos(n), y = cy + oy + d * Math.sin(a) + 13 * Math.sin(n) + 5;
+      x = Math.min(268, Math.max(10, x)); y = Math.min(164, Math.max(16, y)); return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="tx" text-anchor="middle">${t}</text>`; };
+    if (rel === 'paralel') { const a = rad(rot + 90), ox = 32 * Math.cos(a), oy = 32 * Math.sin(a); s += etiket(rot, ox, oy, h1, a) + etiket(rot, -ox, -oy, h2, a + Math.PI); }  // paralelde harf dışa doğru: iki doğrunun arasında kalmasın
+    else s += etiket(rot, 0, 0, h1) + etiket(rot + (rel === 'dik' ? 90 : (kesAci || 55)), 0, 0, h2);
     return svg(280, 170, s, 'iki doğru');
+  };
+  // ---- Yazıyla canlandırılması zor sorular için şekiller (25.10.2026) ----
+  // Doğru üzerinde sıralı noktalar (kaç doğru parçası?): yalnız noktalar, parçalar çizilmez (cevabı söylemesin)
+  V.noktaDogru = (set) => {
+    const n = set.length, W = 300, x0 = 34, x1 = W - 34, y = 46, X = (i) => x0 + (x1 - x0) * i / (n - 1);
+    let s = `<line x1="8" y1="${y}" x2="${W - 8}" y2="${y}" class="ln"/><path d="M8,${y} l10,-6 v12 Z M${W - 8},${y} l-10,-6 v12 Z" class="ok-uc"/>`;
+    set.forEach((h, i) => { s += `<circle cx="${X(i).toFixed(1)}" cy="${y}" r="5" class="dot"/><text x="${X(i).toFixed(1)}" y="${y + 26}" text-anchor="middle" class="tx">${h}</text>`; });
+    return svg(W, 84, s, `doğru üzerinde sırasıyla ${set.join(', ')} noktaları`);
+  };
+  // Köşesi b, kolları ba ve bc ışınları olan açı (harfler kolların ucunda)
+  V.aciAdli = (a, b, c) => {
+    const cx = 70, cy = 130, A = [cx + 170, cy - 8], C = [cx + 95, cy - 105];
+    let s = `<line x1="${cx}" y1="${cy}" x2="${A[0]}" y2="${A[1]}" class="ln"/><line x1="${cx}" y1="${cy}" x2="${C[0]}" y2="${C[1]}" class="ln"/>`;
+    s += `<path d="M${cx + 28},${cy - 1.3} A28,28 0 0 0 ${(cx + 28 * Math.cos(rad(-48))).toFixed(1)},${(cy + 28 * Math.sin(rad(-48))).toFixed(1)}" class="arc"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="4" class="dot"/><circle cx="${A[0] - 30}" cy="${A[1] + 1.4}" r="4" class="dot"/><circle cx="${C[0] - 17}" cy="${C[1] + 19}" r="4" class="dot"/>`;
+    s += `<text x="${cx - 16}" y="${cy + 6}" class="tx">${b}</text><text x="${A[0] - 34}" y="${A[1] + 24}" class="tx">${a}</text><text x="${C[0] - 40}" y="${C[1] + 16}" class="tx">${c}</text>`;
+    return svg(260, 150, s, `köşesi ${b}, kolları ${b}${a} ve ${b}${c} olan açı`);
+  };
+  // İkizkenar üçgen: tepe açısı yazılı, taban açıları «?»; eşit kenarlarda çentik
+  V.ikizkenar = (tepe) => {
+    const W = 260, H = 176, by = 156, yarim = Math.max(30, Math.min(105, 120 * Math.tan(rad(tepe / 2)))), h = Math.min(130, yarim / Math.tan(rad(tepe / 2)));
+    const T = [W / 2, by - h], L = [W / 2 - yarim, by], R = [W / 2 + yarim, by];
+    let s = `<polygon points="${[T, L, R].map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" class="f2 ln"/>`;
+    const centik = (P, Q) => { const mx = (P[0] + Q[0]) / 2, my = (P[1] + Q[1]) / 2, dx = Q[0] - P[0], dy = Q[1] - P[1], d = Math.hypot(dx, dy), nx = -dy / d * 7, ny = dx / d * 7; return `<line x1="${(mx - nx).toFixed(1)}" y1="${(my - ny).toFixed(1)}" x2="${(mx + nx).toFixed(1)}" y2="${(my + ny).toFixed(1)}" class="ln"/>`; };
+    s += centik(T, L) + centik(T, R);
+    s += `<text x="${T[0]}" y="${T[1] + Math.min(38, h * 0.55)}" text-anchor="middle" class="tx sm">${tepe}°</text>${[[L, R], [R, L]].map(([K, O]) => { const x = K[0] + (T[0] - K[0]) * 0.2 + (O[0] - K[0]) * 0.1, y = K[1] + (T[1] - K[1]) * 0.2 - 2; return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" class="tx sm">?</text>`; }).join('')}`;
+    return svg(W, H, s, `tepe açısı ${tepe} derece olan ikizkenar üçgen`);
+  };
+  // Paralel iki doğru ve onları kesen doğru: bir dar açı yazılı, sorulan açı «?»
+  V.paralelKesen = (aci, sorGenis) => {
+    const W = 290, H = 180, y1 = 58, y2 = 128, t = rad(aci), k = 1 / Math.tan(t);  // kesen doğru: yatayla «aci» derece
+    const xAt = (y) => 145 + (93 - y) * k;
+    let s = `<line x1="10" y1="${y1}" x2="${W - 10}" y2="${y1}" class="ln"/><line x1="10" y1="${y2}" x2="${W - 10}" y2="${y2}" class="ln"/>`;
+    s += `<line x1="${xAt(10).toFixed(1)}" y1="10" x2="${xAt(H - 10).toFixed(1)}" y2="${H - 10}" class="ln"/>`;
+    s += `<path d="M${W - 30},${y1 - 6} l8,6 l-8,6 M${W - 30},${y2 - 6} l8,6 l-8,6" class="ln thin" fill="none"/>`;  // paralel işareti
+    const yay = (cx, cy, a0, a1) => { const r = 22, p0 = [cx + r * Math.cos(rad(a0)), cy - r * Math.sin(rad(a0))], p1 = [cx + r * Math.cos(rad(a1)), cy - r * Math.sin(rad(a1))]; return `<path d="M${p0[0].toFixed(1)},${p0[1].toFixed(1)} A${r},${r} 0 0 0 ${p1[0].toFixed(1)},${p1[1].toFixed(1)}" class="arc"/>`; };
+    const x1 = xAt(y1), x2 = xAt(y2), yaz = (x, y, a, t2) => `<text x="${(x + 38 * Math.cos(rad(a))).toFixed(1)}" y="${(y - 38 * Math.sin(rad(a)) + 5).toFixed(1)}" text-anchor="middle" class="tx sm">${t2}</text>`;
+    s += yay(x1, y1, 0, aci) + yaz(x1, y1, aci / 2, aci + '°');                 // üst kesişim, sağ üst: dar açı
+    if (sorGenis) s += yay(x2, y2, aci, 180) + yaz(x2, y2, (aci + 180) / 2, '?'); // alt kesişim, sol üst: geniş açı
+    else s += yay(x2, y2, 180, 180 + aci) + yaz(x2, y2, 180 + aci / 2, '?');      // alt kesişim, sol alt: dar açı
+    return svg(W, H, s, 'paralel iki doğru ve onları kesen bir doğru');
+  };
+  // Çemberlerle üçgen inşası: A ve B merkezli çemberler, kesişim noktası C, üçgen kesik çizgiyle.
+  // Yarıçaplar AC/BC üzerine YAZILMAZ (soru zaten bunu soruyor); başka yöne çizilmiş yarıçapta yazar.
+  V.cemberInsa = (r1, r2, d) => {
+    const k = 15, W = 300, cy = 104, ax = W / 2 - d * k / 2, bx = W / 2 + d * k / 2;
+    const px = (d * d + r1 * r1 - r2 * r2) / (2 * d), py = Math.sqrt(Math.max(0, r1 * r1 - px * px)), C = [ax + px * k, cy - py * k];
+    let s = `<circle cx="${ax}" cy="${cy}" r="${r1 * k}" class="ln" fill="none"/><circle cx="${bx}" cy="${cy}" r="${r2 * k}" class="ln" fill="none" stroke-dasharray="6 4"/>`;
+    s += `<polygon points="${ax},${cy} ${bx},${cy} ${C[0].toFixed(1)},${C[1].toFixed(1)}" class="ucgen-insa"/>`;
+    s += `<line x1="${ax}" y1="${cy}" x2="${(ax - r1 * k * 0.7071).toFixed(1)}" y2="${(cy + r1 * k * 0.7071).toFixed(1)}" class="ln thin"/><text x="${(ax - r1 * k * 0.42 - 16).toFixed(1)}" y="${(cy + r1 * k * 0.42 + 4).toFixed(1)}" class="tx sm" text-anchor="end">${r1} cm</text>`;
+    s += `<line x1="${bx}" y1="${cy}" x2="${(bx + r2 * k * 0.7071).toFixed(1)}" y2="${(cy + r2 * k * 0.7071).toFixed(1)}" class="ln thin"/><text x="${(bx + r2 * k * 0.42 + 16).toFixed(1)}" y="${(cy + r2 * k * 0.42 + 4).toFixed(1)}" class="tx sm">${r2} cm</text>`;
+    s += `<text x="${W / 2}" y="${cy + 18}" text-anchor="middle" class="tx sm">${d} cm</text>`;
+    s += [[ax, cy, 'A', -16, 5], [bx, cy, 'B', 8, 5], [C[0], C[1], 'C', -5, -10]].map(([x, y, h, dx, dy]) => `<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="4" class="dot"/><text x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" class="tx">${h}</text>`).join('');
+    return svg(W, 208, s, 'A ve B merkezli iki çember ve kesişim noktası C');
   };
   // Düzgün çokgen
   V.polygon = (n, diag) => {
@@ -1159,9 +1219,11 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   };
   // Sütun grafiği
   V.barChart = (cats, vals, opts = {}) => {
-    const W = 300, H = 200, x0 = 34, y0 = 166, top = 16, max = opts.max || Math.max(...vals), min = opts.min || 0;
+    const W = 300, H = 200, x0 = 34, y0 = 166, top = 16, min = opts.min || 0; let max = opts.max || Math.max(...vals);
     const bw = (W - x0 - 10) / cats.length; let s = '';
-    const steps = opts.step ? Math.round((max - min) / opts.step) : 4;
+    let steps = opts.step ? Math.round((max - min) / opts.step) : 4;
+    // Adım verilmediyse tam sayılı, yuvarlak bir adım seç (kişi sayısı ekseninde 2,5 / 7,5 görünmesin)
+    if (!opts.step && !Number.isInteger((max - min) / 4)) { const st = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000].find(x => (max - min) / x <= 6) || 1000; steps = Math.ceil((max - min) / st); max = min + steps * st; }
     for (let i = 0; i <= steps; i++) { const v = min + (max - min) * i / steps, y = y0 - (y0 - top) * i / steps; s += `<line x1="${x0}" y1="${y}" x2="${W - 6}" y2="${y}" class="ln grid"/><text x="${x0 - 5}" y="${y + 4}" class="tx sm" text-anchor="end">${String(+v.toFixed(1)).replace('.', ',')}</text>`; }
     cats.forEach((c, i) => { const h = (vals[i] - min) / (max - min) * (y0 - top); s += `<rect x="${x0 + i * bw + bw * 0.18}" y="${y0 - h}" width="${bw * 0.64}" height="${h}" rx="3" class="c${i % 6}"/><text x="${x0 + i * bw + bw / 2}" y="${y0 + 16}" class="tx sm" text-anchor="middle">${c}</text>`; });
     s += `<line x1="${x0}" y1="${y0}" x2="${W - 6}" y2="${y0}" class="ln"/><line x1="${x0}" y1="${top - 6}" x2="${x0}" y2="${y0}" class="ln"/>`;
@@ -1202,6 +1264,9 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       s += p >= 0.999 ? `<circle cx="${cx}" cy="${cy}" r="${R}" class="c${i}"/>` : `<path d="M${cx},${cy} L${x0},${y0} A${R},${R} 0 ${la} 1 ${x1},${y1} Z" class="c${i} sep"/>`;
       a = a1;
     });
+    // Dilimler çeyrek/sekizlik ise ince bölme çizgileri: çocuk 3/8'i gözle sayabilsin
+    const k = [2, 4, 8].find(k => parts.every(p => Math.abs(p * k - Math.round(p * k)) < 1e-6));
+    if (k >= 4) for (let j = 0; j < k; j++) { const t = rad(-90 + 360 * j / k); s += `<line x1="${cx}" y1="${cy}" x2="${(cx + R * Math.cos(t)).toFixed(1)}" y2="${(cy + R * Math.sin(t)).toFixed(1)}" class="pie-bol"/>`; }
     cats.forEach((c, i) => { s += `<rect x="172" y="${18 + i * 24}" width="14" height="14" rx="3" class="c${i}"/><text x="192" y="${30 + i * 24}" class="tx sm">${c}</text>`; });
     return svg(300, 164, s, 'daire grafiği');
   };
@@ -1424,11 +1489,18 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 
   /* ------------ yardımcılar ------------ */
   // Doğru + yanlışlardan şık seti; aynı metinleri ayıklar
-  function mc(correct, wrongs, fillers) {
+  // Şıkkın sayısal değeri (kesir, tam sayılı kesir, yüzde, ondalık); sayı değilse null
+  const sikDeger = (t) => { const x = String(t).replace(/<span class="fr"><span>(\d+)<\/span><span>(\d+)<\/span><\/span>/g, '($1/$2)').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').trim(); let m;
+    if ((m = x.match(/^(\d+)\s*\((\d+)\/(\d+)\)$/))) return +m[1] + m[2] / m[3]; if ((m = x.match(/^\((\d+)\/(\d+)\)$/))) return m[1] / m[2];
+    if ((m = x.match(/^%\s?(\d+(?:,\d+)?)$/))) return parseFloat(m[1].replace(',', '.')) / 100; if ((m = x.match(/^(\d+(?:,\d+)?)$/))) return parseFloat(m[1].replace(',', '.')); return null; };
+  function mc(correct, wrongs, fillers, ayniDegerSerbest) {
     const seen = new Set([String(correct)]), opts = [{ t: String(correct), ok: true }];
+    // Doğru cevapla aynı değeri taşıyan "yanlış" şık iki doğru cevap demektir (%10 = 10/100 = 1/10): atılır (25.10.2026)
+    const dv = ayniDegerSerbest ? null : sikDeger(correct);
+    if (dv != null) wrongs = wrongs.filter(w => { const v = sikDeger(w[0]); if (v != null && String(w[0]) !== String(correct) && Math.abs(v - dv) < 1e-9) { if (G.MY_CARPISMA) G.MY_CARPISMA(w[1]); return false; } return true; }); if (G.MY_CARPISMA) for (const w of wrongs) if (String(w[0]) === String(correct)) G.MY_CARPISMA(w[1]);
     for (const [t, mis, ac] of wrongs) { const k = String(t); if (!seen.has(k) && opts.length < 4) { seen.add(k); opts.push(ac ? { t: k, ok: false, mis, ac } : { t: k, ok: false, mis }); } }
     // Dolgu şıkları yalnız bir yanılgıya bağlıysa eklenir (§1-3: rastgele çeldirici yok). 'genel' dolgu atlanır; soru 3 şıkla kalabilir.
-    if (fillers) for (const [t, mis] of fillers) { const k = String(t); if (mis && mis !== 'genel' && !seen.has(k) && opts.length < 4) { seen.add(k); opts.push({ t: k, ok: false, mis }); } }
+    if (fillers) for (const [t, mis] of fillers) { const k = String(t), v = dv != null ? sikDeger(k) : null; if (v != null && Math.abs(v - dv) < 1e-9) continue; if (mis && mis !== 'genel' && !seen.has(k) && opts.length < 4) { seen.add(k); opts.push({ t: k, ok: false, mis }); } }
     return shuffle(opts);
   }
   // Sayısal yakın yanlışlar (dolgu için)
@@ -1436,7 +1508,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   // Sayı girişinde yanılgılı değer doğru cevapla aynıysa (ör. yarım dilimde "toplam ÷ dilim sayısı" = cevap) ya da
   // başka bir yanılgıyla çakışıyorsa atılır: doğru cevap yanılgı sayılmasın, teşhis belirsiz kalmasın.
   const Q = (o) => { const q = Object.assign({ type: 'mc', hint: '', steps: [] }, o);
-    if (q.inputMis && q.answer !== undefined) { const goruldu = new Set([String(q.answer)]); q.inputMis = q.inputMis.filter(m => { const k = String(m.v); if (goruldu.has(k)) return false; goruldu.add(k); return true; }); }
+    if (q.inputMis && q.answer !== undefined) { if (G.MY_CARPISMA) for (const m of q.inputMis) if (String(m.v) === String(q.answer)) G.MY_CARPISMA(m.mis); const goruldu = new Set([String(q.answer)]); q.inputMis = q.inputMis.filter(m => { const k = String(m.v); if (goruldu.has(k)) return false; goruldu.add(k); return true; }); }
     return q; };
   const cmpQ = (o, rel, misMap) => {
     // rel: '<' | '>' | '='
@@ -1476,7 +1548,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     const n = ri(3, 5), set = pick([['A', 'B', 'C', 'D', 'E'], ['K', 'L', 'M', 'N', 'O'], ['P', 'R', 'S', 'T', 'U']]).slice(0, n), ans = n * (n - 1) / 2;
     const yol = Math.random() < 0.5, prompt = !yol ? `Bir doğru üzerinde sırasıyla ${set.join(', ')} noktaları var. Bu noktalarla kaç farklı doğru parçası oluşur?` : `Düz bir yol üzerinde sırasıyla ${set.join(', ')} durakları var. Uç noktaları bu duraklardan ikisi olan kaç farklı doğru parçası vardır?`;
     const parcalar = Array.from({ length: n - 1 }, (_, i) => n - 1 - i);
-    return Q({ type: 'input', prompt, answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }, { v: n * (n - 1), mis: 'nokta_sayma' }],
+    return Q({ type: 'input', prompt, visual: V.noktaDogru(set), answer: String(ans), inputMis: [{ v: n - 1, mis: 'nokta_sayma' }, { v: n * (n - 1), mis: 'nokta_sayma' }],
       // Her noktadan yalnız sağa doğru say: aynı parça iki kez sayılmaz (PR ile RP aynı parça)
       steps: [...set.slice(0, -1).map((h, i) => `${h} noktasından sağa doğru: ${set.slice(i + 1).map(k => h + k).join(', ')} → ${n - 1 - i} tane`), `Toplam: ${parcalar.join(' + ')} = ${ans}`],
       cozumGorsel: U.parcaSayGorsel(set), hint: 'Sadece yan yana olanları sayma; aradaki noktaları atlayan doğru parçaları da var.' });
@@ -1585,7 +1657,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   };
   GEN.g_ucgen = (lv) => {
     if (lv === 1) {
-      let a = ri(3, 10) * 10, b = ri(2, 8) * 10; if (a + b >= 170) b = 170 - a - 10 > 10 ? 170 - a - 10 : 20; if (a + b >= 180) { a = 60; b = 50; }
+      let a = ri(3, 10) * 10, b = ri(2, 8) * 10; if (a + b >= 170) b = 170 - a - 10 > 10 ? 170 - a - 10 : 20; if (a + b >= 180) { a = 60; b = 50; } if (a + b === 90) b += 10;  // ara sonuç (a + b) cevaba eşit olmasın
       return Q({ type: 'input', prompt: `Bir üçgenin iki iç açısının ölçüsü ${a}° ve ${b}°'dir. Üçüncü açının ölçüsü kaç derecedir?`, answer: String(180 - a - b), unit: '°', inputMis: [{ v: 360 - a - b, mis: 'ucgen_360' }, { v: a + b, mis: 'ara_sonuc', ac: `${a + b}° bilinen iki açının toplamı, yani bir ara sonuç. Üçüncü açı için bunu 180°'den çıkar.` }], steps: ['Üçgenin iç açıları toplamı 180°', `${a} + ${b} = ${a + b}`, `180 − ${a + b} = ${180 - a - b}°`] });
     }
     if (lv === 2) {
@@ -1599,7 +1671,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     }
     if (Math.random() < .35) return Q({ type: 'input', prompt: 'Eşkenar üçgenin bir iç açısı kaç derecedir?', answer: '60', unit: '°', inputMis: [{ v: 180, mis: 'ucgen_360' }, { v: 120, mis: 'ucgen_360' }], steps: ['Eşkenar üçgenin üç açısı eşit.', '180 ÷ 3 = 60°'] });
     const x = pick([20, 40, 50, 60, 70, 80, 100, 120, 30]);
-    return Q({ type: 'input', prompt: `İkizkenar bir üçgende eşit kenarların arasındaki (tepe) açı ${x}°'dir. Taban açılarından biri kaç derecedir?`, answer: String((180 - x) / 2), unit: '°', inputMis: [{ v: 180 - x, mis: 'ara_sonuc', ac: `${180 - x}° iki taban açısının toplamı. Taban açıları eşit olduğu için bunu 2'ye bölmelisin.` }, { v: (360 - x) / 2, mis: 'ucgen_360' }], steps: ['İkizkenar üçgende taban açıları eşittir.', `180 − ${x} = ${180 - x}`, `${180 - x} ÷ 2 = ${(180 - x) / 2}°`] });
+    return Q({ type: 'input', prompt: `İkizkenar bir üçgende eşit kenarların arasındaki (tepe) açı ${x}°'dir. Taban açılarından biri kaç derecedir?`, visual: V.ikizkenar(x), answer: String((180 - x) / 2), unit: '°', inputMis: [{ v: 180 - x, mis: 'ara_sonuc', ac: `${180 - x}° iki taban açısının toplamı. Taban açıları eşit olduğu için bunu 2'ye bölmelisin.` }, { v: (360 - x) / 2, mis: 'ucgen_360' }], steps: ['İkizkenar üçgende taban açıları eşittir.', `180 − ${x} = ${180 - x}`, `${180 - x} ÷ 2 = ${(180 - x) / 2}°`] });
   };
 
   /* =========================================================
@@ -1637,7 +1709,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (lv === 1 || lv === 2) {
       const len = lv === 1 ? ri(6, 7) : ri(8, 10); let digits = [];
       for (let i = 0; i < len; i++) digits.push(i === 0 ? ri(1, 9) : ri(0, 9));
-      let pos = ri(1, len - 1); // sağdan indeks
+      let pos; do pos = ri(1, len - 1); while (lv === 2 && pos === len - 1 - pos); // sağdan indeks; soldan saymak aynı basamağı vermesin
       let idx = len - 1 - pos; if (digits[idx] === 0) digits[idx] = ri(2, 9);
       const n = +digits.join(''), d = digits[idx], val = d * Math.pow(10, pos);
       if (lv === 1) {
@@ -1646,7 +1718,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       return Q({ prompt: `${fmtN(n)} sayısında soldan ${idx + 1}. rakam olan ${d}, hangi basamaktadır?`, options: mc(U.cap(BAS[pos]) + ' basamağı', [[U.cap(BAS[pos + 1] || BAS[pos - 2]) + ' basamağı', 'basamak_kayma'], [U.cap(BAS[pos - 1]) + ' basamağı', 'basamak_kayma'], [U.cap(BAS[idx] || 'birler') + ' basamağı', 'basamak_kayma']]), steps: ['Basamakları SAĞDAN saymaya başla: birler, onlar, yüzler...', `${d} sağdan ${pos + 1}. sırada → ${BAS[pos]} basamağı`] });
     }
     // çözümleme
-    const parts = []; const used = shuffle([0, 1, 2, 3, 4, 5, 6, 7]).slice(0, 4).sort((a, b) => b - a);
+    const parts = []; let used; do used = shuffle([0, 1, 2, 3, 4, 5, 6, 7]).slice(0, 4).sort((a, b) => b - a); while (used[0] === 3 && used[3] === 0);  // 3-2-1-0 iken bitişik yazmak doğru cevabı verir
     used.forEach(p => parts.push(ri(1, 9) * Math.pow(10, p)));
     const n = parts.reduce((a, b) => a + b, 0), concat = +parts.map(p => String(p)[0]).join('');
     return Q({ prompt: `${parts.map(fmtN).join(' + ')} çözümlemesi verilen sayı hangisidir?`, options: mc(fmtN(n), [[fmtN(concat), 'cozumleme_bitisik'], [fmtN(n * 10), 'basamak_kayma'], [fmtN(n - parts[parts.length - 1] + parts[parts.length - 1] * 10), 'basamak_kayma']]), steps: ['Her parçayı alt alta, basamaklarına göre yaz.', 'Boş basamaklara 0 koyarak topla.', `Sonuç: ${fmtN(n)}`] });
@@ -1712,11 +1784,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   GEN.n_tahmin = (lv) => {
     const to = lv === 1 ? 10 : lv === 2 ? 100 : 1000;
     if (lv < 3) {
-      let n = ri(1000, 99999); if (Math.random() < .6) { const r = n % to; const up = to / 2 + ri(0, to / 2 - 1); n = n - r + up; }
-      const rnd = Math.round(n / to) * to, trunc = Math.floor(n / to) * to;
+      let n, rnd, trunc; do { n = ri(1000, 99999); if (Math.random() < .75) { const r = n % to; const up = to / 2 + ri(0, to / 2 - 1); n = n - r + up; } rnd = Math.round(n / to) * to; trunc = Math.floor(n / to) * to; } while (rnd % (to * 10) === 0);  // bir üst basamağa yuvarlamak aynı sonucu vermesin
       return Q({ prompt: `${fmtN(n)} sayısını en yakın ${to === 10 ? 'onluğa' : 'yüzlüğe'} yuvarlayınca hangi sayı elde edilir?`, options: mc(fmtN(rnd), [[fmtN(trunc), 'yuvarlama_kesme'], [fmtN(rnd + to), 'yuvarlama_kesme'], [fmtN(Math.round(n / (to * 10)) * to * 10), 'basamak_kayma']], [[fmtN(rnd - to), 'yuvarlama_kesme'], [fmtN(rnd + 2 * to), 'genel']]), steps: [`${to === 10 ? 'Birler' : 'Onlar'} basamağına bak: ${String(n).slice(-(String(to).length - 1))[0]}`, `${+String(n).slice(-(String(to).length - 1))[0] >= 5 ? '5 veya büyük → yukarı yuvarla' : '5\'ten küçük → aynı bırak'}`, `Sonuç: ${fmtN(rnd)}`] });
     }
-    const a = ri(12, 48) * 100 + ri(1, 99), b = ri(12, 48) * 100 + ri(1, 99);
+    const a = (ri(1, 4) * 10 + ri(5, 9)) * 100 + ri(1, 99), b = ri(12, 48) * 100 + ri(1, 99);  // a yukarı yuvarlanır: kesip atmak aynı tahmini vermesin
     const ra = Math.round(a / 1000) * 1000, rb = Math.round(b / 1000) * 1000;
     return Q({ prompt: `${fmtN(a)} + ${fmtN(b)} toplamını sayıları en yakın binliğe yuvarlayarak TAHMİN edin.`, options: mc(fmtN(ra + rb), [[fmtN(Math.floor(a / 1000) * 1000 + Math.floor(b / 1000) * 1000), 'yuvarlama_kesme'], [fmtN(ra + rb + 1000), 'yuvarlama_kesme'], [fmtN(a + b), 'tahmin_tam']]), steps: [`${fmtN(a)} ≈ ${fmtN(ra)}`, `${fmtN(b)} ≈ ${fmtN(rb)}`, `Tahmin: ${fmtN(ra + rb)}`] });
   };
@@ -1726,7 +1797,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
      ========================================================= */
   GEN.a_cevre = (lv) => {
     if (lv < 3) {
-      const sq = lv === 2 && Math.random() < .5, a = ri(4, 18), b = sq ? a : ri(2, a - 1 || 2);
+      const sq = lv === 2 && Math.random() < .5; let a, b; do { a = ri(4, 18); b = sq ? a : ri(2, a - 1 || 2); } while (a * b === 2 * (a + b));  // 4×4, 6×3: çevre = alan
       return Q({ type: 'input', prompt: sq ? `Bir kenarı ${a} cm olan karenin çevre uzunluğu kaç cm'dir?` : `Kenar uzunlukları ${a} cm ve ${b} cm olan dikdörtgenin çevre uzunluğu kaç cm'dir?`, visual: V.rect(a, b, 'cm'), answer: String(2 * (a + b)), unit: 'cm', inputMis: [{ v: a + b, mis: 'cevre_yarim' }, { v: a * b, mis: 'cevre_alan' }], steps: sq ? ['Karenin 4 kenarı eşittir.', `Ç = 4 × ${a} = ${4 * a} cm`] : ['Ç = 2 × (uzun kenar + kısa kenar)', `Ç = 2 × (${a} + ${b}) = 2 × ${a + b} = ${2 * (a + b)} cm`] });
     }
     const a = ri(6, 20), b = ri(3, a - 1), P = 2 * (a + b);
@@ -1734,7 +1805,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   };
   GEN.a_alan = (lv) => {
     if (lv === 1) {
-      const [a, b] = dikKenar(3); // eşit kenar = kare; "dikdörtgen" denen soruda kenarlar farklı; alan ≤ 36
+      let a, b; do [a, b] = dikKenar(3); while (a * b === 2 * (a + b)); // 6×3: alan = çevre; eşit kenar = kare; "dikdörtgen" denen soruda kenarlar farklı; alan ≤ 36
       return Q({ type: 'input', prompt: 'Şekildeki dikdörtgenin alanı kaç birimkaredir?', visual: V.rect(a, b, '', true), answer: String(a * b), unit: 'birimkare', inputMis: [{ v: 2 * (a + b), mis: 'cevre_alan' }, { v: a + b, mis: 'cevre_alan' }], steps: [`Bir sırada ${a} kare, ${b} sıra var.`, `${a} × ${b} = ${a * b} birimkare`] });
     }
     if (lv === 2) {
@@ -1761,7 +1832,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (Math.random() < 0.4) {
       return Q({ prompt: `Kenar uzunlukları doğal sayı ve çevre uzunluğu ${P} cm olan dikdörtgenler arasında alanı EN KÜÇÜK olanın alanı kaç cm²'dir?`, options: mc(`${h - 1} cm²`, [[`${s * s} cm²`, 'cevre_alan_ayni'], [`${(h - 2) * 2} cm²`, 'cevre_alan_ayni']], [[`${P} cm²`, 'cevre_alan']]), steps: [`Uzun + kısa kenar = ${P} ÷ 2 = ${h}`, `Denemeler: ${h - 1}×1=${h - 1}, ${h - 2}×2=${(h - 2) * 2}, ..., ${s}×${s}=${s * s}`, `Kenarlar arasındaki fark en çok olunca alan en küçük: ${h - 1}×1 = ${h - 1} cm²`] });
     }
-    const alt = [[(h - 1) * 1, 'cevre_alan_ayni'], [(h - 2) * 2, 'cevre_alan_ayni'], [(h - 3) * 3, 'cevre_alan_ayni']];
+    const alt = [[(h - 1) * 1, 'cevre_alan_ayni'], [(h - 2) * 2, 'cevre_alan_ayni'], [(h - 3) * 3, 'cevre_alan_ayni']].filter(([v]) => v !== s * s);  // P = 12'de 3×3 karenin kendisi
     return Q({ prompt: `Kenar uzunlukları doğal sayı ve çevre uzunluğu ${P} cm olan dikdörtgenler arasında alanı EN BÜYÜK olanın alanı kaç cm²'dir?`, options: mc(`${s * s} cm²`, alt.map(([v, m]) => [`${v} cm²`, m]), [[`${P} cm²`, 'cevre_alan']]), steps: [`Uzun + kısa kenar = ${P} ÷ 2 = ${h}`, `Denemeler: ${h - 1}×1=${h - 1}, ${h - 2}×2=${(h - 2) * 2}, ..., ${s}×${s}=${s * s}`, `Kenarlar eşit olunca (kare) alan en büyük: ${s * s} cm²`] });
   };
 
@@ -1770,7 +1841,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
      ========================================================= */
   GEN.f_tur = (lv) => {
     if (lv === 1) {
-      if (Math.random() < .5) { const n = pick([4, 5, 6, 8]), k = ri(1, n - 1); return Q({ prompt: 'Şeklin boyalı kısmı bütünün kaçta kaçıdır?', visual: V.bar(k, n), options: mc(fr(k, n), [[fr(n - k, n), 'kesir_tur'], [fr(k, n - k), 'kesir_tur'], [fr(n, k), 'kesir_tur']]), steps: [`Bütün ${n} eş parçaya bölünmüş → payda ${n}`, `${k} parça boyalı → pay ${k}`] }); }
+      if (Math.random() < .5) { const n = pick([4, 5, 6, 8]), k = pick(Array.from({ length: n - 1 }, (_, j) => j + 1).filter(j => 2 * j !== n)); return Q({ prompt: 'Şeklin boyalı kısmı bütünün kaçta kaçıdır?', visual: V.bar(k, n), options: mc(fr(k, n), [[fr(n - k, n), 'kesir_tur'], [fr(k, n - k), 'kesir_tur'], [fr(n, k), 'kesir_tur']]), steps: [`Bütün ${n} eş parçaya bölünmüş → payda ${n}`, `${k} parça boyalı → pay ${k}`] }); }
       // Kitabın terimleri (2. kitap s. 12, 18): birim kesir, bileşik kesir, tam sayılı kesir. "Basit kesir" kitapta geçmez.
       const t = pick(['birim', 'bilesik', 'tamsayili']); let n, d, w = 0;
       if (t === 'birim') { n = 1; d = ri(2, 12); } if (t === 'bilesik') { d = ri(2, 9); n = d + ri(1, 9); } if (t === 'tamsayili') { d = ri(3, 9); n = ri(1, d - 1); w = ri(1, 4); }
@@ -1779,10 +1850,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       return Q({ prompt: `${w ? U.mixed(w, n, d) : fr(n, d)} kesri hangi türdendir?`, options: mc(name[t], yanlis), steps: ['Payı 1 olan kesir → birim kesir', 'Payı paydasına eşit ya da paydasından büyük kesir → bileşik kesir', 'Tam kısmı ve kesir kısmı olan gösterim → tam sayılı kesir'] });
     }
     if (lv === 2) {
-      const d = ri(3, 9), w = ri(1, 4), r = ri(1, d - 1), n = w * d + r;
+      const d = ri(3, 9), w = ri(1, 4); let r; do r = ri(1, d - 1); while (r === w); const n = w * d + r;  // r = w olunca tam kısımla payı karıştırmak görünmez
       return Q({ prompt: `${fr(n, d)} bileşik kesrinin tam sayılı kesir olarak gösterimi hangisidir?`, options: mc(mixed(w, r, d), [[mixed(r, w, d), 'tamsayili'], [mixed(w, r, n), 'tamsayili'], [mixed(w + 1, r, d), 'tamsayili']]), steps: [`${n} ÷ ${d} = ${w}, kalan ${r}`, `Tam kısım ${w}, pay ${r}, payda ${d}`] });
     }
-    const d = ri(3, 9), w = ri(1, 5), r = ri(1, d - 1), n = w * d + r;
+    const d = ri(3, 9), w = ri(2, 5), r = ri(1, d - 1), n = w * d + r;  // w = 1 iken w × r + d = w × d + r (yanılgı doğru çıkar)
     return Q({ prompt: `${mixed(w, r, d)} tam sayılı kesrinin bileşik kesir gösterimi hangisidir?`, options: mc(fr(n, d), [[fr(w + r, d), 'tamsayili'], [fr(w * r + d, d), 'tamsayili'], [fr(w * d, r), 'tamsayili']]), steps: [`(Tam × payda) + pay = ${w} × ${d} + ${r} = ${n}`, `Payda aynı kalır → ${n}/${d}`] });
   };
   GEN.f_denk = (lv) => {
@@ -1889,9 +1960,11 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     return Q({ type: 'input', prompt: `En çok tercih edilen seçenek, en az tercih edilenden kaç kişi FAZLADIR?`, visual: chart, answer: String(mx - mn), inputMis: [{ v: mx + mn, mis: 'fark_toplam' }], steps: [`En çok: ${cats[iMx]} = ${mx}`, `En az: ${cats[iMn]} = ${mn}`, `Fark: ${mx} − ${mn} = ${mx - mn}`] });
   };
   GEN.s_daire = (lv) => {
-    const sets = [[[1, 2], [1, 4], [1, 4]], [[1, 2], [1, 4], [1, 8], [1, 8]], [[3, 8], [3, 8], [1, 4]], [[1, 4], [1, 4], [1, 4], [1, 4]], [[1, 2], [1, 2]]];
+    // Bütün dilimleri eşit setler yok: "her dilim eşittir" yanılgısı (toplam ÷ dilim sayısı) doğru cevabı vermesin
+    const sets = [[[1, 2], [1, 4], [1, 4]], [[1, 2], [1, 4], [1, 8], [1, 8]], [[3, 8], [3, 8], [1, 4]], [[1, 2], [3, 8], [1, 8]], [[1, 4], [3, 4]]];
     const parts = pick(sets), cats = shuffle(pick(CATS)).slice(0, parts.length), vals = parts.map(([n, d]) => n / d);
-    const total = pick([24, 32, 40, 48, 80, 120]), i = ri(0, parts.length - 1), [n, d] = parts[i];
+    const adaylar = parts.map((p, j) => j).filter(j => parts[j][0] * parts.length !== parts[j][1]);
+    const total = pick([24, 32, 40, 48, 80, 120]), i = pick(adaylar), [n, d] = parts[i];
     const chart = V.pieChart(cats, vals);
     if (lv === 1) return Q({ prompt: `Daire grafiğine göre "${cats[i]}" dilimi bütünün kaçta kaçıdır?`, visual: chart, options: mc(fr(n, d), [[fr(n, d * 2), 'dilim_oran'], [fr(1, parts.length), 'dilim_oran'], [fr(n * 2 > d ? 1 : n * 2, n * 2 > d ? 3 : d), 'dilim_oran']], [[fr(1, 3), 'dilim_oran']]), steps: ['Bütün daire = 1', n * 2 === d ? 'Yarım daire = 1/2' : n * 4 === d ? 'Çeyrek daire = 1/4' : `Dilim ${d} eş parçadan ${n} tanesi kadar.`, `Cevap: ${n}/${d}`] });
     return Q({ type: 'input', prompt: `${total} öğrenciyle yapılan anketin sonucu daire grafiğinde verilmiştir. "${cats[i]}" seçeneğini kaç öğrenci tercih etmiştir?`, visual: chart, answer: String(total * n / d), unit: 'öğrenci', inputMis: [{ v: total / parts.length, mis: 'dilim_oran' }, { v: total * n / d / 2, mis: 'dilim_oran' }], steps: [`"${cats[i]}" dilimi bütünün ${n}/${d} kadarı.`, `${total} ÷ ${d} = ${total / d}`, `${total / d} × ${n} = ${total * n / d} öğrenci`] });
@@ -1950,7 +2023,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     return tfQ({ prompt: `"${it[0]}" eşitliği doğru mudur?`, steps: [it[1] ? 'Evet, iki taraf da aynı sonucu verir.' : 'Hayır! İki tarafı ayrı ayrı hesapla, sonuçlar farklı çıkar.', 'Değişme ve birleşme özelliği sadece toplama ve çarpmada vardır; dağılmada parantezdeki her terim çarpılır.'] }, it[1], it[2]);
   };
   GEN.e_us = (lv) => {
-    if (lv === 1) { const a = ri(2, 12); return Q({ type: 'input', prompt: `${a}² (${nk(a, 'in')} karesi) kaçtır?`, answer: String(a * a), inputMis: [{ v: 2 * a, mis: 'us_carpim' }, { v: a + 2, mis: 'us_carpim' }], steps: [`${a}² = ${a} × ${a}`, `= ${a * a}`] }); }
+    if (lv === 1) { const a = ri(3, 12); return Q({ type: 'input', prompt: `${a}² (${nk(a, 'in')} karesi) kaçtır?`, answer: String(a * a), inputMis: [{ v: 2 * a, mis: 'us_carpim' }, { v: a + 2, mis: 'us_carpim' }], steps: [`${a}² = ${a} × ${a}`, `= ${a * a}`] }); }
     if (lv === 2) { const a = ri(2, 6); return Q({ type: 'input', prompt: `${a}³ (${nk(a, 'in')} küpü) kaçtır?`, answer: String(a ** 3), inputMis: [{ v: 3 * a, mis: 'us_carpim' }, { v: a * a, mis: 'us_carpim' }], steps: [`${a}³ = ${a} × ${a} × ${a}`, `= ${a * a} × ${a} = ${a ** 3}`] }); }
     const a = ri(2, 4), b = ri(2, 6);
     return Q({ type: 'input', prompt: `${a}³ + ${b}² işleminin sonucu kaçtır?`, answer: String(a ** 3 + b * b), inputMis: [{ v: 3 * a + 2 * b, mis: 'us_carpim' }], steps: [`${a}³ = ${a ** 3}`, `${b}² = ${b * b}`, `${a ** 3} + ${b * b} = ${a ** 3 + b * b}`] });
@@ -1961,11 +2034,11 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       const a = ri(2, 9), b = ri(2, 9), c = ri(2, 6), d = ri(1, Math.min(9, (a + b) * c - 1));  // sonuç hiç eksi olmasın (5. sınıf)
       return Q({ type: 'input', prompt: `(${a} + ${b}) × ${c} − ${d} = ?`, answer: String((a + b) * c - d), inputMis: [...(c > d ? [{ v: (a + b) * (c - d), mis: 'oncelik_soldan' }] : []), ...(a + b * c > d ? [{ v: a + b * c - d, mis: 'oncelik_soldan' }] : [])], steps: [`Önce parantez: ${a} + ${b} = ${a + b}`, `Sonra çarpma: ${a + b} × ${c} = ${(a + b) * c}`, `En son çıkarma: ${(a + b) * c} − ${d} = ${(a + b) * c - d}`] });
     }
-    const a = ri(2, 9), b = ri(2, 5), c = ri(2, 4);
+    const a = ri(2, 9), b = ri(3, 5), c = ri(2, 4);  // b = 2 olunca b² = 2 × b, üs yanılgısı görünmez
     return Q({ type: 'input', prompt: `${a} + ${b}² × ${c} = ?`, answer: String(a + b * b * c), inputMis: [{ v: (a + b) ** 2 * c, mis: 'oncelik_soldan' }, { v: (a + b * b) * c, mis: 'oncelik_soldan' }, { v: a + 2 * b * c, mis: 'us_carpim' }], steps: [`Önce üs: ${b}² = ${b * b}`, `Sonra çarpma: ${b * b} × ${c} = ${b * b * c}`, `En son toplama: ${a} + ${b * b * c} = ${a + b * b * c}`] });
   };
   GEN.e_oruntu = (lv) => {
-    const a = ri(1, 9), d = ri(2, 7);
+    const d = ri(2, 7); let a; do a = ri(1, 9); while (a === d);  // a = d iken başlangıcı unutmak doğru cevabı verir
     if (lv === 1) { const seq = [0, 1, 2, 3].map(i => a + i * d); return Q({ type: 'input', prompt: `${seq.join(', ')}, ....  Örüntünün bir sonraki terimi kaçtır?`, answer: String(a + 4 * d), inputMis: [{ v: a + 5 * d, mis: 'oruntu_bir' }], steps: [`Terimler ${nk(d, 'er')} artıyor.`, `${seq[3]} + ${d} = ${a + 4 * d}`] }); }
     if (lv === 2) {
       const n = pick([10, 12, 15, 20]);
@@ -2019,7 +2092,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       return Q({ prompt: 'Çark çevrildiğinde okun MAVİ dilimde durması nasıl bir olaydır?', visual: V.spinner(cols), options: mc(t, ['İmkânsız', 'Az olası', 'Eşit olası', 'Çok olası', 'Kesin'].filter(x => x !== t).map(x => [x, x === 'Az olası' || x === 'Çok olası' ? 'az_cok' : 'olay_tur'])), steps: [`${n} dilimden ${k} tanesi mavi.`, k * 2 < n ? 'Yarısından az → az olası' : k * 2 > n ? 'Yarısından fazla → çok olası' : k * 2 === n ? 'Tam yarısı → eşit olası' : ''] });
     }
     if (lv === 2) {
-      const kk = Math.max(1, Math.min(n - 1, k)), cc = shuffle(Array.from({ length: n }, (_, i) => i < kk ? 'sb' : 'c0b'));
+      let kk = Math.max(1, Math.min(n - 1, k)); if (2 * kk === n) kk = Math.random() < .5 ? kk - 1 : kk + 1; const cc = shuffle(Array.from({ length: n }, (_, i) => i < kk ? 'sb' : 'c0b'));
       return Q({ prompt: 'Çark çevrildiğinde okun MAVİ dilimde durma olasılığı kaçtır?', visual: V.spinner(cc), options: mc(fr(kk, n), [[fr(n - kk, n), 'olasilik_oran'], [fr(kk, n - kk === kk ? n + 1 : n - kk), 'olasilik_oran'], [fr(n, kk), 'olasilik_buyuk']]), steps: [`Parça: ${kk} mavi dilim. Bütün: ${n} dilim.`, `Mavi dilimler bütünün ${fr(kk, n)} kadarı.`] });
     }
     const tur = ri(0, 3);
@@ -2151,7 +2224,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   MATCH.p_spektrum = [() => { const it = shuffle([[fr(0, 4), 'İmkânsız'], [fr(1, 4), 'Az olası'], [fr(2, 4), 'Eşit olası'], [fr(3, 4), 'Çok olası'], [fr(4, 4), 'Kesin']]).slice(0, 3); return MQ('Olasılıkları spektrumdaki yerleriyle eşleştir.', it.map(([a, b]) => ({ a, b })), 'az_cok', ['0 imkânsız, 1/2 eşit olası, 1 kesin; arası az ya da çok olası.']); }];
   const GQ = (prompt, rows, ok, wrongs, steps, mis) => Q({ type: 'mc', grid: rows, prompt, options: mc(ok, wrongs.map(w => [w, mis])), steps, cards: true });
   const GRID = {};
-  GRID.e_oruntu = [(lv) => { const m = ri(2, 5), c = ri(0, 6), f = (x) => m * x + c, xs = [1, 2, 3], q = pick([5, 6, 10]); return GQ('Örüntüyü takip et: Kurala göre eksik sayı hangisi?', [...xs.map(x => [`${x}. adım`, String(f(x))]), [`${q}. adım`, '?']], String(f(q)), [String(f(q) + m), String(m * q), String(f(q - 1))], [`Her adımda ${m} artıyor; kural: adım × ${m}${c ? ' + ' + c : ''}`, `${q} × ${m}${c ? ' + ' + c : ''} = ${f(q)}`], 'oruntu_baslangic'); }];
+  GRID.e_oruntu = [(lv) => { const m = ri(2, 5), c = ri(1, 6), f = (x) => m * x + c, xs = [1, 2, 3], q = pick([5, 6, 10]); return GQ('Örüntüyü takip et: Kurala göre eksik sayı hangisi?', [...xs.map(x => [`${x}. adım`, String(f(x))]), [`${q}. adım`, '?']], String(f(q)), [String(f(q) + m), String(m * q), String(f(q - 1))], [`Her adımda ${m} artıyor; kural: adım × ${m}${c ? ' + ' + c : ''}`, `${q} × ${m}${c ? ' + ' + c : ''} = ${f(q)}`], 'oruntu_baslangic'); }];
   GRID.f_denk = [(lv) => { const k = ri(2, 4), bs = [[1, 2], [1, 3], [1, 4]], d = pick([5, 6, 8]); return GQ('Örüntüyü takip et: Eksik kesir hangisi?', [...bs.map(([n, dd]) => [fr(n, dd), fr(n * k, dd * k)]), [fr(1, d), '?']], fr(k, d * k), [fr(1 + k, d + k), fr(k, d)], [`Her satırda pay ve payda ${k} ile çarpılmış.`, `1/${d} → ${k}/${d * k}`], 'denk_toplama'); }];
   GRID.e_us = [(lv) => { const e = pick([2, 3]), bs = e === 2 ? [2, 3, 4] : [1, 2, 3], q = e === 2 ? pick([5, 6, 7]) : 4; return GQ('Örüntüyü takip et: Eksik değer hangisi?', [...bs.map(b => [`${b}${e === 2 ? '²' : '³'}`, String(b ** e)]), [`${q}${e === 2 ? '²' : '³'}`, '?']], String(q ** e), [String(q * e), String(e === 2 ? q + 2 : q * q)], [`${q}${e === 2 ? '²' : '³'} = ${Array(e).fill(q).join(' × ')} = ${q ** e}`], 'us_carpim'); }];
   /* ---------- Parmakla kesir: böl, boya, sayı doğrusunda göster (type 'kes') ----------
@@ -2224,7 +2297,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   const HARF3 = () => pick([['A', 'B', 'C'], ['K', 'L', 'M'], ['D', 'E', 'F'], ['P', 'R', 'S'], ['X', 'Y', 'Z']]);
   // TEMA 1
   ekle('g_temel', [2, 3], 0.3, () => { const [a, b, c] = HARF3();
-    return Q({ prompt: `Köşesi ${b} olan ve kolları ${b}${a} ile ${b}${c} ışınları olan açı nasıl adlandırılır?`, options: mc(`${a}${b}${c} açısı`, [[`${b}${a}${c} açısı`, 'aci_isim'], [`${a}${c}${b} açısı`, 'aci_isim'], [`${a} açısı`, 'aci_isim']]),
+    return Q({ prompt: `Köşesi ${b} olan ve kolları ${b}${a} ile ${b}${c} ışınları olan açı nasıl adlandırılır?`, visual: V.aciAdli(a, b, c), options: mc(`${a}${b}${c} açısı`, [[`${b}${a}${c} açısı`, 'aci_isim'], [`${a}${c}${b} açısı`, 'aci_isim'], [`${a} açısı`, 'aci_isim']]),
       steps: ['Açının köşesi ortaya yazılır.', `${a}${b}${c} açısı, ${c}${b}${a} açısı ya da kısaca ${b} açısı denir.`] }); });
   ekle('g_temel', [3], 0.35, () => { const it = pick([
       ['İki farklı noktadan kaç farklı doğru geçer?', 'Yalnız 1 doğru', [['2 doğru', 'dp_dogru'], ['Sonsuz sayıda doğru', 'dp_dogru'], ['Hiç doğru geçmez', 'dp_dogru']], 'İki noktadan yalnız bir doğru geçer.'],
@@ -2242,9 +2315,9 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       ['Bütün noktaları ortak olan iki doğruya ne denir?', 'Çakışık doğrular', [['Paralel doğrular', 'paralel_kesisen'], ['Kesişen doğrular', 'paralel_kesisen'], ['Dik doğrular', 'dik_yatay']], 'Tüm noktaları ortak olan doğrular çakışıktır; paralel doğruların hiç ortak noktası yoktur.']]);
     return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: [it[3]] }); });
   ekle('g_aci_iliski', [3], 0.35, () => { const a = pick([35, 40, 50, 55, 65, 70]), sorGenis = Math.random() < 0.5;
-    return Q({ type: 'input', prompt: `İki paralel doğruyu bir doğru kesiyor. Oluşan dar açılardan biri ${a}°. ${sorGenis ? 'Oluşan geniş açılardan biri' : 'Oluşan başka bir dar açı'} kaç derecedir?`, answer: String(sorGenis ? 180 - a : a), unit: '°',
+    return Q({ type: 'input', prompt: `İki paralel doğruyu bir doğru kesiyor. Oluşan dar açılardan biri ${a}°. ${sorGenis ? 'Oluşan geniş açılardan biri' : 'Oluşan başka bir dar açı'} kaç derecedir?`, visual: V.paralelKesen(a, sorGenis), answer: String(sorGenis ? 180 - a : a), unit: '°',
       inputMis: [{ v: sorGenis ? a : 180 - a, mis: 'paralel_kesen' }, { v: 90 - a, mis: 'tumler_butunler' }], steps: ['Paralel doğruları kesen doğruyla oluşan dar açıların hepsi eştir, geniş açıların hepsi eştir.', sorGenis ? `Geniş açı = 180 − ${a} = ${180 - a}°` : `Dar açılar eş: ${a}°`] }); });
-  ekle('g_cokgen', [2, 3], 0.35, () => { const ic = pick([60, 72, 90, 100, 108, 110, 120, 135, 140]);
+  ekle('g_cokgen', [2, 3], 0.35, () => { const ic = pick([60, 72, 100, 108, 110, 120, 135, 140]);  // 90°: iç açı = dış açı
     return Q({ type: 'input', prompt: `Bir çokgenin bir köşesindeki iç açı ${ic}°. Bu köşedeki dış açı kaç derecedir?`, answer: String(180 - ic), unit: '°', inputMis: [{ v: ic, mis: 'dis_aci' }, { v: 360 - ic, mis: 'dis_aci' }],
       steps: ['Dış açı, iç açının komşu bütünleridir.', `180 − ${ic} = ${180 - ic}°`] }); });
   ekle('g_cokgen', [1, 2], 0.25, () => { const n = pick([4, 5, 6]), H = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, n), k = ri(1, n - 1), dogru = H.slice(k).concat(H.slice(0, k)).join(''), ters = [H[0], ...H.slice(1).reverse()].join('');
@@ -2261,7 +2334,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     return tfQ({ prompt: `Bir üçgenin ${it[0]} olabilir.`, steps: ['Üçgenin iç açılarının toplamı 180°.', 'Bu yüzden en fazla bir dik ya da bir geniş açı olabilir.'] }, it[1], 'ucgen_aci_siniri'); });
   ekle('g_ucgen', [3], 0.3, () => { let r1, r2, d; do { r1 = ri(2, 5); r2 = pick([r1, r1, ri(2, 5)]); d = pick([r1, r2, ri(2, 6)]); } while (!(d < r1 + r2 && d > Math.abs(r1 - r2)));
     const K = [r1, r2, d], es = new Set(K).size, t = es === 1 ? 'Eşkenar üçgen' : es === 2 ? 'İkizkenar üçgen' : 'Çeşitkenar üçgen';
-    return Q({ prompt: `A merkezli çemberin yarıçapı ${r1} cm, B merkezli çemberin yarıçapı ${r2} cm ve |AB| = ${d} cm. Bu iki çember iki noktada kesişiyor. A, B ve kesişim noktalarından biri birleştirilince kenarlarına göre hangi üçgen oluşur?`,
+    return Q({ prompt: `A merkezli çemberin yarıçapı ${r1} cm, B merkezli çemberin yarıçapı ${r2} cm ve |AB| = ${d} cm. Bu iki çember iki noktada kesişiyor. A, B ve kesişim noktalarından biri birleştirilince kenarlarına göre hangi üçgen oluşur?`, visual: V.cemberInsa(r1, r2, d),
       options: mc(t, ['Eşkenar üçgen', 'İkizkenar üçgen', 'Çeşitkenar üçgen'].filter(x => x !== t).map(x => [x, 'cember_insa'])),
       steps: [`Kenarlar: iki yarıçap (${r1} cm ve ${r2} cm) ve merkezler arası uzaklık (${d} cm).`, es === 1 ? 'Üçü eşit → eşkenar.' : es === 2 ? 'İkisi eşit → ikizkenar.' : 'Hepsi farklı → çeşitkenar.'] }); });
   // TEMA 2
@@ -4567,7 +4640,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     else if (AUDIO.keys && AUDIO.keys.has(key)) sesli(); else zamanla();
   };
   const PI = window.MY_PI_LINES;
-  const piSay = (group) => { const arr = PI[group]; if (!arr) return null; const i = Math.floor(Math.random() * arr.length); say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
+  // haric: o anki duruma uymayan repliklerin sırası (ör. cevap uzakken "Neredeyse!", en kolay seviyede "daha kolay bir soru") (25.10.2026)
+  const piSay = (group, haric = []) => { const arr = PI[group]; if (!arr) return null; const uygun = arr.map((_, j) => j).filter(j => !haric.includes(j)); if (!uygun.length) return null; const i = uygun[Math.floor(Math.random() * uygun.length)]; say(`pi_${group}_${i + 1}`, arr[i], false); return arr[i]; };
 
   /* ---------------- Maskot: Pi ---------------- */
   const mascotSvg = (state = '', w = 110) => `<div class="mascot ${state}" style="width:${w}px" aria-hidden="true"><svg viewBox="0 0 120 124"><g class="m-body">
@@ -4688,6 +4762,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       <div class="anahtarlar">${ana}</div></div>${h.acildi ? '' : '<div class="bugun-git">Git ›</div>'}</div></button>`; };
   // Görselleri önceden ısıt (ilk soru/geri bildirimde gecikme olmasın)
   if (PI_GORSEL) setTimeout(() => Object.values(PI_DURUM).forEach(k => { const im = new Image(); im.src = PI_GORSEL + k + '.webp'; }), 1500);
+  // Sahip olunan kostümler önceden indirilir: çevrimdışı katman saklar, internet yokken de alınan kostüm görünür
+  setTimeout(() => { try { (dolap().sahip || []).filter(k => k !== 'normal').forEach(k => { const im = new Image(); im.src = kostumSrc(k); }); } catch (e) { } }, 2500);
 
   const PRAISE = window.MY_PI_LINES.dogru;
   const PRAISE_RESCUE = window.MY_PI_LINES.telafi;
@@ -4739,7 +4815,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     const R = yol.getBoundingClientRect(), pts = [...yol.querySelectorAll('.node, .yolsandik')].map(n => { const r = n.getBoundingClientRect(); return [r.left + r.width / 2 - R.left, r.top + r.height / 2 - R.top]; });
     if (pts.length < 2) return;
     let d = `M${pts[0][0]},${pts[0][1]}`; for (let k = 1; k < pts.length; k++) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k], my = (y0 + y1) / 2; d += ` C${x0},${my} ${x1},${my} ${x1},${y1}`; }
-    yol.insertAdjacentHTML('afterbegin', `<svg class="iz iz-${dolap().iz}" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><defs><linearGradient id="gkIz" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${yol.scrollHeight}"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".25" stop-color="#FFB020"/><stop offset=".5" stop-color="#3DDC84"/><stop offset=".75" stop-color="#2EC5FF"/><stop offset="1" stop-color="#8B5CFF"/></linearGradient></defs><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
+    yol.insertAdjacentHTML('afterbegin', `<svg class="iz iz-${dolap().iz}" width="${R.width}" height="${yol.scrollHeight}" aria-hidden="true"><defs><linearGradient id="gkIz" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="324" spreadMethod="repeat"><stop offset="0" stop-color="#FF4D4D"/><stop offset=".2" stop-color="#FFB020"/><stop offset=".4" stop-color="#3DDC84"/><stop offset=".6" stop-color="#2EC5FF"/><stop offset=".8" stop-color="#8B5CFF"/><stop offset="1" stop-color="#FF4D4D"/></linearGradient></defs><path d="${d}" class="iz-golge"/><path d="${d}" class="iz-yol"/></svg>`);
   }
   addEventListener('resize', () => requestAnimationFrame(izCiz));
   // Tek harita: «Matematik Diyarı». Kitabın 7 teması burada 7 bölge olarak arka arkaya dizilir (aynı yol, aynı iz).
@@ -5379,10 +5455,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (adim === 'gorev') return viewGorevIlerleme();
     const r = A.result, ses = A.ses, acc = Math.round(r.acc * 100), mins = Math.max(1, Math.round((Date.now() - ses.start) / 60000));
     const yildizli = !['placement', 'speed', 'hazir'].includes(ses.mode), ys = yildizSayisi(r.acc);
-    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : 'Az kaldı!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
+    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : acc >= 50 ? 'Az kaldı!' : 'Bir dahakine olacak!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
     // Esprili alt başlık: çocuğun bu dersteki en güzel hâlini söyler (yalnız gerçekten olduysa)
     const sn = ses.answered.length ? (Date.now() - ses.start) / 1000 / ses.answered.length : 99;
-    const altBaslik = !yildizli ? '' : ses.wrong === 0 && ses.answered.length >= 5 ? 'Kusursuz! Tek hata bile yok 🎯' : ses.rescueOk >= 2 ? 'Hatalarından geri dönmeyi bildin 💪' : sn < 12 && r.acc >= 0.7 ? 'Şimşek gibiydin ⚡' : r.acc >= 0.9 ? 'Kafan matematik makinesi gibi çalıştı 🧠' : '';
+    const altBaslik = !yildizli ? '' : ses.answered.length >= 5 && ses.answered.every(a => a.ok && a.kanit === 'ilk' && !a.partial) ? 'Kusursuz! Tek hata bile yok 🎯' : ses.rescueOk >= 2 ? 'Hatalarından geri dönmeyi bildin 💪' : sn < 12 && r.acc >= 0.7 ? 'Şimşek gibiydin ⚡' : r.acc >= 0.9 ? 'Kafan matematik makinesi gibi çalıştı 🧠' : '';
     const resc = ses.rescueTry ? `<div class="speech">💪 ${ses.rescueTry} hatandan sonra <b>${ses.rescueOk}</b> kez doğruya döndün. Hata yapmak öğrenmenin parçası!</div>` : '';
     // Yay göstergesi: doğruluk oranı kadar dolar; 3 işaret = yıldız eşikleri (%0 bitirme, %70, %90)
     const R = 92, C = 2 * Math.PI * R, yay = C * 0.75, dolu = yay * Math.max(0.04, r.acc);
@@ -5537,7 +5613,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     A.kes = A.q.type === 'kes' ? { parca: A.q.parca || 1, on: Array(A.q.parca || 1).fill(false), konum: null } : null;
     A.mt = A.q.type === 'match' ? { L: U.shuffle(A.q.pairs.map((_, i) => i)), R: U.shuffle(A.q.pairs.map((_, i) => i)), sL: null, sR: null, done: [], mist: 0, bad: null, just: null } : null; A.hinted = false; A.showHint = false; A.fb = null; A.deneme = 1; A.elenen = []; A.ikinci = null; A.t0 = Date.now(); render();
     const lb = document.getElementById('lbody'); if (lb) lb.scrollTop = 0;
-    if (A.q.rescue) setTimeout(() => piSay('telafi_soru'), 250);
+    if (A.q.rescue) setTimeout(() => piSay('telafi_soru', (A.ses.lastLevel || 1) <= 1 ? [0] : []), 250);  // en kolay seviyede telafi daha kolay değildir
     idleKur();
   }
   // Doğru cevap kutlaması: seviye seriye göre yükselir
@@ -5575,6 +5651,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (tier === 'fire') seriSoyle('seri3', 0, 3); else if (tier === 'unstop') seriSoyle('seri5', 1, 5); else if (tier === 'legend') seriSoyle('seri8', -1, 8); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
     else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
   }
+  // Sayı cevabı doğruya gerçekten yakın mı? ("Neredeyse!", "Az kaldı!" yalnız o zaman söylenir)
+  const cevapYakin = (q) => { if (q.type !== 'input') return false; const v = parseFloat(String(A.input).replace(',', '.')), a = parseFloat(String(q.answer).replace(',', '.')); return isFinite(v) && isFinite(a) && v !== a && Math.abs(v - a) <= Math.max(1, Math.abs(a) * 0.1); };
   function checkAnswer() {
     const q = A.q, ans = q.type === 'tablo' ? A.tb.slice() : q.type === 'kur' ? A.kur.slice() : q.type === 'input' ? A.input : q.type === 'kes' ? { parca: A.kes.parca, boyali: A.kes.on.filter(Boolean).length, konum: A.kes.konum } : q.type === 'olc' ? { aci: A.olc.aci } : q.type === 'graf' ? { h: A.graf.slice() } : A.sel; if (ans === null || ans === '') return;
     const res = E.check(q, ans), ms = Date.now() - A.t0;
@@ -5585,19 +5663,19 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     }
     // İkinci şans: cevabı söylemeden hedefli ipucu, bir yeniden deneme
     if (!res.ok && (A.deneme || 1) === 1 && E.ikinciSansUygun(A.ses, q)) {
-      E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;
+      const yakin = cevapYakin(q); E.yanilgiNotu(A.st, q, res.mis); A.deneme = 2;
       const once = q.type === 'input' ? A.input.replace('.', ',') : q.type === 'kur' ? `${kurMetin(q, A.kur)}${res.deger ? ' = ' + res.deger : ''}` : null;
       if (q.type === 'tablo') (res.yanlisSatir || []).forEach(i => { A.tb[i] = null; }); // yanlış satırlar boşalır, doğrular kalır
       else if (q.type === 'kur') A.kur = [];
       else if (q.type !== 'input' && !['kes', 'olc', 'graf'].includes(q.type)) { A.elenen.push(A.sel); A.sel = null; } else if (q.type === 'input') A.input = '';
       A.ikinci = { ipucu: ikinciIpucu(q, res), once }; save();
       sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(60); } catch (e) { }
-      piSay('tekrar_dene'); render(); const s = document.querySelector('.ikinci'); if (s) s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); idleKur(); return;
+      piSay('tekrar_dene', yakin ? [] : [0]); render(); const s = document.querySelector('.ikinci'); if (s) s.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); idleKur(); return;
     }
     const kanit = res.ok ? ((A.deneme === 2 || A.hinted) ? 'ipucu' : 'ilk') : 'cozum';
     const gain = E.record(A.st, A.ses, q, res, ms, A.hinted || A.deneme === 2, kanit);
     A.fb = { ok: res.ok, mis: res.mis, ac: res.ac, gain, kanit }; save();
-    if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis'); }
+    if (res.ok) celebrate(q, gain); else { sfx.bad(); if (navigator.vibrate) try { navigator.vibrate(120); } catch (e) { } if (A.ses.mode !== 'speed') piSay('yanlis', cevapYakin(q) ? [] : [2]); }
     if (A.ses.mode === 'speed') { A.fb = null; render(); const lb = document.getElementById('lbody'); if (!res.ok) toast(`Doğrusu: ${q.type === 'input' ? esc(q.answer) : q.type === 'cmp' ? esc(q.options.find(o => o.ok).t) : q.options.find(o => o.ok).t}`); A.ses.lastWrong = false; return nextQuestion(); }
     render();
     if (!res.ok) { const s = document.querySelector('.lbody'); if (s) { s.classList.add('shake'); } }
