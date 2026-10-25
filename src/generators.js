@@ -402,7 +402,7 @@
     if (lv === 2) {
       const s = ri(10, 15) * 60 + ri(30, 55), dur = ri(35, 80), e = s + dur;
       const wrongDec = Math.round(((+hm(e).replace('.', '')) - (+hm(s).replace('.', ''))));
-      return Q({ type: 'input', prompt: `Bir tiyatro oyunu saat ${U.tk(Math.floor(s / 60), s % 60, 'de')} başlayıp ${U.tk(Math.floor(e / 60), e % 60, 'de')} bitti. Oyun kaç dakika sürdü?`, answer: String(dur), unit: 'dk', inputMis: [{ v: wrongDec, mis: 'saat_ondalik' }], steps: [`${hm(s)} → ${hm(Math.ceil(s / 60) * 60)}: ${Math.ceil(s / 60) * 60 - s} dakika`, `${hm(Math.ceil(s / 60) * 60)} → ${hm(e)}: ${e - Math.ceil(s / 60) * 60} dakika`, `Toplam: ${dur} dakika`], hint: '1 saat = 60 dakika' });
+      return Q({ type: 'input', prompt: `Bir tiyatro oyunu saat ${U.tk(Math.floor(s / 60), s % 60, 'de')} başlayıp ${U.tk(Math.floor(e / 60), e % 60, 'de')} bitti. Oyun kaç dakika sürdü?`, answer: String(dur), unit: 'dk', inputMis: [{ v: wrongDec, mis: 'saat_ondalik' }], steps: [`${hm(s)} → ${hm(Math.ceil(s / 60) * 60)}: ${Math.ceil(s / 60) * 60 - s} dakika`, `${hm(Math.ceil(s / 60) * 60)} → ${hm(e)}: ${e - Math.ceil(s / 60) * 60} dakika`, `Toplam: ${dur} dakika`], hint: 'Başlangıç ve bitiş saatlerini dakikaya çevirerek düşün. Bir saat kaç dakikadır?' });
     }
     const n = ri(3, 6), price = ri(15, 45) * 10, budget = Math.ceil((n * price + ri(1, 9) * 100) / 100) * 100, left = budget - n * price;
     const item = pick(['fidan', 'kitap', 'top', 'boya seti']);
@@ -519,7 +519,7 @@
       if (Math.random() < .5) return Q({ prompt: `%${p} ifadesinin ondalık gösterimi hangisidir?`, options: mc(fmtD(p / 100, 2), [[fmtD(p / 10, 1), 'yuzde_ondalik'], [String(p), 'yuzde_ondalik'], [fmtD(p / 1000, 3), 'yuzde_ondalik']]), steps: [`%${p} = ${p}/100`, `${p}/100 = ${fmtD(p / 100, 2)}`] });
       return Q({ prompt: `${fr(p, 100)} kesrinin yüzde ile gösterimi hangisidir?`, options: mc('%' + p, [['%' + (p * 10), 'yuzde_ondalik'], ['%' + fmtD(p / 100, 2), 'yuzde_ondalik'], ['%' + (100 - p), 'bos_kisim']]), steps: ['Paydası 100 olan kesir doğrudan yüzde olarak okunur.', `${p}/100 = %${p}`] });
     }
-    if (lv === 2) { const k = ri(5, 95); return Q({ type: 'input', prompt: 'Yüzlük tablonun yüzde kaçı boyalıdır? (Sadece sayıyı yaz)', visual: V.grid100(k), answer: String(k), unit: '%', inputMis: [{ v: 100 - k, mis: 'bos_kisim', ac: `${100 - k} kare boyanmamış olanlar. Soru boyalı kısmı soruyor.` }, { v: k / 10, mis: 'yuzde_ondalik' }], steps: ['Tabloda 100 kare var.', `${k} kare boyalı → ${k}/100 = %${k}`], hint: 'Her satırda 10 kare var.' }); }
+    if (lv === 2) { const k = ri(5, 95); return Q({ type: 'input', prompt: 'Yüzlük tablonun yüzde kaçı boyalıdır? (Sadece sayıyı yaz)', visual: V.grid100(k), answer: String(k), unit: '%', inputMis: [{ v: 100 - k, mis: 'bos_kisim', ac: `${100 - k} kare boyanmamış olanlar. Soru boyalı kısmı soruyor.` }, { v: k / 10, mis: 'yuzde_ondalik' }], steps: ['Tabloda 100 kare var.', `${k} kare boyalı → ${k}/100 = %${k}`], hint: 'Boyalı kareleri say. Bütün tabloda kaç kare var?' }); }
     const [n, d] = pick([[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [7, 10], [3, 20], [9, 25], [1, 20]]);
     const p = n * 100 / d;
     return Q({ type: 'input', prompt: `${fr(n, d)} kesri yüzde kaça eşittir? (Sadece sayıyı yaz)`, answer: String(p), unit: '%', inputMis: [{ v: n * 10 + d, mis: 'yuzde_ondalik' }, { v: n / d, mis: 'yuzde_ondalik' }], steps: [`Paydayı 100 yap: ${100 / d} ile genişlet.`, `${fr(n, d)} = ${fr(n * 100 / d, 100)} = %${p}`] });
@@ -615,7 +615,7 @@
   GEN.e_esitlik = (lv) => {
     if (lv === 1) {
       const a = ri(3, 12), b = ri(2, 12); let c = ri(1, a + b - 1); while (c === a || c === b) c = ri(1, a + b - 1);
-      return Q({ type: 'input', prompt: `${a} + ${b} = ....... + ${c}   Boş yere hangi sayı gelmelidir?`, answer: String(a + b - c), inputMis: [{ v: a + b, mis: 'esittir_sonuc' }, { v: a + b + c, mis: 'esittir_sonuc' }], steps: [`Sol taraf: ${a} + ${b} = ${a + b}`, `Sağ taraf da ${a + b} olmalı: ....... + ${c} = ${a + b}`, `${a + b} − ${c} = ${a + b - c}`], hint: '"=" iki tarafın eşit olduğunu söyler.' });
+      return Q({ type: 'input', prompt: `${a} + ${b} = ....... + ${c}   Boş yere hangi sayı gelmelidir?`, answer: String(a + b - c), inputMis: [{ v: a + b, mis: 'esittir_sonuc' }, { v: a + b + c, mis: 'esittir_sonuc' }], steps: [`Sol taraf: ${a} + ${b} = ${a + b}`, `Sağ taraf da ${a + b} olmalı: ....... + ${c} = ${a + b}`, `${a + b} − ${c} = ${a + b - c}`], hint: 'Önce bilinen taraftaki işlemi yap. Öbür taraf da aynı sonucu vermeli: boş yere hangi sayı gelirse sonuç tutar?' });
     }
     if (lv === 2) {
       const L = [ri(2, 9), ri(2, 9)], r = ri(1, L[0] + L[1] - 1);
@@ -1590,7 +1590,195 @@
   };
   const ATOLYE = { tabloKontrol: TABLO_CHECK, kurKontrol: KUR_CHECK, kurGecerli, kurIfade, ifadeHesapla, ifadeParcala, sayiYaz, TABLO_AD, ids: Object.keys(PROB), skillOf: (id) => ({ market: 'n_problem', bahce: 'a_cevre', parke: 'a_alan', okuma: 's_tablo_sutun', terazi: 'e_esitlik', kumbara: 'e_oruntu', gezi: 'n_carpbol', torba: 'p_spektrum', ucgen: 'g_ucgen', pizza: 'f_karsilastir' })[id], sorular: atolyeSorulari, ASAMA, PROB };
 
+  /* =========================================================
+     SORUYA ÖZEL İPUÇLARI (25.10.2026)
+     Kendi ipucu olmayan sorularda ampul, becerinin genel kural kartını gösteriyordu; o kural çoğu soruya uymuyordu
+     (ör. çokgen adlandırma sorusunda "n kenarlı çokgen: n köşe…"). Her kalıp için yöntemi gösteren, cevabı söylemeyen
+     bir ipucu: [beceri, sorunun düz metninde aranan kalıp, ipucu]. İlk eşleşen kullanılır.
+     Test (test_generators.js): her ders sorusunun ipucu olmalı ve ipucu doğru cevabı içermemeli.
+     ========================================================= */
+  const IPUCU = [
+    // TEMA 1
+    ['g_temel', /gösterimi neyi ifade eder/, 'Gösterimin iki ucuna bak: köşeli parantez başlangıç noktasıdır, iki yandaki dik çizgiler uzunluğu gösterir.'],
+    ['g_temel', /sınırsız uzar|başlangıç noktası|uç noktası|ölçülebilir/, 'Şıklardaki her birinin uçlarını düşün: kaç ucu var, uçları bir yerde bitiyor mu?'],
+    ['g_temel', /açı nasıl adlandırılır/, 'Açı üç harfle adlandırılırken köşenin harfi hangi sıraya yazılır?'],
+    ['g_temel', /kaç farklı doğru geçer/, 'Kâğıda nokta koyup cetvelle dene: bu noktalardan kaç farklı doğru çizebilirsin?'],
+    ['g_cember', /yarıçapı .*çapı kaç|Yarıçapı \d+ cm olan çemberin çapı/, 'Çap, merkezden geçip çemberin bir ucundan öbür ucuna gider. Yarıçapın kaç katıdır?'],
+    ['g_cember', /Çapı .*aynı merkezli/, 'Önce birinci çemberin yarıçapını bul, sonra ikinci çemberin yarıçapını, en son ikinci çemberin çapını.'],
+    ['g_cember', /Çapı \d+ cm olan çemberin yarıçapı/, 'Yarıçap, merkez ile çember arasındaki uzaklıktır. Çapın kaçta kaçıdır?'],
+    ['g_cember', /ne denir/, 'Bir çember çiz ve merkezini işaretle. Sorulan parça merkezden mi başlıyor, merkezden mi geçiyor, yoksa iç bölgeyi mi anlatıyor?'],
+    ['g_cember', /modelidir/, 'Çember yalnız kenardaki çizgidir, içi boştur. Daire ise iç bölgesiyle birlikte doludur.'],
+    ['g_dikme_paralel', /sembolü ne anlama gelir/, 'Sembolün şekline bak: iki çizgi yan yana mı duruyor, yoksa birbirini köşe yaparak mı kesiyor?'],
+    ['g_dikme_paralel', /ise .* ne söylenebilir/, 'Doğruları kâğıda çiz: önce ilk ilişkiyi, sonra ikincisini çiz. Sonra ilk ve son doğruya bak.'],
+    ['g_dikme_paralel', /kaç noktada kesişir/, 'İki doğruyu çizip uzattığını düşün: buluşuyorlar mı, buluşuyorlarsa kaç yerde?'],
+    ['g_dikme_paralel', /kaç dikme/, 'Kâğıda bir doğru ve dışında bir nokta çiz. Gönyeyle bu noktadan doğruya kaç farklı dik çizgi çizebilirsin?'],
+    ['g_dikme_paralel', /EN KISA/, 'Noktadan doğruya farklı yönlerde parçalar çiz. Hangisi en kısa görünüyor, doğruyla hangi açıyı yapıyor?'],
+    ['g_dikme_paralel', /Bütün noktaları ortak/, 'İki doğru tam üst üste gelirse ne olur? Kaç ortak noktaları olur?'],
+    ['g_aci', /hangisinin ölçüsü daha büyüktür/, 'Kolların uzunluğuna değil, iki kolun arasındaki açıklığa bak.'],
+    ['g_aci', /hangi türdendir/, 'Ölçüyü 90° ve 180° ile karşılaştır.'],
+    ['g_aci', /Gözünle tahmin et/, 'Açıyı bir kâğıdın köşesiyle (dik açıyla) karşılaştır: daha kapalı mı, daha açık mı?'],
+    ['g_aci', /dik açının ölçüleri toplamı/, 'Bir dik açı kaç derecedir? O kadar dik açıyı topla.'],
+    ['g_aci', /kaç tane \d+ derecelik/, 'Doğru açının ve tam açının kaç derece olduğunu hatırla. İçine bu küçük açıdan kaç tane sığar?'],
+    ['g_aci_iliski', /BÜTÜNLERİ|TÜMLERİ|bütünleri|tümleri/, 'Tümler açılar birlikte bir dik açı, bütünler açılar birlikte bir doğru açı oluşturur. Soruda hangisi isteniyor?'],
+    ['g_aci_iliski', /TERS açısı/, 'Kesişen iki doğruda karşı karşıya duran açılar ters açılardır. Ters açıların ölçüleri hakkında ne biliyorsun?'],
+    ['g_aci_iliski', /komşu/, 'Kesişen doğrularda yan yana duran iki açı birlikte bir doğru açı oluşturur.'],
+    ['g_aci_iliski', /paralel doğruyu bir doğru kesiyor/, 'Paralel doğruları kesen doğruyla oluşan dar açılar birbirine, geniş açılar birbirine eşittir. Yan yana duran bir dar ve bir geniş açı ne oluşturur?'],
+    ['g_cokgen', /kaç (köşesi|kenarı|iç açısı) vardır/, 'Çokgenin adı kaç kenarı olduğunu söyler (üç-gen, dört-gen…). Bir çokgenin kenar, köşe ve iç açı sayıları birbirine eşittir.'],
+    ['g_cokgen', /düzgün çokgenin tanımı/, 'Kare ile dikdörtgeni düşün: ikisinin de açıları eşit. Peki kenarları? Hangisi düzgün çokgendir ve neden?'],
+    ['g_cokgen', /düzgün bir çokgen midir/, 'Düzgün çokgende hem bütün kenarlar hem bütün açılar eşittir. Bu şeklin kenarları ve açıları eşit mi?'],
+    ['g_cokgen', /bütün kenarlarının uzunlukları toplamı/, 'Düzgün çokgenin bütün kenarları eşittir. Bu çokgenin kaç kenarı var?'],
+    ['g_cokgen', /yan yana OLMAYAN/, 'Yan yana iki köşeyi birleştiren parça kenardır. Yan yana olmayanları birleştiren parçanın adı ne?'],
+    ['g_cokgen', /dış açı/, 'İç açı ile dış açı aynı köşede yan yana durur ve birlikte doğru açı oluşturur.'],
+    ['g_cokgen', /hiç köşegeni yoktur/, 'Şekilleri çiz: yan yana olmayan iki köşe bulabiliyor musun?'],
+    ['g_ucgen', /iki iç açısının ölçüsü/, 'Üçgenin iç açılarının toplamı kaç derecedir? Verilen iki açıyı bu toplamdan çıkar.'],
+    ['g_ucgen', /açılarına göre hangisidir/, 'En büyük açıya bak: 90°\'den küçük mü, 90°\'ye eşit mi, büyük mü?'],
+    ['g_ucgen', /Eşkenar üçgenin bir iç açısı/, 'Eşkenar üçgenin üç açısı eşittir. İç açıların toplamını üç eşit parçaya böl.'],
+    ['g_ucgen', /Taban açılarından/, 'Tepe açısını iç açıların toplamından çıkar; kalan kısım iki eşit taban açısına paylaşılır.'],
+    ['g_ucgen', /Dik açılı bir üçgende/, 'Dik açı 90° ise kalan iki dar açının toplamı kaç derece olur?'],
+    ['g_ucgen', /kenarlarına göre hangisidir/, 'Kaç kenarın uzunluğu eşit: üçü mü, ikisi mi, hiçbiri mi?'],
+    ['g_ucgen', /olabilir\.?$/, 'Üçgenin iç açılarının toplamı 180°. Bu açıları bir arada düşün: toplam 180°\'yi aşıyor mu?'],
+    ['g_ucgen', /çemberin yarıçapı/, 'Kesişim noktası iki çemberin de üstündedir: A\'ya uzaklığı ilk çemberin yarıçapı, B\'ye uzaklığı ikinci çemberin yarıçapıdır. Üç kenarı karşılaştır.'],
+    // TEMA 2
+    ['n_okuma', /sayısının okunuşu hangisidir/, 'Sayıyı sağdan üçerli bölüklere ayır, her bölüğü okuyup bölüğün adını söyle: milyar, milyon, bin.'],
+    ['n_okuma', /▢/, 'Kutunun hangi bölüğün yerinde olduğunu bul. Okunuşta o bölüğün adından hemen önce söylenen sayıya bak. Bölük üç basamaklıdır.'],
+    ['n_basamak', /basamak değeri/, 'Basamak değeri = rakam × bulunduğu basamağın değeri. O basamağın değerinde kaç sıfır var?'],
+    ['n_basamak', /hangi basamaktadır/, 'Basamaklar sağdan sola sayılır: birler, onlar, yüzler, binler… Önce bu rakamın sağdan kaçıncı sırada olduğunu bul.'],
+    ['n_basamak', /çözümle/, 'Her parçayı kendi basamağına yerleştir. Boş kalan basamaklara 0 yaz.'],
+    ['n_karsilastir', /rakamlarının her biri birer kez/, 'En soldaki basamağa hangi rakam gelmeli? Bir sayının en soldaki rakamı 0 olabilir mi?'],
+    ['n_karsilastir', /sıralanışı/, 'Önce basamak sayılarını karşılaştır. Basamak sayıları eşitse en soldaki rakamdan başlayarak karşılaştır.'],
+    ['n_karsilastir', /kart/, 'Her kartı bir bölük gibi düşün. En büyük sayı için hangi kart en solda olmalı?'],
+    ['n_karsilastir', /sembol/, 'Önce basamak sayılarına bak. Eşitse en soldaki rakamdan başlayarak karşılaştır.'],
+    ['n_toplacikar', /= \?$/, 'Basamakları alt alta hizala ve birler basamağından başla. Eldeyi ya da onluk bozmayı unutma.'],
+    ['n_toplacikar', /^\.+ \+/, 'Bilinmeyen toplananı bulmak için toplamdan bilinen toplananı çıkar.'],
+    ['n_toplacikar', /Eksilen kaçtır/, 'Eksileni bulmak için çıkan ile farkı topla.'],
+    ['n_toplacikar', /Geriye kaç/, 'Önce harcanan paraları topla, sonra bunu eldeki paradan çıkar.'],
+    ['n_carpbol', /^\d[\d ]* × \.+|^\.+ ×/, 'Bilinmeyen çarpanı bulmak için çarpımı bilinen çarpana böl.'],
+    ['n_carpbol', /^\d[\d ]* ÷ \.+/, 'Bilinmeyen böleni bulmak için bölüneni bölüme böl.'],
+    ['n_carpbol', /^\.+ ÷/, 'Bilinmeyen bölüneni bulmak için bölümle böleni çarp.'],
+    ['n_carpbol', /× .*işleminin sonucu/, 'Sıfırları ayır: önce sıfırsız sayıları çarp, sonra bütün sıfırları sonuna ekle.'],
+    ['n_carpbol', /÷ .*işleminin sonucu/, 'Bölünenden ve bölenden aynı sayıda sıfırı silebilirsin. Sonra kalan sayıları böl.'],
+    ['n_carpbol', /× \d+ = \?/, 'Önce birler basamağıyla, sonra onlar basamağıyla çarp ve alt alta topla. Onlar satırında bir basamak sola kaymayı unutma.'],
+    ['n_problem', /kumbarasına her gün/, 'Her gün aynı miktar ekleniyor. Kaç gün, her gün kaç TL?'],
+    ['n_problem', /bütçeyle/, 'Önce harcanan parayı bul ve bütçeden çıkar. Kalan para kaç deftere yeter? Bir deftere yetmeyen artan parayı sayma.'],
+    ['n_problem', /Alışveriş fişi/, 'Önce fişteki fiyatları topla, sonra kasaya verilen paradan çıkar.'],
+    ['n_problem', /en az kaç sefer/, 'Kişileri bir seferde taşınan sayıya böl. Artan kişiler kalırsa onlar için de sefer gerekir mi?'],
+    ['n_problem', /Borç en az kaç ayda/, 'Toplam fiyatı her ay ödenen miktara böl. Borcun bir kısmı artarsa onun için de bir ay gerekir mi?'],
+    ['n_problem', /mola/, 'Ders sürelerini ve aradaki molaları ayrı ayrı topla. Üç ders arasında kaç mola var? Sonra başlangıç saatine ekle.'],
+    ['n_tahmin', /yuvarlayınca/, 'Yuvarlanacak basamağın hemen sağındaki rakama bak: 5 ya da daha büyükse bir artır, küçükse aynı bırak. Sağındaki basamaklar 0 olur.'],
+    ['n_tahmin', /TAHMİN/, 'Önce her sayıyı ayrı ayrı en yakın binliğe yuvarla, sonra yuvarlanmış sayıları topla.'],
+    // TEMA 3
+    ['a_cevre', /karenin çevre/, 'Karenin kaç kenarı var? Hepsinin uzunluğu aynı.'],
+    ['a_cevre', /uzun kenarı .*Kısa kenarı/, 'Çevrenin yarısı, bir uzun kenar ile bir kısa kenarın toplamıdır.'],
+    ['a_cevre', /sıra tel/, 'Önce bir sıra tel için bahçenin çevresini bul, sonra kaç sıra tel çekileceğini düşün.'],
+    ['a_cevre', /kaç farklı dikdörtgen/, 'Çevrenin yarısı bir uzun ve bir kısa kenarın toplamıdır. Toplamı bu yarıyı veren doğal sayı çiftlerini yaz; aynı çifti iki kez sayma.'],
+    ['a_cevre', /dikdörtgen çizilebilir\.?$/, 'Çevre = 2 × (uzun kenar + kısa kenar). Doğal sayıların 2 katı tek sayı olabilir mi?'],
+    ['a_cevre', /dikdörtgenin çevre/, 'Çevre, dört kenarın toplamıdır. Dikdörtgende karşılıklı kenarlar eşittir.'],
+    ['a_alan', /birimkare/, 'Kareleri tek tek saymak yerine bir sıradaki kare sayısını ve sıra sayısını bul.'],
+    ['a_alan', /parke/, 'Önce odanın alanını bul. Her metrekare için ödenen parayı bu alanla düşün.'],
+    ['a_alan', /kaç farklı dikdörtgen/, 'Çarpımı bu alanı veren doğal sayı çiftlerini sırayla yaz (1 × …, 2 × …). Aynı çifti iki kez sayma.'],
+    ['a_alan', /çit/, 'Alanı veren kenar çiftlerini yaz ve her birinin çevresini hesapla. Kenarlar birbirine yaklaştıkça çevre ne oluyor?'],
+    ['a_alan', /Diğer kenarı/, 'Verilen kenarı hangi sayıyla çarparsan alanı bulursun?'],
+    ['a_alan', /alanı nedir/, 'Dikdörtgenin alanı, iki komşu kenarının uzunluklarının çarpımıdır. Birimi kare olarak yaz (cm², m²).'],
+    ['a_cevre_alan', /şerit|kâğıt|kapla|etrafına/, 'Etrafına bir şey çekiliyorsa çevre, üstü kaplanıyorsa alan gerekir. Bu soruda hangisi?'],
+    ['a_cevre_alan', /Çevre uzunlukları eşit/, 'Çevreleri aynı iki farklı dikdörtgen düşün (ör. 5 × 1 ve 3 × 3). Alanları da aynı mı?'],
+    ['a_cevre_alan', /Alanları eşit/, 'Alanları aynı iki farklı dikdörtgen düşün (ör. 12 × 1 ve 4 × 3). Çevreleri de aynı mı?'],
+    ['a_cevre_alan', /boyutlarındaki iki dikdörtgenin/, 'İki dikdörtgen için ayrı ayrı hesapla, sonra karşılaştır. Alan için kenarları çarp, çevre için dört kenarı topla.'],
+    ['a_cevre_alan', /EN KÜÇÜK/, 'Bu çevreye sahip dikdörtgenleri kenar çiftleriyle yaz. Kenarlar arasındaki fark büyüdükçe alan ne oluyor?'],
+    ['a_cevre_alan', /EN BÜYÜK/, 'Bu çevreye sahip dikdörtgenleri kenar çiftleriyle yaz. Kenarlar birbirine yaklaştıkça alan ne oluyor?'],
+    ['a_cevre_alan', /Ç\(|A\(/, 'Ç( ) çevreyi, A( ) alanı gösterir. Hangisi soruluyor?'],
+    // TEMA 4
+    ['f_tur', /boyalı kısmı/, 'Payda: şekil kaç eş parçaya bölünmüş? Pay: kaç parça boyalı?'],
+    ['f_tur', /hangi türdendir/, 'Payı paydayla karşılaştır. Kesrin yanında bir tam sayı var mı?'],
+    ['f_tur', /tam sayılı kesir olarak/, 'Payın içinde paydadan kaç tane var? O kadar tam olur, artan kısım pay olarak kalır.'],
+    ['f_tur', /bileşik kesir gösterimi/, 'Tam sayıyı paydayla çarp, payı ekle; payda aynı kalır.'],
+    ['f_denk', /Soru işareti yerine/, 'Paydaya ne olmuş? Pay ile paydayı aynı sayıyla çarparsan ya da bölersen denk kesir elde edersin.'],
+    ['f_denk', /Örüntüyü takip et/, 'Her satırda pay ve paydaya ne yapılmış? Aynısını eksik satıra uygula.'],
+    ['f_denk', /en sade/, 'Pay ile paydayı bölen en büyük ortak sayıyı bul ve ikisini de ona böl.'],
+    ['f_denk', /denk DEĞİLDİR/, 'Her şıkkı sadeleştir ya da genişlet. Verilen kesre dönüşmeyen hangisi?'],
+    ['f_ondalik', /kesrinin ondalık gösterimi/, 'Paydayı 10, 100 ya da 1000 yap (gerekirse pay ve paydayı aynı sayıyla çarp). Payda 10 ise virgülden sonra 1, 100 ise 2 basamak olur.'],
+    ['f_ondalik', /gösteriminin okunuşu/, 'Önce virgülün solundaki tam kısmı oku ve «tam» de. Virgülden sonra kaç basamak varsa «onda», «yüzde» ya da «binde» diye oku.'],
+    ['f_ondalik', /etiketinde/, 'Virgülün solu lira, sağı kuruştur.'],
+    ['f_ondalik', /kısım hangisidir/, 'Virgülün solu tam kısım, sağı ondalık kısımdır.'],
+    ['f_yuzde', /ifadesinin ondalık/, 'Yüzde, paydası 100 olan kesir demektir. Önce kesir olarak yaz, sonra ondalık gösterime çevir.'],
+    ['f_yuzde', /kesrinin yüzde ile/, 'Paydası 100 olan kesrin payı, yüzde sembolünün yanına yazılır.'],
+    ['f_yuzde', /yüzde kaça eşittir/, 'Kesri, paydası yüz olan denk bir kesre çevir.'],
+    ['f_yuzde', /İNDİRİM/, 'Yüzde, paydası 100 olan kesir demektir.'],
+    ['f_karsilastir', /sembol/, 'Kesirleri aynı biçime getir: tam sayılı kesir varsa bileşik kesre çevir, paydalar farklıysa denk kesirle eşitle. Sonra payları karşılaştır.'],
+    ['f_ondalik_karsilastir', /sembol/, 'Önce tam kısımları karşılaştır. Eşitse virgülden sonraki basamakları sırayla karşılaştır; eksik basamağa 0 yazabilirsin.'],
+    ['f_ondalik_karsilastir', /UCUZ/, 'İki fiyatı karşılaştır: önce lira kısmına, eşitse kuruş kısmına bak. Daha küçük olan daha ucuzdur.'],
+    ['f_ondalik_karsilastir', /gösterimlerinden/, 'Hepsini aynı gösterime çevir: yüzdeleri ondalık gösterime (ya da tersini). Sonra karşılaştır.'],
+    // TEMA 5
+    ['s_arastirma', /araştırma sorusu olmaya UYGUN/, 'İyi bir araştırma sorusunun cevabı veri toplanarak bulunur ve farklı cevaplar çıkabilir. Hangisi böyle?'],
+    ['s_arastirma', /adımından hemen|İLK adımı|SON adımı/, 'Bir araştırmayı baştan sona düşün: önce ne yapılır, en son ne yapılır? Sorulan adımı bu sıraya yerleştir.'],
+    ['s_arastirma', /hangi araştırma adımına örnektir/, 'Bu iş araştırmanın başında mı, ortasında mı, sonunda mı yapılır?'],
+    ['s_arastirma', /KENDİMİZİN|HAZIR veri/, 'Bu yöntemde verileri biz mi topluyoruz, yoksa başkası toplayıp yayımlamış mı?'],
+    ['s_arastirma', /[Aa]nket|raporunda/, 'Ankete katılanların haklarını ve sorunun herkes tarafından aynı şekilde anlaşılmasını düşün.'],
+    ['s_arastirma', /farklı sonuçlar|OLMAMASI/, 'Araştırma sorusunun özelliklerini hatırla: cevabı veri toplanarak bulunur ve kişiden kişiye farklı cevaplar çıkabilir.'],
+    ['s_tablo_sutun', /en çok tercih edilen hangisidir/, 'Sütunların boylarını karşılaştır.'],
+    ['s_tablo_sutun', /seçeneğini kaç kişi/, 'Sütunun tepesinden eksene doğru düz bir çizgi çekip değeri oku. Eksen kaçar artıyor?'],
+    ['s_tablo_sutun', /FAZLADIR/, 'Önce en uzun ve en kısa sütunun değerini oku, sonra büyükten küçüğü çıkar.'],
+    ['s_tablo_sutun', /hangi grafikte/i, 'Hangi grafikte her veri tek tek çizilir? Çok sayıda veride bu kolay mı?'],
+    ['s_daire', /bütünün kaçta kaçı/, 'Daireyi eş dilimlere bölünmüş gibi düşün: bu dilim bütünün kaç eş parçasından biri?'],
+    ['s_daire', /seçeneğini kaç öğrenci/, 'Önce dilimin bütünün kaçta kaçı olduğunu bul. Sonra toplam öğrenci sayısını o kadar eş parçaya böl.'],
+    ['s_daire', /doğru çizilmiştir/, 'Daire grafiğinin tamamı %100\'dür. Dilimlerdeki yüzdeleri topla.'],
+    ['s_daire', /%\d+'i/, 'Yüzdeyi kesre çevir: bütünün kaç eş parçasından kaçı? Sonra toplam kişi sayısıyla hesapla.'],
+    ['s_okuryazar', /Nokta grafiğinde/, 'Her sütundaki noktaları say ve topla.'],
+    ['s_okuryazar', /dikey eksen/, 'Sütun boylarına değil, eksendeki sayılara bak. İki değerin farkını hesapla.'],
+    ['s_okuryazar', /KESİNLİKLE/, 'Veriler yalnız bu sınıfı anlatır. «Herkes», «her zaman» gibi kesin ifadeler bu veriyle desteklenebilir mi?'],
+    // TEMA 6
+    ['e_esitlik', /Terazi dengededir/, 'Dengede iki kefedeki toplam kütle eşittir. Önce bilinen kefenin toplamını bul.'],
+    ['e_esitlik', /olduğuna göre ▲/, 'Önce ▲\'nin kaç olduğunu bul, sonra ikinci işlemde yerine koy.'],
+    ['e_esitlik', /değişmemesi/, 'Birinci sayı değişince toplam ne kadar değişir? Toplamı eski hâline getirmek için ikinci sayıya ne yapmalısın?'],
+    ['e_esitlik', /her iki tarafı/, 'Eşitliğin iki tarafını aynı sayıyla çarparsan eşitlik bozulmaz. Önce sağ tarafı düşün.'],
+    ['e_ozellik', /hangi işlem özelliği/, 'Eşitliğin iki tarafını karşılaştır: sayıların yeri mi değişmiş, parantezin yeri mi, yoksa çarpma parantezin içindeki her sayıya mı uygulanmış?'],
+    ['e_ozellik', /\+ .*× \.+/, 'Çarpılan sayı iki parçaya ayrılmış. Verilen parçayla hangi sayıyı toplarsan ilk sayıyı bulursun?'],
+    ['e_ozellik', /eşitliği doğru mudur/, 'İki tarafı ayrı ayrı hesapla. Sonuçlar aynı mı?'],
+    ['e_ozellik', /▲ yerine/, 'Eşitliğin iki tarafındaki sayıları eşleştir. Hangi özellik kullanılmış? Ona göre ▲\'nin yerine geleni bul.'],
+    ['e_us', /karesi\) kaçtır/, 'Bir sayının karesi, o sayının kendisiyle çarpımıdır: sayı × sayı.'],
+    ['e_us', /küpü\) kaçtır/, 'Bir sayının küpü, o sayının kendisiyle 3 kez çarpımıdır: sayı × sayı × sayı.'],
+    ['e_us', /işleminin sonucu/, 'Önce her üslü ifadeyi ayrı ayrı hesapla, sonra işlemi yap.'],
+    ['e_us', /Örüntüyü takip et/, 'Tablodaki her satırda soldaki ifadeyi hesapla ve sağdakiyle karşılaştır. Aynı kuralı eksik satıra uygula.'],
+    ['e_us', /nasıl okunur/, 'Üs 2 ise «karesi», üs 3 ise «küpü» diye okunur. Taban sayıyı doğru ekle oku.'],
+    ['e_oncelik', /tavuk|ayak/, 'Bir tavuğun ve bir tavşanın kaç ayağı var? Her hayvan grubunun ayaklarını ayrı hesapla, sonra topla.'],
+    ['e_oncelik', /\(/, 'Önce parantezin içini hesapla. Sonra çarpma ve bölme, en son toplama ve çıkarma.'],
+    ['e_oncelik', /[²³]/, 'İşlem sırası: parantez, üslü ifade, çarpma-bölme, toplama-çıkarma.'],
+    ['e_oncelik', /^[\d ]+[×÷] [\d ]+[×÷] [\d ]+ = \?/, 'Çarpma ve bölme aynı önceliktedir: soldan sağa doğru sırayla yap.'],
+    ['e_oncelik', /= \?/, 'Önce çarpma ve bölme, sonra toplama ve çıkarma yapılır.'],
+    ['e_oruntu', /Örüntüyü takip et/, 'Tablodaki adım numarası ile sayı arasındaki ilişkiyi bul. Aynı kuralı eksik satıra uygula.'],
+    ['e_oruntu', /bir sonraki terim/, 'Ardışık iki terimin farkına bak. Her adımda ne kadar artıyor?'],
+    ['e_oruntu', /artan örüntünün \d+\. terimi|adımda kaç nokta/, 'Birinci terimden istenen terime kadar kaç kez artış eklenir? Küçük bir örnekte say: 1. terimden 3. terime kaç artış var?'],
+    ['e_oruntu', /Boş bir kumbaraya/, 'Başta kumbara boş. Her gün aynı miktar ekleniyor: kaç gün boyunca ekleme yapıldı?'],
+    ['e_oruntu', /başta .* vardı/, 'Başlangıçtaki parayı unutma. Üstüne her gün eklenenleri koy.'],
+    ['e_oruntu', /kaçıncı adım/, 'Örüntü kaçar artıyor? 1. adımdaki sayıdan bu sayıya ulaşmak için kaç kez artış gerekiyor?'],
+    ['e_oruntu', /kuralı hangisidir/, 'Şıklardaki kuralı 1. ve 2. adıma uygulayıp dene. Hangisi örüntünün terimlerini veriyor?'],
+    ['e_oruntu', /AYNI miktar/, 'Her şıkta ardışık terimlerin farkını hesapla. Farkları değişen hangisi?'],
+    ['e_algoritma', /Sonucu yaz/, 'Adımları sırayla, birer birer uygula. Her adımdan sonra elindeki sayıyı not et.'],
+    ['e_algoritma', /Aklından bir sayı tut/, 'Tutulan sayıyla başla ve her işlemi sırayla uygula.'],
+    ['e_algoritma', /kaç kez çalışır/, 'Döngüdeki adımı her çalıştırdığında toplamı yaz ve kaç kez yaptığını say.'],
+    ['e_algoritma', /Sayaç/, 'Bölünen bölenden küçük olana kadar çıkarmaya devam et; her çıkarmada sayacı 1 artır.'],
+    ['e_algoritma', /cevabı "Hayır"/, 'Karar kutusunda cevap «Hayır» ise iş bitmemiştir. Ne yapmak gerekir?'],
+    ['e_algoritma', /hangi tür adımdır/, 'Bu kutuda bir iş yapılmıyor, bir soru soruluyor. Sorunun cevabına göre ne olur?'],
+    ['e_algoritma', /hangi adımla başlar/, 'Her akış şemasının bir ilk, bir de son kutusu vardır. İlk kutuda ne yazar?'],
+    ['e_algoritma', /tek tek toplamak yerine/, 'Aynı sayıyı tekrar tekrar toplamanın kısa yolu hangi işlemdir?'],
+    // TEMA 7
+    ['p_olay', /olayının olasılık değeri/, 'Bu olay kesin mi, imkânsız mı, yoksa bazen mi oluyor? Kesin ve imkânsız olayların olasılık değerlerini hatırla.'],
+    ['p_olay', /olayı hangisidir/, 'Bu olay her zaman mı oluyor, hiç mi olmuyor, yoksa bazen oluyor bazen olmuyor mu?'],
+    ['p_olay', /olayın olasılık değeri kaçtır/, 'Olasılık spektrumunu düşün: hiç olmayacak olaylar bir uçta, mutlaka olacak olaylar öbür uçtadır. Uçlardaki değerleri hatırla.'],
+    ['p_olay', /Olasılığı/, 'Olasılık değeri en küçük olabilecek sayıysa, o olay hiç olabilir mi?'],
+    ['p_spektrum', /nasıl bir olaydır/, 'Mavi dilimleri bütün dilimlerle karşılaştır: yarısından az mı, yarısı mı, yarısından fazla mı?'],
+    ['p_spektrum', /olasılığı kaçtır/, 'Mavi dilim sayısı parça, bütün dilim sayısı bütündür. Parça-bütün ilişkisini kesirle yaz.'],
+    ['p_spektrum', /olma olasılığı çoktur/, 'Hangi renkten daha çok top var? Bir iddia «çünkü…» diye torbadaki top sayılarıyla desteklenmeli.'],
+    ['p_spektrum', /adil midir/, 'Oyun adil ise iki oyuncunun kazanma olasılığı eşit olmalı. Küpteki renklerin yüz sayılarını karşılaştır.'],
+    ['p_spektrum', /spektrumunda nerededir/, 'Olasılık spektrumunun iki ucunu düşün: bir ucu hiç olmayacak, öbür ucu mutlaka olacak olaylardır. Bu olay hangi uçta ya da ortada?'],
+    ['p_spektrum', /olabilir\.?$/, 'Olasılık değeri hangi iki sayı arasında olabilir? Bu değer o aralıkta mı?'],
+  ];
+  const IPUCU_HATA = { bul: 'Defterdeki satırları sırayla kendin yap. Her satırda doğru kural mı kullanılmış, işlem doğru mu?', kim: 'İki defteri yan yana koy. Nerede ayrılmaya başlıyorlar? O satırda hangisi doğru kuralı kullanmış?', neden: 'İşaretli satırda kullanılan kuralı doğru kuralla karşılaştır. Hangi bilgi karıştırılmış?' };
+  const ipucuDuz = (x) => String(x || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+  const ipucuBul = (id, q) => { const p = ipucuDuz(q.prompt); for (const [sk, re, h] of IPUCU) if (sk === id && re.test(p)) return typeof h === 'function' ? h(q) : h; return ''; };
+  { const hq = HATA.q; HATA.q = (...a) => { const q = hq(...a); if (!q.hint) q.hint = IPUCU_HATA[q.hata] || ''; return q; }; }
   G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK; G.MY_OLC = OLC_CHECK; G.MY_GRAF = GRAF_CHECK; G.MY_HATA = HATA; G.MY_ATOLYE = ATOLYE;
   for (const [id, e] of Object.entries(EK)) { const base = GEN[id]; GEN[id] = (lv) => { const L = e.L[lv]; return L && Math.random() < e.p ? pick(L)(lv) : base(lv); }; }
+  // Soruya özel ipucu en son eklenir (EK dahil bütün üreticilerin üstünde)
+  for (const id of Object.keys(GEN)) { const base = GEN[id]; GEN[id] = (lv) => { const q = base(lv); if (!q.hint && !q.hata && !q.atolye) q.hint = q.type === 'match' ? 'Önce emin olduğun çifti eşleştir. Geriye kalanlar arasında seçmek kolaylaşır.' : ipucuBul(id, q); return q; }; }
   if (typeof module !== 'undefined') module.exports = { GEN, MIS, KES_CHECK, OLC_CHECK, GRAF_CHECK, HATA, ATOLYE };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -170,6 +170,16 @@ const SKILLS_OK = (id) => id in GEN;
     for (const id of AT.ids) for (let r = 0; r < 40; r++) for (const q of AT.sorular(id)) sik(q); }
   if (eksik.size > 3 || uzun) { console.log('SORU SESİ SÖZLÜĞÜ ESKİ: node tools/soru_sozluk.js çalıştır ve soru-sesi fonksiyonunu yeniden yükle.', [...eksik].slice(0, 10), 'uygunsuz metin:', uzun); errors++; }
   else if (eksik.size) console.log('Uyarı: sözlükte olmayan nadir kelime(ler):', [...eksik]); }
+// Soruya özel ipucu (25.10.2026): her ders sorusunun kendi ipucu olmalı ve ipucu doğru cevabı söylememeli
+{ const duzI = (x) => String(x || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr');
+  const yok = new Set(), ele = new Set();
+  for (const [id, g] of Object.entries(GEN)) for (const lv of [1, 2, 3]) for (let r = 0; r < 400; r++) { const q = g(lv); if (q.atolye) continue;
+    const k = id + ' | ' + duzI(q.prompt).replace(/[0-9]+/g, '#').slice(0, 70);
+    if (!q.hint) { yok.add(k); continue; }
+    if (['mc', 'input', 'cmp', 'tf'].includes(q.type)) { const c = duzI(q.type === 'input' ? q.answer : ((q.options || []).find(o => o.ok) || {}).t); if (c && new RegExp('(^|[^0-9a-zçğıöşü])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(duzI(q.hint))) ele.add(k + ' → ' + q.hint.slice(0, 50)); } }
+  if (yok.size) { console.log('İPUCUSUZ SORU (generators.js → IPUCU tablosuna ekle):', [...yok].slice(0, 10)); errors++; }
+  if (ele.size) { console.log('İPUCU CEVABI SÖYLÜYOR:', [...ele].slice(0, 10)); errors++; }
+  console.log('İpucu denetimi: ipucusuz', yok.size, '· cevabı söyleyen', ele.size); }
 console.log(`\nToplam ${total} soru üretildi, hata: ${errors}`);
 console.log('Beceri sayısı:', Object.keys(GEN).length, '· parmakla kesir sorusu:', kesN, '· açıölçer:', olcN, '· grafik çizme:', grafN);
 for (const [k,v] of Object.entries(samples)) console.log(k, JSON.stringify(v));
