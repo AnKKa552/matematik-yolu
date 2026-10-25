@@ -4487,9 +4487,9 @@ div.plan-satir{cursor:default}
      İki cihaz arada ayrı ayrı ilerlediyse (çakışma) toplam XP'si fazla olan tutulur (tek çocuk için nadir durum). */
   const AILE_RIZA = 'aile-yedek-v1', AILE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // karışan harfler yok: I L O 0 1
   const aileAyarli = () => !!(window.MY_CONFIG && MY_CONFIG.supabaseUrl && MY_CONFIG.anonKey);
-  // Sunucuda yedek fonksiyonları kurulu mu? (yan etkisi olmayan çağrı: geçersiz kodla silme → false). Kurulu değilse kart görünmez.
+  // Sunucuda yedek fonksiyonları kurulu mu? (yan etkisi olmayan çağrı: geçersiz kodla kaydet → {hata:'kod'}). Kurulu değilse kart görünmez.
   let aileSunucu = null;
-  const aileSunucuBak = () => aileAyarli() ? rpc('aile_yedek_sil', { p_kod: 'x' }).then(() => { const ilk = aileSunucu !== true; aileSunucu = true; if (ilk && A.view !== 'lesson') render(); }, () => { aileSunucu = false; }) : Promise.resolve();
+  const aileSunucuBak = () => aileAyarli() ? rpc('aile_yedek_kaydet', { p_kod: 'x', p_durum: {}, p_surum: 0, p_onceki: 0, p_riza: 'yoklama', p_zorla: false }).then(() => { const ilk = aileSunucu !== true; aileSunucu = true; if (ilk && A.view !== 'lesson') render(); }, () => { aileSunucu = false; }) : Promise.resolve();
   const aileHazir = () => aileAyarli() && (aileSunucu === true || !!(A.st.aile && A.st.aile.kod));
   const aileKodUret = () => { let k = ''; while (k.length < 16) { const b = new Uint8Array(32); crypto.getRandomValues(b); for (const x of b) if (x < 248 && k.length < 16) k += AILE_ABC[x % 31]; } return k; };
   const aileKodYaz = (k) => (k || '').match(/.{1,4}/g).join('-');
@@ -5193,7 +5193,7 @@ div.plan-satir{cursor:default}
       case 'aile-kopyala': { const k = aileKodYaz(A.st.aile && A.st.aile.kod); (navigator.clipboard ? navigator.clipboard.writeText(k) : Promise.reject()).then(() => toast('📋 Aile kodu kopyalandı.'), () => toast('Kopyalanamadı. Kodu elle yazın: ' + k)); break; }
       case 'aile-simdi': if (A.st.aile) { A.st.aile.kirli = true; A.st.aile.hata = null; aileGonder(true).then(() => { render(); toast(A.st.aile && !A.st.aile.hata ? '☁️ Yedeklendi.' : 'Yedeklenemedi, internetini kontrol et.'); }); } break;
       case 'aile-sil': A.modal = confirmModal('Bulut yedeği silinsin mi?', 'Sunucudaki yedek kalıcı olarak silinir ve aile kodu geçersiz olur. Bu telefondaki ilerleme silinmez.', 'aile-sil-evet', 'Evet, yedeği sil', 'Vazgeç'); render(); break;
-      case 'aile-sil-evet': { const k = A.st.aile && A.st.aile.kod; A.modal = null; if (!k) break; rpc('aile_yedek_sil', { p_kod: k }).then(() => { delete A.st.aile; save(); render(); toast('🗑️ Bulut yedeği silindi.'); }, () => toast('Silinemedi, internetini kontrol et.')); break; }
+      case 'aile-sil-evet': { const k = A.st.aile && A.st.aile.kod; A.modal = null; if (!k) break; rpc('aile_yedek_sil', { p_kod: k }).then(() => { delete A.st.aile; save(); render(); toast('🗑️ Bulut yedeği silindi.'); }, (e) => toast(/404/.test(String(e && e.message)) ? 'Silme şu an kullanılamıyor (sunucu ayarı eksik). Lütfen daha sonra tekrar deneyin.' : 'Silinemedi, internetini kontrol et.')); break; }
       case 'pi-hello': piSay('hosgeldin'); break;
       case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
