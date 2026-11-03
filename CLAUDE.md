@@ -161,6 +161,19 @@ Telefon değişince ilerleme kaybolmasın diye; satış öncesi zorunlu. **E-pos
 - Test: `python3 test/e2e_aile.py` (iki telefon, sahte sunucu aynı kurallarla: onaysız açılmaz, veli bilgisi gitmez, yanlış kod, özet, geri yükleme, iki yönlü eşitleme, çakışma, silme).
 - **KVKK:** onay metni ve "Neler saklanır?" açıklaması yayın öncesi hukukçuya onaylatılmalı (§1-6).
 
+### 3.6 Oyuncu adı + resimli şifre ile giriş (03.11.2026)
+İki gerçek olayda çocuk ilerlemesine dönemedi (yedek açılmamıştı ya da kod bilinmiyordu; bir öğrenci "kendi adıyla giriş" istedi). Proje sahibi **sadece isimle girişi** değil, **resimli şifreyi** seçti (isimler çakışır, herkes herkesin yerine girer, veli raporu açıkta kalır, veli rızası atlanır).
+- **Oyuncu adı** = ad · hayvan · iki basamaklı sayı (ör. Elif · 🐯 Kaplan · 27); 16 hayvan (`OY_HAYVAN`). Ad sadeleşir (`oySade`: yalnız ilk kelime, küçük harf, ç ğ ı ö ş ü → c g i o s u), yani "ELİF", "Elıf", "elif" aynı. **Resimli şifre** = 16 resimden (`OY_RESIM`) sırayla 3 (4096 olasılık); cihazda saklanmaz.
+- **Kim oluşturur:** yalnız veli, şifreli Veli alanında, yedek açıkken (veli onayı zaten var): "☁️ Yedek açık" kartının altında «🧒 Oyuncu adı oluştur» → ad (🔄 başka hayvan/sayı) → çocuk 3 resim seçer → aynı 3 resmi tekrar seçer → sunucuya kayıt → «ekran görüntüsünü alın» kartı. «Resimli şifreyi değiştir» aynı adla yeni resim.
+- **Giriş:** karşılamada «📲 Başka telefonda kullanıyordum» artık önce oyuncu girişini açar (ad, hayvan, sayı, 3 resim; altta «🔑 Velimin aile kodu var»). Zaten kayıtlı çocuk için Ben → Ayarlar → «📲 Başka telefondaki ilerlememi getir» (pencere). Doğruysa sunucu aile kodunu verir; sonrası aile kodundaki gibi: özet → «Evet, yükle» → eşitleme aynı kodla sürer.
+- **Sunucu** (`sunucu/supabase/oyuncu_giris.sql`, kurulu): tablo `oyuncu_giris` (ad özeti SHA-256, resim bcrypt, aile kodu kasadaki `oyuncu_anahtar` ile pgp şifreli, bir yedeğe bir oyuncu adı). `oyuncu_olustur(p_kod, p_ad, p_resim)` (geçerli yedek ister; ad başka yedekteyse `alinmis` → uygulama yeni sayı dener), `oyuncu_giris(p_ad, p_resim)`. Fren: bir oyuncu adına üst üste 5 yanlışta 15 dk kilit, günde 15 yanlış; aynı ağdan günde 30 başarısız deneme (`aile_yedek_deneme` ortak). Ad yoksa da "yanlis" (hangi adların var olduğu öğrenilmesin). Biçim `ad|hayvan|sayı` (`^[a-z]{2,12}\|[a-z]{3,12}\|[1-9][0-9]$`), resim 3 onaltılık rakam.
+- **Silme parçası** (`oyuncu_giris_silme.sql`, yedek silinince oyuncu satırı da gitsin) ajan oturumunda çalışmaz ("delete" geçiyor); proje sahibi SQL Editor'den çalıştırır. Çalıştırılana kadar giriş, yedeği silinmiş satırı zaten yok sayar.
+- **Ana sayfa uyarısı** (`yedekUyari`): yedek kapalı ve 2+ ders yapmış çocuğa haritada «🛡️ İlerlemen korunsun! Velinden Veli bölümünde yedeği açmasını ve sana bir oyuncu adı oluşturmasını iste»; ✕ ile 7 gün gizlenir (`st.yedekUyariKapat`).
+- Resim seçerken yeniden çizimde kaydırma korunur ve hata mesajı görünür alana gelir (`oyCiz`).
+- **Eşitleme düzeltmesi:** gönderilen sürüm artık hep bilinen bulut sürümünden büyük (`Math.max(savedAt, surum + 1)`); önceden çakışmadan sonra zorla yazan cihaz eski saatiyle yazınca diğer cihaz çakışmayı görmeden üstüne yazabiliyordu (yeni test yakaladı).
+- Test: `python3 test/e2e_aile.py` (oluşturma, boş ad, tekrar farklı resim, resim telefonda yok, büyük harf/İ, yanlış sıra, ad ve sayı korunur, 5 yanlışta kilit, kilitliyken doğru resim reddi, pencere kapanınca kayıt korunur, yedek uyarısı). Sunucu fonksiyonları gerçek veritabanında işlem içinde denenip geri alındı.
+- **KVKK:** "Neler saklanır?" metnine oyuncu adı ve resimli şifrenin şifreli özeti eklendi; yayın öncesi hukukçuya gösterilmeli (§1-6).
+
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 
 ### 4.1 Ustalık: Bayesian Knowledge Tracing (BKT)
@@ -440,7 +453,7 @@ test/test_generators.js   ← 63 000 soruluk doğrulama
 test/sim_engine.js        ← farklı öğrenci tipleriyle motor simülasyonu
 test/test_plan.js         ← okul takvimi, ön bilgi yoklaması, haftalık plan testleri
 test/test_sahne.py        ← 35 konunun adım adım sahneleri: SVG geçerliliği, işlem doğruluğu, pafta
-test/e2e_aile.py          ← aile kodu ile yedek: iki telefonlu uçtan uca test (sahte sunucu)
+test/e2e_aile.py          ← aile kodu ile yedek + oyuncu adı/resimli şifre: dört telefonlu uçtan uca test (sahte sunucu)
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
 ```
 
@@ -483,7 +496,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 12. Prototipte bilinçli olarak eksik bırakılanlar
-- Veriler cihazda; veli isterse aile koduyla buluta yedeklenir ve yeni telefona taşınır (§3.5). Gerçek hesap (e-postalı giriş) özel SMTP ister.
+- Veriler cihazda; veli isterse aile koduyla buluta yedeklenir ve yeni telefona taşınır (§3.5); çocuk başka telefonda oyuncu adı + resimli şifreyle kendi başına döner (§3.6). Gerçek hesap (e-postalı giriş) özel SMTP ister.
 - Lig rakipleri demo (ekranda "(demo)" yazar).
 - Veli raporu tek dokunuşla WhatsApp/Telegram/e-posta açar; **otomatik** haftalık gönderim sunucu ister.
 - BKT parametreleri literatürdeki tipik değerlerle elle ayarlandı; gerçek öğrenci verisiyle (pyBKT) yeniden kalibre edilecek.

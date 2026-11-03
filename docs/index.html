@@ -936,6 +936,30 @@ html.kolay body{font-family:'Lexend','Nunito',system-ui,sans-serif;font-size:19p
 html.kolay .speech,html.kolay .opt,html.kolay .hintbox,html.kolay .ikinci,html.kolay .sheet{font-size:1.06em;line-height:1.6;letter-spacing:.02em;word-spacing:.12em}
 html.kolay .opt{text-align:left;padding-top:14px;padding-bottom:14px}
 html.kolay .card p,html.kolay .muted{line-height:1.65}
+/* Oyuncu adı + resimli şifre (03.11.2026) */
+.oy-bolum{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.oy-adkart{background:var(--brand-t);border-radius:14px;padding:10px 12px;font-size:18px;text-align:center;margin:8px 0}
+.oy-adkart.kucuk{font-size:15px;padding:6px 10px;margin:6px 0 8px}
+.oy-resim{margin:6px 0 4px}
+.oy-yuva{display:flex;gap:8px;align-items:center;justify-content:center;margin:6px 0 10px}
+.oy-yuva span{width:52px;height:52px;border-radius:14px;border:2px dashed var(--line);display:grid;place-items:center;font-size:28px;font-weight:900;color:var(--muted)}
+.oy-yuva span.dolu{border-style:solid;border-color:var(--brand);background:var(--brand-t)}
+.oy-yuva.buyuk span{width:62px;height:62px;font-size:34px}
+.oy-yuva .oy-sil{min-width:48px;min-height:48px;margin:0}
+.oy-izgara{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:320px;margin:0 auto}
+.oy-izgara button{aspect-ratio:1;min-height:56px;font-size:30px;border-radius:14px;border:2px solid var(--line);background:var(--surface);cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.oy-izgara button:active{transform:translateY(2px);box-shadow:none}
+.oy-et{display:block;font-weight:800;margin:10px 0 6px}
+.oy-hayvanlar{display:flex;flex-wrap:wrap;gap:6px}
+.oy-hayvanlar .chip{min-height:44px}
+.oy-hayvanlar+.field{margin-top:12px}
+.oy-hata{color:var(--bad);font-weight:800;margin:8px 0}
+.oy-giris .btn{margin-top:8px}
+.oy-modal{max-height:88vh;overflow-y:auto}
+.oy-ben{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.yedek-uyari{display:flex;gap:10px;align-items:center;margin:10px 0;border:2px solid var(--brand);background:var(--brand-t)}
+.yedek-uyari .yu-ikon{font-size:26px}
+.yedek-uyari .btn{min-width:44px;min-height:44px;margin:0}
 </style>
 </head>
 <body>
@@ -4848,13 +4872,16 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     return `${topbar()}<div class="scroll">
       <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
       <div class="diyar-bas"><div><b>🗺️ ${DIYAR}</b><span class="muted sm"> · ${done}/${SKILLS.length} konu · ${Object.keys(A.st.trophies).length}/7 kupa</span></div><div class="bar"><i style="width:${Math.round(100 * done / SKILLS.length)}%"></i></div></div>
-      ${okulKart()}
+      ${okulKart()}${yedekUyari()}
       <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
       <div class="path harita tek">${bolgeler}</div>
     </div>${nav()}`;
   }
   /* Okul takvimi kartı: MEB taslak yıllık planına göre o haftanın konusu ya da çocuğun/velinin seçtiği konu.
      Dokununca haritada o konuya gider; «Değiştir» okul konusunu seçtirir. */
+  // Yedek kapalıysa (ikinci dersten sonra) haritada küçük uyarı; ✕ ile 7 gün gizlenir. İki gerçek olayda çocuk ilerlemesini kaybetti (03.11.2026)
+  const yedekUyari = () => { if (!aileHazir() || (A.st.aile && A.st.aile.kod) || (A.st.sessions || []).length < 2 || Date.now() - (A.st.yedekUyariKapat || 0) < 7 * 864e5) return '';
+    return `<div class="card yedek-uyari"><span class="yu-ikon">🛡️</span><div class="grow sm"><b>İlerlemen korunsun!</b> Velinden <b>Veli</b> bölümünde yedeği açmasını ve sana bir <b>oyuncu adı</b> oluşturmasını iste. Telefon değişse de kaldığın yerden devam edersin.</div><button class="btn ghost small" data-act="yedek-uyari-kapat" aria-label="Uyarıyı kapat">✕</button></div>`; };
   function okulKart() {
     const ok = E.okulKonusu(A.st), o = A.st.okul || { mod: 'takvim' };
     if (!ok) return o.mod === 'kapali' ? '<button class="okul-kucuk" data-act="okul">🏫 Okulla eşleştir</button>' : `<button class="okul-kart bos" data-act="okul">🏫 <span class="grow">Okulda hangi konudasınız? <b>Seç</b>, haritan okulla aynı yerden gitsin.</span></button>`;
@@ -4997,6 +5024,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
         ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
+        ${aileHazir() ? `<div class="oy-ben">${A.st.oyuncu ? `<span class="sm">🧒 Oyuncu adın: ${oyYaz(A.st.oyuncu)}</span>` : ''}<button class="btn ghost small" data-act="oy-ac">📲 Başka telefondaki ilerlememi getir</button></div>` : ''}
       </div></div>${nav()}`;
   }
 
@@ -5103,7 +5131,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   async function aileGonder(zorla) {
     const a = A.st.aile; if (!a || !a.kod || !aileHazir() || aileGidiyor) return;
     if (!a.kirli && !zorla) return;
-    aileGidiyor = true; a.kirli = false; const surum = A.st.savedAt || Date.now();
+    aileGidiyor = true; a.kirli = false; const surum = Math.max(A.st.savedAt || Date.now(), (a.surum || 0) + 1);  // sürüm hep bilinen bulut sürümünden büyük: zorla yazınca diğer cihaz çakışmayı görsün
     try {
       const r = await rpc('aile_yedek_kaydet', { p_kod: a.kod, p_durum: aileTemiz(A.st), p_surum: surum, p_onceki: a.surum || 0, p_riza: AILE_RIZA, p_zorla: !!zorla });
       if (r && r.ok) { a.surum = r.surum; a.son = Date.now(); a.hata = null; E.save(A.st); }
@@ -5150,10 +5178,11 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   function aileKart() {
     if (!aileHazir()) return '';
     const a = A.st.aile;
-    if (A.aileBulunan) return aileBulunanKart(A.aileBulunan, 'aile-vazgec');
+    if (A.aileBulunan && !A.oyModal) return aileBulunanKart(A.aileBulunan, 'aile-vazgec');
+    if (a && a.kod && A.oy && A.oy.mod === 'kur') return oyKurHtml();
     if (!a || !a.kod) return `<div class="card aile-kart"><b>☁️ İlerlemeyi yedekle (aile kodu)</b>
       <p class="muted sm" style="margin:6px 0 8px">Telefon değişirse ya da uygulama silinirse çocuğunuzun ilerlemesi kaybolmasın. E-posta ya da şifre gerekmez: size özel bir <b>aile kodu</b> oluşturulur, yeni telefonda bu kodu yazmanız yeterli.</p>
-      <details class="aile-detay"><summary class="sm"><b>Neler saklanır?</b></summary><p class="sm muted" style="margin:6px 0 0">Saklanan: çocuğunuzun adı ve uygulamadaki öğrenme durumu (konular, yıldızlar, cevap istatistikleri, rozetler). <b>Saklanmayan:</b> sizin adınız, telefonunuz, e-postanız, veli şifreniz. Kodun kendisi sunucuda tutulmaz, yalnız şifrelenmiş özeti tutulur. 18 ay kullanılmayan yedek kendiliğinden silinir; dilediğiniz an "Yedeği sil" ile silebilirsiniz.</p></details>
+      <details class="aile-detay"><summary class="sm"><b>Neler saklanır?</b></summary><p class="sm muted" style="margin:6px 0 0">Saklanan: çocuğunuzun adı ve uygulamadaki öğrenme durumu (konular, yıldızlar, cevap istatistikleri, rozetler). <b>Saklanmayan:</b> sizin adınız, telefonunuz, e-postanız, veli şifreniz. Kodun kendisi sunucuda tutulmaz, yalnız şifrelenmiş özeti tutulur. Oyuncu adı oluşturursanız adın ve resimli şifrenin de yalnız şifrelenmiş özeti tutulur. 18 ay kullanılmayan yedek kendiliğinden silinir; dilediğiniz an "Yedeği sil" ile silebilirsiniz.</p></details>
       <label class="aile-onay"><input type="checkbox" id="f-aile-onay"> <span class="sm">Velisi olarak, çocuğumun öğrenme verisinin bu amaçla sunucuda saklanmasına onay veriyorum.</span></label>
       <button class="btn" data-act="aile-ac" style="margin-top:8px">Yedeği aç ve aile kodu oluştur</button>
       <details class="aile-detay" style="margin-top:10px"><summary class="sm"><b>Başka telefonda kullanıyordum, kodum var</b></summary><div class="field"><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div><button class="btn ghost small" data-act="aile-bul" data-v="veli">Yedeği bul</button></details></div>`;
@@ -5164,7 +5193,95 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       <div class="aile-kod" aria-label="Aile kodu">${aileKodYaz(a.kod)}</div>
       <div class="row" style="gap:8px;margin-top:8px"><button class="btn ghost small grow" data-act="aile-kopyala">📋 Kopyala</button><a class="btn ghost small grow" href="https://wa.me/?text=${mesaj}" target="_blank" rel="noopener">💬 Kendime gönder</a></div>
       <p class="sm ${a.hata ? 'warn-t' : 'muted'}" style="margin:8px 0 6px">${ne}</p>
-      <div class="row" style="gap:8px"><button class="btn ghost small grow" data-act="aile-simdi">🔄 Şimdi yedekle</button><button class="btn ghost small grow" data-act="aile-sil">🗑️ Yedeği sil</button></div></div>`;
+      <div class="row" style="gap:8px"><button class="btn ghost small grow" data-act="aile-simdi">🔄 Şimdi yedekle</button><button class="btn ghost small grow" data-act="aile-sil">🗑️ Yedeği sil</button></div>${oyBolum()}</div>`;
+  }
+  /* ---------------- Oyuncu adı + resimli şifre (03.11.2026) ----------------
+     Çocuk başka bir telefonda kendi başına ilerlemesine dönsün diye. Aile kodu yedeğinin üstüne kurulu (sunucu/supabase/oyuncu_giris.sql):
+     giriş doğruysa sunucu aile kodunu verir, yedek bugünkü yoldan (özet → "Evet, yükle") gelir. Oyuncu adı = ad · hayvan · sayı
+     (isimler çakışmasın), şifre = 16 resimden sırayla 3'ü. Tahminle deneme sunucuda frenlenir (5 yanlışta 15 dk, günde 15).
+     Oyuncu adını yalnız veli oluşturur (şifreli Veli alanı, yedek açık = veli onayı var). Resimler cihazda saklanmaz. */
+  const OY_HAYVAN = [['kaplan', 'Kaplan', '🐯'], ['aslan', 'Aslan', '🦁'], ['panda', 'Panda', '🐼'], ['tilki', 'Tilki', '🦊'], ['baykus', 'Baykuş', '🦉'], ['penguen', 'Penguen', '🐧'], ['yunus', 'Yunus', '🐬'], ['kartal', 'Kartal', '🦅'],
+    ['fil', 'Fil', '🐘'], ['zurafa', 'Zürafa', '🦒'], ['koala', 'Koala', '🐨'], ['kirpi', 'Kirpi', '🦔'], ['tavsan', 'Tavşan', '🐰'], ['ahtapot', 'Ahtapot', '🐙'], ['kelebek', 'Kelebek', '🦋'], ['kaplumbaga', 'Kaplumbağa', '🐢']];
+  const OY_RESIM = ['🍕', '🍎', '🍦', '🍩', '⚽', '🏀', '🎈', '🎨', '🚀', '🚗', '🚲', '⭐', '🌈', '🌻', '🎵', '🧸'];
+  // "Elif", "ELİF", "elif" ve "Elıf" aynı oyuncu adına gider (Türkçe harfler sadeleşir; yalnız ilk kelime)
+  const oySade = (s) => (String(s || '').trim().split(/\s+/)[0] || '').toLocaleLowerCase('tr').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+    .replace(/[âà]/g, 'a').replace(/[îì]/g, 'i').replace(/[ûù]/g, 'u').replace(/[^a-z]/g, '').slice(0, 12);
+  const oyIlkAd = (s) => { const w = (String(s || '').trim().split(/\s+/)[0] || '').slice(0, 20); return w ? w.charAt(0).toLocaleUpperCase('tr') + w.slice(1).toLocaleLowerCase('tr') : ''; };
+  const oyHayvan = (id) => OY_HAYVAN.find(h => h[0] === id) || OY_HAYVAN[0];
+  const oyAnahtar = (ad, hayvan, sayi) => `${oySade(ad)}|${hayvan}|${sayi}`;
+  const oyYaz = (o) => { const h = oyHayvan(o.hayvan); return `<b>${esc(oyIlkAd(o.ad))}</b> · ${h[2]} ${h[1]} · <b>${o.sayi}</b>`; };
+  const oyResimKod = (r) => r.map(i => i.toString(16)).join('');
+  const oyRastgele = () => { const b = new Uint8Array(2); crypto.getRandomValues(b); return { hayvan: OY_HAYVAN[b[0] % OY_HAYVAN.length][0], sayi: 10 + (b[1] % 90) }; };
+  const oyHata = (t) => t ? `<p class="oy-hata" role="alert">${t}</p>` : '';
+  const oyResimSec = (secili) => `<div class="oy-resim"><div class="oy-yuva">${[0, 1, 2].map(i => `<span class="${secili[i] != null ? 'dolu' : ''}">${secili[i] != null ? OY_RESIM[secili[i]] : i + 1}</span>`).join('')}<button class="btn ghost small oy-sil" data-act="oy-resim-sil" aria-label="Son resmi sil" ${secili.length ? '' : 'disabled'}>⌫</button></div>
+    <div class="oy-izgara">${OY_RESIM.map((r, i) => `<button data-act="oy-resim" data-v="${i}" aria-label="resim ${i + 1}">${r}</button>`).join('')}</div></div>`;
+  // Yazılanlar yeniden çizimde kaybolmasın
+  const oyOku = () => { const o = A.oy; if (!o) return; const a = document.getElementById('f-oy-ad'), s = document.getElementById('f-oy-sayi'); if (a) o.ad = a.value; if (s) o.sayi = s.value.replace(/\D/g, '').slice(0, 2); };
+  // Giriş ekranı: karşılamada (yeni telefon) ve Ben sekmesinden (zaten kayıt olmuş çocuk) aynı
+  function oyGirisHtml(alt) {
+    const o = A.oy;
+    return `<div class="oy-giris"><div class="field"><label>Adın</label><input id="f-oy-ad" value="${esc(o.ad || '')}" placeholder="Örn: Elif" autocomplete="off" maxlength="20"></div>
+      <label class="oy-et">Hayvanın</label><div class="oy-hayvanlar">${OY_HAYVAN.map(h => `<button class="chip ${o.hayvan === h[0] ? 'on' : ''}" data-act="oy-hayvan" data-v="${h[0]}">${h[2]} ${h[1]}</button>`).join('')}</div>
+      <div class="field"><label>Sayın</label><input id="f-oy-sayi" value="${esc(o.sayi || '')}" placeholder="Örn: 27" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off"></div>
+      <label class="oy-et">Resimli şifren <span class="muted sm">(sırasıyla 3 resim)</span></label>${oyResimSec(o.resim)}
+      ${oyHata(o.hata)}<button class="btn" data-act="oy-giris" ${o.bekle ? 'disabled' : ''}>${o.bekle ? 'Bakılıyor…' : 'Giriş yap'}</button>${alt || ''}</div>`;
+  }
+  // Ben sekmesinden açılan pencere: bulununca yedek özeti aynı pencerede
+  const oyModal = () => `<div class="modal oy-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">📲 İlerlememi getir</h2><button class="btn ghost small" data-act="close-modal" aria-label="Kapat">✕</button></div>
+    ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'close-modal') : `<p class="muted sm" style="margin:6px 0 10px">Başka bir telefonda oynuyorsan oyuncu adını ve 3 resmini gir; ilerlemen buraya gelsin.</p>${oyGirisHtml('<p class="muted sm" style="margin-top:8px">Oyuncu adın yoksa velin Veli bölümünden oluşturabilir.</p>')}`}</div>`;
+  // Yeniden çizerken kaydırma yerinde kalsın (her resim dokunuşunda sayfa başa zıplamasın); hata varsa görünür alana gelsin
+  const oyCiz = () => { const kut = ['.oy-modal', '.scroll'].map(q => { const e = document.querySelector(q); return e ? e.scrollTop : 0; }), y = scrollY;
+    if (A.oyModal) A.modal = oyModal(); render();
+    ['.oy-modal', '.scroll'].forEach((q, i) => { const e = document.querySelector(q); if (e) e.scrollTop = kut[i]; }); scrollTo(0, y);
+    const h = A.oy && A.oy.hata && document.querySelector('.oy-hata'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'nearest' }); };
+  async function oyGiris() {
+    const o = A.oy; oyOku();
+    if (oySade(o.ad).length < 2) { o.hata = 'Adını yaz.'; return oyCiz(); }
+    if (!o.hayvan) { o.hata = 'Hayvanını seç.'; return oyCiz(); }
+    if (!/^[1-9][0-9]$/.test(o.sayi || '')) { o.hata = 'Sayın iki basamaklı olmalı (ör. 27).'; return oyCiz(); }
+    if (o.resim.length !== 3) { o.hata = '3 resmini sırasıyla seç.'; return oyCiz(); }
+    if (!aileHazir()) { o.hata = 'İnternete bağlanamadık. Bağlantını kontrol et.'; return oyCiz(); }
+    o.bekle = true; o.hata = ''; oyCiz();
+    let r = null; try { r = await rpc('oyuncu_giris', { p_ad: oyAnahtar(o.ad, o.hayvan, o.sayi), p_resim: oyResimKod(o.resim) }); } catch (e) { }
+    o.bekle = false;
+    if (r && r.ok && r.kod) { const b = await aileKodBul(r.kod); if (b) { A.aileBulunan = b; A.oyBulunan = { ad: o.ad, hayvan: o.hayvan, sayi: +o.sayi }; A.oy = null; return oyCiz(); } o.hata = 'İlerlemen bulunamadı. Velinden aile kodunu iste.'; return oyCiz(); }
+    o.resim = [];
+    o.hata = !r ? 'Sunucuya ulaşılamadı. İnternetini kontrol et.' : r.hata === 'kilit' ? `Çok fazla yanlış deneme oldu. ${r.dakika || 15} dakika sonra tekrar dene.`
+      : r.hata === 'kilit_gun' || r.hata === 'cok_deneme' ? 'Bugünlük deneme hakkın bitti. Yarın tekrar dene ya da velinden aile kodunu iste.' : 'Oyuncu adın ya da resimlerin eşleşmedi. Bir daha dene.';
+    oyCiz();
+  }
+  // Veli alanında oluşturma: ad → 3 resim → aynı 3 resim tekrar → sunucuya kayıt
+  const oyBolum = () => { const y = A.st.oyuncu; return `<div class="oy-bolum"><b class="sm">🧒 Oyuncu adı ve resimli şifre</b>${y ? `<div class="oy-adkart kucuk">${oyYaz(y)}</div><button class="btn ghost small" data-act="oy-kur-basla" data-v="degis">🖼️ Resimli şifreyi değiştir</button>`
+    : `<p class="muted sm" style="margin:4px 0 8px">Çocuğunuz başka bir telefonda aile koduna gerek kalmadan, kendi oyuncu adı ve 3 resimle girebilsin.</p><button class="btn small" data-act="oy-kur-basla">Oyuncu adı oluştur</button>`}</div>`; };
+  function oyKurHtml() {
+    const o = A.oy;
+    if (o.adim === 'ad') return `<div class="card aile-kart oy-kur"><b>🧒 Oyuncu adı</b><p class="muted sm" style="margin:6px 0 8px">Adın yanına bir hayvan ve sayı eklenir; böylece aynı adı taşıyan çocuklar karışmaz.</p>
+      <div class="field"><label>Çocuğun adı</label><input id="f-oy-ad" value="${esc(o.ad || '')}" maxlength="20" autocomplete="off"></div>
+      <div class="oy-adkart">${oyYaz(o)}</div>${oyHata(o.hata)}
+      <div class="row" style="gap:8px;margin-top:8px"><button class="btn ghost small grow" data-act="oy-yenile">🔄 Başka hayvan ve sayı</button><button class="btn small grow" data-act="oy-ad-tamam">Bunu seç</button></div>
+      <button class="btn ghost small" data-act="oy-vazgec" style="margin-top:6px">Vazgeç</button></div>`;
+    if (o.adim === 'resim' || o.adim === 'tekrar') return `<div class="card aile-kart oy-kur"><b>${o.adim === 'resim' ? '🖼️ Çocuğunuz 3 resim seçsin' : '🔁 Aynı 3 resmi aynı sırayla bir daha seçsin'}</b>
+      <p class="muted sm" style="margin:6px 0 8px">${o.adim === 'resim' ? 'Sırası önemli. Çocuğun kolay hatırlayacağı resimler olsun.' : 'Resimleri hatırladığından emin olalım.'}</p>
+      <div class="oy-adkart">${oyYaz(o)}</div>${oyResimSec(o.resim)}${oyHata(o.hata)}<button class="btn ghost small" data-act="oy-vazgec" style="margin-top:6px">Vazgeç</button></div>`;
+    if (o.adim === 'gonder') return `<div class="card aile-kart oy-kur"><b>⏳ Kaydediliyor…</b></div>`;
+    return `<div class="card aile-kart oy-kur"><b>✅ Oyuncu adı hazır</b><div class="oy-adkart">${oyYaz(o)}</div><div class="oy-yuva buyuk">${o.ilk.map(i => `<span class="dolu">${OY_RESIM[i]}</span>`).join('')}</div>
+      <p class="muted sm" style="margin:8px 0">Bu kartın <b>ekran görüntüsünü alın</b> ya da bir kâğıda yazın. Başka telefonda: uygulamayı açın → <b>"📲 Başka telefonda kullanıyordum"</b> → adı, hayvanı, sayıyı ve 3 resmi girin.</p>
+      <button class="btn" data-act="oy-bitti">Tamam</button></div>`;
+  }
+  async function oyKurResim() {
+    const o = A.oy;
+    if (o.adim === 'resim') { o.ilk = o.resim.slice(); o.resim = []; o.adim = 'tekrar'; o.hata = ''; return oyCiz(); }
+    if (o.resim.join() !== o.ilk.join()) { Object.assign(o, { resim: [], ilk: null, adim: 'resim', hata: 'Resimler aynı değildi. Baştan seçelim.' }); return oyCiz(); }
+    const a = A.st.aile; if (!a || !a.kod) { A.oy = null; return oyCiz(); }
+    o.adim = 'gonder'; oyCiz();
+    if (!a.son) await aileGonder(true);   // sunucuda yedek olmadan oyuncu adı kurulamaz
+    for (let deneme = 0; deneme < 6; deneme++) {
+      let r = null; try { r = await rpc('oyuncu_olustur', { p_kod: a.kod, p_ad: oyAnahtar(o.ad, o.hayvan, o.sayi), p_resim: oyResimKod(o.ilk) }); } catch (e) { }
+      if (r && r.ok) { A.st.oyuncu = { ad: oyIlkAd(o.ad), hayvan: o.hayvan, sayi: +o.sayi, at: Date.now() }; save(); o.adim = 'bitti'; oyCiz(); sfx.badge(); return; }
+      if (r && r.hata === 'alinmis') { o.sayi = oyRastgele().sayi; continue; }   // aynı ad·hayvan·sayı başka ailede: yeni sayı
+      Object.assign(o, { adim: 'resim', resim: [], ilk: null, hata: r && r.hata === 'yedek_yok' ? 'Yedek henüz sunucuya ulaşmadı. "Şimdi yedekle" deyip tekrar deneyin.' : 'Kaydedilemedi. İnternetinizi kontrol edip tekrar deneyin.' }); return oyCiz();
+    }
+    Object.assign(o, { adim: 'ad', resim: [], ilk: null, hata: 'Bu ad çok kullanılıyor, başka bir hayvan seçin.' }); oyCiz();
   }
   const b64u = (x) => { const b = atob((x + '='.repeat((4 - x.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, c => c.charCodeAt(0)); };
   async function bildirimAboneOl() {
@@ -5531,6 +5648,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   function viewOnboard() {
     const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
     if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
+    if (o.step === 'oyuncu') return `<div class="onb">${dots}<h2>Tekrar hoş geldin! 👋</h2>
+      ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'onb-oy-geri') : `<p class="muted">Oyuncu adını ve 3 resmini gir; ilerlemen bu telefona gelsin.</p>${oyGirisHtml(`<button class="btn ghost" data-act="onb-kod-ac">🔑 Velimin aile kodu var</button><button class="btn ghost" data-act="onb-kod-geri">Geri</button>`)}`}</div>`;
     if (o.step === 'kod') return `<div class="onb">${dots}<h2>Aile kodunla devam et</h2><p class="muted">Velinin aldığı aile kodunu yaz. İlerlemen bu telefona gelsin.</p>
       ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'onb-kod-geri') : `<div class="field"><label>Aile kodu</label><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div>
       <p class="muted sm">Kod, eski telefonda Veli alanındaki "Yedek açık" kartında yazar.</p><div style="flex:1"></div><button class="btn" data-act="aile-bul" data-v="onb">Yedeği bul</button><button class="btn ghost" data-act="onb-kod-geri">Geri</button>`}</div>`;
@@ -5723,7 +5842,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'task-done': A.st.tasks[v] = Date.now(); A.st.xp += 30; A.st.week.xp += 30; save(); A.modal = null; render(); sfx.unstop(); toast('🛠️ Harika iş! +30 XP'); break;
       case 'book': A.book = +v; render(); break;
       case 'mt': if (!A.fb) matchTap(v); break;
-      case 'close-modal': A.modal = null; render(); break;
+      case 'close-modal': A.modal = null; if (A.oyModal) { A.oyModal = false; A.oy = null; A.aileBulunan = null; } render(); break;
       case 'okul': A.modal = okulModal(); render(); break;
       case 'okul-git': { const n = document.querySelector(`.path.harita [data-act=node][data-v="${v}"]`); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => { A.modal = skillModal(v); render(); }, n ? 350 : 0); break; }
       case 'okul-mod': A.st.okul = { mod: v, at: Date.now() }; save(); A.modal = v === 'kapali' ? null : okulModal(); render(); toast(v === 'kapali' ? 'Okul eşleştirmesi kapandı. İstediğin zaman haritadan açabilirsin.' : '📅 Haritan MEB yıllık planına göre ilerleyecek.'); break;
@@ -5830,12 +5949,25 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
         o.step = o.step === 1 ? 3 : o.step + 1; render(); break; }
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
-      case 'onb-kod': A.onb.step = 'kod'; A.aileBulunan = null; render(); break;
+      case 'onb-kod': A.onb.step = 'oyuncu'; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;
+      case 'onb-kod-ac': A.onb.step = 'kod'; A.aileBulunan = null; A.oy = null; render(); break;
+      case 'onb-oy-geri': A.aileBulunan = null; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;
+      case 'oy-ac': A.aileBulunan = null; A.oyModal = true; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; A.modal = oyModal(); render(); break;
+      case 'oy-kur-basla': { const y = A.st.oyuncu, r = oyRastgele(), degis = v === 'degis' && !!y; A.aileBulunan = null; A.oyModal = false;
+        A.oy = { mod: 'kur', adim: degis ? 'resim' : 'ad', ad: degis ? y.ad : oyIlkAd((A.st.profile || {}).name), hayvan: degis ? y.hayvan : r.hayvan, sayi: degis ? y.sayi : r.sayi, resim: [], ilk: null }; render(); break; }
+      case 'oy-yenile': oyOku(); Object.assign(A.oy, oyRastgele(), { hata: '' }); oyCiz(); break;
+      case 'oy-ad-tamam': oyOku(); if (oySade(A.oy.ad).length < 2) { A.oy.hata = 'Çocuğun adını yazın (en az 2 harf).'; oyCiz(); break; } A.oy.ad = oyIlkAd(A.oy.ad); Object.assign(A.oy, { adim: 'resim', resim: [], hata: '' }); oyCiz(); break;
+      case 'oy-vazgec': case 'oy-bitti': A.oy = null; render(); break;
+      case 'oy-hayvan': if (!A.oy) break; oyOku(); A.oy.hayvan = v; A.oy.hata = ''; oyCiz(); break;
+      case 'oy-resim': { const o = A.oy; if (!o || o.bekle) break; oyOku(); if (o.resim.length < 3) o.resim.push(+v); o.hata = ''; tone(480 + 70 * o.resim.length, .06, 'triangle'); if (o.mod === 'kur' && o.resim.length === 3) { oyKurResim(); break; } oyCiz(); break; }
+      case 'oy-resim-sil': if (!A.oy) break; oyOku(); A.oy.resim.pop(); A.oy.hata = ''; oyCiz(); break;
+      case 'yedek-uyari-kapat': A.st.yedekUyariKapat = Date.now(); save(); render(); break;
+      case 'oy-giris': if (A.oy && !A.oy.bekle) oyGiris(); break;
       case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
       case 'aile-ac': { const c = document.getElementById('f-aile-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } aileAc(); break; }
       case 'aile-bul': { const inp = document.getElementById('f-aile-kod'); el.disabled = true; aileKodBul(inp && inp.value).then(b => { el.disabled = false; if (b) { A.aileBulunan = b; render(); } }); break; }
       case 'aile-vazgec': A.aileBulunan = null; render(); break;
-      case 'aile-yukle': { const b = A.aileBulunan; if (!b) break; aileYukle(b.durum, b.kod, b.surum); A.aileBulunan = null; A.onb = { step: 0, data: {} }; A.view = 'home'; A.tab = A.tab === 'veli' ? 'veli' : 'yol'; render(); toast(`☁️ Hoş geldin ${esc((A.st.profile || {}).name || '')}! İlerlemen bu telefona geldi.`); break; }
+      case 'aile-yukle': { const b = A.aileBulunan; if (!b) break; aileYukle(b.durum, b.kod, b.surum); if (A.oyBulunan && !A.st.oyuncu) { A.st.oyuncu = Object.assign({ at: Date.now() }, A.oyBulunan); E.save(A.st); } A.oyBulunan = null; A.oy = null; if (A.oyModal) { A.oyModal = false; A.modal = null; } A.aileBulunan = null; A.onb = { step: 0, data: {} }; A.view = 'home'; A.tab = A.tab === 'veli' ? 'veli' : 'yol'; render(); toast(`☁️ Hoş geldin ${esc((A.st.profile || {}).name || '')}! İlerlemen bu telefona geldi.`); break; }
       case 'aile-kopyala': { const k = aileKodYaz(A.st.aile && A.st.aile.kod); (navigator.clipboard ? navigator.clipboard.writeText(k) : Promise.reject()).then(() => toast('📋 Aile kodu kopyalandı.'), () => toast('Kopyalanamadı. Kodu elle yazın: ' + k)); break; }
       case 'aile-simdi': if (A.st.aile) { A.st.aile.kirli = true; A.st.aile.hata = null; aileGonder(true).then(() => { render(); toast(A.st.aile && !A.st.aile.hata ? '☁️ Yedeklendi.' : 'Yedeklenemedi, internetini kontrol et.'); }); } break;
       case 'aile-sil': A.modal = confirmModal('Bulut yedeği silinsin mi?', 'Sunucudaki yedek kalıcı olarak silinir ve aile kodu geçersiz olur. Bu telefondaki ilerleme silinmez.', 'aile-sil-evet', 'Evet, yedeği sil', 'Vazgeç'); render(); break;

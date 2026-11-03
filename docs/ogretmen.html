@@ -936,6 +936,30 @@ html.kolay body{font-family:'Lexend','Nunito',system-ui,sans-serif;font-size:19p
 html.kolay .speech,html.kolay .opt,html.kolay .hintbox,html.kolay .ikinci,html.kolay .sheet{font-size:1.06em;line-height:1.6;letter-spacing:.02em;word-spacing:.12em}
 html.kolay .opt{text-align:left;padding-top:14px;padding-bottom:14px}
 html.kolay .card p,html.kolay .muted{line-height:1.65}
+/* Oyuncu adı + resimli şifre (03.11.2026) */
+.oy-bolum{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.oy-adkart{background:var(--brand-t);border-radius:14px;padding:10px 12px;font-size:18px;text-align:center;margin:8px 0}
+.oy-adkart.kucuk{font-size:15px;padding:6px 10px;margin:6px 0 8px}
+.oy-resim{margin:6px 0 4px}
+.oy-yuva{display:flex;gap:8px;align-items:center;justify-content:center;margin:6px 0 10px}
+.oy-yuva span{width:52px;height:52px;border-radius:14px;border:2px dashed var(--line);display:grid;place-items:center;font-size:28px;font-weight:900;color:var(--muted)}
+.oy-yuva span.dolu{border-style:solid;border-color:var(--brand);background:var(--brand-t)}
+.oy-yuva.buyuk span{width:62px;height:62px;font-size:34px}
+.oy-yuva .oy-sil{min-width:48px;min-height:48px;margin:0}
+.oy-izgara{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:320px;margin:0 auto}
+.oy-izgara button{aspect-ratio:1;min-height:56px;font-size:30px;border-radius:14px;border:2px solid var(--line);background:var(--surface);cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.oy-izgara button:active{transform:translateY(2px);box-shadow:none}
+.oy-et{display:block;font-weight:800;margin:10px 0 6px}
+.oy-hayvanlar{display:flex;flex-wrap:wrap;gap:6px}
+.oy-hayvanlar .chip{min-height:44px}
+.oy-hayvanlar+.field{margin-top:12px}
+.oy-hata{color:var(--bad);font-weight:800;margin:8px 0}
+.oy-giris .btn{margin-top:8px}
+.oy-modal{max-height:88vh;overflow-y:auto}
+.oy-ben{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.yedek-uyari{display:flex;gap:10px;align-items:center;margin:10px 0;border:2px solid var(--brand);background:var(--brand-t)}
+.yedek-uyari .yu-ikon{font-size:26px}
+.yedek-uyari .btn{min-width:44px;min-height:44px;margin:0}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -3516,7 +3540,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-10-25 763cb71', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-03 1d7798d', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
