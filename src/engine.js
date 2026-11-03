@@ -100,6 +100,7 @@
     if (mode === 'learn') len = 5;
     if (mode === 'exam') len = 10;
     if (mode === 'hazir') len = 5;
+    if (mode === 'olcme') len = E.OLCME_PLAN.length;
     if (mode === 'hata') len = 6;
     let aq = null; if (mode === 'atolye') { aq = E.atolyePlan(st); len = aq.length; }
     const card = (mode === 'lesson' && st.skills[skillId].lessons === 0) || mode === 'learn';
@@ -114,7 +115,7 @@
   const kalipAnahtari = (q) => String(q.prompt).replace(/<[^>]+>/g, ' ').replace(/\d+([.,]\d+)?/g, '#').replace(/\b[A-ZÇĞİÖŞÜ]\b/g, '@').replace(/[\s#@,]+/g, ' ').trim() + '|' + (q.type || '');
   E.soruAnahtari = soruAnahtari; E.kalipAnahtari = kalipAnahtari;
   E.nextQ = (st, ses) => {
-    if (ses.mode === 'atolye' || ses.mode === 'placement') return E.nextQ0(st, ses);
+    if (ses.mode === 'atolye' || ses.mode === 'placement' || ses.mode === 'olcme') return E.nextQ0(st, ses);
     const gorulen = ses.gorulen || (ses.gorulen = []);
     let q = null, yedek = null;
     for (let t = 0; t < 40; t++) {
@@ -146,6 +147,7 @@
       q.level = 2; q.uid = Math.random().toString(36).slice(2); return q;
     }
     if (ses.mode === 'placement') { id = ses.plan[ses.i]; return E.makeQ(id, 1); }
+    if (ses.mode === 'olcme') return E.olcmeSorusu(ses.form, ses.i);
     if (ses.mode === 'exam') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id); id = ids[ses.i % ids.length]; const q = E.makeQ(id, ses.i < 5 ? 2 : 3); q.exam = true; return q; }
     if (ses.mode === 'hazir') { const ids = SKILLS.filter(s => s.theme === ses.theme).map(s => s.id).slice(0, 3); id = ids[ses.i % ids.length]; return E.makeQ(id, 1); }
     return E.makeQ(id, E.levelFor(st, id, { lastWrong: ses.lastWrong, streak: ses.streak }));
@@ -167,7 +169,7 @@
   };
   /* İkinci şans: yanlıştan sonra cevabı vermeyen ipucu + bir yeniden deneme.
      Yok: hız yarışı, seviye belirleme, sınav, hazır mıyız (ölçme anları); eşleştirme; iki şıklı sorular (ikinci denemede cevap belli olur). */
-  E.ikinciSansUygun = (ses, q) => !['speed', 'placement', 'exam', 'hazir'].includes(ses.mode) && q.type !== 'match' && q.type !== 'tf' && !(q.options && q.type !== 'input' && !['kes', 'olc', 'graf'].includes(q.type) && q.options.length < 3);
+  E.ikinciSansUygun = (ses, q) => !['speed', 'placement', 'exam', 'hazir', 'olcme'].includes(ses.mode) && q.type !== 'match' && q.type !== 'tf' && !(q.options && q.type !== 'input' && !['kes', 'olc', 'graf'].includes(q.type) && q.options.length < 3);
   // İlk denemedeki yanılgı da veridir: deftere yazılır (ustalık hesabı son denemede yapılır)
   E.yanilgiNotu = (st, q, mis) => {
     if (!mis) return; const now = Date.now();
@@ -198,7 +200,7 @@
     const gap = sk.last ? (now - sk.last) / HOUR : 0;
     if (res.ok) sk.half = Math.min(24 * 60, sk.half * (gap > sk.half * 0.5 ? 2 : 1.15)); else sk.half = Math.max(6, sk.half / 2);
     sk.last = now; sk.recent = (sk.recent || []).concat(res.ok ? 1 : 0).slice(-10);
-    if (ses.mode !== 'placement' && ses.mode !== 'speed') st.times = st.times.concat(ms).slice(-60);
+    if (!['placement', 'speed', 'olcme'].includes(ses.mode)) st.times = st.times.concat(ms).slice(-60);
     st.hints.q++; if (hinted) { st.hints.used++; ses.hintsUsed++; }
     // yanılgı defteri
     if (!res.ok && !tahmin) E.yanilgiNotu(st, q, res.mis);
@@ -213,7 +215,7 @@
     else if (res.ok && kanit === 'ipucu' && !q.rescue) { ses.correct++; gain = 5; }
     else if (res.ok) { ses.correct++; ses.streak++; ses.best = Math.max(ses.best, ses.streak); gain = q.rescue ? 15 : 10; if (ses.streak >= 5) gain += 5; }
     else { ses.wrong++; ses.streak = 0; }
-    ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !q.temel && !['placement', 'speed', 'exam', 'hazir', 'atolye'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
+    ses.xp += gain; ses.lastWrong = !res.ok && !q.rescue && !q.temel && !['placement', 'speed', 'exam', 'hazir', 'atolye', 'olcme'].includes(ses.mode); ses.lastSkill = q.skill; ses.lastLevel = q.level; ses.lastMis = res.mis;
     if (q.temel) E.temelKaydet(st, ses, kanit === 'ilk');
     else { if (!q.rescue) ses.i++; E.temelTetikle(st, ses, q, kanit); }
     return gain;
@@ -347,7 +349,7 @@
     if (ses.mode !== 'placement') { ses.xp += 15; if (ses.wrong === 0 && ses.answered.length >= 5) ses.xp += 10; }
     // Roket Gücü (sandıktan çıkar): sonraki N derste 2 kat XP. Saate değil ders sayısına bağlı: çocuğa süre baskısı yok.
     let roket = 0;
-    if (st.roket && st.roket.kalan > 0 && !['placement', 'hazir'].includes(ses.mode)) { roket = ses.xp; ses.xp *= 2; st.roket.kalan--; }
+    if (st.roket && st.roket.kalan > 0 && !['placement', 'hazir', 'olcme'].includes(ses.mode)) { roket = ses.xp; ses.xp *= 2; st.roket.kalan--; }
     const d = today();
     E.seriKontrol(st);
     if (st.lastDay !== d) {
@@ -359,11 +361,12 @@
     st.week.xp += ses.xp;
     if (ses.skill && st.skills[ses.skill] && (ses.mode === 'lesson' || ses.mode === 'learn')) st.skills[ses.skill].lessons++;
     if (ses.skill && SKILL[ses.skill]) { const t = SKILL[ses.skill].theme; if (!st.themesTried.includes(t)) st.themesTried.push(t); }
-    const sandik = ses.mode === 'placement' ? null : E.sandikNadirlik(acc);
+    const sandik = ses.mode === 'placement' || ses.mode === 'olcme' ? null : E.sandikNadirlik(acc);
     const gemsWon = sandik ? E.sandikElmas(sandik) : 0; st.gems += gemsWon;
     st.sessions.unshift({ at: Date.now(), mode: ses.mode, skill: ses.skill, n: ses.answered.length, acc, ms: Date.now() - ses.start, xp: ses.xp, hints: ses.hintsUsed, rescue: [ses.rescueOk, ses.rescueTry] });
     st.sessions = st.sessions.slice(0, 150);
     let trophy = null;
+    if (ses.mode === 'olcme' && ses.form) { st.olcme = st.olcme || {}; st.olcme[ses.form] = { at: Date.now(), n: ses.answered.length, dogru: ses.answered.filter(a => a.ok).length, sure: Math.round((Date.now() - ses.start) / 1000), beceri: ses.answered.map(a => [a.skill, a.ok ? 1 : 0]) }; }
     if (ses.mode === 'exam' && ses.theme) { const pass = acc >= 0.7; if (pass && !st.trophies[ses.theme]) { st.trophies[ses.theme] = { at: Date.now(), acc }; st.gems += 50; } trophy = { pass, acc }; }
     const quests = E.questTick(st, ses, acc);
     const newBadges = E.checkBadges(st, ses, acc);
@@ -385,6 +388,19 @@
   ];
   E.BADGES = BADGES;
   E.checkBadges = (st, ses, acc) => { const got = []; for (const b of BADGES) if (!st.badges.includes(b.id) && b.test(st, ses, acc)) { st.badges.push(b.id); got.push(b); } return got; };
+
+  /* ---------------- Pilot ön test / son test (03.11.2026) ----------------
+     Aynı 10 konudan, aynı seviyede iki paralel form: "on" (başlangıç) ve "son" (bitiş). Sorular tohumlu üretilir: her çocuk
+     aynı formda aynı soruları görür, iki form farklı sayılarla gelir. İpucu ve ikinci şans yok (ölçme anı), sandık yok.
+     Sonuç st.olcme[form]'da; pilot kaydı açıksa 'test' olayı olarak da gider. */
+  E.OLCME_PLAN = ['g_aci', 'g_ucgen', 'n_okuma', 'n_carpbol', 'a_alan', 'f_denk', 'f_karsilastir', 's_tablo_sutun', 'e_oncelik', 'p_spektrum'];
+  const tohumHash = (s) => { let h = 1779033703 ^ s.length; for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); } return h >>> 0; };
+  const mulberry = (a) => () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  E.olcmeSorusu = (form, i) => {
+    const id = E.OLCME_PLAN[Math.min(i, E.OLCME_PLAN.length - 1)], r = Math.random;
+    Math.random = mulberry(tohumHash(`olcme-${form}-${id}`));
+    try { const q = E.makeQ(id, 2, true); q.olcme = form; return q; } finally { Math.random = r; }
+  };
 
   /* ---------------- Yerleştirme (seviye belirleme) ---------------- */
   E.placementPlan = () => THEMES.map(t => SKILLS.find(s => s.theme === t.id && GEN[s.id]).id);

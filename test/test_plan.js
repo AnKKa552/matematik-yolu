@@ -45,3 +45,16 @@ st.plan = { hafta: 0 }; st.skills.g_cember.pL = 0.6; st.skills.g_cember.n = 0;
 let P2 = E.haftalikPlan(st, T('2026-10-24')); st.plan.hedefler = [{ tip: 'geride', sk: 'g_cember', hedef: 1 }]; P2 = E.haftalikPlan(st, T('2026-10-24'));
 ok(!P2.liste[0].tamam && E.okulGeride(st).includes('g_cember'), 'Geride konu, tahmini yıldızla tamam sayılmaz');
 st.skills.g_cember.n = 3; ok(E.haftalikPlan(st, T('2026-10-24')).liste[0].tamam && !E.okulGeride(st).includes('g_cember'), 'Çalışılınca tamam');
+// Pilot ön test / son test (03.11.2026): tohumlu, iki paralel form, ölçme kuralları
+{
+  const imza = (q) => q.skill + '|' + q.prompt + '|' + JSON.stringify(q.options ? q.options.map(o => o.t) : q.answer);
+  const A1 = E.OLCME_PLAN.map((_, i) => imza(E.olcmeSorusu('on', i))), A2 = E.OLCME_PLAN.map((_, i) => imza(E.olcmeSorusu('on', i)));
+  const B = E.OLCME_PLAN.map((_, i) => imza(E.olcmeSorusu('son', i)));
+  ok(A1.join() === A2.join(), 'Başlangıç testi her seferinde aynı sorular');
+  ok(B.filter((b, i) => b !== A1[i]).length >= 8, 'Bitiş testi aynı konulardan, çoğunlukla farklı sorular');
+  ok(E.OLCME_PLAN.every((id, i) => { const q = E.olcmeSorusu('on', i), r = E.olcmeSorusu('son', i); return q.skill === id && r.skill === id && q.level === 2 && !q.hata && !['kes', 'olc', 'graf'].includes(q.type); }), 'İki form da aynı konu ve seviyede, Hata Avcısı ve çizim sorusu yok');
+  const r0 = Math.random(); ok(typeof r0 === 'number' && Math.random() !== r0, 'Tohumlama Math.random\'u geri bırakır');
+  const s2 = E.fresh(), ses = E.newSession(s2, 'olcme', null); ses.form = 'on';
+  ok(ses.len === E.OLCME_PLAN.length && !E.ikinciSansUygun(ses, E.olcmeSorusu('on', 0)), 'Ölçme oturumu: 10 soru, ikinci şans yok');
+  ok(new Set(E.OLCME_PLAN.map(id => require('../src/curriculum.js').SKILLS.find(s => s.id === id).theme)).size === 7, 'Test 7 temanın hepsinden soru içerir');
+}

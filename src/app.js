@@ -855,7 +855,7 @@
   const aileKodTemiz = (k) => String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
   const aileKodGecerli = (k) => /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{16}$/.test(k);
   // Buluta giden kopya: veliye ait iletişim ve güvenlik bilgileri çıkarılır
-  const aileTemiz = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.veli; delete c.bildirim; delete c.aile;
+  const aileTemiz = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.veli; delete c.bildirim; delete c.aile; delete c.pilot;
     if (c.profile) { delete c.profile.parentName; delete c.profile.parentPhone; delete c.profile.parentEmail; delete c.profile.kvkk; } return c; };
   const aileOzet = (d) => ({ ad: (d.profile || {}).name || '—', xp: d.xp || 0, konu: SKILLS.filter(s => d.skills && d.skills[s.id] && d.skills[s.id].n > 0).length, seri: d.streak || 0 });
   let aileZaman = null, aileGidiyor = false;
@@ -865,7 +865,7 @@
     const yerel = A.st, p = yerel.profile || {};
     A.st = Object.assign(E.fresh(), uzak);
     A.st.profile = Object.assign({}, uzak.profile || {}, { parentName: p.parentName, parentPhone: p.parentPhone, parentEmail: p.parentEmail, kvkk: p.kvkk });
-    if (yerel.veli) A.st.veli = yerel.veli; if (yerel.bildirim) A.st.bildirim = yerel.bildirim;
+    if (yerel.veli) A.st.veli = yerel.veli; if (yerel.bildirim) A.st.bildirim = yerel.bildirim; if (yerel.pilot) A.st.pilot = yerel.pilot; else delete A.st.pilot;
     A.st.aile = { kod, onay: (yerel.aile && yerel.aile.onay) || Date.now(), surum, son: Date.now(), kirli: false };
     E.save(A.st);
   }
@@ -916,6 +916,95 @@
     return null;
   }
   const aileBulunanKart = (b, iptal) => { const o = aileOzet(b.durum); return `<div class="card aile-bulunan"><b>☁️ Yedek bulundu</b><div class="aile-ozet"><span>👤 ${esc(o.ad)}</span><span>⚡ ${o.xp} XP</span><span>📚 ${o.konu} konu</span><span>🔥 ${o.seri} gün</span></div><p class="muted sm" style="margin:6px 0 10px">Bu ilerleme bu telefona yüklenecek${A.st.profile && (A.st.xp || 0) > 0 ? `; bu telefondaki ilerlemenin (⚡ ${A.st.xp} XP) yerini alacak` : ''}.</p><button class="btn" data-act="aile-yukle">Evet, yükle</button><button class="btn ghost small" data-act="${iptal}" style="margin-top:6px">Vazgeç</button></div>`; };
+  /* ---------------- Pilot çalışma: isimsiz kullanım kaydı (03.11.2026) ----------------
+     Yalnız veli, şifreli Veli alanında onay verirse açılır (sunucu/supabase/pilot.sql). Bu telefona rastgele 22 karakterlik bir
+     numara verilir; ad, telefon, e-posta, aile kodu, oyuncu adı ya da yazılan metin GİTMEZ. Olaylar cihazda sıraya alınır,
+     ders bitince ve 30 sn'de bir toplu gönderilir; internet yoksa bekler. Pilottan ayrılınca sunucudaki kayıtlar silinir. */
+  const PILOT_RIZA = 'pilot-v1', PILOT_KUYRUK = 'my_pilot_kuyruk';
+  let pilotSunucu = null, pilotGidiyor = false, pilotZaman = null, pilotIlkMis = null, pilotSonAcilis = 0;
+  const pilotAcik = () => !!(A.st && A.st.pilot && A.st.pilot.acik && A.st.pilot.cihaz);
+  const pilotSunucuBak = () => aileAyarli() ? rpc('pilot_kaydet', { p_cihaz: 'x', p_olaylar: [] }).then(r => { const once = pilotSunucu; pilotSunucu = !!(r && r.hata === 'cihaz'); if (once !== pilotSunucu && A.tab === 'veli' && A.view !== 'lesson') render(); }, () => { pilotSunucu = false; }) : Promise.resolve();
+  const pilotCihazUret = () => { const b = new Uint8Array(16); crypto.getRandomValues(b); return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const pilotKuyruk = () => { try { const k = JSON.parse(localStorage.getItem(PILOT_KUYRUK) || '[]'); return Array.isArray(k) ? k : []; } catch (e) { return []; } };
+  const pilotKuyrukYaz = (k) => { try { localStorage.setItem(PILOT_KUYRUK, JSON.stringify(k.slice(-2000))); } catch (e) { } };
+  // Soru kalıbının kısa özeti (sayılar atılmış metin): hangi soru türünde zorlanıldığını görmek için, metnin kendisi gitmez
+  const pilotKalip = (q) => { const t = E.kalipAnahtari(q); let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16).padStart(8, '0'); };
+  function pilot(tur, veri) {
+    if (!pilotAcik()) return;
+    const k = pilotKuyruk(); k.push({ tur, veri: veri || {}, z: Date.now() }); pilotKuyrukYaz(k);
+    clearTimeout(pilotZaman); pilotZaman = setTimeout(() => pilotGonder(), ['ders_bitti', 'ders_birak', 'test'].includes(tur) ? 1500 : 30000);
+  }
+  async function pilotGonder() {
+    if (!pilotAcik() || pilotGidiyor || !aileAyarli()) return;
+    let k = pilotKuyruk(); if (!k.length) return;
+    pilotGidiyor = true; let yeniden = false;
+    try {
+      while (k.length && pilotAcik()) {
+        const parca = k.slice(0, 100), p = A.st.pilot;
+        const r = await rpc('pilot_kaydet', { p_cihaz: p.cihaz, p_olaylar: parca });
+        if (r && r.hata === 'katilim_yok' && !yeniden) { yeniden = true; await rpc('pilot_katil', { p_cihaz: p.cihaz, p_riza: PILOT_RIZA, p_grup: p.grup || null }); continue; }
+        if (!r || !r.ok) { p.hata = (r && r.hata) || 'bilinmiyor'; break; }
+        k = pilotKuyruk().slice(parca.length); pilotKuyrukYaz(k); p.gonderilen = (p.gonderilen || 0) + (r.alindi || 0); p.son = Date.now(); p.hata = null;
+      }
+    } catch (e) { if (A.st.pilot) A.st.pilot.hata = 'ag'; }
+    finally { pilotGidiyor = false; E.save(A.st); }
+  }
+  const pilotAcilis = () => { if (pilotAcik() && Date.now() - pilotSonAcilis > 30 * 60000) { pilotSonAcilis = Date.now(); pilot('acilis', { surum: PILOT_RIZA }); } };
+  // Cevaplar motorun kendi kaydından alınır (ikinci şanstaki ilk yanılgı da: yanilgiNotu)
+  const pilotKayit0 = E.record, pilotYanilgi0 = E.yanilgiNotu;
+  E.yanilgiNotu = (st, q, mis) => { pilotIlkMis = mis || pilotIlkMis; return pilotYanilgi0(st, q, mis); };
+  E.record = (st, ses, q, res, ms, hinted, kanit) => {
+    const n0 = ses.answered.length, g = pilotKayit0(st, ses, q, res, ms, hinted, kanit);
+    if (pilotAcik()) { const a = ses.answered.length > n0 ? ses.answered[ses.answered.length - 1] : null;
+      pilot('cevap', { mod: ses.mode, beceri: q.skill, sev: q.level, tur: q.type || 'mc', hata: q.hata, asama: q.atolye ? q.atolye.asama : undefined,
+        ok: !!res.ok, kanit: a ? a.kanit : 'tahmin', mis: res.mis || pilotIlkMis || undefined, ms: Math.min(600000, Math.round((ms || 0) / 100) * 100), telafi: q.rescue ? 1 : undefined, kalip: pilotKalip(q) }); }
+    pilotIlkMis = null; return g;
+  };
+  const pilotDers = (tur) => { const s = A.ses; if (!s) return; pilot(tur, { mod: s.mode, beceri: s.skill || undefined, n: s.answered.length, ilk: s.answered.filter(a => a.kanit === 'ilk').length, sure: Math.round((Date.now() - s.start) / 1000) }); };
+  function pilotKart() {
+    if (!pilotAcik() && pilotSunucu !== true) return '';
+    const p = A.st.pilot;
+    if (pilotAcik()) { const bekleyen = pilotKuyruk().length;
+      return `<div class="card aile-kart"><b>🔬 Pilot çalışmadasınız</b>${p.grup ? ` <span class="muted sm">· grup ${esc(p.grup)}</span>` : ''}
+      <p class="muted sm" style="margin:6px 0 6px">Çocuğunuzun uygulamayı nasıl kullandığı isimsiz olarak kaydediliyor. Katkınız için teşekkürler!</p>
+      <p class="sm muted" style="margin:0 0 8px">Gönderilen kayıt: <b>${p.gonderilen || 0}</b>${bekleyen ? ` · gönderilmeyi bekleyen: ${bekleyen}` : ''}${p.hata ? ' · ⏳ internet gelince gönderilecek' : ''}</p>
+      ${olcmeBolum()}
+      <button class="btn ghost small" data-act="pilot-ayril" style="margin-top:10px">Pilottan ayrıl ve kayıtları sil</button></div>`; }
+    return `<div class="card aile-kart"><b>🔬 Pilot çalışmaya katıl (isteğe bağlı)</b>
+      <p class="muted sm" style="margin:6px 0 8px">Uygulamayı birkaç aileyle deneyerek geliştiriyoruz. Katılırsanız çocuğunuzun uygulamayı nasıl kullandığı <b>isimsiz</b> olarak kaydedilir: hangi konuda kaç soru çözdüğü, hangi soruda zorlandığı, dersi nerede bıraktığı. Katılmasanız da uygulama aynen çalışır.</p>
+      <details class="aile-detay"><summary class="sm"><b>Neler kaydedilir, neler kaydedilmez?</b></summary><p class="sm muted" style="margin:6px 0 0"><b>Kaydedilen:</b> uygulamanın açıldığı zaman, başlanan ve bitirilen dersler, her cevabın konusu, zorluk seviyesi, doğru mu yanlış mı olduğu, ipucu kullanılıp kullanılmadığı, yanlış cevabın hangi tipik hatadan geldiği ve cevap süresi. <b>Kaydedilmeyen:</b> çocuğunuzun ve sizin adınız, telefon, e-posta, aile kodu, oyuncu adı, konum, yazılan herhangi bir metin. Bu telefona rastgele bir numara verilir; numaradan kim olduğunuz anlaşılmaz. Kayıtlar en fazla 13 ay saklanır ve yalnız uygulamayı geliştirmek için kullanılır. İstediğiniz an «Pilottan ayrıl» diyerek bütün kayıtları silebilirsiniz.</p></details>
+      <div class="field" style="margin-top:8px"><label class="sm" for="f-pilot-grup">Pilot grubu kodu (size verildiyse, ör. 5A)</label><input id="f-pilot-grup" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="isteğe bağlı"></div>
+      <label class="aile-onay"><input type="checkbox" id="f-pilot-onay"> <span class="sm">Velisi olarak, çocuğumun uygulama kullanımının bu açıklamaya göre isimsiz kaydedilmesine onay veriyorum.</span></label>
+      <button class="btn" data-act="pilot-katil" style="margin-top:8px">Pilota katıl</button></div>`;
+  }
+  // Ön test / son test: aynı 10 konudan iki paralel form; son test, başlangıç testinden en az OLCME_ARA_GUN gün sonra açılır
+  const OLCME_ARA_GUN = 14;
+  function olcmeBolum() {
+    const o = A.st.olcme || {}, tarih = (t) => new Date(t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }), n = E.OLCME_PLAN.length;
+    const satir = (ad, r) => `<div class="olcme-satir"><span>${ad}</span><b>${r.dogru}/${r.n}</b><span class="muted sm">${tarih(r.at)}</span></div>`;
+    let ic = '';
+    if (!o.on) ic = `<p class="sm muted" style="margin:4px 0 8px">Pilotun başında bir kez: ${n} soruluk kısa bir test (yaklaşık 10 dakika). Telefonu çocuğunuza verin; ipucu yoktur, yanlış yapmak sorun değildir.</p><button class="btn small" data-act="olcme" data-v="on">📝 Başlangıç testini başlat</button>`;
+    else {
+      ic = satir('Başlangıç testi', o.on);
+      if (o.son) { const fark = o.son.dogru - o.on.dogru; ic += satir('Bitiş testi', o.son) + `<p class="sm" style="margin:6px 0 0">${fark > 0 ? `📈 ${fark} soru daha fazla doğru.` : fark === 0 ? 'Doğru sayısı aynı kaldı.' : `Bitiş testinde ${-fark} soru daha az doğru; tek bir test günlük duruma bağlı olabilir.`}</p>`; }
+      else { const kalan = Math.ceil(OLCME_ARA_GUN - (Date.now() - o.on.at) / 86400000);
+        ic += kalan > 0 ? `<p class="sm muted" style="margin:6px 0 0">Bitiş testi ${kalan} gün sonra açılır (pilotun sonunda, aynı konulardan yeni sayılarla).</p>` : `<button class="btn small" data-act="olcme" data-v="son" style="margin-top:8px">📝 Bitiş testini başlat</button>`; }
+    }
+    return `<div class="olcme-kutu"><b class="sm">📝 Başlangıç ve bitiş testi</b>${ic}</div>`;
+  }
+  async function pilotKatil(grup) {
+    const cihaz = (A.st.pilot && A.st.pilot.cihaz) || pilotCihazUret();
+    try { const r = await rpc('pilot_katil', { p_cihaz: cihaz, p_riza: PILOT_RIZA, p_grup: grup || null });
+      if (!r || !r.ok) { toast(r && r.hata === 'grup' ? 'Grup kodu en fazla 12 harf ya da rakam olabilir.' : 'Katılım kaydedilemedi, biraz sonra tekrar deneyin.'); return; }
+      A.st.pilot = { acik: true, cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('🔬 Pilota katıldınız. Teşekkürler!');
+    } catch (e) { toast('İnternete bağlanılamadı, biraz sonra tekrar deneyin.'); }
+  }
+  async function pilotAyril(sessiz) {
+    const p = A.st.pilot; if (!p || !p.cihaz) return true;
+    let silindi = false; try { const r = await rpc('pilot_ayril', { p_cihaz: p.cihaz }); silindi = !!(r && r.ok); } catch (e) { }
+    if (!silindi) { if (!sessiz) toast('Sunucuya ulaşılamadı; kayıtlar silinemedi. İnternete bağlanıp tekrar deneyin.'); return false; }
+    A.st.pilot = { acik: false }; pilotKuyrukYaz([]); E.save(A.st); if (!sessiz) { render(); toast('Pilottan ayrıldınız, kayıtlar silindi.'); } return true;
+  }
   function aileKart() {
     if (!aileHazir()) return '';
     const a = A.st.aile;
@@ -1060,6 +1149,7 @@
       <details class="card rmetin"><summary><b>📝 Gönderilecek mesaj metni</b> <span class="muted sm">(WhatsApp/e-posta ile bu gider)</span></summary><pre class="report">${esc(txt)}</pre></details>
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
       ${aileKart()}
+      ${pilotKart()}
       ${CL && CL.oturum ? cloudCard() : ''}
       ${bildirimKart()}
       ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
@@ -1123,7 +1213,7 @@
     const hint = A.showHint ? `<div class="hintbox">💡 ${ampulIpucu(q)}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
       ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(104, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
-      ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
+      ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' && ses.mode !== 'olcme' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
 
@@ -1294,6 +1384,7 @@
     const right = ['kes', 'tablo', 'kur', 'olc', 'graf'].includes(q.type) ? q.cevap : q.type === 'match' ? `<div class="mright">${q.pairs.map(p => `<span>${p.a}</span><b>↔</b><span>${p.b}</span>`).join('')}</div>` : q.type === 'input' ? `${esc(q.answer).replace('.', ',')} ${q.unit ? esc(q.unit) : ''}` : q.type === 'cmp' ? `${q.cmp[0]} <b>${esc(q.options.find(o => o.ok).t)}</b> ${q.cmp[1]}` : q.options.find(o => o.ok).t;
     // Seviye belirleme: ilk tanışmada açıklama yığını yok; sadece doğru cevap ve cesaret
     if (A.ses.mode === 'placement') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>🌱 Bunu birlikte öğreneceğiz!</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Şimdilik seviyeni ölçüyorum. Burada yanlış yapmak hiç sorun değil.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
+    if (A.ses.mode === 'olcme') return `<div class="sheet learnc"><div class="row"><div class="grow"><h3>👍 Tamam, sıradaki soruya geçelim</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div><div class="sub">Bu kısa bir ölçme testi. Yanlış yapmak sorun değil; ne bildiğini görmek istiyoruz.</div></div>${mascot('think', 64)}</div><button class="btn" data-act="next">Devam</button></div>`;
     const m = MIS[fb.mis] || MIS.genel;
     const steps = (q.steps || []).length ? `<details class="howto" ${q.cozumGorsel ? 'open' : ''}><summary>🪜 Nasıl çözülür?</summary>${q.cozumGorsel || ''}<ol class="steps">${q.steps.map(s => `<li>${s}</li>`).join('')}</ol></details>` : '';
     return `<div class="sheet learnc"><div class="row" style="align-items:flex-start"><div class="grow"><h3>💡 Birlikte bakalım</h3><div class="ans">Doğru cevap: <span style="font-size:20px">${right}</span></div>${q.duzeltme ? `<div class="duz">✏️ Doğrusu: ${q.duzeltme}</div>` : ''}${q.atolye && !['kontrol', 'derin', 'bagimsiz'].includes(q.atolye.asama) ? '<div class="sub">Bu adımın çözümünü birlikte gördük. Doğru değerle sıradaki adıma geçiyoruz; asıl deneme sondaki "Kendin dene" sorusu!</div>' : ''}${tahminKarsilastir(q)}</div>${mascot('sad', 64)}</div>
@@ -1312,8 +1403,8 @@
     if (adim === 'sandik') return viewSandik();
     if (adim === 'gorev') return viewGorevIlerleme();
     const r = A.result, ses = A.ses, acc = Math.round(r.acc * 100), mins = Math.max(1, Math.round((Date.now() - ses.start) / 60000));
-    const yildizli = !['placement', 'speed', 'hazir'].includes(ses.mode), ys = yildizSayisi(r.acc);
-    const title = ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : acc >= 50 ? 'Az kaldı!' : 'Bir dahakine olacak!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
+    const yildizli = !['placement', 'speed', 'hazir', 'olcme'].includes(ses.mode), ys = yildizSayisi(r.acc);
+    const title = ses.mode === 'olcme' ? 'Testi bitirdin, teşekkürler!' : ses.mode === 'placement' ? 'Seviyeni belirledim!' : ses.mode === 'exam' ? (acc >= 70 ? 'Sınav başarılı!' : acc >= 50 ? 'Az kaldı!' : 'Bir dahakine olacak!') : ses.mode === 'hazir' ? 'Ön bilgin ölçüldü!' : ses.mode === 'speed' ? `${ses.correct} doğru!` : `${ys} yıldız kazandın!`;
     // Esprili alt başlık: çocuğun bu dersteki en güzel hâlini söyler (yalnız gerçekten olduysa)
     const sn = ses.answered.length ? (Date.now() - ses.start) / 1000 / ses.answered.length : 99;
     const altBaslik = !yildizli ? '' : ses.answered.length >= 5 && ses.answered.every(a => a.ok && a.kanit === 'ilk' && !a.partial) ? 'Kusursuz! Tek hata bile yok 🎯' : ses.rescueOk >= 2 ? 'Hatalarından geri dönmeyi bildin 💪' : sn < 12 && r.acc >= 0.7 ? 'Şimşek gibiydin ⚡' : r.acc >= 0.9 ? 'Kafan matematik makinesi gibi çalıştı 🧠' : '';
@@ -1439,10 +1530,11 @@
   }
   function startSession2(mode, skillId) {
     if (mode === 'placement') { A.ses.plan = E.placementPlan(); A.ses.len = A.ses.plan.length; }
+    if (mode === 'olcme') A.ses.form = A.olcmeForm || 'on';
     if (A.ses.format && mode !== 'lesson' && mode !== 'learn') A.ses.format = null;
     A.ses.showCard = !!A.ses.format;
     if (mode === 'speed') { A.ses.left = 60; clearInterval(A.timer); A.timer = setInterval(() => { A.ses.left -= 1; if (A.ses.left <= 0) { clearInterval(A.timer); finishSession(); } else if (A.view === 'lesson' && !A.fb) { const t = document.querySelector('.timer'); if (t) t.textContent = Math.ceil(A.ses.left) + ' sn'; const p = document.querySelector('.prog>i'); if (p) p.style.width = (100 * (1 - A.ses.left / 60)) + '%'; } }, 1000); }
-    A.view = 'lesson'; sfx.swoosh(); sahneHazirla(); if (mode === 'exam') setTimeout(() => piSay('bolge_sinav'), 200); else if (!A.ses.showCard && !['speed', 'placement'].includes(mode)) setTimeout(() => piSay('ders_basla'), 200);
+    A.view = 'lesson'; pilot('ders_basla', { mod: mode, beceri: skillId || undefined }); if (A.ses.showCard) pilot('kart', { beceri: skillId, bicim: A.ses.format }); sfx.swoosh(); sahneHazirla(); if (mode === 'exam') setTimeout(() => piSay('bolge_sinav'), 200); else if (!A.ses.showCard && !['speed', 'placement'].includes(mode)) setTimeout(() => piSay('ders_basla'), 200);
     if (!A.ses.showCard) nextQuestion(); else { render(); if (A.st.settings.voice) setTimeout(() => sayCard(skillId, A.ses.format), 300); }
   }
   // Ders ortası mola ekranı (kısa, motive edici)
@@ -1458,7 +1550,7 @@
   function idleKur(ms = 25000) {
     clearTimeout(A.idle); if (!A.q) return; const uid = A.q.uid;
     A.idle = setTimeout(() => {
-      if (A.view !== 'lesson' || !A.q || A.q.uid !== uid || A.fb || A.ses.mode === 'speed') return;
+      if (A.view !== 'lesson' || !A.q || A.q.uid !== uid || A.fb || A.ses.mode === 'speed' || A.ses.mode === 'olcme') return;
       if (sesSuruyor()) return idleKur(6000);
       piSay('yonlendir'); const h = document.querySelector('[data-act="hint"]'); if (h) h.classList.add('nudge');
     }, ms);
@@ -1544,7 +1636,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); bildirimDers(); if (!['placement', 'hazir'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } A.dersSandik = A.result.sandik ? { n: A.result.sandik, dokun: 0, acik: false, od: sandikOdulleri(A.result.sandik, A.result.gemsWon, ['speed', 'placement', 'hazir'].includes(A.ses.mode) ? null : dersTemasi(A.ses), CIK_SANS[A.result.sandik]) } : null; A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); bildirimDers(); pilotDers('ders_bitti'); if (A.ses.mode === 'olcme' && A.st.olcme && A.st.olcme[A.ses.form]) { const o = A.st.olcme[A.ses.form]; pilot('test', { form: A.ses.form, n: o.n, dogru: o.dogru, sure: o.sure, beceri: Object.fromEntries(o.beceri) }); } if (!['placement', 'hazir', 'olcme'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } A.dersSandik = A.result.sandik ? { n: A.result.sandik, dokun: 0, acik: false, od: sandikOdulleri(A.result.sandik, A.result.gemsWon, ['speed', 'placement', 'hazir'].includes(A.ses.mode) ? null : dersTemasi(A.ses), CIK_SANS[A.result.sandik]) } : null; A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -1612,7 +1704,7 @@
       case 'next': nextQuestion(); break;
       case 'explain-other': { const f = E.pickFormat(A.st, [E.formatRank(A.st)[0].f]); A.modal = explainModal(A.q.skill, f); render(); sayCard(A.q.skill, f); break; }
       case 'quit': A.modal = confirmModal('Dersten çıkmak istiyor musun?', 'Cevapladığın sorular kaydedildi, ama ders tamamlanmış sayılmayacak ve ders XP\'si verilmeyecek.', 'quit-yes', 'Çık', 'Derse devam'); render(); break;
-      case 'quit-yes': clearInterval(A.timer); stopVoice(); A.modal = null; A.view = 'home'; A.ses = null; A.fb = null; render(); break;
+      case 'quit-yes': pilotDers('ders_birak'); clearInterval(A.timer); stopVoice(); A.modal = null; A.view = 'home'; A.ses = null; A.fb = null; render(); break;
       case 'sandik-dokun': { const ss = A.sahne || (A.view === 'end' ? A.dersSandik : null); if (!ss || ss.acik) break; ss.dokun++;
         const kok = el.closest('.ss'), titre = (d) => { if (navigator.vibrate) try { navigator.vibrate(d); } catch (e) { } };
         if (ss.dokun < SANDIK_DOKUN) { tone(392 + ss.dokun * 196, .14, 'triangle'); tone(587 + ss.dokun * 262, .12, 'sine', .07); titre(18 + ss.dokun * 22);
@@ -1660,7 +1752,7 @@
       case 'dolap-giy': { const d = dolap(), [t, id] = (A.dolapSec || '').split(':'); if (t === 'k' && d.sahip.includes(id)) d.giyili = id; else if (t === 'i' && d.izler.includes(id)) d.iz = id; save(); A.modal = dolapModal(); render(); tone(700, .12, 'triangle'); break; }
       case 'buy-freeze': if (A.st.freezes >= E.KORUYUCU_EN_FAZLA) { toast(`🧊 En fazla ${E.KORUYUCU_EN_FAZLA} seri koruyucu taşıyabilirsin. Elindekiler seni koruyor!`); break; } if (A.st.gems >= 50) { A.st.gems -= 50; A.st.freezes++; save(); render(); toast('🧊 Seri koruyucu alındı!'); } else toast('Yeterli elmasın yok. Ders yaparak kazanabilirsin!'); break;
       case 'reset': A.modal = confirmModal('Tüm veriler silinsin mi?', 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break;
-      case 'reset-yes': A.modal = null; A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; render(); break;
+      case 'reset-yes': if (pilotAcik()) pilotAyril(true); A.modal = null; A.st = E.reset(); pilotKuyrukYaz([]); A.onb = { step: 0, data: {} }; A.tab = 'yol'; render(); break;
       case 'copy': try { navigator.clipboard.writeText(E.parentReport(A.st).text).then(() => toast('Rapor kopyalandı ✓'), () => toast('Kopyalanamadı')); } catch (e) { toast('Kopyalanamadı'); } break;
       case 'edit-profile': A.veliDuzenle = true; render(); break;
       case 'veli-vazgec': A.veliDuzenle = false; render(); break;
@@ -1705,6 +1797,10 @@
       case 'yedek-uyari-kapat': A.st.yedekUyariKapat = Date.now(); save(); render(); break;
       case 'oy-giris': if (A.oy && !A.oy.bekle) oyGiris(); break;
       case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
+      case 'pilot-katil': { const c = document.getElementById('f-pilot-onay'), g = document.getElementById('f-pilot-grup'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } pilotKatil(g ? g.value.trim() : ''); break; }
+      case 'olcme': { const o = A.st.olcme || {}; if (o[v]) break; A.olcmeForm = v === 'son' ? 'son' : 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break; }
+      case 'pilot-ayril': A.modal = confirmModal('Pilottan ayrılmak istiyor musunuz?', 'Bu telefondan gönderilen bütün isimsiz kayıtlar sunucudan silinir ve kayıt durur. Çocuğunuzun ilerlemesi etkilenmez.', 'pilot-ayril-evet', 'Evet, ayrıl', 'Vazgeç'); render(); break;
+      case 'pilot-ayril-evet': A.modal = null; render(); pilotAyril(false); break;
       case 'aile-ac': { const c = document.getElementById('f-aile-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } aileAc(); break; }
       case 'aile-bul': { const inp = document.getElementById('f-aile-kod'); el.disabled = true; aileKodBul(inp && inp.value).then(b => { el.disabled = false; if (b) { A.aileBulunan = b; render(); } }); break; }
       case 'aile-vazgec': A.aileBulunan = null; render(); break;
@@ -1730,8 +1826,8 @@
   // Seri koruyucu: açılışta ve uygulamaya geri dönülünce (gece yarısını geçtiyse) kendiliğinden kontrol edilir
   const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
     setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
-  seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); } else if (A.st.aile && A.st.aile.kirli) aileGonder(); });
-  aileSunucuBak().then(() => setTimeout(aileKontrol, 800));
+  seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); } });
+  aileSunucuBak().then(() => setTimeout(aileKontrol, 800)); pilotSunucuBak(); pilotAcilis(); setTimeout(pilotGonder, 3000);
   if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });
   if (CL && CL.ayarli) CL.baslat(() => render()).then(async () => {

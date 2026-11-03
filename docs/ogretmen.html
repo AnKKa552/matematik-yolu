@@ -961,6 +961,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .yedek-uyari .yu-ikon{font-size:26px}
 .yedek-uyari .btn{min-width:44px;min-height:44px;margin:0}
 .vis-ikili{display:flex;flex-direction:column;gap:6px;align-items:center}
+.olcme-kutu{margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--soft,rgba(91,75,255,.07))}
+.olcme-satir{display:flex;gap:10px;align-items:baseline;margin-top:6px}.olcme-satir span:first-child{flex:1}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -3597,7 +3599,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-11-03 c785b3e', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-03 0cbc9b4', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

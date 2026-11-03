@@ -174,6 +174,15 @@ Telefon değişince ilerleme kaybolmasın diye; satış öncesi zorunlu. **E-pos
 - Test: `python3 test/e2e_aile.py` (oluşturma, boş ad, tekrar farklı resim, resim telefonda yok, büyük harf/İ, yanlış sıra, ad ve sayı korunur, 5 yanlışta kilit, kilitliyken doğru resim reddi, pencere kapanınca kayıt korunur, yedek uyarısı). Sunucu fonksiyonları gerçek veritabanında işlem içinde denenip geri alındı.
 - **KVKK:** "Neler saklanır?" metnine oyuncu adı ve resimli şifrenin şifreli özeti eklendi; yayın öncesi hukukçuya gösterilmeli (§1-6).
 
+### 3.7 Pilot çalışma: isimsiz kullanım kaydı + başlangıç/bitiş testi (03.11.2026)
+5–10 aileyle 2–3 haftalık pilot için (§10 metrikleri, §11 B3). **Yalnız veli, şifreli Veli alanında onay verirse açılır** (§1-6); katılmayan aile için hiçbir şey gönderilmez.
+- **Kimlik:** cihazda üretilen rastgele 22 karakter (`st.pilot.cihaz`, `crypto.getRandomValues`). Ad, veli bilgisi, telefon, e-posta, aile kodu, oyuncu adı, IP, soru metni ya da yazılan cevap **gitmez**. İsteğe bağlı «pilot grubu kodu» (araştırmacının verdiği sınıf kodu, ör. 5A). `st.pilot` bulut yedeğine girmez (`aileTemiz`), geri yüklemede bu telefonunki korunur.
+- **Olaylar** (`pilot(tur, veri)` in app.js; kuyruk `localStorage.my_pilot_kuyruk`, en fazla 2000; ders bitince 1,5 sn, yoksa 30 sn sonra ve uygulama arka plana geçince toplu gönderilir; internet yoksa bekler): `acilis` (30 dk'da en fazla bir), `ders_basla` {mod, beceri}, `kart` {beceri, bicim}, `cevap` {mod, beceri, sev, tur, hata, asama, ok, kanit, mis (ikinci şanstaki ilk yanılgı dahil), ms, telafi, kalip (sayısız soru metninin 8 haneli özeti)}, `ders_bitti` / `ders_birak` {mod, beceri, n, ilk, sure}, `test` {form, n, dogru, sure, beceri: {id: 0/1}}. Cevaplar `E.record` sarmalanarak alınır (motor değişmedi).
+- **Sunucu** (`sunucu/supabase/pilot.sql`, kurulu): tablolar `pilot_katilim`, `pilot_olay` (RLS açık, politika yok); `pilot_katil(p_cihaz, p_riza, p_grup)`, `pilot_kaydet(p_cihaz, p_olaylar)` (çağrı başına 100 olay, olay başına 1 KB, cihaz başına günde 3000, bilinmeyen tür atlanır, cihaz saati sunucuya göre sınırlanır). Araştırmacı sorguları (geri gelme D1/D7, ders tamamlama, vazgeçilen yer, beceri doğruluğu, sık yanılgı, zor soru kalıbı) dosyanın başında. **Silme parçası** `pilot_silme.sql` (`pilot_ayril`, olaylar katılımla birlikte silinsin kuralı, 13 aydan eski kayıtların aylık temizliği): ajan oturumunda çalışmaz, proje sahibi SQL Editor'den çalıştırır. **Pilot başlamadan önce kurulmuş olmalı**, yoksa «Pilottan ayrıl» kayıtları silemez ve bunu veliye söyler. «Tüm verileri sıfırla» da önce pilottan ayrılır.
+- **Başlangıç ve bitiş testi** (`mode: 'olcme'`, `E.OLCME_PLAN`, `E.olcmeSorusu`): 7 temadan 10 konu (g_aci, g_ucgen, n_okuma, n_carpbol, a_alan, f_denk, f_karsilastir, s_tablo_sutun, e_oncelik, p_spektrum), seviye 2, iki paralel form (`on`, `son`); sorular tohumlu (`olcme-<form>-<beceri>`), herkes aynı formda aynı soruyu görür. Ölçme kuralları: ipucu düğmesi ve takılma yönlendirmesi yok, ikinci şans yok, yanlışta kısa nazik geri bildirim, yıldız/sandık/roket/hazine anahtarı yok. Veli kartından başlatılır; bitiş testi başlangıçtan **14 gün** sonra açılır (`OLCME_ARA_GUN`). Sonuç `st.olcme[form]` ve kartta «Başlangıç 6/10 → Bitiş 8/10».
+- Test: `python3 test/e2e_pilot.py` (onaysız katılım yok, katılmadan olay yok, alan listesi, kişisel bilgi sızmaz, yarıda bırakma, internetsiz bekleme, test akışı, ayrılınca silme ve sonrasında sessizlik); `node test/test_plan.js` (formların tohumlu ve paralel olması).
+- **KVKK:** bilgilendirme ve onay metni (`pilot-v1`) yayın öncesi hukukçuya gösterilmeli (§1-6). Rastgele numara da kişisel veri sayılabilir (takma adlı veri); bu yüzden onay, silme ve süre sınırı var.
+
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 
 ### 4.1 Ustalık: Bayesian Knowledge Tracing (BKT)
@@ -456,6 +465,7 @@ test/test_generators.js   ← 63 000 soruluk doğrulama
 test/sim_engine.js        ← farklı öğrenci tipleriyle motor simülasyonu
 test/test_plan.js         ← okul takvimi, ön bilgi yoklaması, haftalık plan testleri
 test/test_sahne.py        ← 35 konunun adım adım sahneleri: SVG geçerliliği, işlem doğruluğu, pafta
+test/e2e_pilot.py         ← pilot kaydı ve başlangıç/bitiş testi: uçtan uca (sahte sunucu)
 test/e2e_aile.py          ← aile kodu ile yedek + oyuncu adı/resimli şifre: dört telefonlu uçtan uca test (sahte sunucu)
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
 ```
@@ -508,7 +518,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py` ve `python3 test/e2e_aile.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py` ve `python3 test/e2e_pilot.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.
