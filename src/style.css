@@ -811,7 +811,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .pikonus.kostumlu img{opacity:1}
 .pikonus.kostumlu.konusuyor{animation:piNefes 3.2s ease-in-out infinite}
 /* Derste Pi büyüdü (104 px); dar ekranda balon sıkışmasın diye küçülür */
-@media (max-width:360px){.qrow .pikonus,.lbody>.row>.pikonus{width:84px!important;height:84px!important}.qrow .pikonus.kostumlu,.lbody>.row>.pikonus.kostumlu{height:99px!important}}
+@media (max-width:360px){.qrow .pikonus,.lbody>.row>.pikonus{width:84px!important;height:84px!important}.qrow .pikonus.kostumlu,.lbody>.row>.pikonus.kostumlu{height:99px!important}.qrow .pikonus.govde,.lbody>.row>.pikonus.govde{height:109px!important}}
 
 /* ---------- Sandık sahnesi: dokun, dokun, aç (22.10.2026) ---------- */
 .ss-tam{position:fixed;inset:0;z-index:60;display:flex}

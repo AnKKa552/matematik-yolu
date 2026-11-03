@@ -201,13 +201,20 @@
     return svg(260, 150, s, `köşesi ${b}, kolları ${b}${a} ve ${b}${c} olan açı`);
   };
   // İkizkenar üçgen: tepe açısı yazılı, taban açıları «?»; eşit kenarlarda çentik
+  // Köşede iki kol arasındaki açıyı gösteren yay (P köşe, A ve B kolların uçları)
+  const kyay = (P, A, B, r, cls) => { const a1 = Math.atan2(A[1] - P[1], A[0] - P[0]), a2 = Math.atan2(B[1] - P[1], B[0] - P[0]); let d = a2 - a1; while (d <= -Math.PI) d += 2 * Math.PI; while (d > Math.PI) d -= 2 * Math.PI;
+    const x1 = P[0] + r * Math.cos(a1), y1 = P[1] + r * Math.sin(a1), x2 = P[0] + r * Math.cos(a2), y2 = P[1] + r * Math.sin(a2);
+    return `<path d="M${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 0 ${d > 0 ? 1 : 0} ${x2.toFixed(1)},${y2.toFixed(1)}" class="${cls || 'arc'}"/>`; };
+  // İkizkenar üçgen (03.11.2026: büyük ve okunur). Tepe açısı tepenin üstünde, taban açıları «?» köşelerin altında; her açıda yay, eşit kenarlarda çentik.
+  // Çok dar tepe açısı ince çubuk gibi görünmesin diye taban en az 90 birim (açı biraz geniş çizilebilir; ölçü yazıyla verilir).
   V.ikizkenar = (tepe) => {
-    const W = 260, H = 176, by = 156, yarim = Math.max(30, Math.min(105, 120 * Math.tan(rad(tepe / 2)))), h = Math.min(130, yarim / Math.tan(rad(tepe / 2)));
+    const W = 280, H = 210, by = 172, t = Math.tan(rad(tepe / 2)), yarim = Math.max(45, Math.min(118, 140 * t)), h = Math.min(140, yarim / t);
     const T = [W / 2, by - h], L = [W / 2 - yarim, by], R = [W / 2 + yarim, by];
     let s = `<polygon points="${[T, L, R].map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" class="f2 ln"/>`;
-    const centik = (P, Q) => { const mx = (P[0] + Q[0]) / 2, my = (P[1] + Q[1]) / 2, dx = Q[0] - P[0], dy = Q[1] - P[1], d = Math.hypot(dx, dy), nx = -dy / d * 7, ny = dx / d * 7; return `<line x1="${(mx - nx).toFixed(1)}" y1="${(my - ny).toFixed(1)}" x2="${(mx + nx).toFixed(1)}" y2="${(my + ny).toFixed(1)}" class="ln"/>`; };
-    s += centik(T, L) + centik(T, R);
-    s += `<text x="${T[0]}" y="${T[1] + Math.min(38, h * 0.55)}" text-anchor="middle" class="tx sm">${tepe}°</text>${[[L, R], [R, L]].map(([K, O]) => { const x = K[0] + (T[0] - K[0]) * 0.2 + (O[0] - K[0]) * 0.1, y = K[1] + (T[1] - K[1]) * 0.2 - 2; return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" class="tx sm">?</text>`; }).join('')}`;
+    const centik = (P, Q) => { const mx = (P[0] + Q[0]) / 2, my = (P[1] + Q[1]) / 2, dx = Q[0] - P[0], dy = Q[1] - P[1], d = Math.hypot(dx, dy), nx = -dy / d * 8, ny = dx / d * 8; return `<line x1="${(mx - nx).toFixed(1)}" y1="${(my - ny).toFixed(1)}" x2="${(mx + nx).toFixed(1)}" y2="${(my + ny).toFixed(1)}" class="ln"/>`; };
+    s += centik(T, L) + centik(T, R) + kyay(T, L, R, 20) + kyay(L, R, T, 22) + kyay(R, T, L, 22);
+    s += `<text x="${T[0]}" y="${(T[1] - 10).toFixed(1)}" text-anchor="middle" class="tx">${tepe}°</text>`;
+    s += `<text x="${(L[0] + 14).toFixed(1)}" y="${by + 26}" text-anchor="middle" class="tx">?</text><text x="${(R[0] - 14).toFixed(1)}" y="${by + 26}" text-anchor="middle" class="tx">?</text>`;
     return svg(W, H, s, `tepe açısı ${tepe} derece olan ikizkenar üçgen`);
   };
   // Paralel iki doğru ve onları kesen doğru: bir dar açı yazılı, sorulan açı «?»
@@ -227,15 +234,20 @@
   // Çemberlerle üçgen inşası: A ve B merkezli çemberler, kesişim noktası C, üçgen kesik çizgiyle.
   // Yarıçaplar AC/BC üzerine YAZILMAZ (soru zaten bunu soruyor); başka yöne çizilmiş yarıçapta yazar.
   V.cemberInsa = (r1, r2, d) => {
-    const k = 15, W = 300, cy = 104, ax = W / 2 - d * k / 2, bx = W / 2 + d * k / 2;
+    // 03.11.2026: ölçek sabit değil, şekil kutuyu doldurur (yarıçap 2 cm iken çemberler minicik kalıyordu)
+    const W = 300, H = 214, k = Math.min(262 / (r1 + d + r2), 172 / (2 * Math.max(r1, r2)), 42);
+    const sol = (W - (r1 + d + r2) * k) / 2, ax = sol + r1 * k, bx = ax + d * k, cy = H / 2 + 8;
     const px = (d * d + r1 * r1 - r2 * r2) / (2 * d), py = Math.sqrt(Math.max(0, r1 * r1 - px * px)), C = [ax + px * k, cy - py * k];
-    let s = `<circle cx="${ax}" cy="${cy}" r="${r1 * k}" class="ln" fill="none"/><circle cx="${bx}" cy="${cy}" r="${r2 * k}" class="ln" fill="none" stroke-dasharray="6 4"/>`;
-    s += `<polygon points="${ax},${cy} ${bx},${cy} ${C[0].toFixed(1)},${C[1].toFixed(1)}" class="ucgen-insa"/>`;
-    s += `<line x1="${ax}" y1="${cy}" x2="${(ax - r1 * k * 0.7071).toFixed(1)}" y2="${(cy + r1 * k * 0.7071).toFixed(1)}" class="ln thin"/><text x="${(ax - r1 * k * 0.42 - 16).toFixed(1)}" y="${(cy + r1 * k * 0.42 + 4).toFixed(1)}" class="tx sm" text-anchor="end">${r1} cm</text>`;
-    s += `<line x1="${bx}" y1="${cy}" x2="${(bx + r2 * k * 0.7071).toFixed(1)}" y2="${(cy + r2 * k * 0.7071).toFixed(1)}" class="ln thin"/><text x="${(bx + r2 * k * 0.42 + 16).toFixed(1)}" y="${(cy + r2 * k * 0.42 + 4).toFixed(1)}" class="tx sm">${r2} cm</text>`;
-    s += `<text x="${W / 2}" y="${cy + 18}" text-anchor="middle" class="tx sm">${d} cm</text>`;
-    s += [[ax, cy, 'A', -16, 5], [bx, cy, 'B', 8, 5], [C[0], C[1], 'C', -5, -10]].map(([x, y, h, dx, dy]) => `<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="4" class="dot"/><text x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" class="tx">${h}</text>`).join('');
-    return svg(W, 208, s, 'A ve B merkezli iki çember ve kesişim noktası C');
+    let s = `<circle cx="${ax.toFixed(1)}" cy="${cy}" r="${(r1 * k).toFixed(1)}" class="ln" fill="none"/><circle cx="${bx.toFixed(1)}" cy="${cy}" r="${(r2 * k).toFixed(1)}" class="ln" fill="none" stroke-dasharray="7 5"/>`;
+    s += `<polygon points="${ax.toFixed(1)},${cy} ${bx.toFixed(1)},${cy} ${C[0].toFixed(1)},${C[1].toFixed(1)}" class="ucgen-insa"/>`;
+    // Yarıçaplar AC ve BC üzerine YAZILMAZ (soru onu soruyor); aşağı doğru çizilmiş birer yarıçapta yazar
+    const yr = (x, r, yon) => { const ex = x + yon * r * k * 0.6, ey = cy + r * k * 0.8, lx = Math.min(W - 6, Math.max(6, ex + yon * 6)), ly = Math.min(H - 4, ey + 16);
+      return `<line x1="${x.toFixed(1)}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" class="ln thin"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="tx" text-anchor="${yon < 0 ? 'end' : 'start'}">${r} cm</text>`; };
+    s += yr(ax, r1, -1) + yr(bx, r2, 1);
+    const bosSag = Math.max(ax, bx - r2 * k), abx = bosSag - ax > 34 ? (ax + bosSag) / 2 : (ax + bx) / 2;  // |AB| yazısı kesikli çembere binmesin
+    s += `<text x="${abx.toFixed(1)}" y="${cy + 22}" text-anchor="middle" class="tx">${d} cm</text>`;
+    s += [[ax, cy, 'A', -20, 6], [bx, cy, 'B', 9, 6], [C[0], C[1], 'C', -6, -12]].map(([x, y, h, dx, dy]) => `<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="5" class="dot"/><text x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" class="tx">${h}</text>`).join('');
+    return svg(W, H, s, 'A ve B merkezli iki çember ve kesişim noktası C');
   };
   // Düzgün çokgen
   V.polygon = (n, diag) => {

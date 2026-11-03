@@ -242,7 +242,9 @@
     },
     g_ucgen: (i) => {
       const A = [70, 150], B = [230, 150], C = [165, 37];
-      return DS(300, 200, `<polygon points="${A} ${B} ${C}" class="f2"/>${dsSol(86, 142, '50°')}${dsSol(198, 142, '60°')}${dsY(165, 66, i >= 1 ? '70°' : '?', i >= 2 ? 'ds-parla ds-buyuk' : 'ds-parla')}
+      // 03.11.2026: tepe açısı tepenin ÜSTÜNDE (içeride yazıya yer yoktu, kenarlara biniyordu); her köşede yay
+      const yay = (P, Q, R, r) => { const a1 = Math.atan2(Q[1] - P[1], Q[0] - P[0]), a2 = Math.atan2(R[1] - P[1], R[0] - P[0]); let d = a2 - a1; while (d <= -Math.PI) d += 2 * Math.PI; while (d > Math.PI) d -= 2 * Math.PI; return `<path d="M${(P[0] + r * Math.cos(a1)).toFixed(1)},${(P[1] + r * Math.sin(a1)).toFixed(1)} A${r},${r} 0 0 ${d > 0 ? 1 : 0} ${(P[0] + r * Math.cos(a2)).toFixed(1)},${(P[1] + r * Math.sin(a2)).toFixed(1)}" fill="none" stroke="var(--accent)" stroke-width="3"/>`; };
+      return DS(300, 200, `<polygon points="${A} ${B} ${C}" class="f2"/>${yay(A, B, C, 22)}${yay(B, C, A, 22)}${yay(C, A, B, 18)}${dsY(108, 140, '50°')}${dsY(194, 140, '60°')}${dsY(165, 26, i >= 1 ? '70°' : '?', i >= 2 ? 'ds-parla ds-buyuk' : 'ds-parla')}
         ${dsY(150, 190, ['50 + 60 = 110', '180 − 110 = 70°', 'En büyük açı: 70°', '70° &lt; 90° → dar açılı üçgen'][Math.min(i, 3)], `ds-buyuk ds-gel ${i >= 3 ? 'ds-yesil' : ''}`)}`);
     },
     n_basamak: (i) => {
@@ -426,8 +428,9 @@
   // Konuşan Pi (büst): 3 ağız karesi üst üste; hangisinin görüneceğini data-agiz belirler
   // 21.10.2026: kostüm giyiliyse derste de kostümlü Pi görünür (çocuk aldığı kıyafeti her yerde görsün). Ağız kareleri yalnız
   // normal Pi için var; kostümlüde konuşma, sesin şiddetiyle hafif büyüme/zıplama olarak görünür (data-agiz yine işler).
-  const piKonus = (w = 76, act = '') => { const k = dolap().giyili; if (k && k !== 'normal' && KOSTUM_KOK) return `<button class="pikonus kostumlu" data-agiz="0" style="width:${w}px;height:${Math.round(w * 1.18)}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi"><img class="a0" src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='img/pi_agiz0.webp'"></button>`;
-    return `<button class="pikonus" data-agiz="0" style="width:${w}px;height:${w}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`; };
+  const piKonus = (w = 76, act = '') => { const k = dolap().giyili; if (k && k !== 'normal' && KOSTUM_KOK) return `<button class="pikonus kostumlu" data-agiz="0" style="width:${w}px;height:${Math.round(w * 1.18)}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi"><img class="a0" src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='img/pi_govde_agiz0.webp'"></button>`;
+    // 03.11.2026: boydan Pi (proje sahibi: derste yalnız kafası görünüyordu). Ağız kareleri pi_bekle'nin yüzüne büstteki ağızlar aktarılarak üretildi (tasarim/kaynak/pi_govde_agiz*.png)
+    return `<button class="pikonus govde" data-agiz="0" style="width:${w}px;height:${Math.round(w * 1.3)}px" ${act ? `data-act="${act}"` : 'tabindex="-1"'} aria-label="Pi">${[0, 1, 2].map(i => `<img class="a${i}" src="img/pi_govde_agiz${i}.webp" alt="" draggable="false" decoding="async" onerror="this.closest('.pikonus').classList.add('yedek')">`).join('')}</button>`; };
   const mascot = (state = '', w = 110) => PI_GORSEL
     ? (() => { const k = dolap().giyili, durum = `${PI_GORSEL}${PI_DURUM[state] || 'pi_bekle'}.webp`;  // kostüm giyiliyse her yerde kostümlü; duygu zıplama/sallanma animasyonuyla görünür
       return k && k !== 'normal' && KOSTUM_KOK ? `<div class="mascot pim ${state}" style="width:${w}px" aria-hidden="true"><img src="${kostumSrc(k)}" alt="" draggable="false" decoding="async" onerror="this.onerror=null;this.src='${durum}'"></div>`
