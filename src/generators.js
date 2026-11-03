@@ -13,6 +13,11 @@
     // Geometri
     isin_dogru: { t: 'Işın ile doğruyu karıştırma', fix: 'Işının bir başlangıç noktası vardır ve tek yönde sonsuza gider. Doğru ise iki yönde de sonsuza uzar.' },
     dp_dogru: { t: 'Doğru parçası ile doğruyu karıştırma', fix: 'Doğru parçasının iki uç noktası vardır, bu yüzden uzunluğu ölçülebilir. Doğrunun ucu yoktur.' },
+    isin_dp: { t: 'Işın ile doğru parçasını karıştırma', fix: 'Doğru parçasının iki uç noktası vardır, iki ucunda da durur. Işının ise yalnız bir başlangıç noktası vardır ve öbür yönde sonsuza gider.' },
+    dp_uzunluk: { t: 'Doğru parçası ile uzunluğunu karıştırma', fix: 'Köşeli parantezle yazılan gösterim doğru parçasının kendisidir. İki dik çizgi arasına yazılan gösterim ise o doğru parçasının uzunluğudur.' },
+    isin_yon: { t: 'Işının başlangıç noktasını karıştırma', fix: 'Işın, adındaki ilk harften başlar ve ikinci harfin olduğu yöne doğru sonsuza gider. Harflerin sırası önemlidir.' },
+    nokta_dogru: { t: 'Noktalardan geçen doğru sayısını karıştırma', fix: 'İki farklı noktadan yalnız bir doğru geçer. Tek bir noktadan ise sonsuz sayıda doğru geçer, çünkü doğru o noktanın çevresinde her yöne döndürülebilir.' },
+    aci_olcu: { t: 'Özel açıların ölçülerini karıştırma', fix: 'Dik açı 90°, doğru açı 180°, tam açı 360°tır. Doğru açı iki dik açı, tam açı iki doğru açı eder.' },
     nokta_sayma: { t: 'Doğru parçalarını eksik sayma', fix: 'Sadece yan yana olanları değil, aradaki noktaları atlayan doğru parçalarını da say: A-C de bir doğru parçasıdır.' },
     cap_yaricap: { t: 'Çap ile yarıçapı karıştırma', fix: 'Yarıçap, merkezden çembere uzanan doğru parçasıdır. Çap ise merkezden geçen ve iki ucu çember üzerinde olan doğru parçasıdır. Çap = 2 × yarıçap.' },
     dik_yatay: { t: '"Dik olmak için yatay-dikey olmalı" sanma', fix: 'İki doğru dönük çizilse de aralarındaki açı 90° ise birbirine diktir. Köşedeki küçük kare işareti bunu gösterir.' },
@@ -167,20 +172,29 @@
     if (lv === 1) {
       const k = pick(['dp', 'isin', 'dogru']);
       const name = { dp: 'Doğru parçası', isin: 'Işın', dogru: 'Doğru', nokta: 'Nokta' };
-      const wr = { dp: [['Doğru', 'dp_dogru'], ['Işın', 'isin_dogru']], isin: [['Doğru', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']], dogru: [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']] }[k];
+      const wr = { dp: [['Doğru', 'dp_dogru'], ['Işın', 'isin_dp']], isin: [['Doğru', 'isin_dogru'], ['Doğru parçası', 'isin_dp']], dogru: [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru']] }[k];
+      // 03.11.2026 (öğretmen geri bildirimi: aynı kök çok tekrar ediyordu): yarısı şekilsiz tanım sorusu, şekilli soruda da kök değişir
+      if (Math.random() < 0.45) {
+        const tn = {
+          dp: pick(['İki ucu da belli olan, iki uç noktası arasında kalan çizgiye ne denir?', 'Uzunluğu cetvelle ölçülebilen çizgi hangisidir?']),
+          isin: pick(['Bir noktadan başlayıp tek yönde sonsuza giden çizgiye ne denir?', 'El fenerinden çıkan ışık hangi geometrik çizimle modellenir?']),
+          dogru: pick(['İki yönde de sonsuza uzayan, hiç ucu olmayan çizgiye ne denir?', 'Hiç başlangıç ve bitiş noktası olmayan çizgi hangisidir?']),
+        }[k];
+        return Q({ prompt: tn, options: mc(name[k], wr, [['Nokta', 'nokta_ad']]), steps: ['Doğru parçası: iki uç noktası var, ölçülebilir.', 'Işın: bir başlangıç noktası var, tek yönde sonsuza gider.', 'Doğru: ucu yok, iki yönde sonsuza gider.'] });
+      }
       const harf = pick([['A', 'B'], ['K', 'L'], ['M', 'N'], ['P', 'R'], ['C', 'D'], ['E', 'F']]);
-      return Q({ prompt: 'Şekildeki geometrik çizimin adı nedir?', visual: V.lineKind(k, harf), options: mc(name[k], wr, [['Nokta', 'nokta_ad']]), steps: ['Uçlarına bak: iki uç noktası varsa doğru parçası,', 'bir başlangıç noktası ve tek ok varsa ışın,', 'iki yönde ok varsa doğrudur.'], hint: 'Okların sayısına bak!' });
+      return Q({ prompt: pick(['Şekildeki geometrik çizimin adı nedir?', 'Şekilde hangi geometrik çizim görülüyor?', `Şekilde ${harf[0]} ve ${harf[1]} noktalarıyla gösterilen çizimin adı nedir?`]), visual: V.lineKind(k, harf), options: mc(name[k], wr, [['Nokta', 'nokta_ad']]), steps: ['Uçlarına bak: iki uç noktası varsa doğru parçası,', 'bir başlangıç noktası ve tek ok varsa ışın,', 'iki yönde ok varsa doğrudur.'], hint: 'Okların sayısına bak!' });
     }
     if (lv === 2) {
       const [X, Y] = pick([['A', 'B'], ['K', 'L'], ['M', 'N'], ['P', 'R'], ['C', 'D'], ['E', 'F']]), XY = X + Y;
       const it = pick([
-        [`[${XY}] gösterimi neyi ifade eder?`, `${XY} doğru parçasını`, [[`${XY} ışınını`, 'isin_dogru'], [`${XY} doğrusunu`, 'dp_dogru'], [`${XY} uzunluğunu`, 'dp_dogru']]],
-        [`[${XY} gösterimi neyi ifade eder?`, `${X} noktasından başlayan ${XY} ışınını`, [[`${XY} doğru parçasını`, 'isin_dogru'], [`${XY} doğrusunu`, 'isin_dogru'], [`${Y} noktasından başlayan ışını`, 'isin_dogru']]],
-        [`|${XY}| gösterimi neyi ifade eder?`, `${XY} doğru parçasının uzunluğunu`, [[`${XY} doğrusunu`, 'dp_dogru'], [`${XY} ışınını`, 'isin_dogru'], [`${X} ile ${Y} noktalarını`, 'dp_dogru']]],
-        ['Hangisi iki yönde de sınırsız uzar?', 'Doğru', [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru'], ['Nokta', 'dp_dogru']]],
-        ['Hangisinin uzunluğu ölçülebilir?', 'Doğru parçası', [['Doğru', 'dp_dogru'], ['Işın', 'isin_dogru'], ['Hiçbiri', 'dp_dogru']]],
-        ['Hangisinin bir başlangıç noktası vardır ama bitiş noktası yoktur?', 'Işın', [['Doğru', 'isin_dogru'], ['Doğru parçası', 'isin_dogru'], ['Nokta', 'isin_dogru']]],
-        ['Hangisinin iki uç noktası vardır?', 'Doğru parçası', [['Işın', 'isin_dogru'], ['Doğru', 'dp_dogru'], ['Hiçbiri', 'dp_dogru']]],
+        [`[${XY}] gösterimi neyi ifade eder?`, `${XY} doğru parçasını`, [[`${XY} ışınını`, 'isin_dp'], [`${XY} doğrusunu`, 'dp_dogru'], [`${XY} uzunluğunu`, 'dp_uzunluk']]],
+        [`[${XY} gösterimi neyi ifade eder?`, `${X} noktasından başlayan ${XY} ışınını`, [[`${XY} doğru parçasını`, 'isin_dp'], [`${XY} doğrusunu`, 'isin_dogru'], [`${Y} noktasından başlayan ışını`, 'isin_yon']]],
+        [`|${XY}| gösterimi neyi ifade eder?`, `${XY} doğru parçasının uzunluğunu`, [[`${XY} doğrusunu`, 'dp_uzunluk'], [`${XY} ışınını`, 'dp_uzunluk'], [`${XY} doğru parçasının kendisini`, 'dp_uzunluk']]],
+        ['Hangisi iki yönde de sınırsız uzar?', 'Doğru', [['Işın', 'isin_dogru'], ['Doğru parçası', 'dp_dogru'], ['Nokta', 'nokta_ad']]],
+        ['Hangisinin uzunluğu ölçülebilir?', 'Doğru parçası', [['Doğru', 'dp_dogru'], ['Işın', 'isin_dp']]],
+        ['Hangisinin bir başlangıç noktası vardır ama bitiş noktası yoktur?', 'Işın', [['Doğru', 'isin_dogru'], ['Doğru parçası', 'isin_dp'], ['Nokta', 'nokta_ad']]],
+        ['Hangisinin iki uç noktası vardır?', 'Doğru parçası', [['Işın', 'isin_dp'], ['Doğru', 'dp_dogru']]],
       ]);
       return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['[AB]: iki uç noktalı doğru parçası.', '[AB: A\'dan başlayıp B yönünde sonsuza giden ışın.', '|AB|: doğru parçasının uzunluğu.'] });
     }
@@ -205,6 +219,10 @@
         ['Çemberin merkezinden geçen ve iki ucu çember üzerinde olan doğru parçasına ne denir?', 'Çap', [['Yarıçap', 'cap_yaricap'], ['Merkez', 'cember_parca'], ['Daire', 'cember_parca']]],
         ['Merkezi çember üzerindeki bir noktaya birleştiren doğru parçasına ne denir?', 'Yarıçap', [['Çap', 'cap_yaricap'], ['Çember', 'cember_parca'], ['Merkez', 'cember_parca']]],
         ['Çember ile iç bölgesinin birleşimine ne denir?', 'Daire', [['Çember', 'cember_parca'], ['Çap', 'cap_yaricap'], ['Merkez', 'cember_parca']]],
+        ['Pergelle çember çizerken pergelin sivri ucunun durduğu nokta çemberin neresi olur?', 'Merkezi', [['Çapı', 'cember_parca'], ['Yarıçapı', 'cap_yaricap'], ['Çemberin üzerindeki bir nokta', 'cember_parca']]],
+        ['Uzunluğu yarıçapın 2 katı olan ve merkezden geçen doğru parçasına ne denir?', 'Çap', [['Yarıçap', 'cap_yaricap'], ['Çember', 'cember_parca'], ['Merkez', 'cember_parca']]],
+        ['Bir bilezik çemberi, bir bozuk para ise daireyi modeller. Bunun nedeni nedir?', 'Bilezikte yalnız kenar çizgisi var, parada iç bölge de dolu', [['İkisi de aynı şeydir', 'cember_parca'], ['Bilezik daha büyüktür', 'cember_parca'], ['Paranın çapı yoktur', 'cap_yaricap']]],
+        ['Bir çemberde merkezden çembere çizilen bütün yarıçaplar için hangisi doğrudur?', 'Hepsinin uzunluğu eşittir', [['Çember üzerinde ilerledikçe uzarlar', 'cember_parca'], ['Her biri çapa eşittir', 'cap_yaricap'], ['Bir çemberde yalnız bir yarıçap vardır', 'cember_parca']]],
       ]);
       return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: ['Çember: sadece kenar çizgisi. Daire: çember + içi.', 'Yarıçap: merkez → çember. Çap: çemberden çembere, merkezden geçerek.'] });
     }
@@ -249,12 +267,12 @@
     }
     if (lv === 2) {
       const d = pick([20, 35, 40, 50, 55, 65, 70, 80, 100, 110, 125, 140, 150, 160]);
-      return Q({ prompt: 'Şekildeki açının ölçüsü aşağıdakilerden hangisi olabilir? (Gözünle tahmin et: dar mı, geniş mi?)', visual: V.angle(d), options: mc(d + '°', [[(180 - d) + '°', 'iletki_ters'], [(d < 90 ? 90 + d : d - 60) + '°', 'aci_tur']], [[(d + 180) + '°', 'aci_tur']]), steps: [d < 90 ? 'Açı dik açıdan (köşe gibi) daha kapalı → dar açı, ölçüsü 90°\'den küçük.' : 'Açı dik açıdan daha açık → geniş açı, ölçüsü 90°\'den büyük.', `Açıölçerin doğru sırası ${d}° gösterir; ${180 - d}° öbür sıradaki sayıdır.`] });
+      return Q({ prompt: pick(['Şekildeki açının ölçüsü aşağıdakilerden hangisi olabilir? (Gözünle tahmin et: dar mı, geniş mi?)', 'Açıölçer kullanmadan karar ver: şekildeki açı kaç derece olabilir? (Gözünle tahmin et)', 'Şekildeki açıyı bir dik açıyla karşılaştır. Ölçüsü hangisi olabilir? (Gözünle tahmin et)']), visual: V.angle(d, { rot: pick([0, 0, 20, -15]) }), options: mc(d + '°', [[(180 - d) + '°', 'iletki_ters'], [(d < 90 ? 90 + d : d - 60) + '°', 'aci_tur']]), steps: [d < 90 ? 'Açı dik açıdan (köşe gibi) daha kapalı → dar açı, ölçüsü 90°\'den küçük.' : 'Açı dik açıdan daha açık → geniş açı, ölçüsü 90°\'den büyük.', `Açıölçerin doğru sırası ${d}° gösterir; ${180 - d}° öbür sıradaki sayıdır.`] });
     }
     const it = pick([
-      () => { const k = ri(2, 4); return Q({ type: 'input', prompt: `${k} tane dik açının ölçüleri toplamı kaç derecedir?`, answer: String(90 * k), unit: '°', inputMis: [{ v: 180 * k, mis: 'aci_tur' }], steps: ['Bir dik açı 90°', `${k} × 90 = ${90 * k}°`] }); },
+      () => { const k = ri(2, 4); return Q({ type: 'input', prompt: `${k} tane dik açının ölçüleri toplamı kaç derecedir?`, answer: String(90 * k), unit: '°', inputMis: [{ v: 180 * k, mis: 'aci_olcu' }], steps: ['Bir dik açı 90°', `${k} × 90 = ${90 * k}°`] }); },
       () => { const d = pick([30, 45, 60, 90]), tam = Math.random() < 0.5, top = tam ? 360 : 180, yan = (tam ? 180 : 360) / d;
-        return Q({ type: 'input', prompt: `Bir ${tam ? 'tam' : 'doğru'} açı kaç tane ${d} derecelik açıdan oluşur?`, answer: String(top / d), inputMis: [{ v: yan, mis: 'aci_tur' }], steps: [`${tam ? 'Tam açı 360°' : 'Doğru açı 180°'}`, `${top} ÷ ${d} = ${top / d}`] }); },
+        return Q({ type: 'input', prompt: `Bir ${tam ? 'tam' : 'doğru'} açı kaç tane ${d} derecelik açıdan oluşur?`, answer: String(top / d), inputMis: [{ v: yan, mis: 'aci_olcu' }], steps: [`${tam ? 'Tam açı 360°' : 'Doğru açı 180°'}`, `${top} ÷ ${d} = ${top / d}`] }); },
     ]);
     return it();
   };
@@ -542,7 +560,7 @@
     else if (lv === 2) { a = c = ri(1, 4); b = ri(a + 1, 9); do { d = ri(a + 1, 12); } while (d === b); misMap = { '<': 'payda_buyuk', '>': 'payda_buyuk', '=': 'payda_buyuk' }; }
     else { b = pick([2, 3, 4, 5]); const k = pick([2, 3]); d = b * k; a = ri(1, b - 1); c = ri(1, d - 1); if (c === a * k) c = c > 1 ? c - 1 : c + 1; if (Math.random() < .5) [a, b, c, d] = [c, d, a, b]; misMap = { '<': 'pay_payda_ayri', '>': 'pay_payda_ayri', '=': 'pay_payda_ayri' }; }
     const L = a / b, R = c / d, rel = Math.abs(L - R) < 1e-9 ? '=' : L > R ? '>' : '<';
-    return cmpQ({ prompt: 'Boş yere hangi sembol gelmelidir?', cmp: [fr(a, b), fr(c, d)], visual: lv === 1 ? V.bar(a, b) + V.bar(c, d) : undefined, steps: lv === 1 ? ['Paydalar eşit → payı büyük olan büyüktür.'] : lv === 2 ? ['Paylar eşit → paydası KÜÇÜK olan büyüktür (parçalar daha büyük).'] : [`Paydaları eşitle: ortak payda ${Math.max(b, d)} olsun.`, `${a}/${b} = ${a * Math.max(b, d) / b}/${Math.max(b, d)}, ${c}/${d} = ${c * Math.max(b, d) / d}/${Math.max(b, d)}`, `Sonuç: ${a}/${b} ${rel} ${c}/${d}`] }, rel, misMap);
+    return cmpQ({ prompt: 'Boş yere hangi sembol gelmelidir?', cmp: [fr(a, b), fr(c, d)], visual: lv === 1 ? `<div class="vis-ikili">${V.bar(a, b)}${V.bar(c, d)}</div>` : undefined, steps: lv === 1 ? ['Paydalar eşit → payı büyük olan büyüktür.'] : lv === 2 ? ['Paylar eşit → paydası KÜÇÜK olan büyüktür (parçalar daha büyük).'] : [`Paydaları eşitle: ortak payda ${Math.max(b, d)} olsun.`, `${a}/${b} = ${a * Math.max(b, d) / b}/${Math.max(b, d)}, ${c}/${d} = ${c * Math.max(b, d) / d}/${Math.max(b, d)}`, `Sonuç: ${a}/${b} ${rel} ${c}/${d}`] }, rel, misMap);
   };
   GEN.f_ondalik_karsilastir = (lv) => {
     let L, R, lt, rt, misMap = { '<': 'genel', '>': 'genel', '=': 'genel' };
@@ -565,7 +583,8 @@
      ========================================================= */
   const CATS = [['Elma', 'Muz', 'Çilek', 'Kiraz', 'Erik'], ['Futbol', 'Voleybol', 'Basketbol', 'Yüzme', 'Tenis'], ['Kedi', 'Köpek', 'Kuş', 'Balık', 'Tavşan'], ['Roman', 'Masal', 'Şiir', 'Çizgi R.', 'Bilim']];
   GEN.s_arastirma = (lv) => {
-    if (lv === 1) return Q({ prompt: 'Hangisi istatistiksel bir araştırma sorusu olmaya UYGUNDUR?', options: mc(pick(['5/A sınıfındaki öğrencilerin en sevdiği meyve hangisidir?', 'Okulumuzdaki öğrenciler okula hangi ulaşım aracıyla geliyor?', 'Mahallemizdeki ailelerin en çok tercih ettiği tatil yeri neresidir?']), [[pick(['Ayşe\'nin en sevdiği renk nedir?', 'Öğretmenimizin doğum günü ne zaman?']), 'soru_tek'], ['Bugün hangi gün?', 'soru_tek'], ['Türkiye\'nin başkenti neresidir?', 'soru_tek']]), steps: ['Araştırma sorusu bir GRUBA yöneltilir.', 'Birden çok farklı cevabı olabilir (değişkenlik vardır).'] });
+    if (lv === 1 && Math.random() < 0.4) return Q({ prompt: 'Hangisi istatistiksel bir araştırma sorusu olmaya UYGUN DEĞİLDİR?', options: mc(pick(['Ayşe\'nin en sevdiği renk nedir?', 'Öğretmenimizin doğum günü ne zaman?', 'Bugün hangi gün?', 'Türkiye\'nin başkenti neresidir?']), [['5/A sınıfındaki öğrencilerin en sevdiği meyve hangisidir?', 'soru_tek'], ['Okulumuzdaki öğrenciler okula hangi ulaşım aracıyla geliyor?', 'soru_tek'], ['Sınıfımızdaki öğrencilerin kardeş sayıları kaçtır?', 'soru_tek']]), steps: ['Araştırma sorusu bir GRUBA yöneltilir ve farklı cevapları olabilir.', 'Tek bir kişiye ya da tek cevaplı bir bilgiye yönelen soru araştırma sorusu değildir.'] });
+    if (lv === 1) return Q({ prompt: pick(['Hangisi istatistiksel bir araştırma sorusu olmaya UYGUNDUR?', 'Sınıfta bir araştırma yapacağız. Hangisi iyi bir araştırma sorusudur?']), options: mc(pick(['5/A sınıfındaki öğrencilerin en sevdiği meyve hangisidir?', 'Okulumuzdaki öğrenciler okula hangi ulaşım aracıyla geliyor?', 'Mahallemizdeki ailelerin en çok tercih ettiği tatil yeri neresidir?']), [[pick(['Ayşe\'nin en sevdiği renk nedir?', 'Öğretmenimizin doğum günü ne zaman?']), 'soru_tek'], ['Bugün hangi gün?', 'soru_tek'], ['Türkiye\'nin başkenti neresidir?', 'soru_tek']]), steps: ['Araştırma sorusu bir GRUBA yöneltilir.', 'Birden çok farklı cevabı olabilir (değişkenlik vardır).'] });
     // Kitaptaki adlar (2. kitap s. 62–69)
     const ADIMLAR = ['Araştırma sorusunu belirleme', 'Verileri toplama ve analize hazırlama', 'Veri görselleştirme ve özetleme', 'Sonuçları yorumlama'];
     const adimSteps = ADIMLAR.map((a, i) => `${i + 1}) ${a}`);
@@ -595,7 +614,8 @@
     const u = lv === 3 ? 10 : 2, cats = pick(CATS).slice(0, 4), vals = cats.map(() => ri(1, 6) * u); while (new Set(vals).size < 4) vals[ri(0, 3)] = ri(1, 7) * u;
     const mx = Math.max(...vals), mn = Math.min(...vals), iMx = vals.indexOf(mx), iMn = vals.indexOf(mn);
     const chart = V.barChart(cats, vals, { max: Math.ceil(mx / u) * u, step: u, aria: 'sütun grafiği' });
-    if (lv === 1) return Q({ prompt: 'Grafiğe göre en çok tercih edilen hangisidir?', visual: chart, options: mc(cats[iMx], cats.filter((_, i) => i !== iMx).map(c => [c, c === cats[iMn] ? 'grafik_okuma' : 'grafik_okuma'])), steps: ['En uzun sütunu bul.', `En uzun: ${cats[iMx]} (${mx})`] });
+    if (lv === 1) { const az = Math.random() < 0.45, hi = az ? iMn : iMx;
+      return Q({ prompt: az ? pick(['Grafiğe göre en az tercih edilen hangisidir?', 'Grafikte en kısa sütun hangi seçeneğe aittir?']) : pick(['Grafiğe göre en çok tercih edilen hangisidir?', 'Grafikte en uzun sütun hangi seçeneğe aittir?']), visual: chart, options: mc(cats[hi], cats.filter((_, i) => i !== hi).map(c => [c, 'grafik_okuma'])), steps: [az ? 'En kısa sütunu bul.' : 'En uzun sütunu bul.', `${az ? 'En kısa' : 'En uzun'}: ${cats[hi]} (${vals[hi]})`] }); }
     if (lv === 2) { const i = ri(0, 3); return Q({ type: 'input', prompt: `Grafiğe göre "${cats[i]}" seçeneğini kaç kişi tercih etmiştir?`, visual: chart, answer: String(vals[i]), inputMis: vals.filter((v, j) => j !== i && v !== vals[i]).map(v => ({ v, mis: 'grafik_okuma' })), steps: [`${cats[i]} sütununun tepesinden eksene bak.`, `Değer: ${vals[i]}`] }); }
     return Q({ type: 'input', prompt: `En çok tercih edilen seçenek, en az tercih edilenden kaç kişi FAZLADIR?`, visual: chart, answer: String(mx - mn), inputMis: [{ v: mx + mn, mis: 'fark_toplam' }], steps: [`En çok: ${cats[iMx]} = ${mx}`, `En az: ${cats[iMn]} = ${mn}`, `Fark: ${mx} − ${mn} = ${mx - mn}`] });
   };
@@ -613,14 +633,24 @@
     if (lv === 1) {
       const cats = pick(CATS).slice(0, 4), vals = cats.map(() => ri(1, 6)); while (new Set(vals).size < 3) vals[ri(0, 3)] = ri(1, 6);
       const tot = vals.reduce((a, b) => a + b, 0);
+      if (Math.random() < 0.45) { // 03.11.2026: aynı grafikte farkı sorma (kök çeşitliliği)
+        let i = vals.indexOf(Math.max(...vals)), j = vals.indexOf(Math.min(...vals));
+        return Q({ type: 'input', prompt: `Nokta grafiğinde her nokta bir öğrenciyi gösteriyor. "${cats[i]}" seçeneğini seçenler, "${cats[j]}" seçeneğini seçenlerden kaç kişi fazladır?`, visual: V.dotPlot(cats, vals), answer: String(vals[i] - vals[j]), inputMis: [{ v: vals[i] + vals[j], mis: 'fark_toplam' }, { v: vals[i], mis: 'grafik_okuma' }], steps: [`${cats[i]}: ${vals[i]} nokta, ${cats[j]}: ${vals[j]} nokta.`, `Fark: ${vals[i]} − ${vals[j]} = ${vals[i] - vals[j]}`] });
+      }
       return Q({ type: 'input', prompt: 'Nokta grafiğinde her nokta bir öğrenciyi gösteriyor. Ankete toplam kaç öğrenci katılmıştır?', visual: V.dotPlot(cats, vals), answer: String(tot), inputMis: [{ v: cats.length, mis: 'grafik_okuma' }, { v: Math.max(...vals), mis: 'grafik_okuma' }], steps: ['Bütün noktaları say.', `${vals.join(' + ')} = ${tot}`] });
     }
     if (lv === 2) {
       const cats = ['A', 'B'], a = ri(40, 46), b = a + ri(3, 6);
       return Q({ prompt: `Grafikte dikey eksen 38'den başlıyor. A ürünü ${a}, B ürünü ${b} adet satılmış. Grafikteki B sütunu A sütunundan çok daha uzun görünüyor. Hangisi DOĞRUDUR?`, visual: V.barChart(cats, [a, b], { min: 38, max: 50, step: 2, aria: 'kesik eksenli sütun grafiği' }), options: mc(`B, A'dan sadece ${b - a} adet fazla satılmıştır`, [['B, A\'nın birkaç katı satılmıştır', 'eksen_yanilsama'], ['A neredeyse hiç satılmamıştır', 'eksen_yanilsama'], ['Grafikten bir şey anlaşılmaz', 'eksen_yanilsama']]), steps: ['Eksen 0\'dan değil 38\'den başlıyor → sütun boyları farkı abartıyor.', `Gerçek sayılar: ${a} ve ${b}`, `Fark: ${b - a}`] });
     }
-    const cats = ['Elma', 'Muz', 'Çilek'], vals = [ri(6, 9), ri(2, 4), ri(3, 5)];
-    return Q({ prompt: `Bir sınıfta yapılan ankete göre Elma ${vals[0]}, Muz ${vals[1]}, Çilek ${vals[2]} öğrenci tarafından seçilmiştir. Bu veriye göre hangisi KESİNLİKLE söylenebilir?`, visual: V.barChart(cats, vals, { max: 10, aria: 'sütun grafiği' }), options: mc('Bu sınıfta en çok tercih edilen meyve elmadır', [['Türkiye\'deki tüm çocuklar en çok elmayı sever', 'asiri_genelleme'], ['Bu sınıftaki hiç kimse muz sevmez', 'asiri_genelleme'], ['Gelecek yıl da en çok elma seçilecektir', 'asiri_genelleme']]), steps: ['Veri sadece BU sınıftan toplandı.', 'Başka gruplara veya geleceğe genelleme yapılamaz.', '"Muz seçen var" → "hiç kimse sevmez" yanlış.'] });
+    // 03.11.2026: bağlam havuzu (önceden hep meyve anketiydi)
+    const bg = pick([
+      { cats: ['Elma', 'Muz', 'Çilek'], tur: 'meyve', dogru: 'Bu sınıfta en çok tercih edilen meyve elmadır', y: ['Türkiye\'deki tüm çocuklar en çok elmayı sever', 'Bu sınıftaki hiç kimse muz sevmez', 'Gelecek yıl da en çok elma seçilecektir'] },
+      { cats: ['Futbol', 'Yüzme', 'Satranç'], tur: 'spor', dogru: 'Bu sınıfta en çok tercih edilen spor futboldur', y: ['Bütün okullarda en sevilen spor futboldur', 'Bu sınıfta hiç kimse yüzmeyi sevmez', 'Bu sınıftaki herkes futbol oynamayı bilir'] },
+      { cats: ['Mavi', 'Yeşil', 'Mor'], tur: 'renk', dogru: 'Bu sınıfta en çok tercih edilen renk mavidir', y: ['Dünyadaki herkesin en sevdiği renk mavidir', 'Bu sınıfta hiç kimse yeşili sevmez', 'Bu sınıf gelecek yıl da en çok maviyi seçecektir'] },
+    ]);
+    const cats = bg.cats, vals = [ri(6, 9), ri(2, 4), ri(3, 5)];
+    return Q({ prompt: `Bir sınıfta yapılan ankete göre ${cats[0]} ${vals[0]}, ${cats[1]} ${vals[1]}, ${cats[2]} ${vals[2]} öğrenci tarafından seçilmiştir. Bu veriye göre hangisi KESİNLİKLE söylenebilir?`, visual: V.barChart(cats, vals, { max: 10, aria: 'sütun grafiği' }), options: mc(bg.dogru, bg.y.map(t => [t, 'asiri_genelleme'])), steps: ['Veri sadece BU sınıftan toplandı.', 'Başka gruplara veya geleceğe genelleme yapılamaz.', '"Muz seçen var" → "hiç kimse sevmez" yanlış.'] });
   };
 
   /* =========================================================
@@ -728,12 +758,16 @@
   GEN.p_spektrum = (lv) => {
     const n = pick([4, 6, 8]), k = ri(0, n), cols = shuffle(Array.from({ length: n }, (_, i) => i < k ? 'sb' : 'c0b'));
     if (lv === 1) {
-      const t = k === 0 ? 'İmkânsız' : k === n ? 'Kesin' : k * 2 === n ? 'Eşit olası' : k * 2 < n ? 'Az olası' : 'Çok olası';
-      return Q({ prompt: 'Çark çevrildiğinde okun MAVİ dilimde durması nasıl bir olaydır?', visual: V.spinner(cols), options: mc(t, ['İmkânsız', 'Az olası', 'Eşit olası', 'Çok olası', 'Kesin'].filter(x => x !== t).map(x => [x, x === 'Az olası' || x === 'Çok olası' ? 'az_cok' : 'olay_tur'])), steps: [`${n} dilimden ${k} tanesi mavi.`, k * 2 < n ? 'Yarısından az → az olası' : k * 2 > n ? 'Yarısından fazla → çok olası' : k * 2 === n ? 'Tam yarısı → eşit olası' : ''] });
+      // 03.11.2026: kök hep "MAVİ dilim" idi; şimdi bazen "mavi OLMAYAN dilim" (tümleyeni düşünmek de ölçülür)
+      const degil = Math.random() < 0.4, kh = degil ? n - k : k;
+      const t = kh === 0 ? 'İmkânsız' : kh === n ? 'Kesin' : kh * 2 === n ? 'Eşit olası' : kh * 2 < n ? 'Az olası' : 'Çok olası';
+      return Q({ prompt: degil ? 'Çark çevrildiğinde okun mavi OLMAYAN bir dilimde durması nasıl bir olaydır?' : pick(['Çark çevrildiğinde okun MAVİ dilimde durması nasıl bir olaydır?', 'Bu çark çevrilince okun MAVİ bir dilime gelmesi için hangisi söylenebilir?']), visual: V.spinner(cols), options: mc(t, ['İmkânsız', 'Az olası', 'Eşit olası', 'Çok olası', 'Kesin'].filter(x => x !== t).map(x => [x, x === 'Az olası' || x === 'Çok olası' ? 'az_cok' : 'olay_tur'])), steps: [degil ? `${n} dilimden ${k} tanesi mavi, ${n - k} tanesi mavi değil.` : `${n} dilimden ${k} tanesi mavi.`, kh * 2 < n ? 'Yarısından az → az olası' : kh * 2 > n ? 'Yarısından fazla → çok olası' : kh * 2 === n ? 'Tam yarısı → eşit olası' : ''].filter(Boolean) });
     }
     if (lv === 2) {
       let kk = Math.max(1, Math.min(n - 1, k)); if (2 * kk === n) kk = Math.random() < .5 ? kk - 1 : kk + 1; const cc = shuffle(Array.from({ length: n }, (_, i) => i < kk ? 'sb' : 'c0b'));
-      return Q({ prompt: 'Çark çevrildiğinde okun MAVİ dilimde durma olasılığı kaçtır?', visual: V.spinner(cc), options: mc(fr(kk, n), [[fr(n - kk, n), 'olasilik_oran'], [fr(kk, n - kk === kk ? n + 1 : n - kk), 'olasilik_oran'], [fr(n, kk), 'olasilik_buyuk']]), steps: [`Parça: ${kk} mavi dilim. Bütün: ${n} dilim.`, `Mavi dilimler bütünün ${fr(kk, n)} kadarı.`] });
+      if (Math.random() < 0.4) { const m = n - kk;
+        return Q({ prompt: 'Çark çevrildiğinde okun mavi OLMAYAN bir dilimde durma olasılığı kaçtır?', visual: V.spinner(cc), options: mc(fr(m, n), [[fr(kk, n), 'olasilik_oran'], [fr(m, kk), 'olasilik_oran'], [fr(n, m), 'olasilik_buyuk']]), steps: [`Parça: mavi olmayan ${m} dilim. Bütün: ${n} dilim.`, `Mavi olmayan dilimler bütünün ${fr(m, n)} kadarı.`] }); }
+      return Q({ prompt: pick(['Çark çevrildiğinde okun MAVİ dilimde durma olasılığı kaçtır?', 'Bu çarkta okun MAVİ bir dilime gelme olasılığını hangi kesir gösterir?']), visual: V.spinner(cc), options: mc(fr(kk, n), [[fr(n - kk, n), 'olasilik_oran'], [fr(kk, n - kk === kk ? n + 1 : n - kk), 'olasilik_oran'], [fr(n, kk), 'olasilik_buyuk']]), steps: [`Parça: ${kk} mavi dilim. Bütün: ${n} dilim.`, `Mavi dilimler bütünün ${fr(kk, n)} kadarı.`] });
     }
     const tur = ri(0, 3);
     if (tur === 1) {
@@ -940,8 +974,8 @@
     return Q({ prompt: `Köşesi ${b} olan ve kolları ${b}${a} ile ${b}${c} ışınları olan açı nasıl adlandırılır?`, visual: V.aciAdli(a, b, c), options: mc(`${a}${b}${c} açısı`, [[`${b}${a}${c} açısı`, 'aci_isim'], [`${a}${c}${b} açısı`, 'aci_isim'], [`${a} açısı`, 'aci_isim']]),
       steps: ['Açının köşesi ortaya yazılır.', `${a}${b}${c} açısı, ${c}${b}${a} açısı ya da kısaca ${b} açısı denir.`] }); });
   ekle('g_temel', [3], 0.35, () => { const it = pick([
-      ['İki farklı noktadan kaç farklı doğru geçer?', 'Yalnız 1 doğru', [['2 doğru', 'dp_dogru'], ['Sonsuz sayıda doğru', 'dp_dogru'], ['Hiç doğru geçmez', 'dp_dogru']], 'İki noktadan yalnız bir doğru geçer.'],
-      ['Bir noktadan kaç farklı doğru geçer?', 'Sonsuz sayıda doğru', [['Yalnız 1 doğru', 'dp_dogru'], ['2 doğru', 'dp_dogru'], ['4 doğru', 'dp_dogru']], 'Bir noktadan sonsuz sayıda doğru geçer; doğru her yöne çevrilebilir.']]);
+      ['İki farklı noktadan kaç farklı doğru geçer?', 'Yalnız 1 doğru', [['2 doğru', 'nokta_dogru'], ['Sonsuz sayıda doğru', 'nokta_dogru'], ['Hiç doğru geçmez', 'nokta_dogru']], 'İki noktadan yalnız bir doğru geçer.'],
+      ['Bir noktadan kaç farklı doğru geçer?', 'Sonsuz sayıda doğru', [['Yalnız 1 doğru', 'nokta_dogru'], ['2 doğru', 'nokta_dogru'], ['4 doğru', 'nokta_dogru']], 'Bir noktadan sonsuz sayıda doğru geçer; doğru her yöne çevrilebilir.']]);
     return Q({ prompt: it[0], options: mc(it[1], it[2]), steps: [it[3]] }); });
   ekle('g_cember', [2, 3], 0.35, () => { const k = ri(2, 9), cap = Math.random() < 0.5;
     return Q({ type: 'input', prompt: `Pergelin sivri ucu ile kalem ucu arasındaki açıklık ${k} cm. Bu açıklıkla bir çember çiziliyor. Çemberin ${cap ? 'çapı' : 'yarıçapı'} kaç cm'dir?`, answer: String(cap ? 2 * k : k), unit: 'cm', inputMis: cap ? [{ v: k, mis: 'cap_yaricap' }] : [{ v: 2 * k, mis: 'cap_yaricap' }].concat(k % 2 ? [] : [{ v: k / 2, mis: 'cap_yaricap' }]),
@@ -1614,6 +1648,7 @@
      ========================================================= */
   const IPUCU = [
     // TEMA 1
+    ['g_temel', /çizgiye ne denir|çizgi hangisidir|ışık hangi geometrik/, 'Çizginin uçlarını düşün: kaç ucu var, uçlarında duruyor mu, yoksa sonsuza mı gidiyor?'],
     ['g_temel', /gösterimi neyi ifade eder/, 'Gösterimin iki ucuna bak: köşeli parantez başlangıç noktasıdır, iki yandaki dik çizgiler uzunluğu gösterir.'],
     ['g_temel', /sınırsız uzar|başlangıç noktası|uç noktası|ölçülebilir/, 'Şıklardaki her birinin uçlarını düşün: kaç ucu var, uçları bir yerde bitiyor mu?'],
     ['g_temel', /açı nasıl adlandırılır/, 'Açı üç harfle adlandırılırken köşenin harfi hangi sıraya yazılır?'],
@@ -1621,6 +1656,9 @@
     ['g_cember', /yarıçapı .*çapı kaç|Yarıçapı \d+ cm olan çemberin çapı/, 'Çap, merkezden geçip çemberin bir ucundan öbür ucuna gider. Yarıçapın kaç katıdır?'],
     ['g_cember', /Çapı .*aynı merkezli/, 'Önce birinci çemberin yarıçapını bul, sonra ikinci çemberin yarıçapını, en son ikinci çemberin çapını.'],
     ['g_cember', /Çapı \d+ cm olan çemberin yarıçapı/, 'Yarıçap, merkez ile çember arasındaki uzaklıktır. Çapın kaçta kaçıdır?'],
+    ['g_cember', /sivri ucunun/, 'Pergelin sivri ucu çizim boyunca hiç kımıldamaz. Çemberin her noktası bu noktaya eşit uzaklıktadır.'],
+    ['g_cember', /bütün yarıçaplar/, 'Pergelin açıklığını değiştirmeden çember çizdiğini düşün. Merkezden çembere giden her çizgi ne kadar uzun olur?'],
+    ['g_cember', /bilezik/, 'Bileziğin ortası boş, paranın içi dolu. Çember ile dairenin farkı neydi?'],
     ['g_cember', /ne denir/, 'Bir çember çiz ve merkezini işaretle. Sorulan parça merkezden mi başlıyor, merkezden mi geçiyor, yoksa iç bölgeyi mi anlatıyor?'],
     ['g_cember', /modelidir/, 'Çember yalnız kenardaki çizgidir, içi boştur. Daire ise iç bölgesiyle birlikte doludur.'],
     ['g_dikme_paralel', /sembolü ne anlama gelir/, 'Sembolün şekline bak: iki çizgi yan yana mı duruyor, yoksa birbirini köşe yaparak mı kesiyor?'],
@@ -1723,13 +1761,15 @@
     ['f_ondalik_karsilastir', /UCUZ/, 'İki fiyatı karşılaştır: önce lira kısmına, eşitse kuruş kısmına bak. Daha küçük olan daha ucuzdur.'],
     ['f_ondalik_karsilastir', /gösterimlerinden/, 'Hepsini aynı gösterime çevir: yüzdeleri ondalık gösterime (ya da tersini). Sonra karşılaştır.'],
     // TEMA 5
+    ['s_arastirma', /UYGUN DEĞİLDİR/, 'İyi bir araştırma sorusu bir gruba sorulur ve farklı cevaplar çıkabilir. Hangisinin tek bir cevabı var ya da tek bir kişiyle ilgili?'],
+    ['s_arastirma', /iyi bir araştırma sorusudur/, 'İyi bir araştırma sorusunun cevabı veri toplanarak bulunur ve farklı cevaplar çıkabilir. Hangisi böyle?'],
     ['s_arastirma', /araştırma sorusu olmaya UYGUN/, 'İyi bir araştırma sorusunun cevabı veri toplanarak bulunur ve farklı cevaplar çıkabilir. Hangisi böyle?'],
     ['s_arastirma', /adımından hemen|İLK adımı|SON adımı/, 'Bir araştırmayı baştan sona düşün: önce ne yapılır, en son ne yapılır? Sorulan adımı bu sıraya yerleştir.'],
     ['s_arastirma', /hangi araştırma adımına örnektir/, 'Bu iş araştırmanın başında mı, ortasında mı, sonunda mı yapılır?'],
     ['s_arastirma', /KENDİMİZİN|HAZIR veri/, 'Bu yöntemde verileri biz mi topluyoruz, yoksa başkası toplayıp yayımlamış mı?'],
     ['s_arastirma', /[Aa]nket|raporunda/, 'Ankete katılanların haklarını ve sorunun herkes tarafından aynı şekilde anlaşılmasını düşün.'],
     ['s_arastirma', /farklı sonuçlar|OLMAMASI/, 'Araştırma sorusunun özelliklerini hatırla: cevabı veri toplanarak bulunur ve kişiden kişiye farklı cevaplar çıkabilir.'],
-    ['s_tablo_sutun', /en çok tercih edilen hangisidir/, 'Sütunların boylarını karşılaştır.'],
+    ['s_tablo_sutun', /en (çok|az) tercih edilen hangisidir|sütun hangi seçeneğe/, 'Sütunların boylarını karşılaştır.'],
     ['s_tablo_sutun', /seçeneğini kaç kişi/, 'Sütunun tepesinden eksene doğru düz bir çizgi çekip değeri oku. Eksen kaçar artıyor?'],
     ['s_tablo_sutun', /FAZLADIR/, 'Önce en uzun ve en kısa sütunun değerini oku, sonra büyükten küçüğü çıkar.'],
     ['s_tablo_sutun', /hangi grafikte/i, 'Hangi grafikte her veri tek tek çizilir? Çok sayıda veride bu kolay mı?'],
@@ -1737,6 +1777,7 @@
     ['s_daire', /seçeneğini kaç öğrenci/, 'Önce dilimin bütünün kaçta kaçı olduğunu bul. Sonra toplam öğrenci sayısını o kadar eş parçaya böl.'],
     ['s_daire', /doğru çizilmiştir/, 'Daire grafiğinin tamamı %100\'dür. Dilimlerdeki yüzdeleri topla.'],
     ['s_daire', /%\d+'i/, 'Yüzdeyi kesre çevir: bütünün kaç eş parçasından kaçı? Sonra toplam kişi sayısıyla hesapla.'],
+    ['s_okuryazar', /kaç kişi fazladır/, 'İki sütundaki noktaları ayrı ayrı say, sonra çoktan azı çıkar.'],
     ['s_okuryazar', /Nokta grafiğinde/, 'Her sütundaki noktaları say ve topla.'],
     ['s_okuryazar', /dikey eksen/, 'Sütun boylarına değil, eksendeki sayılara bak. İki değerin farkını hesapla.'],
     ['s_okuryazar', /KESİNLİKLE/, 'Veriler yalnız bu sınıfı anlatır. «Herkes», «her zaman» gibi kesin ifadeler bu veriyle desteklenebilir mi?'],
@@ -1780,6 +1821,9 @@
     ['p_olay', /olayı hangisidir/, 'Bu olay her zaman mı oluyor, hiç mi olmuyor, yoksa bazen oluyor bazen olmuyor mu?'],
     ['p_olay', /olayın olasılık değeri kaçtır/, 'Olasılık spektrumunu düşün: hiç olmayacak olaylar bir uçta, mutlaka olacak olaylar öbür uçtadır. Uçlardaki değerleri hatırla.'],
     ['p_olay', /Olasılığı/, 'Olasılık değeri en küçük olabilecek sayıysa, o olay hiç olabilir mi?'],
+    ['p_spektrum', /mavi OLMAYAN/, 'Önce mavi olmayan dilimleri say, sonra bütün dilimlerle karşılaştır.'],
+    ['p_spektrum', /hangisi söylenebilir/, 'Mavi dilimleri bütün dilimlerle karşılaştır: yarısından az mı, yarısı mı, yarısından fazla mı?'],
+    ['p_spektrum', /hangi kesir gösterir/, 'Mavi dilim sayısı parça, bütün dilim sayısı bütündür. Parça-bütün ilişkisini kesirle yaz.'],
     ['p_spektrum', /nasıl bir olaydır/, 'Mavi dilimleri bütün dilimlerle karşılaştır: yarısından az mı, yarısı mı, yarısından fazla mı?'],
     ['p_spektrum', /olasılığı kaçtır/, 'Mavi dilim sayısı parça, bütün dilim sayısı bütündür. Parça-bütün ilişkisini kesirle yaz.'],
     ['p_spektrum', /olma olasılığı çoktur/, 'Hangi renkten daha çok top var? Bir iddia «çünkü…» diye torbadaki top sayılarıyla desteklenmeli.'],

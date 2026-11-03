@@ -142,7 +142,11 @@
       "yanilgilar": [
         "isin_dogru",
         "dp_dogru",
-        "nokta_sayma"
+        "nokta_sayma",
+        "isin_dp",
+        "dp_uzunluk",
+        "isin_yon",
+        "nokta_dogru"
       ],
       "anlatim": {
         "gorsel": "Uçlarına bak! İki uç noktası olan doğru parçası , bir başlangıcı ve tek oku olan ışın , iki yönde oku olan doğru dur.",
@@ -231,7 +235,8 @@
       "yanilgilar": [
         "aci_tur",
         "aci_kol",
-        "iletki_ters"
+        "iletki_ters",
+        "aci_olcu"
       ],
       "anlatim": {
         "gorsel": "Açının büyüklüğü kolların ne kadar açıldığına bağlıdır, uzunluğuna değil. 90° (dik açı) referans noktandır.",
@@ -1568,6 +1573,38 @@
     "cember_insa": {
       "ad": "Çemberlerle inşa edilen üçgenin türünü yanlış bulma",
       "duzeltme": "Üçgenin kenarları iki çemberin yarıçapları ve merkezler arasındaki uzaklıktır. Üçü eşitse eşkenar, ikisi eşitse ikizkenar, hepsi farklıysa çeşitkenar üçgen oluşur."
+    },
+    "isin_dp": {
+      "ad": "Işın ile doğru parçasını karıştırma",
+      "duzeltme": "Doğru parçasının iki uç noktası vardır, iki ucunda da durur. Işının ise yalnız bir başlangıç noktası vardır ve öbür yönde sonsuza gider."
+    },
+    "dp_uzunluk": {
+      "ad": "Doğru parçası ile uzunluğunu karıştırma",
+      "duzeltme": "Köşeli parantezle yazılan gösterim doğru parçasının kendisidir. İki dik çizgi arasına yazılan gösterim ise o doğru parçasının uzunluğudur."
+    },
+    "isin_yon": {
+      "ad": "Işının başlangıç noktasını karıştırma",
+      "duzeltme": "Işın, adındaki ilk harften başlar ve ikinci harfin olduğu yöne doğru sonsuza gider. Harflerin sırası önemlidir."
+    },
+    "nokta_dogru": {
+      "ad": "Noktalardan geçen doğru sayısını karıştırma",
+      "duzeltme": "İki farklı noktadan yalnız bir doğru geçer. Tek bir noktadan ise sonsuz sayıda doğru geçer, çünkü doğru o noktanın çevresinde her yöne döndürülebilir."
+    },
+    "aci_olcu": {
+      "ad": "Özel açıların ölçülerini karıştırma",
+      "duzeltme": "Dik açı 90°, doğru açı 180°, tam açı 360°tır. Doğru açı iki dik açı, tam açı iki doğru açı eder."
+    },
+    "aci_olcme": {
+      "ad": "Açıölçerle ölçerken yanlış çizgiyi okuma",
+      "duzeltme": "Açıölçerin merkezini açının köşesine, 0 çizgisini sabit kola koy. Diğer kolun geçtiği çizgiye kadar, sabit koldaki 0'dan başlayarak 10'ar 10'ar say, sonra 5'leri ekle."
+    },
+    "grafik_cizim": {
+      "ad": "Sütun grafiğinde sütun boyunu yanlış çizme",
+      "duzeltme": "Her sütunun tepesi, tablodaki sayının eksende yazdığı çizgiye kadar çıkmalı. Eksendeki sayılar 1'er değil 2'şer ya da 5'er artabilir; çizgileri değil, yazan sayıları oku."
+    },
+    "hata_ilk": {
+      "ad": "Hatanın başladığı yeri değil, sonucunu seçme",
+      "duzeltme": "İlk hatadan sonraki adımlar o hatayı taşıdığı için onlar da yanlış görünür. Hatanın başladığı yeri bulmak için adımları baştan sırayla kontrol et: ilk yanlış olan hangisi?"
     }
   },
   "anlatim_bicimleri": {

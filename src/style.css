@@ -948,3 +948,4 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .yedek-uyari{display:flex;gap:10px;align-items:center;margin:10px 0;border:2px solid var(--brand);background:var(--brand-t)}
 .yedek-uyari .yu-ikon{font-size:26px}
 .yedek-uyari .btn{min-width:44px;min-height:44px;margin:0}
+.vis-ikili{display:flex;flex-direction:column;gap:6px;align-items:center}

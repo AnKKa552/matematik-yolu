@@ -4,7 +4,7 @@
   "voice_id": "Hr3W7yWIljG9YBJn39oK",
   "ses_adi": "Gamze - Cartoon Character (ElevenLabs kütüphanesi)"
  },
- "toplam_karakter": 33937,
+ "toplam_karakter": 38729,
  "kayitlar": [
   {
    "key": "pi_dogru_1",
@@ -1580,6 +1580,31 @@
    "key": "mis_hata_ilk",
    "grup": "mis",
    "text": "Hatanın başladığı yeri değil, sonucunu seçme. İlk hatadan sonraki adımlar o hatayı taşıdığı için onlar da yanlış görünür. Hatanın başladığı yeri bulmak için adımları baştan sırayla kontrol et. İlk yanlış olan hangisi?"
+  },
+  {
+   "key": "mis_isin_dp",
+   "grup": "yanilgi",
+   "text": "Işın ile doğru parçasını karıştırma. Doğru parçasının iki uç noktası vardır, iki ucunda da durur. Işının ise yalnız bir başlangıç noktası vardır ve öbür yönde sonsuza gider."
+  },
+  {
+   "key": "mis_dp_uzunluk",
+   "grup": "yanilgi",
+   "text": "Doğru parçası ile uzunluğunu karıştırma. Köşeli parantezle yazılan gösterim doğru parçasının kendisidir. İki dik çizgi arasına yazılan gösterim ise o doğru parçasının uzunluğudur."
+  },
+  {
+   "key": "mis_isin_yon",
+   "grup": "yanilgi",
+   "text": "Işının başlangıç noktasını karıştırma. Işın, adındaki ilk harften başlar ve ikinci harfin olduğu yöne doğru sonsuza gider. Harflerin sırası önemlidir."
+  },
+  {
+   "key": "mis_nokta_dogru",
+   "grup": "yanilgi",
+   "text": "Noktalardan geçen doğru sayısını karıştırma. İki farklı noktadan yalnız bir doğru geçer. Tek bir noktadan ise sonsuz sayıda doğru geçer, çünkü doğru o noktanın çevresinde her yöne döndürülebilir."
+  },
+  {
+   "key": "mis_aci_olcu",
+   "grup": "yanilgi",
+   "text": "Özel açıların ölçülerini karıştırma. Dik açı doksan derece, doğru açı yüz seksen derece, tam açı üç yüz altmış derecedir. Doğru açı iki dik açı, tam açı iki doğru açı eder."
   }
  ]
 }

@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 108 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 113 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -320,6 +320,8 @@ Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular içi
 - Sunucu: `sunucu/supabase/ogretmen_inceleme.sql` (tablolar `inceleme_kodlari`, `soru_incelemeleri`; fonksiyonlar `inceleme_kod_gecerli`, `inceleme_kaydet`, `inceleme_listesi`, hepsi SECURITY DEFINER ve kod denetler; tabloya doğrudan yazma reddedilir). Yeni davet, iptal ve sonuç okuma sorguları dosyanın başında. Davet kodu gizli tutulur, yalnız öğretmenle paylaşılır.
 - **İlk bulgusu (17.10.2026):** panel denenirken 15 konu-seviyede "genel/işlem hatası" etiketli dolgu şıkları çıktı (§1-3 ihlali). Düzeltildi: `mc()` artık yanılgıya bağlı olmayan dolguyu eklemez (soru 3 şıkla kalabilir); gerçek hatalar doğru etikete bağlandı (`bos_kisim`, `ara_sonuc`, `sifir_sayisi`); 4 yeni yanılgı: `nokta_ad`, `cember_parca`, `basamak_karsilastir`, `tahmin_tam`; müfredatta olmayan "kiriş" şıkkı çıkarıldı. Test artık `genel` etiketli tek bir yanlış şıkta bile hata verir.
 
+- **İlk öğretmen gözü geri bildirimi (03.11.2026, 412 soruluk örneklem JSON'u üzerinden):** (1) *Aynı soru kökü çok tekrar ediyordu* (g_temel şekil adı, g_cember tanım, g_aci gözle tahmin, p_spektrum, s_tablo_sutun, s_okuryazar, s_arastirma). Kök çeşitlendi ve yeni düşünme biçimleri eklendi: tanımdan çizim adı, pergel/bilezik/yarıçaplar eşit tanım soruları, «mavi OLMAYAN dilim» (tümleyen), «en az tercih edilen», nokta grafiğinde fark, «araştırma sorusu olmaya UYGUN DEĞİLDİR», 3 bağlamlı aşırı genelleme. Panel örneklemi artık önce **kökü farklı** soruyu seçer (eşleştirme ve sembol karşılaştırma hariç; 350 konu sorusunda 336 farklı kök). (2) *Geniş yanılgı etiketleri:* `dp_dogru` ve `aci_tur` başka hatalar için de kullanılıyordu (ör. ışın ↔ doğru parçası, |AB| ↔ [AB], «iki noktadan kaç doğru geçer», dik/doğru/tam açının ölçüsü). 5 yeni yanılgı: `isin_dp`, `dp_uzunluk`, `isin_yon`, `nokta_dogru`, `aci_olcu`; anlamsız «Hiçbiri» ve 180°'den büyük şıklar çıkarıldı. (3) *`fixed: true`* bilinçlidir: < = > sırası, Doğru/Yanlış, Hata Avcısı'nda defter satırları ve tahmin aralıkları sıralı kalmalı; değiştirilmedi. (4) *İki SVG arka arkaya* (kesir karşılaştırma): HTML içinde geçerliydi ama artık `.vis-ikili` kabında. Yüzlük tablonun 100 karesi ve satır içi SVG'de `xmlns` olmaması sorun değil.
+
 ### 5.5 Matematik ve program denetimi (19.10.2026)
 Öğretmen bulunana kadar ajan denetimi yapıldı: 35 becerinin her seviyesinden örnekler, 21 Hata Avcısı senaryosu, 10 atölye şablonu, 140 anlatım kartı ve 32 görsel tek tek çözülüp kontrol edildi; konular MEB TYMM 5. sınıf programının resmî sayfalarıyla (tymm.meb.gov.tr, ünite 448 Geometrik Şekiller, 450 İşlemlerle Cebirsel Düşünme, 451 Geometrik Nicelikler, 452 İstatistik, 455 Veriden Olasılığa) karşılaştırıldı. **Program sınırları (uyulması zorunlu):**
 - **Çokgenlerde köşegen SAYISINA değinilmez** (MAT.5.3). Köşegen yalnız tanımıyla sorulur; "bir köşeden n − 3 köşegen" soruları ve kart cümleleri kaldırıldı.
@@ -434,9 +436,9 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 ```
 CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
-data/mufredat.json        ← 7 tema, 35 beceri, 105 yanılgı, 140 anlatım (makine okur)
+data/mufredat.json        ← 7 tema, 35 beceri, 113 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (108) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (113) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar

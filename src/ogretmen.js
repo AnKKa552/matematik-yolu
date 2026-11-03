@@ -29,7 +29,12 @@
   const sorular = (b) => {
     if (onbellek[b.id]) return onbellek[b.id];
     const L = [], gor = new Set();
-    if (b.tur === 'beceri') SEV.forEach((lv, i) => { for (let k = 0; k < 30; k++) { const id = `${b.id}-${lv}-${i}${k ? '-' + k : ''}`, q = tohumla(id, () => GEN[b.id](lv)), a = anahtar(q); if (!gor.has(a) || k === 29) { gor.add(a); L.push({ id, seviye: lv, beceri: b.id, q }); break; } } });
+    // 03.11.2026: önce soru kökü (metin) de farklı olanı ara; bulunamazsa yalnız soru farklı olsun (eşleştirme gibi kökü sabit türler)
+    const kokGor = new Set(), kok = (q) => String(q.prompt).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (b.tur === 'beceri') SEV.forEach((lv, i) => { let yedek = null; for (let k = 0; k < 30; k++) { const id = `${b.id}-${lv}-${i}${k ? '-' + k : ''}`, q = tohumla(id, () => GEN[b.id](lv)), a = anahtar(q);
+      if (gor.has(a)) continue; if (!kokGor.has(kok(q)) || q.type === 'match' || q.type === 'cmp') { yedek = { id, q, a }; break; } if (!yedek) yedek = { id, q, a }; }
+      if (!yedek) { const id = `${b.id}-${lv}-${i}`; yedek = { id, q: tohumla(id, () => GEN[b.id](lv)) }; yedek.a = anahtar(yedek.q); }
+      gor.add(yedek.a); kokGor.add(kok(yedek.q)); L.push({ id: yedek.id, seviye: lv, beceri: b.id, q: yedek.q }); });
     if (b.tur === 'hata') HATA.ids.forEach((sid, i) => ['bul', 'kim', 'neden'].filter((_, j) => j === i % 3 || j === (i + 1) % 3).forEach((tur) => { const id = `hata-${sid}-${tur}`; L.push({ id, seviye: 2, beceri: sid, q: tohumla(id, () => HATA.q(sid, 2, tur)) }); }));
     if (b.tur === 'atolye') ATOLYE.ids.forEach((pid) => ['a', 'b'].forEach((v) => { const id = `atolye-${pid}-${v}`; const sec = v === 'a' ? { tablo: false, kur: false, gerekce: false, no: 1 } : { tablo: true, kur: true, gerekce: true, no: 2 };
       L.push({ id, seviye: 2, beceri: ATOLYE.skillOf(pid), adimlar: tohumla(id, () => ATOLYE.sorular(pid, sec)) }); }));
