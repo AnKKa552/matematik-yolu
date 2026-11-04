@@ -613,7 +613,7 @@
     return `${topbar()}<div class="scroll">
       <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
       <div class="diyar-bas"><div><b>🗺️ ${DIYAR}</b><span class="muted sm"> · ${done}/${SKILLS.length} konu · ${Object.keys(A.st.trophies).length}/7 kupa</span></div><div class="bar"><i style="width:${Math.round(100 * done / SKILLS.length)}%"></i></div></div>
-      ${okulKart()}${yedekUyari()}
+      ${okulKart()}${pilotTestKart()}${yedekUyari()}
       <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
       <div class="path harita tek">${bolgeler}</div>
     </div>${nav()}`;
@@ -995,9 +995,38 @@
   async function pilotKatil(grup) {
     const cihaz = (A.st.pilot && A.st.pilot.cihaz) || pilotCihazUret();
     try { const r = await rpc('pilot_katil', { p_cihaz: cihaz, p_riza: PILOT_RIZA, p_grup: grup || null });
-      if (!r || !r.ok) { toast(r && r.hata === 'grup' ? 'Grup kodu en fazla 12 harf ya da rakam olabilir.' : 'Katılım kaydedilemedi, biraz sonra tekrar deneyin.'); return; }
-      A.st.pilot = { acik: true, cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('🔬 Pilota katıldınız. Teşekkürler!');
-    } catch (e) { toast('İnternete bağlanılamadı, biraz sonra tekrar deneyin.'); }
+      if (!r || !r.ok) { toast(r && r.hata === 'grup' ? 'Grup kodu en fazla 12 harf ya da rakam olabilir.' : 'Katılım kaydedilemedi, biraz sonra tekrar deneyin.'); return false; }
+      A.st.pilot = { acik: true, karar: 'evet', cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); pilotDavetSil(); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('💙 Katıldınız. Teşekkürler!'); return true;
+    } catch (e) { toast('İnternete bağlanılamadı, biraz sonra tekrar deneyin.'); return false; }
+  }
+  /* Davet bağlantısı (04.11.2026, proje sahibinin önerisi): pilot ailesine …/?pilot=5A bağlantısı gider. İlk açılışta, kayıttan
+     önce veliye sıcak dilli bir karşılama ekranı çıkar: ne kaydedilir, ne asla kaydedilmez, onay kutusu, "Katılıyorum" /
+     "Katılmadan devam et". Karar verilene kadar davet telefonda bekler (uygulama kapatılıp açılsa da ekran gelir). Bağlantıyı
+     almayan kullanıcı bu ekranı hiç görmez. Katılan çocuğa kayıttan sonra 10 soruluk başlangıç testi önerilir. */
+  const PILOT_DAVET = 'my_pilot_davet';
+  try { const g = new URLSearchParams(location.search).get('pilot'); if (g !== null) { localStorage.setItem(PILOT_DAVET, g.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12) || 'GENEL'); history.replaceState(null, '', location.pathname + location.hash); } } catch (e) { }
+  const pilotDavet = () => { try { return localStorage.getItem(PILOT_DAVET); } catch (e) { return null; } };
+  function pilotDavetSil() { try { localStorage.removeItem(PILOT_DAVET); } catch (e) { } }
+  const pilotDavetGoster = () => !!pilotDavet() && !(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar));
+  function viewPilotDavet() {
+    return `<div class="onb pdavet">
+      <div class="pd-veli">👨‍👩‍👧 Bu ekran veliler için. Lütfen çocuğunuzla birlikte açın.</div>
+      <div class="center" style="margin-top:12px">${mascot('happy', 110)}</div>
+      <h2 class="center" style="margin:6px 0 8px">Bize yardım eder misiniz?</h2>
+      <p style="margin:0 0 12px">Merhaba! Matematik Yolu'nu 5. sınıf çocukları için daha iyi hâle getirmeye çalışıyoruz ve bunu sizin gibi birkaç aileyle birlikte deniyoruz. Çocuğunuz uygulamayı her zamanki gibi kullanacak; biz de hangi sorularda zorlandığını <b>isimsiz</b> olarak göreceğiz. Böylece zor gelen soruları düzeltip anlatımları iyileştireceğiz.</p>
+      <div class="card pd-liste"><b>✅ Kaydettiklerimiz</b><ul><li>Hangi soruda ne kadar düşünüldüğü</li><li>Hangi soruların doğru ya da yanlış yapıldığı, yanlışın hangi tipik hatadan geldiği</li><li>İpucu kullanılıp kullanılmadığı, dersin nerede bırakıldığı</li><li>Başta ve iki hafta sonra çözülen 10 soruluk kısa testin sonucu</li></ul>
+      <b>🚫 Asla kaydetmediklerimiz</b><ul><li>Çocuğunuzun ve sizin adınız</li><li>Telefon, e-posta, konum</li><li>Uygulamaya yazılan herhangi bir metin</li></ul></div>
+      <details class="aile-detay"><summary class="sm"><b>Ayrıntılar</b></summary><p class="sm muted" style="margin:6px 0 0">Bu telefona rastgele bir numara verilir; kayıtlar yalnız bu numarayla tutulur ve numaradan kim olduğunuz anlaşılmaz. Kayıtlar Almanya'daki (Frankfurt) sunucularda en fazla 13 ay saklanır, yalnız uygulamayı geliştirmek için kullanılır, kimseyle paylaşılmaz ve satılmaz. Veli bölümündeki «Pilottan ayrıl» düğmesiyle istediğiniz an ayrılabilir, bütün kayıtları silebilirsiniz. Katılmasanız da uygulama aynen çalışır.</p></details>
+      <label class="aile-onay" style="margin-top:10px"><input type="checkbox" id="f-pd-onay"> <span class="sm">Velisi olarak bu açıklamayı okudum; çocuğumun uygulama kullanımının isimsiz kaydedilmesine onay veriyorum.</span></label>
+      <button class="btn" data-act="pd-katil" style="margin-top:10px">Katılıyorum 💙</button>
+      <button class="btn ghost" data-act="pd-hayir">Katılmadan devam et</button></div>`;
+  }
+  // Çocuğun haritasında: başlangıç testi bekliyorsa ya da bitiş testinin zamanı geldiyse küçük bir davet kartı
+  function pilotTestKart() {
+    if (!pilotAcik()) return ''; const o = A.st.olcme || {};
+    if (!o.on) return `<div class="card pilot-test"><b>📝 Kısa bir test seni bekliyor!</b><p class="sm muted" style="margin:4px 0 8px">10 soru. Pi'ye şu an nerede olduğunu göster; ipucu yok, yanlış yapmak hiç sorun değil.</p><button class="btn small" data-act="olcme" data-v="on">Başla</button></div>`;
+    if (!o.son && Date.now() - o.on.at >= OLCME_ARA_GUN * 86400000) return `<div class="card pilot-test"><b>🎯 Bitiş testi zamanı!</b><p class="sm muted" style="margin:4px 0 8px">İki hafta önce çözdüğün testin yeni sayılı hâli. Bakalım ne kadar ilerledin!</p><button class="btn small" data-act="olcme" data-v="son">Başla</button></div>`;
+    return '';
   }
   async function pilotAyril(sessiz) {
     const p = A.st.pilot; if (!p || !p.cihaz) return true;
@@ -1492,7 +1521,7 @@
     const ch = (k, ic, t, s) => `<button class="card choice ${d.motivation === k ? 'on' : ''}" data-act="motiv" data-v="${k}"><span class="ic">${ic}</span><span><b>${t}</b><br><span class="muted sm">${s}</span></span></button>`;
     return `<div class="onb">${dots}<h2>Seni en çok ne mutlu eder?</h2>
       ${ch('yaris', '🏆', 'Yarışmak', 'Ligde arkadaşlarımı geçmek, rekor kırmak')}${ch('koleksiyon', '🏅', 'Toplamak', 'Rozet, taç ve elmas biriktirmek')}${ch('kesif', '🧭', 'Keşfetmek', 'Hikâyeler ve yeni konular keşfetmek')}
-      <div style="flex:1"></div><button class="btn" data-act="onb-finish" ${d.motivation ? '' : 'disabled'}>Seviyemi belirle (7 soru)</button><button class="btn ghost" data-act="onb-finish-skip" ${d.motivation ? '' : 'disabled'}>Sıfırdan başla</button></div>`;
+      <div style="flex:1"></div>${pilotAcik() && !(A.st.olcme && A.st.olcme.on) ? `<button class="btn" data-act="onb-finish" data-v="olcme" ${d.motivation ? '' : 'disabled'}>Kısa teste başla (10 soru)</button>` : `<button class="btn" data-act="onb-finish" ${d.motivation ? '' : 'disabled'}>Seviyemi belirle (7 soru)</button>`}<button class="btn ghost" data-act="onb-finish-skip" ${d.motivation ? '' : 'disabled'}>Sıfırdan başla</button></div>`;
   }
 
   /* =================== RENDER =================== */
@@ -1504,7 +1533,8 @@
   function render() {
     kolayUygula();
     let h = '';
-    if (!A.st.profile) h = viewOnboard();
+    if (pilotDavetGoster()) h = viewPilotDavet();
+    else if (!A.st.profile) h = viewOnboard();
     else if (A.view === 'lesson') h = viewLesson();
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
@@ -1513,7 +1543,7 @@
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
     const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
     $app.innerHTML = h;
-    A._ekran = !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
+    A._ekran = pilotDavetGoster() ? 'pdavet' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
       if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
@@ -1798,6 +1828,11 @@
       case 'oy-giris': if (A.oy && !A.oy.bekle) oyGiris(); break;
       case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
       case 'pilot-katil': { const c = document.getElementById('f-pilot-onay'), g = document.getElementById('f-pilot-grup'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } pilotKatil(g ? g.value.trim() : ''); break; }
+      case 'pd-katil': { const c = document.getElementById('f-pd-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
+        const b = document.querySelector('[data-act=pd-katil]'); if (b) { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
+        pilotKatil(pilotDavet()).then(ok => { if (!ok) { render(); return; } if (A.st.profile && !(A.st.olcme && A.st.olcme.on)) { A.modal = confirmModal('Kısa bir test çözelim mi?', 'Çocuğunuz şimdi 10 soruluk başlangıç testini çözebilir (yaklaşık 10 dakika). İsterseniz sonra da haritadan başlatabilir.', 'pd-test', 'Şimdi başla', 'Sonra'); render(); } }); break; }
+      case 'pd-hayir': A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; pilotDavetSil(); save(); render(); break;
+      case 'pd-test': A.modal = null; A.olcmeForm = 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break;
       case 'olcme': { const o = A.st.olcme || {}; if (o[v]) break; A.olcmeForm = v === 'son' ? 'son' : 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break; }
       case 'pilot-ayril': A.modal = confirmModal('Pilottan ayrılmak istiyor musunuz?', 'Bu telefondan gönderilen bütün isimsiz kayıtlar sunucudan silinir ve kayıt durur. Çocuğunuzun ilerlemesi etkilenmez.', 'pilot-ayril-evet', 'Evet, ayrıl', 'Vazgeç'); render(); break;
       case 'pilot-ayril-evet': A.modal = null; render(); pilotAyril(false); break;
@@ -1812,7 +1847,7 @@
       case 'pi-hello': piSay('hosgeldin'); break;
       case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
-      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, created: Date.now() }; save(); if (act === 'onb-finish') startSession('placement', null); else render(); break; }
+      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, created: Date.now() }; save(); if (act === 'onb-finish' && v === 'olcme') { A.olcmeForm = 'on'; startSession('olcme', null); } else if (act === 'onb-finish') startSession('placement', null); else render(); break; }
     }
   });
   document.addEventListener('keydown', (e) => {

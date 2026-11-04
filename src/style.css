@@ -951,3 +951,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .vis-ikili{display:flex;flex-direction:column;gap:6px;align-items:center}
 .olcme-kutu{margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--soft,rgba(91,75,255,.07))}
 .olcme-satir{display:flex;gap:10px;align-items:baseline;margin-top:6px}.olcme-satir span:first-child{flex:1}
+.pdavet{gap:4px}.pd-veli{background:#FFF4D6;color:#6B4A00;border-radius:14px;padding:10px 12px;font-weight:800;font-size:15px;text-align:center}
+.pd-liste ul{margin:6px 0 10px;padding-left:20px}.pd-liste li{margin:3px 0;font-size:15px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pd-veli{background:#4A3A10;color:#FFE3A0}}
+:root[data-theme="dark"] .pd-veli{background:#4A3A10;color:#FFE3A0}
+.pilot-test{margin:10px 0;border:2px solid var(--brand);background:var(--brand-t)}.pilot-test .btn{width:auto;padding-left:22px;padding-right:22px}
