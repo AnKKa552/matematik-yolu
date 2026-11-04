@@ -972,6 +972,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .sec-kart{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:64px;border:2px solid var(--line)}
 .sec-kart.on{border-color:var(--brand)}
 .sec-av{width:46px;height:46px;border-radius:50%;color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+.sec-yeni{margin-top:12px}.sec-yeni input{min-height:48px;border-radius:12px;border:2px solid var(--line);padding:0 12px;font:inherit;background:var(--card,#fff);color:var(--ink)}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -3608,7 +3609,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-11-04 81cda16', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-04 bc0cb92', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

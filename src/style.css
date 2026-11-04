@@ -960,3 +960,4 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .sec-kart{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:64px;border:2px solid var(--line)}
 .sec-kart.on{border-color:var(--brand)}
 .sec-av{width:46px;height:46px;border-radius:50%;color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+.sec-yeni{margin-top:12px}.sec-yeni input{min-height:48px;border-radius:12px;border:2px solid var(--line);padding:0 12px;font:inherit;background:var(--card,#fff);color:var(--ink)}

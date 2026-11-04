@@ -972,6 +972,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .sec-kart{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:64px;border:2px solid var(--line)}
 .sec-kart.on{border-color:var(--brand)}
 .sec-av{width:46px;height:46px;border-radius:50%;color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
+.sec-yeni{margin-top:12px}.sec-yeni input{min-height:48px;border-radius:12px;border:2px solid var(--line);padding:0 12px;font:inherit;background:var(--card,#fff);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -5112,7 +5113,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       <li><b>Problem adımları:</b> atölyede her adımın ilk denemede doğru oranı. "Kendin dene", benzer yeni problemi tek başına çözmektir.</li>
       <li>XP çalışmayı ödüllendirir; öğrenmeyi gösteren ustalık ve ilk deneme oranıdır.</li></ul></details>`;
     const mis = fp.misList.slice(0, 6).map(m => `<div class="misrow"><span>${esc(m.t)}</span><span class="tag ${!m.active ? 'ok' : m.kesin ? 'warm' : ''}">${!m.active ? 'aştın ✓' : m.kesin ? 'çalışıyoruz' : 'göz kulak'}</span></div>`).join('') || '<div class="muted sm">Henüz bir tuzak görmedik. 🙌</div>';
-    return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${dolapPi(70, 'happy')}<div><h2>${esc(p.name || 'Öğrenci')}</h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
+    return `${topbar()}<div class="scroll"><div class="row" style="margin:6px 0 14px">${dolapPi(70, 'happy')}<div class="grow"><h2>${esc(p.name || 'Öğrenci')} <button class="chip" data-act="oyuncu-ac" style="font-size:13px;vertical-align:middle">👥 ${E.profiller().liste.length > 1 ? 'Değiştir' : 'Kardeş ekle'}</button></h2><div class="muted sm">5. sınıf · ${A.st.xp} XP toplam</div></div></div>
       <div class="stats4"><div><span>🔥</span><b>${A.st.streak} gün</b><small>Seri</small></div><div><span>⚡</span><b>${A.st.xp}</b><small>Toplam XP</small></div><div><span>🏆</span><b>${E.TIERS[A.st.league.tier || 0]}</b><small>Lig</small></div><div><span>🥇</span><b>${A.st.top3 || 0} kez</b><small>İlk 3</small></div><div><span>🎓</span><b>${Object.keys(A.st.trophies).length}/7</b><small>Bölge kupası</small></div><div><span>🛠️</span><b>${Object.keys(A.st.tasks).length}/7</b><small>Gerçek görev</small></div></div>
       <button class="card album-kart" data-act="album"><span class="album-ikon">📒</span><div class="grow" style="text-align:left"><b>Çıkartma albümüm</b><div class="qbar"><i style="--hedef:${Math.round(100 * cikSayisi() / CIK_TOPLAM)}%"></i><span>${cikSayisi()} / ${CIK_TOPLAM}</span></div></div><span>›</span></button>
       <div class="card"><h3>🧬 Öğrenme Parmak İzim</h3><p class="muted sm" style="margin:4px 0 10px">Sistem cevaplarından seni tanıyor ve anlatımı sana göre seçiyor.</p>
@@ -5372,15 +5373,20 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
      kaydı ayrıdır; yalnız veli şifresi yeni kardeşe kopyalanır (veli tek). Birden çok çocuk varsa uygulama açılınca seçici gelir. */
   const SEC_RENK = ['#5B4BFF', '#FF8A00', '#12B76A', '#E0457B', '#0BA5EC', '#8E5CF7'];
   function secListe() { const p = E.profiller(); return p.liste.map((id, i) => { const s = id === p.aktif ? A.st : E.profilOku(id); return { id, i, s, aktif: id === p.aktif }; }).filter(o => o.s && o.s.profile || o.aktif); }
+  const rumuzNorm = (t) => String(t || '').normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('tr-TR');
+  const rumuzBul = (ad) => { const n = rumuzNorm(ad); return n ? (secListe().find(o => o.s && o.s.profile && rumuzNorm(o.s.profile.name) === n) || null) : null; };
   function viewSecici() {
     const L = secListe().filter(o => o.s && o.s.profile);
     return `<div class="onb secici"><div class="center" style="margin-top:10px">${mascot('happy', 100)}</div><h2 class="center" style="margin:6px 0 4px">Kim oynuyor?</h2>
       <p class="muted center sm" style="margin:0 0 12px">Her oyuncunun ilerlemesi ayrı tutulur.</p>
       <div class="sec-liste">${L.map(o => `<button class="card sec-kart ${o.aktif ? 'on' : ''}" data-act="oyuncu-sec" data-v="${o.id}"><span class="sec-av" style="background:${SEC_RENK[o.i % SEC_RENK.length]}">${esc([...(o.s.profile.name || '?').normalize('NFC').trim()][0].toLocaleUpperCase('tr-TR'))}</span><span class="grow"><b>${esc(o.s.profile.name || 'Oyuncu')}</b><br><span class="muted sm">⚡ ${o.s.xp || 0} XP · 🔥 ${o.s.streak || 0} gün</span></span>${o.aktif ? '<span class="sm muted">şimdiki</span>' : ''}</button>`).join('')}</div>
       <button class="btn ghost" data-act="oyuncu-ekle" style="margin-top:6px">➕ Kardeş ekle</button>
-      ${L.length < 2 && A.st.profile ? `<button class="btn ghost" data-act="secici-kapat">Geri</button>` : ''}</div>`;
+      <div class="card sec-yeni"><b class="sm">Listede yok musun? Rumuzunu yaz</b>
+        <div class="row" style="margin-top:8px;gap:8px"><input id="f-sec-ad" class="grow" maxlength="20" autocomplete="off" placeholder="Örn: Kaplan Ela"><button class="btn small" data-act="sec-gir" style="width:auto">Gir</button></div>
+        <p class="muted sm" style="margin:6px 0 0">Her rumuzun ilerlemesi ayrı tutulur. Aynı rumuzu yazan, kaldığı yerden devam eder.</p></div>
+      ${L.length < 2 && A.st.profile && !A.seciciAcilis ? `<button class="btn ghost" data-act="secici-kapat">Geri</button>` : ''}</div>`;
   }
-  async function oyuncuGec(id) {
+  async function oyuncuGec(id, rumuz) {
     A.modal = null; $app.innerHTML = `<div class="mid">${mascot('', 100)}<div class="muted" style="font-weight:900">Hazırlanıyor…</div></div>`;
     const bekle = (pr) => Promise.race([pr, new Promise(r => setTimeout(r, 4000))]);
     try { if (A.st.aile && A.st.aile.kirli) await bekle(aileGonder()); await bekle(pilotGonder()); } catch (e) { }
@@ -5390,6 +5396,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (!id && veli) { A.st.veli = JSON.parse(JSON.stringify(veli)); }
     A.secici = false; A.view = 'home'; A.tab = 'yol'; A.ses = null; A.q = null; A.fb = null; A.veliAcik = false; A.onb = { step: 0, data: {} };
     A.oy = null; A.oyModal = null; A.oyBulunan = null; A.aileBulunan = null; A._ekran = null; pilotSonAcilis = 0;
+    if (!id && rumuz) { A.onb.data.name = rumuz; if (!pilotDavet()) A.onb.step = 3; }
     if (A.st.profile) { E.save(A.st); pilotAcilis(); setTimeout(aileKontrol, 500); seriBak(); }
     render();
   }
@@ -5401,6 +5408,14 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   try { const g = new URLSearchParams(location.search).get('pilot'); if (g !== null) { localStorage.setItem(PILOT_DAVET, g.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12) || 'GENEL'); history.replaceState(null, '', location.pathname + location.hash); } } catch (e) { }
   const pilotDavet = () => { try { return localStorage.getItem(PILOT_DAVET); } catch (e) { return null; } };
   function pilotDavetSil() { try { localStorage.removeItem(PILOT_DAVET); } catch (e) { } }
+  // Davet ekranındaki rumuz: kayıtlı değilse zorunlu. Bu telefonda aynı rumuzlu öğrenci varsa ona geçilir (kaldığı yerden).
+  function pdRumuz() { if (A.st.profile) return true; const ad = ((document.getElementById('f-pd-ad') || {}).value || '').trim();
+    if (ad.length < 2) { toast('Öğrencinin rumuzunu yazın (en az 2 harf).'); const i = document.getElementById('f-pd-ad'); if (i) i.focus(); return false; }
+    A.onb.data.name = ad; A.onb.step = 3; return true; }
+  function pdMevcut(karar) { if (A.st.profile) return false; const o = rumuzBul(A.onb.data.name); if (!o || o.aktif) return false;
+    const bos = E.profilId(); A.st = E.profilSec(o.id); E.profilSil(bos); A.onb = { step: 0, data: {} }; A.secici = false;
+    if (!(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar))) { if (karar === 'evet') { pilotKatil(pilotDavet()); return true; } A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); }
+    toast(`👋 Tekrar hoş geldin, ${A.st.profile.name}!`); render(); return true; }
   const pilotDavetGoster = () => !!pilotDavet() && !(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar));
   function viewPilotDavet() {
     return `<div class="onb pdavet">
@@ -5411,6 +5426,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       <div class="card pd-liste"><b>✅ Kaydettiklerimiz</b><ul><li>Hangi soruda ne kadar düşünüldüğü</li><li>Hangi soruların doğru ya da yanlış yapıldığı, yanlışın hangi tipik hatadan geldiği</li><li>İpucu kullanılıp kullanılmadığı, dersin nerede bırakıldığı</li><li>Başta ve iki hafta sonra çözülen 10 soruluk kısa testin sonucu</li></ul>
       <b>🚫 Asla kaydetmediklerimiz</b><ul><li>Çocuğunuzun ve sizin adınız</li><li>Telefon, e-posta, konum</li><li>Uygulamaya yazılan herhangi bir metin</li></ul></div>
       <details class="aile-detay"><summary class="sm"><b>Ayrıntılar</b></summary><p class="sm muted" style="margin:6px 0 0">Bu telefona rastgele bir numara verilir; kayıtlar yalnız bu numarayla tutulur ve numaradan kim olduğunuz anlaşılmaz. Kayıtlar Almanya'daki (Frankfurt) sunucularda en fazla 13 ay saklanır, yalnız uygulamayı geliştirmek için kullanılır, kimseyle paylaşılmaz ve satılmaz. Veli bölümündeki «Pilottan ayrıl» düğmesiyle istediğiniz an ayrılabilir, bütün kayıtları silebilirsiniz. Katılmasanız da uygulama aynen çalışır.</p></details>
+      ${A.st.profile ? `<p class="sm" style="margin:10px 0 0">Öğrenci: <b>${esc(A.st.profile.name)}</b></p>` : `<div class="field" style="margin-top:10px"><label for="f-pd-ad"><b>Öğrencinin rumuzu</b> <span class="muted sm">(takma ad; gerçek adı yazmanız gerekmez)</span></label><input id="f-pd-ad" maxlength="20" autocomplete="off" placeholder="Örn: Kaplan Ela" value="${esc(A.onb.data.name || '')}"><p class="muted sm" style="margin:4px 0 0">Aynı telefonu kullanan her öğrenci kendi rumuzuyla girer; kayıtları ayrı tutulur. Rumuz yalnız bu telefonda kalır, sunucuya gönderilmez.</p></div>`}
       <label class="aile-onay" style="margin-top:10px"><input type="checkbox" id="f-pd-onay"> <span class="sm">Velisi olarak bu açıklamayı okudum; çocuğumun uygulama kullanımının isimsiz kaydedilmesine onay veriyorum.</span></label>
       <button class="btn" data-act="pd-katil" style="margin-top:10px">Katılıyorum 💙</button>
       <button class="btn ghost" data-act="pd-hayir">Katılmadan devam et</button></div>`;
@@ -6236,10 +6252,13 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'secici-kapat': A.secici = false; render(); break;
       case 'oyuncu-ac': A.secici = true; render(); break;
       case 'onb-iptal': { const bos = E.profilId(); A.st = E.profilSil(bos); A.onb = { step: 0, data: {} }; A.secici = true; render(); break; }
-      case 'pd-katil': { const c = document.getElementById('f-pd-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
+      case 'pd-katil': { if (!pdRumuz()) break; const c = document.getElementById('f-pd-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
+        if (pdMevcut('evet')) break;
         const b = document.querySelector('[data-act=pd-katil]'); if (b) { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
         pilotKatil(pilotDavet()).then(ok => { if (!ok) { render(); return; } if (A.st.profile && !(A.st.olcme && A.st.olcme.on)) { A.modal = confirmModal('Kısa bir test çözelim mi?', 'Çocuğunuz şimdi 10 soruluk başlangıç testini çözebilir (yaklaşık 10 dakika). İsterseniz sonra da haritadan başlatabilir.', 'pd-test', 'Şimdi başla', 'Sonra'); render(); } }); break; }
-      case 'pd-hayir': A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); render(); break;
+      case 'pd-hayir': if (!pdRumuz()) break; if (pdMevcut('hayir')) break; A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); render(); break;
+      case 'sec-gir': { const ad = ((document.getElementById('f-sec-ad') || {}).value || '').trim(); if (ad.length < 2) { toast('Rumuz en az 2 harf olsun.'); break; }
+        const o = rumuzBul(ad); if (o) { if (o.aktif) { A.secici = false; render(); } else oyuncuGec(o.id); toast(`👋 Tekrar hoş geldin, ${o.s.profile.name}!`); } else oyuncuGec(null, ad); break; }
       case 'pd-test': A.modal = null; A.olcmeForm = 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break;
       case 'olcme': { const o = A.st.olcme || {}; if (o[v]) break; A.olcmeForm = v === 'son' ? 'son' : 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break; }
       case 'pilot-ayril': A.modal = confirmModal('Pilottan ayrılmak istiyor musunuz?', 'Bu telefondan gönderilen bütün isimsiz kayıtlar sunucudan silinir ve kayıt durur. Çocuğunuzun ilerlemesi etkilenmez.', 'pilot-ayril-evet', 'Evet, ayrıl', 'Vazgeç'); render(); break;
@@ -6273,7 +6292,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
   { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
     if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }
-    if (E.profiller().liste.length > 1) A.secici = true; }
+    if (E.profiller().liste.length > 1 || (pilotDavet() && A.st.profile)) A.secici = true; }
   aileSunucuBak().then(() => setTimeout(aileKontrol, 800)); pilotSunucuBak(); pilotAcilis(); setTimeout(pilotGonder, 3000);
   if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });
