@@ -13,7 +13,12 @@
   const { SKILLS, SKILL, THEMES, FORMATS, OKUL_TAKVIM, OKUL_YIL } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
-  const KEY = 'matematik_yolu_v1';
+  /* Aynı telefonda birden çok çocuk (04.11.2026, proje sahibi: "evde iki öğrencim var, kayıtları karışmasın"): her çocuğun
+     durumu ayrı anahtarda. İlk çocuk eski anahtarı ('matematik_yolu_v1') kullanır; böylece mevcut kullanıcıların kaydı
+     yerinde kalır. Liste: 'matematik_yolu_profiller' = {aktif, liste: [id…]}. */
+  const KEY0 = 'matematik_yolu_v1', PKEY = 'matematik_yolu_profiller';
+  const anahtarOf = (id) => !id || id === '0' ? KEY0 : KEY0 + ':' + id;
+  let KEY = KEY0;
   const HOUR = 3600e3, DAY = 24 * HOUR;
   const today = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const weekStart = (t = Date.now()) => { const d = new Date(t); const wd = (d.getDay() + 6) % 7; d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - wd); return d.getTime(); };
@@ -29,9 +34,24 @@
     };
   }
   const E = {};
+  E.profiller = () => { let p = null; try { p = JSON.parse(localStorage.getItem(PKEY) || 'null'); } catch (e) { }
+    if (!p || !Array.isArray(p.liste) || !p.liste.length) p = { aktif: '0', liste: ['0'] };
+    if (!p.liste.includes(p.aktif)) p.aktif = p.liste[0]; return p; };
+  const profilYaz = (p) => { try { localStorage.setItem(PKEY, JSON.stringify(p)); } catch (e) { } };
+  E.profilId = () => E.profiller().aktif;
+  E.profilOku = (id) => { try { const s = JSON.parse(localStorage.getItem(anahtarOf(id)) || 'null'); return s; } catch (e) { return null; } };
+  E.profilSec = (id) => { const p = E.profiller(); if (!p.liste.includes(id)) return null; p.aktif = id; profilYaz(p); KEY = anahtarOf(id); return E.load(); };
+  E.profilYeni = () => { const p = E.profiller(); let id; do { id = Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36); } while (p.liste.includes(id));
+    p.liste.push(id); p.aktif = id; profilYaz(p); KEY = anahtarOf(id); return fresh(); };
+  // Bir çocuğun kaydını sil; başka çocuk varsa ona geçilir (yeni durum döner), yoksa boş bir kayıt döner
+  E.profilSil = (id) => { const p = E.profiller(); try { localStorage.removeItem(anahtarOf(id)); } catch (e) { }
+    p.liste = p.liste.filter(x => x !== id); if (!p.liste.length) p.liste = ['0']; if (!p.liste.includes(p.aktif)) p.aktif = p.liste[0];
+    profilYaz(p); KEY = anahtarOf(p.aktif); return E.load(); };
+
+  KEY = anahtarOf(E.profiller().aktif);
   E.load = () => { try { const raw = localStorage.getItem(KEY); if (raw) { const s = JSON.parse(raw); const f = fresh(); for (const k in f) if (!(k in s)) s[k] = f[k]; SKILLS.forEach(sk => { if (!s.skills[sk.id]) s.skills[sk.id] = f.skills[sk.id]; }); return s; } } catch (e) { } return fresh(); };
   E.save = (st) => { st.savedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { } };
-  E.reset = () => { try { localStorage.removeItem(KEY); } catch (e) { } return fresh(); };
+  E.reset = () => E.profilSil(E.profilId());
   E.fresh = fresh;
 
   /* ---------------- 1) BKT ---------------- */

@@ -968,6 +968,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pd-veli{background:#4A3A10;color:#FFE3A0}}
 :root[data-theme="dark"] .pd-veli{background:#4A3A10;color:#FFE3A0}
 .pilot-test{margin:10px 0;border:2px solid var(--brand);background:var(--brand-t)}.pilot-test .btn{width:auto;padding-left:22px;padding-right:22px}
+.secici .sec-liste{display:flex;flex-direction:column;gap:10px}
+.sec-kart{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:64px;border:2px solid var(--line)}
+.sec-kart.on{border-color:var(--brand)}
+.sec-av{width:46px;height:46px;border-radius:50%;color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
 </style>
 </head>
 <body>
@@ -3597,7 +3601,12 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   const { SKILLS, SKILL, THEMES, FORMATS, OKUL_TAKVIM, OKUL_YIL } = isNode ? require('./curriculum.js') : G.MY_CUR;
   const U = isNode ? require('./core.js').U : G.MY_U;
 
-  const KEY = 'matematik_yolu_v1';
+  /* Aynı telefonda birden çok çocuk (04.11.2026, proje sahibi: "evde iki öğrencim var, kayıtları karışmasın"): her çocuğun
+     durumu ayrı anahtarda. İlk çocuk eski anahtarı ('matematik_yolu_v1') kullanır; böylece mevcut kullanıcıların kaydı
+     yerinde kalır. Liste: 'matematik_yolu_profiller' = {aktif, liste: [id…]}. */
+  const KEY0 = 'matematik_yolu_v1', PKEY = 'matematik_yolu_profiller';
+  const anahtarOf = (id) => !id || id === '0' ? KEY0 : KEY0 + ':' + id;
+  let KEY = KEY0;
   const HOUR = 3600e3, DAY = 24 * HOUR;
   const today = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const weekStart = (t = Date.now()) => { const d = new Date(t); const wd = (d.getDay() + 6) % 7; d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - wd); return d.getTime(); };
@@ -3613,9 +3622,24 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     };
   }
   const E = {};
+  E.profiller = () => { let p = null; try { p = JSON.parse(localStorage.getItem(PKEY) || 'null'); } catch (e) { }
+    if (!p || !Array.isArray(p.liste) || !p.liste.length) p = { aktif: '0', liste: ['0'] };
+    if (!p.liste.includes(p.aktif)) p.aktif = p.liste[0]; return p; };
+  const profilYaz = (p) => { try { localStorage.setItem(PKEY, JSON.stringify(p)); } catch (e) { } };
+  E.profilId = () => E.profiller().aktif;
+  E.profilOku = (id) => { try { const s = JSON.parse(localStorage.getItem(anahtarOf(id)) || 'null'); return s; } catch (e) { return null; } };
+  E.profilSec = (id) => { const p = E.profiller(); if (!p.liste.includes(id)) return null; p.aktif = id; profilYaz(p); KEY = anahtarOf(id); return E.load(); };
+  E.profilYeni = () => { const p = E.profiller(); let id; do { id = Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36); } while (p.liste.includes(id));
+    p.liste.push(id); p.aktif = id; profilYaz(p); KEY = anahtarOf(id); return fresh(); };
+  // Bir çocuğun kaydını sil; başka çocuk varsa ona geçilir (yeni durum döner), yoksa boş bir kayıt döner
+  E.profilSil = (id) => { const p = E.profiller(); try { localStorage.removeItem(anahtarOf(id)); } catch (e) { }
+    p.liste = p.liste.filter(x => x !== id); if (!p.liste.length) p.liste = ['0']; if (!p.liste.includes(p.aktif)) p.aktif = p.liste[0];
+    profilYaz(p); KEY = anahtarOf(p.aktif); return E.load(); };
+
+  KEY = anahtarOf(E.profiller().aktif);
   E.load = () => { try { const raw = localStorage.getItem(KEY); if (raw) { const s = JSON.parse(raw); const f = fresh(); for (const k in f) if (!(k in s)) s[k] = f[k]; SKILLS.forEach(sk => { if (!s.skills[sk.id]) s.skills[sk.id] = f.skills[sk.id]; }); return s; } } catch (e) { } return fresh(); };
   E.save = (st) => { st.savedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { } };
-  E.reset = () => { try { localStorage.removeItem(KEY); } catch (e) { } return fresh(); };
+  E.reset = () => E.profilSil(E.profilId());
   E.fresh = fresh;
 
   /* ---------------- 1) BKT ---------------- */
@@ -5107,6 +5131,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
         ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
+        <button class="btn ghost small" data-act="oyuncu-ac">👥 ${E.profiller().liste.length > 1 ? 'Oyuncu değiştir' : 'Kardeş ekle (aynı telefonda)'}</button>
         ${aileHazir() ? `<div class="oy-ben">${A.st.oyuncu ? `<span class="sm">🧒 Oyuncu adın: ${oyYaz(A.st.oyuncu)}</span>` : ''}<button class="btn ghost small" data-act="oy-ac">📲 Başka telefondaki ilerlememi getir</button></div>` : ''}
       </div></div>${nav()}`;
   }
@@ -5267,8 +5292,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   const pilotAcik = () => !!(A.st && A.st.pilot && A.st.pilot.acik && A.st.pilot.cihaz);
   const pilotSunucuBak = () => aileAyarli() ? rpc('pilot_kaydet', { p_cihaz: 'x', p_olaylar: [] }).then(r => { const once = pilotSunucu; pilotSunucu = !!(r && r.hata === 'cihaz'); if (once !== pilotSunucu && A.tab === 'veli' && A.view !== 'lesson') render(); }, () => { pilotSunucu = false; }) : Promise.resolve();
   const pilotCihazUret = () => { const b = new Uint8Array(16); crypto.getRandomValues(b); return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
-  const pilotKuyruk = () => { try { const k = JSON.parse(localStorage.getItem(PILOT_KUYRUK) || '[]'); return Array.isArray(k) ? k : []; } catch (e) { return []; } };
-  const pilotKuyrukYaz = (k) => { try { localStorage.setItem(PILOT_KUYRUK, JSON.stringify(k.slice(-2000))); } catch (e) { } };
+  // Kuyruk her çocuk için ayrı (aynı telefonda kardeşler, 04.11.2026)
+  const pilotKuyrukAnahtar = () => { const id = E.profilId(); return id === '0' ? PILOT_KUYRUK : PILOT_KUYRUK + ':' + id; };
+  const pilotKuyruk = (an = pilotKuyrukAnahtar()) => { try { const k = JSON.parse(localStorage.getItem(an) || '[]'); return Array.isArray(k) ? k : []; } catch (e) { return []; } };
+  const pilotKuyrukYaz = (k, an = pilotKuyrukAnahtar()) => { try { localStorage.setItem(an, JSON.stringify(k.slice(-2000))); } catch (e) { } };
   // Soru kalıbının kısa özeti (sayılar atılmış metin): hangi soru türünde zorlanıldığını görmek için, metnin kendisi gitmez
   const pilotKalip = (q) => { const t = E.kalipAnahtari(q); let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16).padStart(8, '0'); };
   function pilot(tur, veri) {
@@ -5278,18 +5305,18 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   }
   async function pilotGonder() {
     if (!pilotAcik() || pilotGidiyor || !aileAyarli()) return;
-    let k = pilotKuyruk(); if (!k.length) return;
+    const an = pilotKuyrukAnahtar(), st0 = A.st, p = st0.pilot; let k = pilotKuyruk(an); if (!k.length) return;
     pilotGidiyor = true; let yeniden = false;
     try {
-      while (k.length && pilotAcik()) {
-        const parca = k.slice(0, 100), p = A.st.pilot;
+      while (k.length && p.acik) {
+        const parca = k.slice(0, 100);
         const r = await rpc('pilot_kaydet', { p_cihaz: p.cihaz, p_olaylar: parca });
         if (r && r.hata === 'katilim_yok' && !yeniden) { yeniden = true; await rpc('pilot_katil', { p_cihaz: p.cihaz, p_riza: PILOT_RIZA, p_grup: p.grup || null }); continue; }
         if (!r || !r.ok) { p.hata = (r && r.hata) || 'bilinmiyor'; break; }
-        k = pilotKuyruk().slice(parca.length); pilotKuyrukYaz(k); p.gonderilen = (p.gonderilen || 0) + (r.alindi || 0); p.son = Date.now(); p.hata = null;
+        k = pilotKuyruk(an).slice(parca.length); pilotKuyrukYaz(k, an); p.gonderilen = (p.gonderilen || 0) + (r.alindi || 0); p.son = Date.now(); p.hata = null;
       }
-    } catch (e) { if (A.st.pilot) A.st.pilot.hata = 'ag'; }
-    finally { pilotGidiyor = false; E.save(A.st); }
+    } catch (e) { p.hata = 'ag'; }
+    finally { pilotGidiyor = false; if (A.st === st0) E.save(A.st); }
   }
   const pilotAcilis = () => { if (pilotAcik() && Date.now() - pilotSonAcilis > 30 * 60000) { pilotSonAcilis = Date.now(); pilot('acilis', { surum: PILOT_RIZA }); } };
   // Cevaplar motorun kendi kaydından alınır (ikinci şanstaki ilk yanılgı da: yanilgiNotu)
@@ -5338,12 +5365,37 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     const cihaz = (A.st.pilot && A.st.pilot.cihaz) || pilotCihazUret();
     try { const r = await rpc('pilot_katil', { p_cihaz: cihaz, p_riza: PILOT_RIZA, p_grup: grup || null });
       if (!r || !r.ok) { toast(r && r.hata === 'grup' ? 'Grup kodu en fazla 12 harf ya da rakam olabilir.' : 'Katılım kaydedilemedi, biraz sonra tekrar deneyin.'); return false; }
-      A.st.pilot = { acik: true, karar: 'evet', cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); pilotDavetSil(); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('💙 Katıldınız. Teşekkürler!'); return true;
+      A.st.pilot = { acik: true, karar: 'evet', cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('💙 Katıldınız. Teşekkürler!'); return true;
     } catch (e) { toast('İnternete bağlanılamadı, biraz sonra tekrar deneyin.'); return false; }
+  }
+  /* Aynı telefonda kardeşler (04.11.2026, §3.8): «Kim oynuyor?» seçicisi. Her çocuğun ilerlemesi, veli raporu, yedeği ve pilot
+     kaydı ayrıdır; yalnız veli şifresi yeni kardeşe kopyalanır (veli tek). Birden çok çocuk varsa uygulama açılınca seçici gelir. */
+  const SEC_RENK = ['#5B4BFF', '#FF8A00', '#12B76A', '#E0457B', '#0BA5EC', '#8E5CF7'];
+  function secListe() { const p = E.profiller(); return p.liste.map((id, i) => { const s = id === p.aktif ? A.st : E.profilOku(id); return { id, i, s, aktif: id === p.aktif }; }).filter(o => o.s && o.s.profile || o.aktif); }
+  function viewSecici() {
+    const L = secListe().filter(o => o.s && o.s.profile);
+    return `<div class="onb secici"><div class="center" style="margin-top:10px">${mascot('happy', 100)}</div><h2 class="center" style="margin:6px 0 4px">Kim oynuyor?</h2>
+      <p class="muted center sm" style="margin:0 0 12px">Her oyuncunun ilerlemesi ayrı tutulur.</p>
+      <div class="sec-liste">${L.map(o => `<button class="card sec-kart ${o.aktif ? 'on' : ''}" data-act="oyuncu-sec" data-v="${o.id}"><span class="sec-av" style="background:${SEC_RENK[o.i % SEC_RENK.length]}">${esc([...(o.s.profile.name || '?').normalize('NFC').trim()][0].toLocaleUpperCase('tr-TR'))}</span><span class="grow"><b>${esc(o.s.profile.name || 'Oyuncu')}</b><br><span class="muted sm">⚡ ${o.s.xp || 0} XP · 🔥 ${o.s.streak || 0} gün</span></span>${o.aktif ? '<span class="sm muted">şimdiki</span>' : ''}</button>`).join('')}</div>
+      <button class="btn ghost" data-act="oyuncu-ekle" style="margin-top:6px">➕ Kardeş ekle</button>
+      ${L.length < 2 && A.st.profile ? `<button class="btn ghost" data-act="secici-kapat">Geri</button>` : ''}</div>`;
+  }
+  async function oyuncuGec(id) {
+    A.modal = null; $app.innerHTML = `<div class="mid">${mascot('', 100)}<div class="muted" style="font-weight:900">Hazırlanıyor…</div></div>`;
+    const bekle = (pr) => Promise.race([pr, new Promise(r => setTimeout(r, 4000))]);
+    try { if (A.st.aile && A.st.aile.kirli) await bekle(aileGonder()); await bekle(pilotGonder()); } catch (e) { }
+    if (A.st.profile) E.save(A.st);
+    const veli = A.st.veli;
+    A.st = id ? E.profilSec(id) : E.profilYeni();
+    if (!id && veli) { A.st.veli = JSON.parse(JSON.stringify(veli)); }
+    A.secici = false; A.view = 'home'; A.tab = 'yol'; A.ses = null; A.q = null; A.fb = null; A.veliAcik = false; A.onb = { step: 0, data: {} };
+    A.oy = null; A.oyModal = null; A.oyBulunan = null; A.aileBulunan = null; A._ekran = null; pilotSonAcilis = 0;
+    if (A.st.profile) { E.save(A.st); pilotAcilis(); setTimeout(aileKontrol, 500); seriBak(); }
+    render();
   }
   /* Davet bağlantısı (04.11.2026, proje sahibinin önerisi): pilot ailesine …/?pilot=5A bağlantısı gider. İlk açılışta, kayıttan
      önce veliye sıcak dilli bir karşılama ekranı çıkar: ne kaydedilir, ne asla kaydedilmez, onay kutusu, "Katılıyorum" /
-     "Katılmadan devam et". Karar verilene kadar davet telefonda bekler (uygulama kapatılıp açılsa da ekran gelir). Bağlantıyı
+     "Katılmadan devam et". Davet telefonda kalır; karar her çocuk için ayrıdır (aynı telefona eklenen kardeş de bu ekranı görür, §3.8). Bağlantıyı
      almayan kullanıcı bu ekranı hiç görmez. Katılan çocuğa kayıttan sonra 10 soruluk başlangıç testi önerilir. */
   const PILOT_DAVET = 'my_pilot_davet';
   try { const g = new URLSearchParams(location.search).get('pilot'); if (g !== null) { localStorage.setItem(PILOT_DAVET, g.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12) || 'GENEL'); history.replaceState(null, '', location.pathname + location.hash); } } catch (e) { }
@@ -5850,7 +5902,14 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   /* ---------------- Karşılama / kayıt ---------------- */
   function viewOnboard() {
     const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
-    if (o.step === 0) return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
+    if (o.step === 0 && E.profiller().liste.length > 1 && !A.onbGeriYok) { const h0 = viewOnboard0(); return h0.replace('<div class="onb">', '<div class="onb"><button class="chip" data-act="onb-iptal" style="align-self:flex-start">← Oyunculara dön</button>'); }
+    if (o.step === 0) return viewOnboard0();
+    return viewOnboard1();
+  }
+  function viewOnboard0() { const o = A.onb, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
+    return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
+  }
+  function viewOnboard1() { const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
     if (o.step === 'oyuncu') return `<div class="onb">${dots}<h2>Tekrar hoş geldin! 👋</h2>
       ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'onb-oy-geri') : `<p class="muted">Oyuncu adını ve 3 resmini gir; ilerlemen bu telefona gelsin.</p>${oyGirisHtml(`<button class="btn ghost" data-act="onb-kod-ac">🔑 Velimin aile kodu var</button><button class="btn ghost" data-act="onb-kod-geri">Geri</button>`)}`}</div>`;
     if (o.step === 'kod') return `<div class="onb">${dots}<h2>Aile kodunla devam et</h2><p class="muted">Velinin aldığı aile kodunu yaz. İlerlemen bu telefona gelsin.</p>
@@ -5875,7 +5934,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   function render() {
     kolayUygula();
     let h = '';
-    if (pilotDavetGoster()) h = viewPilotDavet();
+    if (A.secici) h = viewSecici();
+    else if (pilotDavetGoster()) h = viewPilotDavet();
     else if (!A.st.profile) h = viewOnboard();
     else if (A.view === 'lesson') h = viewLesson();
     else if (A.view === 'end') h = viewEnd();
@@ -5885,7 +5945,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
     const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
     $app.innerHTML = h;
-    A._ekran = pilotDavetGoster() ? 'pdavet' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
+    A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
       if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
@@ -6123,8 +6183,9 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
         if (t === 'k') d.giyili = id; else d.iz = id; A.dolapOnay = null; save(); A.modal = dolapModal(); render(); sfx.badge(); confetti(); toast(t === 'k' ? `👕 Pi artık ${o.ad}!` : `✨ Haritadaki iz: ${o.ad}`); break; }
       case 'dolap-giy': { const d = dolap(), [t, id] = (A.dolapSec || '').split(':'); if (t === 'k' && d.sahip.includes(id)) d.giyili = id; else if (t === 'i' && d.izler.includes(id)) d.iz = id; save(); A.modal = dolapModal(); render(); tone(700, .12, 'triangle'); break; }
       case 'buy-freeze': if (A.st.freezes >= E.KORUYUCU_EN_FAZLA) { toast(`🧊 En fazla ${E.KORUYUCU_EN_FAZLA} seri koruyucu taşıyabilirsin. Elindekiler seni koruyor!`); break; } if (A.st.gems >= 50) { A.st.gems -= 50; A.st.freezes++; save(); render(); toast('🧊 Seri koruyucu alındı!'); } else toast('Yeterli elmasın yok. Ders yaparak kazanabilirsin!'); break;
-      case 'reset': A.modal = confirmModal('Tüm veriler silinsin mi?', 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break;
-      case 'reset-yes': if (pilotAcik()) pilotAyril(true); A.modal = null; A.st = E.reset(); pilotKuyrukYaz([]); A.onb = { step: 0, data: {} }; A.tab = 'yol'; render(); break;
+      case 'reset': { const cok = E.profiller().liste.length > 1, ad = esc((A.st.profile && A.st.profile.name) || 'bu oyuncu');
+        A.modal = confirmModal(cok ? `${ad} silinsin mi?` : 'Tüm veriler silinsin mi?', cok ? `Yalnız ${ad} adlı oyuncunun ilerlemesi, rozetleri ve öğrenme parmak izi bu cihazdan kalıcı olarak silinir. Diğer oyuncular olduğu gibi kalır.` : 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break; }
+      case 'reset-yes': if (pilotAcik()) pilotAyril(true); A.modal = null; pilotKuyrukYaz([]); A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; A.view = 'home'; A.veliAcik = false; A.secici = !!A.st.profile && E.profiller().liste.length > 1; render(); break;
       case 'copy': try { navigator.clipboard.writeText(E.parentReport(A.st).text).then(() => toast('Rapor kopyalandı ✓'), () => toast('Kopyalanamadı')); } catch (e) { toast('Kopyalanamadı'); } break;
       case 'edit-profile': A.veliDuzenle = true; render(); break;
       case 'veli-vazgec': A.veliDuzenle = false; render(); break;
@@ -6170,10 +6231,15 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'oy-giris': if (A.oy && !A.oy.bekle) oyGiris(); break;
       case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
       case 'pilot-katil': { const c = document.getElementById('f-pilot-onay'), g = document.getElementById('f-pilot-grup'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } pilotKatil(g ? g.value.trim() : ''); break; }
+      case 'oyuncu-sec': if (v === E.profilId() && A.st.profile) { A.secici = false; render(); } else oyuncuGec(v); break;
+      case 'oyuncu-ekle': oyuncuGec(null); break;
+      case 'secici-kapat': A.secici = false; render(); break;
+      case 'oyuncu-ac': A.secici = true; render(); break;
+      case 'onb-iptal': { const bos = E.profilId(); A.st = E.profilSil(bos); A.onb = { step: 0, data: {} }; A.secici = true; render(); break; }
       case 'pd-katil': { const c = document.getElementById('f-pd-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
         const b = document.querySelector('[data-act=pd-katil]'); if (b) { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
         pilotKatil(pilotDavet()).then(ok => { if (!ok) { render(); return; } if (A.st.profile && !(A.st.olcme && A.st.olcme.on)) { A.modal = confirmModal('Kısa bir test çözelim mi?', 'Çocuğunuz şimdi 10 soruluk başlangıç testini çözebilir (yaklaşık 10 dakika). İsterseniz sonra da haritadan başlatabilir.', 'pd-test', 'Şimdi başla', 'Sonra'); render(); } }); break; }
-      case 'pd-hayir': A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; pilotDavetSil(); save(); render(); break;
+      case 'pd-hayir': A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); render(); break;
       case 'pd-test': A.modal = null; A.olcmeForm = 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break;
       case 'olcme': { const o = A.st.olcme || {}; if (o[v]) break; A.olcmeForm = v === 'son' ? 'son' : 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break; }
       case 'pilot-ayril': A.modal = confirmModal('Pilottan ayrılmak istiyor musunuz?', 'Bu telefondan gönderilen bütün isimsiz kayıtlar sunucudan silinir ve kayıt durur. Çocuğunuzun ilerlemesi etkilenmez.', 'pilot-ayril-evet', 'Evet, ayrıl', 'Vazgeç'); render(); break;
@@ -6204,6 +6270,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
     setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
   seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); } });
+  // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
+  { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
+    if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }
+    if (E.profiller().liste.length > 1) A.secici = true; }
   aileSunucuBak().then(() => setTimeout(aileKontrol, 800)); pilotSunucuBak(); pilotAcilis(); setTimeout(pilotGonder, 3000);
   if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });

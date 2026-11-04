@@ -184,6 +184,15 @@ Telefon değişince ilerleme kaybolmasın diye; satış öncesi zorunlu. **E-pos
 - Test: `python3 test/e2e_pilot.py` (onaysız katılım yok, katılmadan olay yok, alan listesi, kişisel bilgi sızmaz, yarıda bırakma, internetsiz bekleme, test akışı, ayrılınca silme ve sonrasında sessizlik); `node test/test_plan.js` (formların tohumlu ve paralel olması).
 - **KVKK:** bilgilendirme ve onay metni (`pilot-v1`) yayın öncesi hukukçuya gösterilmeli (§1-6). Rastgele numara da kişisel veri sayılabilir (takma adlı veri); bu yüzden onay, silme ve süre sınırı var.
 
+### 3.8 Aynı telefonda kardeşler (04.11.2026, proje sahibinin isteği)
+Proje sahibi aynı telefonda iki bağlantıyla iki "öğrenci" açınca ikisinin aynı kaydı gördüğünü fark etti; evde iki 5. sınıf öğrencisi olan aile de aynı sorunu yaşar.
+- **Depolama** (`engine.js`): her çocuğun durumu ayrı `localStorage` anahtarında; ilk çocuk eski anahtarı (`matematik_yolu_v1`) kullanır, diğerleri `matematik_yolu_v1:<id>`. Liste `matematik_yolu_profiller = {aktif, liste}`. `E.profiller / profilId / profilOku / profilSec / profilYeni / profilSil`; `E.reset()` yalnız etkin çocuğu siler, varsa diğerine geçer. Mevcut kullanıcıların kaydı yerinde kalır.
+- **Arayüz** (`viewSecici`, `oyuncuGec` in app.js): birden çok çocuk varsa açılışta **«Kim oynuyor?»** (baş harfli renkli yuvarlak, ad, XP, seri). Ben → Ayarlar → «👥 Kardeş ekle (aynı telefonda)» / «Oyuncu değiştir». Yeni kardeşin kaydında «← Oyunculara dön» boş kaydı siler; ad girilmeden kapatılan kayıt açılışta temizlenir. Geçişten önce bekleyen yedek ve pilot kayıtları gönderilir (en çok 4 sn), Veli alanı kilitlenir.
+- **Ayrı olanlar:** ilerleme, rozet, elmas, veli raporu, aile kodu yedeği, oyuncu adı, pilot katılımı ve numarası, pilot kuyruğu (`my_pilot_kuyruk[:id]`). **Ortak olan:** veli şifresi yeni kardeşe kopyalanır (veli tek). Pilot davet bağlantısı telefonda kalır; karar her çocuk için ayrıdır, kardeş eklenince veli karşılaması yeniden gelir.
+- «Tüm verileri sıfırla» birden çok çocuk varken yalnız o çocuğu adıyla anar ve siler.
+- Bilinen sınır: bildirim aboneliği telefona bağlıdır; iki kardeş de bildirim açarsa son açanın ayarı geçerli olur.
+- Test: `python3 test/e2e_profil.py` (ayrı ilerleme, veli şifresi kopyası, seçici, yarım kayıt temizliği, tek çocuğu silme, kardeşlerin ayrı pilot numarası ve olayları).
+
 ## 4. Uyarlanabilir motorun algoritmaları (`src/engine.js`)
 
 ### 4.1 Ustalık: Bayesian Knowledge Tracing (BKT)
@@ -466,6 +475,7 @@ test/test_generators.js   ← 63 000 soruluk doğrulama
 test/sim_engine.js        ← farklı öğrenci tipleriyle motor simülasyonu
 test/test_plan.js         ← okul takvimi, ön bilgi yoklaması, haftalık plan testleri
 test/test_sahne.py        ← 35 konunun adım adım sahneleri: SVG geçerliliği, işlem doğruluğu, pafta
+test/e2e_profil.py        ← aynı telefonda kardeşler: ayrı kayıt, seçici, ayrı pilot numarası
 test/e2e_pilot.py         ← pilot kaydı ve başlangıç/bitiş testi: uçtan uca (sahte sunucu)
 test/e2e_aile.py          ← aile kodu ile yedek + oyuncu adı/resimli şifre: dört telefonlu uçtan uca test (sahte sunucu)
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
@@ -519,7 +529,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py` ve `python3 test/e2e_pilot.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py`, `python3 test/e2e_pilot.py` ve `python3 test/e2e_profil.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.
