@@ -34,6 +34,7 @@ async def main():
             await route.fulfill(status=200, content_type='application/json', body=json.dumps(body))
         async def sayfa():
             c = await b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+            await c.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")  # vitrin (tanıtım) testlerde atlanır
             g = await c.new_page(); g.on('pageerror', lambda e: errs.append(str(e)))
             await g.route(re.compile(r'.*/rest/v1/rpc/.*'), yol); await g.route(re.compile(r'.*cdn\.jsdelivr\.net.*'), lambda r: r.abort())
             return g
@@ -111,6 +112,14 @@ async def main():
         ok(await d.evaluate("window.MY_APP.st.profile.name") == 'Ayşe' and await d.evaluate("JSON.parse(localStorage.getItem('matematik_yolu_profiller')).liste.length") == 3 and len(KAT) == 3, 'Davette var olan rumuz o çocuğun kaydına döner')
         # Bağlantısız tek çocuklu telefonda seçici açılmaz (yukarıda), Ben başlığında değiştir düğmesi
         await ben(d); ok(await d.query_selector('.prof-top [data-act=oyuncu-ac], h2 [data-act=oyuncu-ac]') is not None, 'Ben başlığında oyuncu değiştir düğmesi')
+        # Vitrin (tanıtım): ilk kez gelen ziyaretçiye görünür; başla deyince kayda geçer ve bir daha gelmez; pilot bağlantısında görünmez
+        v = await (await b.new_context(viewport={'width': 390, 'height': 844})).new_page(); await v.goto(APP); await v.wait_for_timeout(700)
+        ok(await v.query_selector('.vt') is not None, 'İlk ziyarette vitrin görünür')
+        await v.click('[data-act=vt-basla] >> nth=0'); await v.wait_for_timeout(300)
+        ok(await v.query_selector('[data-act=onb-next]') is not None, 'Hemen başla → kayıt')
+        await v.reload(); await v.wait_for_timeout(700); ok(await v.query_selector('.vt') is None, 'Bir kez geçilen vitrin yeniden gelmez')
+        v2 = await (await b.new_context(viewport={'width': 390, 'height': 844})).new_page(); await v2.goto(APP + '?pilot=VT1'); await v2.wait_for_timeout(700)
+        ok(await v2.query_selector('.vt') is None and await v2.query_selector('[data-act=pd-katil]') is not None, 'Pilot bağlantısında vitrin yok, veli karşılaması gelir')
         ok(not errs, f'Sayfa hatası yok {errs[:3]}')
         await b.close()
     print('BİTTİ hata:', len(HATA))

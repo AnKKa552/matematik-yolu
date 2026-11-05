@@ -1575,17 +1575,69 @@
       <div style="flex:1"></div>${pilotAcik() && !(A.st.olcme && A.st.olcme.on) ? `<button class="btn" data-act="onb-finish" data-v="olcme" ${d.motivation ? '' : 'disabled'}>Kısa teste başla (10 soru)</button>` : `<button class="btn" data-act="onb-finish" ${d.motivation ? '' : 'disabled'}>Seviyemi belirle (7 soru)</button>`}<button class="btn ghost" data-act="onb-finish-skip" ${d.motivation ? '' : 'disabled'}>Sıfırdan başla</button></div>`;
   }
 
+
+  /* =================== VİTRİN (05.11.2026) ===================
+     Kaydı olmayan, ilk kez gelen ziyaretçiye uygulamayı anlatan tanıtım sayfası (Duolingo ana sayfası gibi).
+     Görmeyenler: kayıtlı çocuk, pilot bağlantısıyla gelen veli, ana ekrana eklenmiş / Play'den kurulmuş uygulama. */
+  const vitrinUygulamaMi = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true || document.referrer.indexOf('android-app://') === 0; } catch (e) { return false; } };
+  const vitrinGecti = () => { try { return localStorage.getItem('my_vitrin_gecti') === '1'; } catch (e) { return true; } };
+  const vitrinGoster = () => !A.st.profile && !A.secici && !pilotDavet() && !vitrinUygulamaMi() && !vitrinGecti() && E.profiller().liste.length < 2;
+  function viewVitrin() {
+    const img = (f, alt, cls) => `<img src="${PI_GORSEL}${f}" alt="${alt}" class="${cls || ''}" loading="lazy" decoding="async">`;
+    const kart = (g, b, t) => `<div class="vt-kart">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
+    const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" style="background-image:url(${PI_GORSEL}fon_${k}.webp)"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
+    const sss = [
+      ['Ücretli mi?', 'Şu an bütün konular ve özellikler ücretsiz. İleride ek özellikler için isteğe bağlı bir aile aboneliği gelebilir; uygulamada reklam ve elmas satışı hiçbir zaman olmayacak.'],
+      ['Hesap açmak gerekiyor mu?', 'Hayır. E-posta, telefon ya da gerçek ad istemiyoruz; çocuğunuz bir takma adla hemen başlar. İlerleme telefonda saklanır.'],
+      ['Ders kitabıyla uyumlu mu?', 'Konular ve sıralama 5. sınıf Maarif Modeli matematik programına göre hazırlandı; okulda işlenen haftanın konusu haritada işaretlenir. Sorular ve anlatımlar bize aittir, ders kitabından kopyalanmaz. Matematik Yolu, Millî Eğitim Bakanlığının resmî uygulaması değildir.'],
+      ['Telefon değişirse ilerleme kaybolur mu?', 'Veli alanından bulut yedeğini açarsanız kaybolmaz. Yeni telefonda aile kodu ya da çocuğun oyuncu adı ve resimli şifresiyle kaldığı yerden devam eder.'],
+      ['Aynı telefonu iki kardeş kullanabilir mi?', 'Evet. Her çocuk kendi adıyla girer; ilerlemeleri, rozetleri ve veli raporları ayrı tutulur.'],
+      ['Çocuğumun verileri nerede?', 'Varsayılan olarak yalnızca telefonda. Yedek, hatırlatma ya da geliştirme araştırması gibi internete veri gönderen özellikler yalnızca siz şifreli Veli alanından onay verirseniz açılır. Ayrıntılar gizlilik politikasında.']
+    ].map(([q, a]) => `<details class="vt-sss"><summary>${q}</summary><p>${a}</p></details>`).join('');
+    return `<div class="vt">
+      <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik Yolu</b></div><button class="vt-link" data-act="vt-giris">Devam ediyorum</button></header>
+      <section class="vt-hero"><div class="vt-hero-pi">${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
+        <div class="vt-hero-yazi"><h1>Matematiği oyun gibi öğren.</h1>
+        <p class="vt-alt">5. sınıf matematiği için, her çocuğa kendi yolunu çizen ve hatasından öğreten ücretsiz uygulama.</p>
+        <div class="vt-cta"><button class="btn" data-act="vt-basla">Hemen başla</button><button class="btn ghost" data-act="vt-giris">Başka telefonda kullanıyordum</button></div>
+        <p class="vt-guven">Reklamsız · Hesap gerekmez · Maarif Modeli programına uygun</p></div></section>
+      <section class="vt-bolum"><h2>Her ders kısa ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
+        <div class="vt-kartlar">
+          ${kart('pi_roket.webp', 'Sana özel yol', 'Doğru ve yanlışlarına bakarak soruların zorluğunu ve tekrar zamanını ayarlar. Unutmaya başladığın konuyu sana yeniden getirir.')}
+          ${kart('pi_dusun.webp', 'Hatadan öğren', 'Yanlış şıkkın nedenini bilir: «Payda büyüdükçe kesir büyür» gibi bir tuzağa düştüysen tam onu anlatır, sonra kolay bir soruyla geri dönmeni sağlar.')}
+          ${kart('pi_konus.webp', 'Pi anlatıyor', 'Her konunun sesli mini dersi var: şekil adım adım çizilir, Pi anlatır. Görselle, hikâyeyle ya da kısa kuralla; hangisi işine yarıyorsa.')}
+          ${kart('sandik_acik.webp', 'Ödüller ve seri', 'Yıldızlar, sandıklar, çıkartma albümü, Pi\'nin kostümleri ve haftalık lig. Hepsi çalışarak kazanılır; hiçbiri parayla satılmaz.')}
+        </div></section>
+      <section class="vt-bolum vt-harita"><h2>Matematik Diyarı'nda 7 bölge, 35 konu</h2><p class="vt-giris">Doğal sayılardan olasılığa, okuldaki sırayla ilerleyen tek bir harita. Bu hafta okulda işlenen konu haritada işaretlenir.</p>
+        <div class="vt-bolgeler">${bolge}<button class="vt-bolge vt-bolge-cta" data-act="vt-basla"><b>🗺️</b><span>Yola çık →</span></button></div></section>
+      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><h2>Veliler için</h2>
+        <ul class="vt-liste">
+          <li><b>«Neyi neden yanlış yapıyor?»</b> Haftalık raporda güçlü ve zorlanılan konular, sık düşülen kavram yanılgıları ve öneriler.</li>
+          <li><b>Problem çözmenin hangi adımında zorlanıyor?</b> Anlama, plan yapma, hesaplama ve kontrol adımları ayrı ayrı ölçülür.</li>
+          <li><b>Şifreli veli alanı.</b> Rapor ve ayarlar çocuğun göremeyeceği, size ait bir bölümde.</li>
+          <li><b>Baskı yok.</b> Reklam, satın alma ısrarı, «can bitti» kilidi ya da suçlayıcı bildirim yok. Hatırlatma günde en fazla iki kez ve yalnızca siz açarsanız.</li>
+        </ul></div>
+        <div class="vt-rapor" aria-hidden="true"><div class="vt-rapor-bas">📊 Haftalık rapor <span>örnek</span></div>
+          ${[['Açılar', 86, 'var(--ok)'], ['Kesirler', 58, 'var(--accent)'], ['Alan ve çevre', 74, 'var(--blue)']].map(([a, y, r]) => `<div class="vt-cubuk"><span>${a}</span><i><b style="width:${y}%;background:${r}"></b></i><em>%${y}</em></div>`).join('')}
+          <div class="vt-rapor-not">🔎 Sık görülen tuzak: <b>paydası büyük olan kesir daha büyüktür</b> sanmak.</div>
+          <div class="vt-rapor-not">🧩 Hesaplamada değil, <b>problemi anlamada</b> zorlanıyor.</div></div></section>
+      <section class="vt-bolum"><h2>Sık sorulanlar</h2>${sss}</section>
+      <section class="vt-son">${img('pi_sevin.webp', '', 'vt-son-pi')}<h2>Pi seni bekliyor!</h2><button class="btn" data-act="vt-basla">Hemen başla</button></section>
+      <footer class="vt-alt-bilgi"><nav><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></nav><p>© 2026 Matematik Yolu</p></footer>
+    </div>`;
+  }
+
   /* =================== RENDER =================== */
   // Okuma kolaylığı: daha büyük yazı, geniş harf/kelime/satır aralığı, Lexend yazı tipi (yalnız açılınca indirilir; yoksa Nunito kalır)
   function kolayUygula() {
     const on = !!(A.st && A.st.settings && A.st.settings.kolay); document.documentElement.classList.toggle('kolay', on);
-    if (on && !document.getElementById('lexend')) { const l = document.createElement('link'); l.id = 'lexend'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap'; document.head.appendChild(l); }
   }
   function render() {
     kolayUygula();
     let h = '';
     if (A.secici) h = viewSecici();
     else if (pilotDavetGoster()) h = viewPilotDavet();
+    else if (vitrinGoster()) h = viewVitrin();
     else if (!A.st.profile) h = viewOnboard();
     else if (A.view === 'lesson') h = viewLesson();
     else if (A.view === 'end') h = viewEnd();
@@ -1594,8 +1646,9 @@
     if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
     const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
+    $app.classList.toggle('genis', A._vitrin = vitrinGoster() && !A.secici && !pilotDavetGoster());
     $app.innerHTML = h;
-    A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
+    A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
       if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
@@ -1865,6 +1918,8 @@
         o.step = o.step === 1 ? 3 : o.step + 1; render(); break; }
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
+      case 'vt-basla': try { localStorage.setItem('my_vitrin_gecti', '1'); } catch (e) {} A.onb = { step: 0, data: {} }; scrollTo(0, 0); render(); break;
+      case 'vt-giris': try { localStorage.setItem('my_vitrin_gecti', '1'); } catch (e) {} A.onb = { step: 'oyuncu', data: {} }; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; scrollTo(0, 0); render(); break;
       case 'onb-kod': A.onb.step = 'oyuncu'; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;
       case 'onb-kod-ac': A.onb.step = 'kod'; A.aileBulunan = null; A.oy = null; render(); break;
       case 'onb-oy-geri': A.aileBulunan = null; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;

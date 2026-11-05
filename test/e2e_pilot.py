@@ -55,6 +55,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
         ctx = await b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+        await ctx.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")  # vitrin (tanıtım) testlerde atlanır
         pg = await ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         async def yol(route):
@@ -151,6 +152,7 @@ async def main():
         # ---- Davet bağlantısı (04.11.2026): …/?pilot=5a ile ilk açılış ----
         async def yeni_sayfa():
             c = await b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+            await c.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")  # vitrin (tanıtım) testlerde atlanır
             g = await c.new_page(); g.on('pageerror', lambda e: errs.append(str(e)))
             await g.route(re.compile(r'.*/rest/v1/rpc/.*'), yol); await g.route(re.compile(r'.*cdn\.jsdelivr\.net.*'), lambda r: r.abort())
             return g

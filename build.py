@@ -1,7 +1,7 @@
 import pathlib
 R = pathlib.Path(__file__).parent; S = R/'src'; D = R/'dist'; D.mkdir(exist_ok=True)
 tpl = (S/'index.template.html').read_text()
-css = (S/'style.css').read_text()
+css = (S/'fontlar.css').read_text().replace('%FONT%', 'font/') + (S/'style.css').read_text()  # yazi tipleri yerel (05.11.2026)
 js = '\n'.join((S/f).read_text() for f in ['core.js','voice.js','generators.js','curriculum.js','engine.js','fx.js','cloud.js','app.js'])
 base = tpl.replace('/*CSS*/', css).replace('/*JS*/', js.replace('</script>', '<\\/script>'))
 import re
@@ -31,11 +31,14 @@ for f in (S/'pwa').glob('*'):
     if f.is_file(): shutil.copy(f, D/f.name)
 # Görseller (src/pwa/img) → dist/img ve docs/img
 if (S/'pwa'/'img').exists(): shutil.copytree(S/'pwa'/'img', D/'img', dirs_exist_ok=True)
+if (S/'pwa'/'font').exists(): shutil.copytree(S/'pwa'/'font', D/'font', dirs_exist_ok=True)
 # Yayın kopyası: GitHub Pages docs/ klasöründen yayınlar
 P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch(); (P/'CNAME').write_text('matematikyolu.com\n')  # kendi alan adı (05.11.2026)
 for f in ['index.html', 'ogretmen.html', 'config.js', 'sw.js', 'manifest.webmanifest']:
     if (D/f).exists(): shutil.copy(D/f, P/f)
 if (D/'img').exists(): shutil.copytree(D/'img', P/'img', dirs_exist_ok=True)
+if (D/'font').exists(): shutil.copytree(D/'font', P/'font', dirs_exist_ok=True)
 # Gizlilik politikası: matematikyolu.com/gizlilik/ (Play mağazası için zorunlu)
-for K in (D, P): (K/'gizlilik').mkdir(exist_ok=True); shutil.copy(S/'gizlilik.html', K/'gizlilik'/'index.html')
+for K in (D, P):
+    for ad in ('gizlilik', 'kosullar'): (K/ad).mkdir(exist_ok=True); shutil.copy(S/(ad + '.html'), K/ad/'index.html')
 print('docs/ güncellendi')

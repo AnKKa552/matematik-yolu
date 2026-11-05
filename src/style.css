@@ -961,3 +961,67 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .sec-kart.on{border-color:var(--brand)}
 .sec-av{width:46px;height:46px;border-radius:50%;color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
 .sec-yeni{margin-top:12px}.sec-yeni input{min-height:48px;border-radius:12px;border:2px solid var(--line);padding:0 12px;font:inherit;background:var(--card,#fff);color:var(--ink)}
+
+/* ---------- Vitrin (tanıtım sayfası, 05.11.2026) ---------- */
+#app.genis{max-width:none}
+.vt{--vt-w:1040px;width:100%;overflow-x:hidden}
+.vt>section,.vt>header,.vt>footer{max-width:var(--vt-w);margin:0 auto;padding-left:16px;padding-right:16px}
+.vt-ust{display:flex;align-items:center;justify-content:space-between;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:12px}
+.vt-logo{display:flex;align-items:center;gap:10px;font-size:20px;color:var(--brand)} .vt-logo img{border-radius:10px}
+.vt-link{background:none;border:0;color:var(--brand);font-weight:900;font-size:15px;padding:12px 4px;cursor:pointer;min-height:44px}
+.vt-hero{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;padding-top:8px;padding-bottom:40px;text-align:center}
+.vt-pi{width:min(300px,72vw);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 18px 24px rgba(91,75,255,.25));animation:vtSuz 4s ease-in-out infinite}
+@keyframes vtSuz{50%{transform:translateY(-8px)}}
+.vt-hero h1{font-size:clamp(32px,7.5vw,54px);line-height:1.08;margin:6px 0 12px}
+.vt-alt{font-size:clamp(17px,2.4vw,21px);color:var(--muted);font-weight:700;margin:0 auto 22px;max-width:34ch}
+.vt-cta{display:grid;gap:14px;max-width:360px;margin:0 auto}
+.vt-guven{font-size:14px;color:var(--muted);font-weight:800;margin:18px 0 0}
+.vt-bolum{padding-top:36px;padding-bottom:36px;border-top:2px solid var(--line)}
+.vt-bolum h2{font-size:clamp(25px,4.6vw,36px);line-height:1.15;text-align:center}
+.vt-giris{text-align:center;color:var(--muted);font-weight:700;max-width:52ch;margin:10px auto 24px}
+.vt-kartlar{display:grid;grid-template-columns:1fr;gap:14px}
+.vt-kart{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 4px 0 var(--line);display:grid;grid-template-columns:76px 1fr;column-gap:14px;align-items:start}
+.vt-kart-img{width:76px;height:76px;object-fit:contain;grid-row:span 2}
+.vt-kart h3{font-size:19px;margin:4px 0 4px} .vt-kart p{margin:0;color:var(--muted);font-size:15px;font-weight:600}
+.vt-bolgeler{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.vt-bolge{height:150px;border-radius:18px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px;scroll-snap-align:start;box-shadow:inset 0 -60px 40px -20px rgba(0,0,0,.45)}
+.vt-bolge span{color:#fff;font-weight:900;font-size:15px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.vt-veli{display:grid;gap:24px;align-items:center}
+.vt-veli h2{text-align:left}
+.vt-liste{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:14px}
+.vt-liste li{padding-left:34px;position:relative;font-size:16px;color:var(--muted);font-weight:600}
+.vt-liste li::before{content:"✓";position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center}
+.vt-liste b{color:var(--ink)}
+.vt-rapor{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 6px 0 var(--line)}
+.vt-rapor-bas{font-weight:900;font-size:17px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.vt-rapor-bas span{font-size:12px;color:var(--muted);border:2px solid var(--line);border-radius:999px;padding:2px 8px}
+.vt-cubuk{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;font-weight:800;font-size:14px;margin:8px 0}
+.vt-cubuk i{height:12px;background:var(--surface2);border-radius:99px;overflow:hidden;display:block} .vt-cubuk b{display:block;height:100%;border-radius:99px}
+.vt-cubuk em{font-style:normal;color:var(--muted);text-align:right}
+.vt-rapor-not{margin-top:12px;background:var(--surface2);border-radius:14px;padding:10px 12px;font-size:14px;font-weight:600}
+.vt-sss{background:var(--surface);border:2px solid var(--line);border-radius:16px;margin:10px auto;max-width:720px}
+.vt-sss summary{cursor:pointer;font-weight:900;padding:16px 44px 16px 16px;list-style:none;position:relative;min-height:44px}
+.vt-sss summary::-webkit-details-marker{display:none}
+.vt-sss summary::after{content:"+";position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--brand)}
+.vt-sss[open] summary::after{content:"−"}
+.vt-sss p{margin:0;padding:0 16px 16px;color:var(--muted);font-weight:600}
+.vt-son{text-align:center;padding-top:36px;padding-bottom:40px;border-top:2px solid var(--line)}
+.vt-son-pi{width:150px;height:auto} .vt-son h2{font-size:clamp(26px,5vw,38px);margin:8px 0 18px}
+.vt-son .btn{max-width:360px;margin:0 auto}
+.vt-alt-bilgi{border-top:2px solid var(--line);padding-top:20px;padding-bottom:calc(28px + env(safe-area-inset-bottom));text-align:center}
+.vt-alt-bilgi nav{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px}
+.vt-alt-bilgi a{color:var(--brand);font-weight:800;text-decoration:none;padding:10px 0;display:inline-block}
+.vt-alt-bilgi p{color:var(--muted);font-size:14px;margin:8px 0 0}
+@media (min-width:760px){
+  .vt-hero{grid-template-columns:1fr 1.1fr;text-align:left;padding-top:30px;padding-bottom:60px}
+  .vt-hero-pi{order:2} .vt-pi{width:min(420px,40vw)}
+  .vt-alt{margin-left:0} .vt-cta{margin:0;grid-template-columns:1fr 1fr;max-width:560px} .vt-cta .btn{font-size:15px}
+  .vt-kartlar{grid-template-columns:1fr 1fr}
+  .vt-bolgeler{grid-auto-flow:row;grid-template-columns:repeat(4,1fr);overflow:visible}
+  .vt-veli{grid-template-columns:1.1fr 1fr} .vt-bolum{padding-top:56px;padding-bottom:56px}
+}
+@media (prefers-reduced-motion:reduce){.vt-pi{animation:none}}
+.vt-pi{border-radius:32px}
+.vt-bolge-cta{border:0;cursor:pointer;background:var(--brand);box-shadow:0 4px 0 var(--brand-d);flex-direction:column;justify-content:center;align-items:center;gap:6px;font-family:inherit}
+.vt-bolge-cta b{font-size:40px} .vt-bolge-cta span{text-shadow:none;font-size:17px}
+@media (max-width:759px){.vt-pi{width:min(250px,64vw)}}

@@ -7,10 +7,23 @@
 <meta name="description" content="5. sınıf Maarif matematiğini oyun gibi, kişiye özel öğreten uygulama.">
 <meta name="theme-color" content="#5B4BFF">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="img/simge2_192.png" type="image/png"><link rel="apple-touch-icon" href="img/simge2_192.png"><script src="config.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>#acilis{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#F5F3FF;color:#2A2660;font:800 22px system-ui,-apple-system,"Segoe UI",sans-serif;z-index:99}#acilis img{width:112px;height:112px;border-radius:28px;box-shadow:0 10px 28px rgba(60,40,200,.3);animation:acZ 1.2s ease-in-out infinite}#acilis i{width:120px;height:6px;border-radius:6px;background:rgba(91,75,255,.18);overflow:hidden;position:relative}#acilis i:after{content:"";position:absolute;inset:0;width:40%;border-radius:6px;background:#5B4BFF;animation:acY 1s ease-in-out infinite alternate}@keyframes acZ{50%{transform:translateY(-8px)}}@keyframes acY{to{transform:translateX(150%)}}@media (prefers-color-scheme:dark){#acilis{background:#12142B;color:#fff}}@media (prefers-reduced-motion:reduce){#acilis img,#acilis i:after{animation:none}}</style>
-<style>:root{
+<style>/* Yazi tipleri kendi sitemizden (05.11.2026): Google Fonts'a cocugun IP'si gitmesin (KVKK yurt disi aktarim). Kaynak @fontsource 5.1.0, SIL OFL lisansi (font/LICENSE-*.txt) */
+@font-face{font-family:'Nunito';font-style:normal;font-weight:600;font-display:swap;src:url(font/nunito-latin-ext-600-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:600;font-display:swap;src:url(font/nunito-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:700;font-display:swap;src:url(font/nunito-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:700;font-display:swap;src:url(font/nunito-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:800;font-display:swap;src:url(font/nunito-latin-ext-800-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:800;font-display:swap;src:url(font/nunito-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:900;font-display:swap;src:url(font/nunito-latin-ext-900-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:900;font-display:swap;src:url(font/nunito-latin-900-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Lexend';font-style:normal;font-weight:400;font-display:swap;src:url(font/lexend-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Lexend';font-style:normal;font-weight:400;font-display:swap;src:url(font/lexend-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Lexend';font-style:normal;font-weight:600;font-display:swap;src:url(font/lexend-latin-ext-600-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Lexend';font-style:normal;font-weight:600;font-display:swap;src:url(font/lexend-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Lexend';font-style:normal;font-weight:700;font-display:swap;src:url(font/lexend-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Lexend';font-style:normal;font-weight:700;font-display:swap;src:url(font/lexend-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
   --bg:#F5F4FF; --surface:#FFFFFF; --surface2:#F0EFFA; --ink:#1E1B4B; --muted:#6B6893; --line:#E3E1F3;
   --brand:#5B4BFF; --brand-d:#4334D9; --brand-t:#E8E5FF;
   --accent:#FF9F1C; --accent-d:#D97F00;
@@ -973,6 +986,70 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .sec-kart.on{border-color:var(--brand)}
 .sec-av{width:46px;height:46px;border-radius:50%;color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;flex:none}
 .sec-yeni{margin-top:12px}.sec-yeni input{min-height:48px;border-radius:12px;border:2px solid var(--line);padding:0 12px;font:inherit;background:var(--card,#fff);color:var(--ink)}
+
+/* ---------- Vitrin (tanıtım sayfası, 05.11.2026) ---------- */
+#app.genis{max-width:none}
+.vt{--vt-w:1040px;width:100%;overflow-x:hidden}
+.vt>section,.vt>header,.vt>footer{max-width:var(--vt-w);margin:0 auto;padding-left:16px;padding-right:16px}
+.vt-ust{display:flex;align-items:center;justify-content:space-between;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:12px}
+.vt-logo{display:flex;align-items:center;gap:10px;font-size:20px;color:var(--brand)} .vt-logo img{border-radius:10px}
+.vt-link{background:none;border:0;color:var(--brand);font-weight:900;font-size:15px;padding:12px 4px;cursor:pointer;min-height:44px}
+.vt-hero{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;padding-top:8px;padding-bottom:40px;text-align:center}
+.vt-pi{width:min(300px,72vw);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 18px 24px rgba(91,75,255,.25));animation:vtSuz 4s ease-in-out infinite}
+@keyframes vtSuz{50%{transform:translateY(-8px)}}
+.vt-hero h1{font-size:clamp(32px,7.5vw,54px);line-height:1.08;margin:6px 0 12px}
+.vt-alt{font-size:clamp(17px,2.4vw,21px);color:var(--muted);font-weight:700;margin:0 auto 22px;max-width:34ch}
+.vt-cta{display:grid;gap:14px;max-width:360px;margin:0 auto}
+.vt-guven{font-size:14px;color:var(--muted);font-weight:800;margin:18px 0 0}
+.vt-bolum{padding-top:36px;padding-bottom:36px;border-top:2px solid var(--line)}
+.vt-bolum h2{font-size:clamp(25px,4.6vw,36px);line-height:1.15;text-align:center}
+.vt-giris{text-align:center;color:var(--muted);font-weight:700;max-width:52ch;margin:10px auto 24px}
+.vt-kartlar{display:grid;grid-template-columns:1fr;gap:14px}
+.vt-kart{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 4px 0 var(--line);display:grid;grid-template-columns:76px 1fr;column-gap:14px;align-items:start}
+.vt-kart-img{width:76px;height:76px;object-fit:contain;grid-row:span 2}
+.vt-kart h3{font-size:19px;margin:4px 0 4px} .vt-kart p{margin:0;color:var(--muted);font-size:15px;font-weight:600}
+.vt-bolgeler{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.vt-bolge{height:150px;border-radius:18px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px;scroll-snap-align:start;box-shadow:inset 0 -60px 40px -20px rgba(0,0,0,.45)}
+.vt-bolge span{color:#fff;font-weight:900;font-size:15px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.vt-veli{display:grid;gap:24px;align-items:center}
+.vt-veli h2{text-align:left}
+.vt-liste{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:14px}
+.vt-liste li{padding-left:34px;position:relative;font-size:16px;color:var(--muted);font-weight:600}
+.vt-liste li::before{content:"✓";position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center}
+.vt-liste b{color:var(--ink)}
+.vt-rapor{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 6px 0 var(--line)}
+.vt-rapor-bas{font-weight:900;font-size:17px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.vt-rapor-bas span{font-size:12px;color:var(--muted);border:2px solid var(--line);border-radius:999px;padding:2px 8px}
+.vt-cubuk{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;font-weight:800;font-size:14px;margin:8px 0}
+.vt-cubuk i{height:12px;background:var(--surface2);border-radius:99px;overflow:hidden;display:block} .vt-cubuk b{display:block;height:100%;border-radius:99px}
+.vt-cubuk em{font-style:normal;color:var(--muted);text-align:right}
+.vt-rapor-not{margin-top:12px;background:var(--surface2);border-radius:14px;padding:10px 12px;font-size:14px;font-weight:600}
+.vt-sss{background:var(--surface);border:2px solid var(--line);border-radius:16px;margin:10px auto;max-width:720px}
+.vt-sss summary{cursor:pointer;font-weight:900;padding:16px 44px 16px 16px;list-style:none;position:relative;min-height:44px}
+.vt-sss summary::-webkit-details-marker{display:none}
+.vt-sss summary::after{content:"+";position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--brand)}
+.vt-sss[open] summary::after{content:"−"}
+.vt-sss p{margin:0;padding:0 16px 16px;color:var(--muted);font-weight:600}
+.vt-son{text-align:center;padding-top:36px;padding-bottom:40px;border-top:2px solid var(--line)}
+.vt-son-pi{width:150px;height:auto} .vt-son h2{font-size:clamp(26px,5vw,38px);margin:8px 0 18px}
+.vt-son .btn{max-width:360px;margin:0 auto}
+.vt-alt-bilgi{border-top:2px solid var(--line);padding-top:20px;padding-bottom:calc(28px + env(safe-area-inset-bottom));text-align:center}
+.vt-alt-bilgi nav{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px}
+.vt-alt-bilgi a{color:var(--brand);font-weight:800;text-decoration:none;padding:10px 0;display:inline-block}
+.vt-alt-bilgi p{color:var(--muted);font-size:14px;margin:8px 0 0}
+@media (min-width:760px){
+  .vt-hero{grid-template-columns:1fr 1.1fr;text-align:left;padding-top:30px;padding-bottom:60px}
+  .vt-hero-pi{order:2} .vt-pi{width:min(420px,40vw)}
+  .vt-alt{margin-left:0} .vt-cta{margin:0;grid-template-columns:1fr 1fr;max-width:560px} .vt-cta .btn{font-size:15px}
+  .vt-kartlar{grid-template-columns:1fr 1fr}
+  .vt-bolgeler{grid-auto-flow:row;grid-template-columns:repeat(4,1fr);overflow:visible}
+  .vt-veli{grid-template-columns:1.1fr 1fr} .vt-bolum{padding-top:56px;padding-bottom:56px}
+}
+@media (prefers-reduced-motion:reduce){.vt-pi{animation:none}}
+.vt-pi{border-radius:32px}
+.vt-bolge-cta{border:0;cursor:pointer;background:var(--brand);box-shadow:0 4px 0 var(--brand-d);flex-direction:column;justify-content:center;align-items:center;gap:6px;font-family:inherit}
+.vt-bolge-cta b{font-size:40px} .vt-bolge-cta span{text-shadow:none;font-size:17px}
+@media (max-width:759px){.vt-pi{width:min(250px,64vw)}}
 </style>
 </head>
 <body>
@@ -5942,17 +6019,69 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       <div style="flex:1"></div>${pilotAcik() && !(A.st.olcme && A.st.olcme.on) ? `<button class="btn" data-act="onb-finish" data-v="olcme" ${d.motivation ? '' : 'disabled'}>Kısa teste başla (10 soru)</button>` : `<button class="btn" data-act="onb-finish" ${d.motivation ? '' : 'disabled'}>Seviyemi belirle (7 soru)</button>`}<button class="btn ghost" data-act="onb-finish-skip" ${d.motivation ? '' : 'disabled'}>Sıfırdan başla</button></div>`;
   }
 
+
+  /* =================== VİTRİN (05.11.2026) ===================
+     Kaydı olmayan, ilk kez gelen ziyaretçiye uygulamayı anlatan tanıtım sayfası (Duolingo ana sayfası gibi).
+     Görmeyenler: kayıtlı çocuk, pilot bağlantısıyla gelen veli, ana ekrana eklenmiş / Play'den kurulmuş uygulama. */
+  const vitrinUygulamaMi = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true || document.referrer.indexOf('android-app://') === 0; } catch (e) { return false; } };
+  const vitrinGecti = () => { try { return localStorage.getItem('my_vitrin_gecti') === '1'; } catch (e) { return true; } };
+  const vitrinGoster = () => !A.st.profile && !A.secici && !pilotDavet() && !vitrinUygulamaMi() && !vitrinGecti() && E.profiller().liste.length < 2;
+  function viewVitrin() {
+    const img = (f, alt, cls) => `<img src="${PI_GORSEL}${f}" alt="${alt}" class="${cls || ''}" loading="lazy" decoding="async">`;
+    const kart = (g, b, t) => `<div class="vt-kart">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
+    const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" style="background-image:url(${PI_GORSEL}fon_${k}.webp)"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
+    const sss = [
+      ['Ücretli mi?', 'Şu an bütün konular ve özellikler ücretsiz. İleride ek özellikler için isteğe bağlı bir aile aboneliği gelebilir; uygulamada reklam ve elmas satışı hiçbir zaman olmayacak.'],
+      ['Hesap açmak gerekiyor mu?', 'Hayır. E-posta, telefon ya da gerçek ad istemiyoruz; çocuğunuz bir takma adla hemen başlar. İlerleme telefonda saklanır.'],
+      ['Ders kitabıyla uyumlu mu?', 'Konular ve sıralama 5. sınıf Maarif Modeli matematik programına göre hazırlandı; okulda işlenen haftanın konusu haritada işaretlenir. Sorular ve anlatımlar bize aittir, ders kitabından kopyalanmaz. Matematik Yolu, Millî Eğitim Bakanlığının resmî uygulaması değildir.'],
+      ['Telefon değişirse ilerleme kaybolur mu?', 'Veli alanından bulut yedeğini açarsanız kaybolmaz. Yeni telefonda aile kodu ya da çocuğun oyuncu adı ve resimli şifresiyle kaldığı yerden devam eder.'],
+      ['Aynı telefonu iki kardeş kullanabilir mi?', 'Evet. Her çocuk kendi adıyla girer; ilerlemeleri, rozetleri ve veli raporları ayrı tutulur.'],
+      ['Çocuğumun verileri nerede?', 'Varsayılan olarak yalnızca telefonda. Yedek, hatırlatma ya da geliştirme araştırması gibi internete veri gönderen özellikler yalnızca siz şifreli Veli alanından onay verirseniz açılır. Ayrıntılar gizlilik politikasında.']
+    ].map(([q, a]) => `<details class="vt-sss"><summary>${q}</summary><p>${a}</p></details>`).join('');
+    return `<div class="vt">
+      <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik Yolu</b></div><button class="vt-link" data-act="vt-giris">Devam ediyorum</button></header>
+      <section class="vt-hero"><div class="vt-hero-pi">${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
+        <div class="vt-hero-yazi"><h1>Matematiği oyun gibi öğren.</h1>
+        <p class="vt-alt">5. sınıf matematiği için, her çocuğa kendi yolunu çizen ve hatasından öğreten ücretsiz uygulama.</p>
+        <div class="vt-cta"><button class="btn" data-act="vt-basla">Hemen başla</button><button class="btn ghost" data-act="vt-giris">Başka telefonda kullanıyordum</button></div>
+        <p class="vt-guven">Reklamsız · Hesap gerekmez · Maarif Modeli programına uygun</p></div></section>
+      <section class="vt-bolum"><h2>Her ders kısa ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
+        <div class="vt-kartlar">
+          ${kart('pi_roket.webp', 'Sana özel yol', 'Doğru ve yanlışlarına bakarak soruların zorluğunu ve tekrar zamanını ayarlar. Unutmaya başladığın konuyu sana yeniden getirir.')}
+          ${kart('pi_dusun.webp', 'Hatadan öğren', 'Yanlış şıkkın nedenini bilir: «Payda büyüdükçe kesir büyür» gibi bir tuzağa düştüysen tam onu anlatır, sonra kolay bir soruyla geri dönmeni sağlar.')}
+          ${kart('pi_konus.webp', 'Pi anlatıyor', 'Her konunun sesli mini dersi var: şekil adım adım çizilir, Pi anlatır. Görselle, hikâyeyle ya da kısa kuralla; hangisi işine yarıyorsa.')}
+          ${kart('sandik_acik.webp', 'Ödüller ve seri', 'Yıldızlar, sandıklar, çıkartma albümü, Pi\'nin kostümleri ve haftalık lig. Hepsi çalışarak kazanılır; hiçbiri parayla satılmaz.')}
+        </div></section>
+      <section class="vt-bolum vt-harita"><h2>Matematik Diyarı'nda 7 bölge, 35 konu</h2><p class="vt-giris">Doğal sayılardan olasılığa, okuldaki sırayla ilerleyen tek bir harita. Bu hafta okulda işlenen konu haritada işaretlenir.</p>
+        <div class="vt-bolgeler">${bolge}<button class="vt-bolge vt-bolge-cta" data-act="vt-basla"><b>🗺️</b><span>Yola çık →</span></button></div></section>
+      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><h2>Veliler için</h2>
+        <ul class="vt-liste">
+          <li><b>«Neyi neden yanlış yapıyor?»</b> Haftalık raporda güçlü ve zorlanılan konular, sık düşülen kavram yanılgıları ve öneriler.</li>
+          <li><b>Problem çözmenin hangi adımında zorlanıyor?</b> Anlama, plan yapma, hesaplama ve kontrol adımları ayrı ayrı ölçülür.</li>
+          <li><b>Şifreli veli alanı.</b> Rapor ve ayarlar çocuğun göremeyeceği, size ait bir bölümde.</li>
+          <li><b>Baskı yok.</b> Reklam, satın alma ısrarı, «can bitti» kilidi ya da suçlayıcı bildirim yok. Hatırlatma günde en fazla iki kez ve yalnızca siz açarsanız.</li>
+        </ul></div>
+        <div class="vt-rapor" aria-hidden="true"><div class="vt-rapor-bas">📊 Haftalık rapor <span>örnek</span></div>
+          ${[['Açılar', 86, 'var(--ok)'], ['Kesirler', 58, 'var(--accent)'], ['Alan ve çevre', 74, 'var(--blue)']].map(([a, y, r]) => `<div class="vt-cubuk"><span>${a}</span><i><b style="width:${y}%;background:${r}"></b></i><em>%${y}</em></div>`).join('')}
+          <div class="vt-rapor-not">🔎 Sık görülen tuzak: <b>paydası büyük olan kesir daha büyüktür</b> sanmak.</div>
+          <div class="vt-rapor-not">🧩 Hesaplamada değil, <b>problemi anlamada</b> zorlanıyor.</div></div></section>
+      <section class="vt-bolum"><h2>Sık sorulanlar</h2>${sss}</section>
+      <section class="vt-son">${img('pi_sevin.webp', '', 'vt-son-pi')}<h2>Pi seni bekliyor!</h2><button class="btn" data-act="vt-basla">Hemen başla</button></section>
+      <footer class="vt-alt-bilgi"><nav><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></nav><p>© 2026 Matematik Yolu</p></footer>
+    </div>`;
+  }
+
   /* =================== RENDER =================== */
   // Okuma kolaylığı: daha büyük yazı, geniş harf/kelime/satır aralığı, Lexend yazı tipi (yalnız açılınca indirilir; yoksa Nunito kalır)
   function kolayUygula() {
     const on = !!(A.st && A.st.settings && A.st.settings.kolay); document.documentElement.classList.toggle('kolay', on);
-    if (on && !document.getElementById('lexend')) { const l = document.createElement('link'); l.id = 'lexend'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap'; document.head.appendChild(l); }
   }
   function render() {
     kolayUygula();
     let h = '';
     if (A.secici) h = viewSecici();
     else if (pilotDavetGoster()) h = viewPilotDavet();
+    else if (vitrinGoster()) h = viewVitrin();
     else if (!A.st.profile) h = viewOnboard();
     else if (A.view === 'lesson') h = viewLesson();
     else if (A.view === 'end') h = viewEnd();
@@ -5961,8 +6090,9 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
     const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
+    $app.classList.toggle('genis', A._vitrin = vitrinGoster() && !A.secici && !pilotDavetGoster());
     $app.innerHTML = h;
-    A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
+    A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
       if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
@@ -6232,6 +6362,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
         o.step = o.step === 1 ? 3 : o.step + 1; render(); break; }
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
+      case 'vt-basla': try { localStorage.setItem('my_vitrin_gecti', '1'); } catch (e) {} A.onb = { step: 0, data: {} }; scrollTo(0, 0); render(); break;
+      case 'vt-giris': try { localStorage.setItem('my_vitrin_gecti', '1'); } catch (e) {} A.onb = { step: 'oyuncu', data: {} }; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; scrollTo(0, 0); render(); break;
       case 'onb-kod': A.onb.step = 'oyuncu'; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;
       case 'onb-kod-ac': A.onb.step = 'kod'; A.aileBulunan = null; A.oy = null; render(); break;
       case 'onb-oy-geri': A.aileBulunan = null; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;
