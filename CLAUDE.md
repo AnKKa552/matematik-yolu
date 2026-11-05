@@ -436,6 +436,7 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 - Tek dosya: HTML + CSS + saf JavaScript, kütüphane yok, derleme yok. `python3 build.py` → `dist/`.
 - Veri: tarayıcının `localStorage`'ı (cihazda). Çevrimdışı çalışır (`sw.js`).
 - Yayın: GitHub Pages / Netlify / Vercel (ücretsiz), Termux'tan `git push` ile.
+- **Alan adı (05.11.2026): `https://matematikyolu.com`** (Cloudflare Registrar, proje sahibinin hesabı; DNS Cloudflare'de: 4 A kaydı GitHub Pages IP'leri 185.199.108–111.153 + `www` CNAME → `ankka552.github.io`, hepsi **proxy kapalı/gri**; proxy açılırsa GitHub HTTPS sertifikası yenilenemez). GitHub Pages `docs/CNAME` dosyasını `build.py` yazar; HTTPS zorunlu. Eski adres `ankka552.github.io/matematik-yolu` yeni adrese yönlenir. **Tarayıcı kayıtları adrese bağlıdır**: bu adres bir daha değiştirilmemeli (çocukların ilerlemesi gider). Pilot bağlantısı: `https://matematikyolu.com/?pilot=<KOD>`.
 - Telefona kurulum: Chrome → "Ana ekrana ekle".
 
 ### Faz B — Sunucu (ücretli satış için gerekli) — KOD HAZIR, kurulum `sunucu/SUNUCU_KURULUM.md`
