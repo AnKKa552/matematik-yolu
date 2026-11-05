@@ -5,7 +5,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import * as webpush from "jsr:@negrel/webpush@0.5.0";
 
-const ILETISIM = "https://ankka552.github.io/matematik-yolu/";
+const ILETISIM = "https://matematikyolu.com/";
 const SON_DAKIKA = 20 * 60 + 30;           // 20.30'dan sonra asla
 const PENCERE = 60;                         // saatinden en fazla 60 dk sonra gönderilebilir (geciken iş eski bildirim atmasın)
 

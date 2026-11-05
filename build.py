@@ -32,7 +32,7 @@ for f in (S/'pwa').glob('*'):
 # Görseller (src/pwa/img) → dist/img ve docs/img
 if (S/'pwa'/'img').exists(): shutil.copytree(S/'pwa'/'img', D/'img', dirs_exist_ok=True)
 # Yayın kopyası: GitHub Pages docs/ klasöründen yayınlar
-P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch()
+P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch(); (P/'CNAME').write_text('matematikyolu.com\n')  # kendi alan adı (05.11.2026)
 for f in ['index.html', 'ogretmen.html', 'config.js', 'sw.js', 'manifest.webmanifest']:
     if (D/f).exists(): shutil.copy(D/f, P/f)
 if (D/'img').exists(): shutil.copytree(D/'img', P/'img', dirs_exist_ok=True)
