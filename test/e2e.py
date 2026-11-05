@@ -17,10 +17,19 @@ async def main():
         await pg.evaluate("window.MY_APP.st.settings.voice=false; window.MY_APP.st.settings.sound=false")
         await pg.screenshot(path=OUT+'01_welcome.png')
         await pg.click('[data-act=onb-next]')
+        assert (await pg.inner_text('[data-act=onb-next]')).strip().lower() == 'geç', 'Seçim yokken düğme Geç der'
+        await pg.click('[data-act=onb-sec][data-k=kaynak][data-v=ogretmen]'); await pg.wait_for_timeout(450)
+        assert 'selam' in await pg.inner_text('.onb-balon'), 'Pi seçime cevap verir'
+        await pg.screenshot(path=OUT+'02a_kaynak.png'); await pg.click('[data-act=onb-next]')
         await pg.fill('#f-name','Ela Yılmaz')
         await pg.screenshot(path=OUT+'02_info.png'); await pg.click('[data-act=onb-next]')
+        await pg.click('[data-act=onb-geri]'); assert await pg.input_value('#f-name') == 'Ela Yılmaz', 'Geri ok adı korur'; await pg.click('[data-act=onb-next]')
+        await pg.click('[data-act=onb-sec][data-k=his][data-v=zor]'); await pg.wait_for_timeout(450); await pg.screenshot(path=OUT+'02b_his.png'); await pg.click('[data-act=onb-next]')
+        await pg.click('[data-act=onb-sec][data-k=hedef][data-v="80"]'); await pg.wait_for_timeout(450); await pg.screenshot(path=OUT+'02c_hedef.png'); await pg.click('[data-act=onb-next]')
         await pg.click('[data-act=motiv][data-v=yaris]'); await pg.screenshot(path=OUT+'03_motiv.png')
         await pg.click('[data-act=onb-finish]')
+        pr = await pg.evaluate("[window.MY_APP.st.profile.kaynak, window.MY_APP.st.profile.his, window.MY_APP.st.dailyGoal]")
+        assert pr == ['ogretmen', 'zor', 80], f'Kayıt cevapları saklanır: {pr}'
         # yerleştirme: 7 soru, rastgele cevap
         async def bitir():
             # Ders sonu artık birkaç adımlı: yıldız ekranı → sandık (dokunarak aç) → görevler

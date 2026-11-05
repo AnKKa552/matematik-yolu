@@ -1030,7 +1030,7 @@
     if (!id && veli) { A.st.veli = JSON.parse(JSON.stringify(veli)); }
     A.secici = false; A.view = 'home'; A.tab = 'yol'; A.ses = null; A.q = null; A.fb = null; A.veliAcik = false; A.onb = { step: 0, data: {} };
     A.oy = null; A.oyModal = null; A.oyBulunan = null; A.aileBulunan = null; A._ekran = null; pilotSonAcilis = 0;
-    if (!id && rumuz) { A.onb.data.name = rumuz; if (!pilotDavet()) A.onb.step = 3; }
+    if (!id && rumuz) { A.onb.data.name = rumuz; A.onb.rumuzlu = true; if (!pilotDavet()) A.onb.step = 'his'; }
     if (A.st.profile) { E.save(A.st); pilotAcilis(); setTimeout(aileKontrol, 500); seriBak(); }
     render();
   }
@@ -1045,7 +1045,7 @@
   // Davet ekranındaki rumuz: kayıtlı değilse zorunlu. Bu telefonda aynı rumuzlu öğrenci varsa ona geçilir (kaldığı yerden).
   function pdRumuz() { if (A.st.profile) return true; const ad = ((document.getElementById('f-pd-ad') || {}).value || '').trim();
     if (ad.length < 2) { toast('Öğrencinin rumuzunu yazın (en az 2 harf).'); const i = document.getElementById('f-pd-ad'); if (i) i.focus(); return false; }
-    A.onb.data.name = ad; A.onb.step = 3; return true; }
+    A.onb.data.name = ad; A.onb.rumuzlu = true; A.onb.step = 'his'; return true; }
   function pdMevcut(karar) { if (A.st.profile) return false; const o = rumuzBul(A.onb.data.name); if (!o || o.aktif) return false;
     const bos = E.profilId(); A.st = E.profilSec(o.id); E.profilSil(bos); A.onb = { step: 0, data: {} }; A.secici = false;
     if (!(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar))) { if (karar === 'evet') { pilotKatil(pilotDavet()); return true; } A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); }
@@ -1550,29 +1550,60 @@
 
 
   /* ---------------- Karşılama / kayıt ---------------- */
+  /* Kayıt akışı (05.11.2026, proje sahibinin isteği: Duolingo'nun kayıt öncesi soruları gibi, kendimize özgü). Üstte ilerleme
+     çubuğu ve geri oku, solda konuşan Pi ve balonu, altında büyük seçenek kartları. Pi her seçime kısa bir cevap verir.
+     Sorular: nereden duydun, ad, matematikle aran, günlük hedef, seni ne mutlu eder. Ad dışındakiler «Geç» ile atlanabilir
+     (veri minimizasyonu). Yaş sorulmaz: uygulama zaten 5. sınıf için; çocuğun yaşını bilmek gerekmez (§1-6). Cevaplar
+     yalnız bu telefonda kalır (profile.kaynak, profile.his); günlük hedef A.st.dailyGoal olur. */
+  const onbAkis = () => A.onb.rumuzlu ? [0, 'his', 'hedef', 3] : [0, 'kaynak', 1, 'his', 'hedef', 3];
+  const ONB_KAYNAK = [['ogretmen', '🧑‍🏫', 'Öğretmenimden'], ['aile', '👨‍👩‍👧', 'Ailemden'], ['arkadas', '🧒', 'Arkadaşımdan'], ['youtube', '▶️', 'YouTube\'dan'], ['sosyal', '📱', 'Instagram / TikTok'], ['google', '🔍', 'Google\'da aradım'], ['diger', '💬', 'Başka bir yerden']];
+  const ONB_KAYNAK_CEVAP = { ogretmen: 'Öğretmenine benden selam söyle! 👋', aile: 'Ailen seni çok düşünüyor! 💛', arkadas: 'Arkadaşın iyi bir öneri yapmış! 🤝', youtube: 'Videodan buraya, hoş geldin! 🎬', sosyal: 'Ekrandan buraya ışınlandın! ✨', google: 'Araştırmayı seven birine benziyorsun! 🔎', diger: 'Nereden gelirsen gel, hoş geldin! 🌸' };
+  const ONB_HIS = [['zor', '😟', 'Zorlanıyorum', 'Bazı konular kafamı karıştırıyor'], ['idare', '🙂', 'İdare eder', 'Bazen kolay, bazen zor'], ['sev', '😄', 'Seviyorum', 'Matematik eğlenceli'], ['usta', '🤩', 'Çok iyiyim', 'Zor sorular istiyorum']];
+  const ONB_HIS_CEVAP = { zor: 'Merak etme, adım adım gideceğiz. Hata yapmak öğrenmenin bir parçası! 🌱', idare: 'Güzel! Eksik yerleri birlikte bulup tamamlayacağız. 🧩', sev: 'Harika! O zaman çok eğleneceğiz. 🎉', usta: 'Süper! Sana zorlayıcı sorular da hazırladım. 🚀' };
+  const ONB_HEDEF = [[20, '🌱', 'Isınma', 'Günde birkaç soru'], [50, '🙂', 'Rahat', 'Günde yarım ders'], [80, '💪', 'Düzenli', 'Günde bir ders'], [120, '🔥', 'Hırslı', 'Günde bir dersten fazla']];
+  const ONB_MOTIV = [['yaris', '🏆', 'Yarışmak', 'Ligde yükselmek, rekor kırmak'], ['koleksiyon', '🏅', 'Toplamak', 'Rozet, çıkartma ve elmas biriktirmek'], ['kesif', '🧭', 'Keşfetmek', 'Hikâyeler ve yeni konular keşfetmek']];
+  const ONB_MOTIV_CEVAP = { yaris: 'Bir yarışçı! Haftalık ligde görüşürüz. 🏁', koleksiyon: 'Albümünü birlikte dolduracağız! 📒', kesif: 'Matematik Diyarı\'nda keşfedecek çok yer var! 🗺️' };
+  function onbPiImg(f, boy) { return PI_GORSEL ? `<img src="${PI_GORSEL}${f}" alt="Pi" width="${boy}" height="${boy}" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',${boy})">` : mascot('happy', boy); }
+  function onbUst() {
+    const akis = onbAkis(), i = Math.max(0, akis.indexOf(A.onb.step)), y = Math.round(i / (akis.length - 1) * 100);
+    return `<div class="onb-ust"><button class="onb-geri" data-act="onb-geri" aria-label="Geri">←</button><div class="onb-bar" role="progressbar" aria-valuenow="${y}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(6, y)}%"></i></div></div>`;
+  }
+  // Pi ve konuşma balonu; balon metni değişince yeniden "patlar", aynı kalınca kıpırdamaz
+  function onbPi(yazi, gorsel) {
+    const yeni = A._onbBalon !== yazi; A._onbBalon = yazi;
+    return `<div class="onb-pi"><div class="onb-pi-g ${yeni ? 'yeni' : ''}">${onbPiImg(gorsel || 'pi_konus.webp', 96)}</div><div class="onb-balon ${yeni ? 'yeni' : ''}" aria-live="polite">${yazi}</div></div>`;
+  }
+  function onbSecenekler(alan, liste, secili) {
+    const ilk = A._onbAdim !== A.onb.step; A._onbAdim = A.onb.step;
+    return `<div class="onb-secler ${ilk ? 'giris' : ''}">${liste.map(([k, ic, t, alt], i) => `<button class="onb-sec ${String(secili) === String(k) ? 'on' : ''}" data-act="${alan === 'motivation' ? 'motiv' : 'onb-sec'}" data-k="${alan}" data-v="${k}" style="--i:${i}"><span class="ic" aria-hidden="true">${ic}</span><span class="yz"><b>${t}</b>${alt ? `<small>${alt}</small>` : ''}</span></button>`).join('')}</div>`;
+  }
   function viewOnboard() {
-    const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
-    if (o.step === 0 && E.profiller().liste.length > 1 && !A.onbGeriYok) { const h0 = viewOnboard0(); return h0.replace('<div class="onb">', '<div class="onb"><button class="chip" data-act="onb-iptal" style="align-self:flex-start">← Oyunculara dön</button>'); }
-    if (o.step === 0) return viewOnboard0();
+    if (A.onb.step === 0 && E.profiller().liste.length > 1 && !A.onbGeriYok) { const h0 = viewOnboard0(); return h0.replace('<div class="onb onb-0">', '<div class="onb onb-0"><button class="chip" data-act="onb-iptal" style="align-self:flex-start">← Oyunculara dön</button>'); }
+    if (A.onb.step === 0) return viewOnboard0();
     return viewOnboard1();
   }
-  function viewOnboard0() { const o = A.onb, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
-    return `<div class="onb">${dots}<div class="center" style="margin-top:18px">${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center" style="font-size:30px">Merhaba, ben Pi!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
+  function viewOnboard0() { A._onbBalon = null; A._onbAdim = 0;
+    const semboller = ['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('');
+    return `<div class="onb onb-0"><div class="onb-hero"><div class="onb-semboller" aria-hidden="true">${semboller}</div>${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center onb-baslik">Merhaba, ben <em>Pi</em>!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
   }
-  function viewOnboard1() { const o = A.onb, d = o.data, dots = `<div class="dots">${[0, 1, 3].map(i => `<i class="${i === o.step ? 'on' : ''}"></i>`).join('')}</div>`;
-    if (o.step === 'oyuncu') return `<div class="onb">${dots}<h2>Tekrar hoş geldin! 👋</h2>
+  function viewOnboard1() { const o = A.onb, d = o.data;
+    if (o.step === 'oyuncu') return `<div class="onb"><h2>Tekrar hoş geldin! 👋</h2>
       ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'onb-oy-geri') : `<p class="muted">Oyuncu adını ve 3 resmini gir; ilerlemen bu telefona gelsin.</p>${oyGirisHtml(`<button class="btn ghost" data-act="onb-kod-ac">🔑 Velimin aile kodu var</button><button class="btn ghost" data-act="onb-kod-geri">Geri</button>`)}`}</div>`;
-    if (o.step === 'kod') return `<div class="onb">${dots}<h2>Aile kodunla devam et</h2><p class="muted">Velinin aldığı aile kodunu yaz. İlerlemen bu telefona gelsin.</p>
+    if (o.step === 'kod') return `<div class="onb"><h2>Aile kodunla devam et</h2><p class="muted">Velinin aldığı aile kodunu yaz. İlerlemen bu telefona gelsin.</p>
       ${A.aileBulunan ? aileBulunanKart(A.aileBulunan, 'onb-kod-geri') : `<div class="field"><label>Aile kodu</label><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div>
       <p class="muted sm">Kod, eski telefonda Veli alanındaki "Yedek açık" kartında yazar.</p><div style="flex:1"></div><button class="btn" data-act="aile-bul" data-v="onb">Yedeği bul</button><button class="btn ghost" data-act="onb-kod-geri">Geri</button>`}</div>`;
-    if (o.step === 1) return `<div class="onb">${dots}<h2>Seni tanıyalım</h2>
-      <div class="field"><label>Sana ne diyelim?</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela" autocomplete="off" maxlength="30"></div>
-      <p class="muted sm" style="margin:4px 0 0">Sadece adın yeter. Pi seni bu adla çağıracak. 🙂</p>
-      <div style="flex:1"></div><button class="btn" data-act="onb-next">İleri</button></div>`;
-    const ch = (k, ic, t, s) => `<button class="card choice ${d.motivation === k ? 'on' : ''}" data-act="motiv" data-v="${k}"><span class="ic">${ic}</span><span><b>${t}</b><br><span class="muted sm">${s}</span></span></button>`;
-    return `<div class="onb">${dots}<h2>Seni en çok ne mutlu eder?</h2>
-      ${ch('yaris', '🏆', 'Yarışmak', 'Ligde arkadaşlarımı geçmek, rekor kırmak')}${ch('koleksiyon', '🏅', 'Toplamak', 'Rozet, taç ve elmas biriktirmek')}${ch('kesif', '🧭', 'Keşfetmek', 'Hikâyeler ve yeni konular keşfetmek')}
-      <div style="flex:1"></div>${pilotAcik() && !(A.st.olcme && A.st.olcme.on) ? `<button class="btn" data-act="onb-finish" data-v="olcme" ${d.motivation ? '' : 'disabled'}>Kısa teste başla (10 soru)</button>` : `<button class="btn" data-act="onb-finish" ${d.motivation ? '' : 'disabled'}>Seviyemi belirle (7 soru)</button>`}<button class="btn ghost" data-act="onb-finish-skip" ${d.motivation ? '' : 'disabled'}>Sıfırdan başla</button></div>`;
+    const ileri = (secili) => `<div class="onb-alt"><button class="btn ${secili ? '' : 'ghost'}" data-act="onb-next">${secili ? 'Devam et' : 'Geç'}</button></div>`;
+    if (o.step === 'kaynak') return `<div class="onb onb-soru">${onbUst()}${onbPi(d.kaynak ? ONB_KAYNAK_CEVAP[d.kaynak] : 'Matematik Yolu\'nu nereden duydun?', d.kaynak ? 'pi_sevin.webp' : 'pi_konus.webp')}${onbSecenekler('kaynak', ONB_KAYNAK, d.kaynak)}${ileri(d.kaynak)}</div>`;
+    if (o.step === 1) return `<div class="onb onb-soru">${onbUst()}${onbPi('Sana ne diyelim? Sadece adın yeter. 🙂')}
+      <div class="field onb-ad"><label for="f-name">Adın</label><input id="f-name" value="${esc(d.name || '')}" placeholder="Örn: Ela" autocomplete="off" maxlength="30"></div>
+      <p class="muted sm" style="margin:0">Pi seni bu adla çağıracak.</p>
+      <div class="onb-alt"><button class="btn" data-act="onb-next">Devam et</button></div></div>`;
+    if (o.step === 'his') return `<div class="onb onb-soru">${onbUst()}${onbPi(d.his ? ONB_HIS_CEVAP[d.his] : `${d.name ? esc(d.name) + ', m' : 'M'}atematikle aran nasıl?`, d.his && d.his !== 'zor' ? 'pi_sevin.webp' : 'pi_konus.webp')}${onbSecenekler('his', ONB_HIS, d.his)}${ileri(d.his)}</div>`;
+    if (o.step === 'hedef') { const h = ONB_HEDEF.find(x => x[0] === +d.hedef);
+      return `<div class="onb onb-soru">${onbUst()}${onbPi(h ? `${h[2]} hedef: her gün ${h[0]} XP. Sonra Ayarlar'dan değiştirebilirsin. ⚡` : 'Her gün ne kadar çalışmak istersin?', h ? 'pi_roket.webp' : 'pi_konus.webp')}${onbSecenekler('hedef', ONB_HEDEF.map(([k, ic, t, a]) => [k, ic, t, `${a} · ${k} XP`]), d.hedef)}${ileri(d.hedef)}</div>`; }
+    const bitir = pilotAcik() && !(A.st.olcme && A.st.olcme.on) ? `<button class="btn" data-act="onb-finish" data-v="olcme" ${d.motivation ? '' : 'disabled'}>Kısa teste başla (10 soru)</button>` : `<button class="btn" data-act="onb-finish" ${d.motivation ? '' : 'disabled'}>Seviyemi belirle (7 soru)</button>`;
+    return `<div class="onb onb-soru">${onbUst()}${onbPi(d.motivation ? ONB_MOTIV_CEVAP[d.motivation] : 'Son soru: seni en çok ne mutlu eder?', d.motivation ? 'pi_sevin.webp' : 'pi_konus.webp')}${onbSecenekler('motivation', ONB_MOTIV, d.motivation)}
+      <div class="onb-alt">${bitir}<button class="btn ghost" data-act="onb-finish-skip" ${d.motivation ? '' : 'disabled'}>Sıfırdan başla</button></div></div>`;
   }
 
 
@@ -1584,7 +1615,7 @@
   const vitrinGoster = () => !A.st.profile && !A.secici && !pilotDavet() && !vitrinUygulamaMi() && !vitrinGecti() && E.profiller().liste.length < 2;
   function viewVitrin() {
     const img = (f, alt, cls) => `<img src="${PI_GORSEL}${f}" alt="${alt}" class="${cls || ''}" loading="lazy" decoding="async">`;
-    const kart = (g, b, t) => `<div class="vt-kart">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
+    const kart = (g, b, t) => `<div class="vt-kart vt-gor">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
     const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" style="background-image:url(${PI_GORSEL}fon_${k}.webp)"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
     const sss = [
       ['Ücretli mi?', 'Şu an bütün konular ve özellikler ücretsiz. İleride ek özellikler için isteğe bağlı bir aile aboneliği gelebilir; uygulamada reklam ve elmas satışı hiçbir zaman olmayacak.'],
@@ -1596,35 +1627,71 @@
     ].map(([q, a]) => `<details class="vt-sss"><summary>${q}</summary><p>${a}</p></details>`).join('');
     return `<div class="vt">
       <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik Yolu</b></div><button class="vt-link" data-act="vt-giris">Devam ediyorum</button></header>
-      <section class="vt-hero"><div class="vt-hero-pi">${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
-        <div class="vt-hero-yazi"><h1>Matematiği oyun gibi öğren.</h1>
+      <section class="vt-hero"><div class="vt-hero-pi"><div class="vt-semboller" aria-hidden="true">${['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('')}</div>${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
+        <div class="vt-hero-yazi"><span class="vt-rozet">5. sınıf · 7 bölge · 35 konu</span><h1>Matematiği <em>oyun gibi</em> öğren.</h1>
         <p class="vt-alt">5. sınıf matematiği için, her çocuğa kendi yolunu çizen ve hatasından öğreten ücretsiz uygulama.</p>
         <div class="vt-cta"><button class="btn" data-act="vt-basla">Hemen başla</button><button class="btn ghost" data-act="vt-giris">Başka telefonda kullanıyordum</button></div>
         <p class="vt-guven">Reklamsız · Hesap gerekmez · Maarif Modeli programına uygun</p></div></section>
-      <section class="vt-bolum"><h2>Her ders kısa ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
+      <div class="vt-serit" aria-hidden="true"><div>${[0, 1].map(() => ['Her gün bir adım', 'Hatadan öğren', 'Pi seninle', 'Bugünün bölgesi seni bekliyor', 'Sandığı aç', 'Yıldızları topla'].map(t => `<span>${t}</span><b>✦</b>`).join('')).join('')}</div></div>
+      <section class="vt-bolum"><p class="vt-ust-yazi">01 · Nasıl çalışır</p><h2>Her ders <em>kısa</em> ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
         <div class="vt-kartlar">
           ${kart('pi_roket.webp', 'Sana özel yol', 'Doğru ve yanlışlarına bakarak soruların zorluğunu ve tekrar zamanını ayarlar. Unutmaya başladığın konuyu sana yeniden getirir.')}
           ${kart('pi_dusun.webp', 'Hatadan öğren', 'Yanlış şıkkın nedenini bilir: «Payda büyüdükçe kesir büyür» gibi bir tuzağa düştüysen tam onu anlatır, sonra kolay bir soruyla geri dönmeni sağlar.')}
           ${kart('pi_konus.webp', 'Pi anlatıyor', 'Her konunun sesli mini dersi var: şekil adım adım çizilir, Pi anlatır. Görselle, hikâyeyle ya da kısa kuralla; hangisi işine yarıyorsa.')}
           ${kart('sandik_acik.webp', 'Ödüller ve seri', 'Yıldızlar, sandıklar, çıkartma albümü, Pi\'nin kostümleri ve haftalık lig. Hepsi çalışarak kazanılır; hiçbiri parayla satılmaz.')}
         </div></section>
-      <section class="vt-bolum vt-harita"><h2>Matematik Diyarı'nda 7 bölge, 35 konu</h2><p class="vt-giris">Doğal sayılardan olasılığa, okuldaki sırayla ilerleyen tek bir harita. Bu hafta okulda işlenen konu haritada işaretlenir.</p>
+      <section class="vt-bolum vt-dene"><p class="vt-ust-yazi">02 · Hemen dene</p><h2>Bir soru çöz, <em>farkı hisset.</em></h2><p class="vt-giris">Yanlış yapmaktan korkma: Pi, yanlışın nedenini bilir.</p>
+        <div class="vt-demo vt-gor" id="vt-demo">${vitrinDemo()}</div></section>
+      <section class="vt-bolum vt-harita"><p class="vt-ust-yazi">03 · Harita</p><h2>Matematik Diyarı'nda <em>7 bölge,</em> 35 konu</h2><p class="vt-giris">Doğal sayılardan olasılığa, okuldaki sırayla ilerleyen tek bir harita. Bu hafta okulda işlenen konu haritada işaretlenir.</p>
         <div class="vt-bolgeler">${bolge}<button class="vt-bolge vt-bolge-cta" data-act="vt-basla"><b>🗺️</b><span>Yola çık →</span></button></div></section>
-      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><h2>Veliler için</h2>
+      <section class="vt-bolum vt-seri-bolum"><p class="vt-ust-yazi">04 · Seri ve ödüller</p><h2>Her gün bir adım. <em>Her adımda biraz daha ileri.</em></h2>
+        <div class="vt-seri vt-gor"><div class="vt-seri-bas"><span class="vt-alev">🔥</span><div><b>Bugün de geldin!</b><span>Kaçırdığın gün için seri koruyucun var; kimse seni suçlamaz.</span></div></div>
+          <div class="vt-gunler">${['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((g, i) => `<div class="vt-gun ${i < 5 ? 'dolu' : ''}" style="--i:${i}"><i>${i < 5 ? '🔥' : ''}</i><span>${g}</span></div>`).join('')}</div></div>
+        <div class="vt-ligler vt-gor">${[['🥉', 'Bronz'], ['🥈', 'Gümüş'], ['🥇', 'Altın'], ['💚', 'Zümrüt'], ['💎', 'Elmas']].map(([e, a], i) => `<div class="vt-lig" style="--i:${i}"><b>${e}</b><span>${a}</span></div>`).join('')}</div>
+        <p class="vt-giris" style="margin-bottom:0">Haftalık ligde XP topla, bir üst lige çık. Sandıklar, çıkartma albümü ve Pi'nin kostümleri çalışarak kazanılır.</p></section>
+      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><p class="vt-ust-yazi" style="text-align:left">05 · Veliler için</p><h2>Çocuğunuz <em>neyi neden</em> yanlış yapıyor?</h2>
         <ul class="vt-liste">
-          <li><b>«Neyi neden yanlış yapıyor?»</b> Haftalık raporda güçlü ve zorlanılan konular, sık düşülen kavram yanılgıları ve öneriler.</li>
+          <li><b>Haftalık rapor.</b> Raporda güçlü ve zorlanılan konular, sık düşülen kavram yanılgıları ve öneriler.</li>
           <li><b>Problem çözmenin hangi adımında zorlanıyor?</b> Anlama, plan yapma, hesaplama ve kontrol adımları ayrı ayrı ölçülür.</li>
           <li><b>Şifreli veli alanı.</b> Rapor ve ayarlar çocuğun göremeyeceği, size ait bir bölümde.</li>
           <li><b>Baskı yok.</b> Reklam, satın alma ısrarı, «can bitti» kilidi ya da suçlayıcı bildirim yok. Hatırlatma günde en fazla iki kez ve yalnızca siz açarsanız.</li>
         </ul></div>
-        <div class="vt-rapor" aria-hidden="true"><div class="vt-rapor-bas">📊 Haftalık rapor <span>örnek</span></div>
-          ${[['Açılar', 86, 'var(--ok)'], ['Kesirler', 58, 'var(--accent)'], ['Alan ve çevre', 74, 'var(--blue)']].map(([a, y, r]) => `<div class="vt-cubuk"><span>${a}</span><i><b style="width:${y}%;background:${r}"></b></i><em>%${y}</em></div>`).join('')}
+        <div class="vt-rapor vt-gor" aria-hidden="true"><div class="vt-rapor-bas">📊 Haftalık rapor <span>örnek</span></div>
+          ${[['Açılar', 86, 'var(--ok)'], ['Kesirler', 58, 'var(--accent)'], ['Alan ve çevre', 74, 'var(--blue)']].map(([a, y, r]) => `<div class="vt-cubuk"><span>${a}</span><i><b style="--w:${y}%;background:${r}"></b></i><em>%${y}</em></div>`).join('')}
           <div class="vt-rapor-not">🔎 Sık görülen tuzak: <b>paydası büyük olan kesir daha büyüktür</b> sanmak.</div>
           <div class="vt-rapor-not">🧩 Hesaplamada değil, <b>problemi anlamada</b> zorlanıyor.</div></div></section>
-      <section class="vt-bolum"><h2>Sık sorulanlar</h2>${sss}</section>
-      <section class="vt-son">${img('pi_sevin.webp', '', 'vt-son-pi')}<h2>Pi seni bekliyor!</h2><button class="btn" data-act="vt-basla">Hemen başla</button></section>
+      <section class="vt-bolum"><p class="vt-ust-yazi">06 · Merak edilenler</p><h2>Sık sorulanlar</h2>${sss}</section>
+      <section class="vt-son">${img('pi_sevin.webp', '', 'vt-son-pi')}<h2>Pi seni <em>bekliyor!</em></h2><button class="btn" data-act="vt-basla">Hemen başla</button></section>
       <footer class="vt-alt-bilgi"><nav><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></nav><p>© 2026 Matematik Yolu</p></footer>
     </div>`;
+  }
+
+  /* Vitrinde tek soruluk deneme (ezelingo'nun «Bir ders dene» bölümünden esinlendi, kendi içeriğimiz): yanlış şıkkın
+     kavram yanılgısı açıklanır, doğruda kutlama. Sayfanın yalnız bu kutusu yenilenir (kaydırma ve görünme animasyonları bozulmasın). */
+  const VT_PIZZA = (n, renk) => { const r = 34, c = 40; let d = ''; for (let i = 0; i < n; i++) { const a0 = -Math.PI / 2 + i * 2 * Math.PI / n, a1 = a0 + 2 * Math.PI / n;
+      d += `<path d="M${c} ${c}L${(c + r * Math.cos(a0)).toFixed(1)} ${(c + r * Math.sin(a0)).toFixed(1)}A${r} ${r} 0 0 1 ${(c + r * Math.cos(a1)).toFixed(1)} ${(c + r * Math.sin(a1)).toFixed(1)}Z" fill="${i === 0 ? renk : '#FFE7B3'}" stroke="#C47A1E" stroke-width="2"/>`; }
+    return `<svg viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">${d}</svg>`; };
+  const VT_DEMO = [
+    { t: `${U.fr(1, 8)}`, mis: 'Payda büyüdükçe kesir büyür sanmak, en sık düşülen tuzaklardan biri! Pizzayı 8 parçaya bölersen her dilim <b>daha küçük</b> olur.' },
+    { t: `${U.fr(1, 4)}`, ok: true },
+    { t: 'İkisi eşit', mis: 'Pay ikisinde de 1, ama bütünler farklı sayıda parçaya bölünmüş. 4 parçaya bölünen pizzanın dilimi <b>daha büyük</b>.' }];
+  function vitrinDemo() { const d = A.vtDemo;
+    const soru = `<div class="vt-demo-soru"><div class="vt-demo-pi">${onbPiImg(d != null ? (VT_DEMO[d].ok ? 'pi_sevin.webp' : 'pi_dusun.webp') : 'pi_konus.webp', 84)}</div><p>Bir pizza 4, diğeri 8 eşit dilime bölündü. Hangi dilim <b>daha büyük</b>?</p></div>`;
+    const siklar = `<div class="vt-demo-siklar">${VT_DEMO.map((o, i) => `<button class="opt ${i === d ? (o.ok ? 'right' : 'wrong') : ''}" data-act="vt-demo" data-v="${i}" ${d != null && VT_DEMO[d].ok ? 'disabled' : ''}><span>${o.t}</span></button>`).join('')}</div>`;
+    let fb = '';
+    if (d != null) fb = VT_DEMO[d].ok
+      ? `<div class="vt-demo-fb ok"><b>🎉 Harika!</b> 4 dilime bölünen pizzanın her dilimi daha büyüktür. Böyle 35 konu seni bekliyor.<button class="btn" data-act="vt-basla">Hemen başla</button></div>`
+      : `<div class="vt-demo-fb hata"><b>🤔 Bir daha düşün!</b> ${VT_DEMO[d].mis}<div class="vt-pizzalar">${VT_PIZZA(4, '#FF9F1C')}<span>${U.fr(1, 4)}</span>${VT_PIZZA(8, '#FF9F1C')}<span>${U.fr(1, 8)}</span></div></div>`;
+    return soru + siklar + fb;
+  }
+  // Kaydırınca beliren bölümler. Hareket azaltılmışsa ya da IntersectionObserver yoksa her şey baştan görünür.
+  function vitrinCanlandir() {
+    const kok = $app.querySelector('.vt'); if (!kok) return;
+    let az = false; try { az = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
+    if (az || !('IntersectionObserver' in window)) { kok.querySelectorAll('.vt-gor').forEach(e => e.classList.add('gorundu')); return; }
+    kok.classList.add('vt-anim');
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('gorundu'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: .12 });
+    kok.querySelectorAll('.vt-gor').forEach(e => io.observe(e));
   }
 
   /* =================== RENDER =================== */
@@ -1649,6 +1716,7 @@
     $app.classList.toggle('genis', A._vitrin = vitrinGoster() && !A.secici && !pilotDavetGoster());
     $app.innerHTML = h;
     A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
+    if (A._ekran === 'vitrin') vitrinCanlandir();
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
       if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
@@ -1915,9 +1983,14 @@
         const o = A.onb, d = o.data;
         if (o.step === 1) { d.name = (document.getElementById('f-name').value || '').trim(); if (!d.name) { toast('Adını yazar mısın? 🙂'); break; } }
         // Veli bilgileri ve onay çocuğun kaydında sorulmaz; veli bunları şifreli Veli alanında girer
-        o.step = o.step === 1 ? 3 : o.step + 1; render(); break; }
+        const akis = onbAkis(), i = akis.indexOf(o.step); o.step = akis[Math.min(i + 1, akis.length - 1)]; render(); scrollTo(0, 0); break; }
+      case 'onb-geri': { const akis = onbAkis(), i = akis.indexOf(A.onb.step); if (i > 0) { A.onb.step = akis[i - 1]; render(); scrollTo(0, 0); } break; }
+      case 'onb-sec': { const k = el.dataset.k; if (!['kaynak', 'his', 'hedef'].includes(k)) break; A.onb.data[k] = k === 'hedef' ? +v : v; render(); break; }
       case 'cloud-login': { const m = (document.getElementById('f-cloudmail').value || '').trim(); if (!/.+@.+\..+/.test(m)) { toast('Geçerli bir e-posta yazın.'); break; } CL.girisBaglantisi(m).then(() => toast('📩 Giriş bağlantısı gönderildi. E-postanızı açın.'), () => toast('Gönderilemedi, tekrar deneyin.')); break; }
       case 'cloud-logout': CL.cikis().then(() => render()); break;
+      case 'vt-demo': { if (A.vtDemo != null && VT_DEMO[A.vtDemo].ok) break; A.vtDemo = +v; const k = document.getElementById('vt-demo'); if (k) k.innerHTML = vitrinDemo();
+        if (VT_DEMO[+v].ok) { const r = el.getBoundingClientRect(); if (window.MY_FX) window.MY_FX.correct({ xp: 10, word: 'Harika!', origin: { x: r.left + r.width / 2, y: r.top } }); if (navigator.vibrate) try { navigator.vibrate(25); } catch (e) { } }
+        break; }
       case 'vt-basla': try { localStorage.setItem('my_vitrin_gecti', '1'); } catch (e) {} A.onb = { step: 0, data: {} }; scrollTo(0, 0); render(); break;
       case 'vt-giris': try { localStorage.setItem('my_vitrin_gecti', '1'); } catch (e) {} A.onb = { step: 'oyuncu', data: {} }; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; scrollTo(0, 0); render(); break;
       case 'onb-kod': A.onb.step = 'oyuncu'; A.aileBulunan = null; A.oyModal = false; A.oy = { mod: 'giris', ad: '', hayvan: null, sayi: '', resim: [] }; render(); break;
@@ -1963,7 +2036,7 @@
       case 'pi-hello': piSay('hosgeldin'); break;
       case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
-      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, created: Date.now() }; save(); if (act === 'onb-finish' && v === 'olcme') { A.olcmeForm = 'on'; startSession('olcme', null); } else if (act === 'onb-finish') startSession('placement', null); else render(); break; }
+      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, kaynak: d.kaynak, his: d.his, created: Date.now() }; if ([20, 50, 80, 120].includes(+d.hedef)) A.st.dailyGoal = +d.hedef; save(); if (act === 'onb-finish' && v === 'olcme') { A.olcmeForm = 'on'; startSession('olcme', null); } else if (act === 'onb-finish') startSession('placement', null); else render(); break; }
     }
   });
   document.addEventListener('keydown', (e) => {

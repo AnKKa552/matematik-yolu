@@ -65,8 +65,8 @@ async def main():
         b = await p.chromium.launch()
         # --- A telefonu: kayıt, biraz ilerleme, veli onayı, yedek ---
         ctxA, A, errA = await telefon(b)
-        await A.click('[data-act=onb-next]'); await A.fill('#f-name', 'Deniz')
-        await A.click('[data-act=onb-next]'); await A.click('[data-act=motiv][data-v=kesif]'); await A.click('[data-act=onb-finish-skip]')
+        await A.click('[data-act=onb-next]'); await A.click('[data-act=onb-next]'); await A.fill('#f-name', 'Deniz')
+        await A.click('[data-act=onb-next]'); await A.click('[data-act=onb-next]'); await A.click('[data-act=onb-next]'); await A.click('[data-act=motiv][data-v=kesif]'); await A.click('[data-act=onb-finish-skip]')
         await A.wait_for_timeout(300)
         await A.evaluate("""(()=>{const a=window.MY_APP; a.st.xp=850; a.st.streak=4; a.st.skills.g_temel.n=12; a.st.skills.g_temel.pL=.8; a.st.skills.n_okuma.n=6;
           a.st.profile.parentPhone='05321112233'; a.st.profile.parentName='Ayşe Hanım'; a.st.profile.parentEmail='veli@ornek.com'; a.view='home'; a.tab='veli'; window.MY_APP_RENDER();})()""")
@@ -149,7 +149,7 @@ async def main():
         ok(stC['xp'] == 990 and stC['kod'] == kod.replace('-', '') and stC['view'] == 'home' and stC['oy'] and stC['oy']['sayi'] == int(oyA['sayi']), 'C telefonuna ilerleme geldi, eşitleme aile koduyla sürer')
         # Kaba kuvvet: 5 yanlışta kilit (D telefonu, Ben sekmesinden; zaten kayıtlı çocuk)
         ctxD, D, errD = await telefon(b)
-        await D.click('[data-act=onb-next]'); await D.fill('#f-name', 'Ali'); await D.click('[data-act=onb-next]'); await D.click('[data-act=motiv][data-v=kesif]'); await D.click('[data-act=onb-finish-skip]'); await D.wait_for_timeout(300)
+        await D.click('[data-act=onb-next]'); await D.click('[data-act=onb-next]'); await D.fill('#f-name', 'Ali'); await D.click('[data-act=onb-next]'); await D.click('[data-act=onb-next]'); await D.click('[data-act=onb-next]'); await D.click('[data-act=motiv][data-v=kesif]'); await D.click('[data-act=onb-finish-skip]'); await D.wait_for_timeout(300)
         await D.evaluate("window.MY_APP.view='home'; window.MY_APP.tab='profil'; window.MY_APP_RENDER()")
         await D.click('[data-act=oy-ac]'); await D.wait_for_timeout(200)
         for n in range(5): await gir(D, 'Deniz', oyA['hayvan'], oyA['sayi'], (0, 0, n + 1))

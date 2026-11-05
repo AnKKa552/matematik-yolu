@@ -19,7 +19,7 @@ def ok(c, m):
     print(('✓ ' if c else 'HATA: ') + m)
     if not c: HATA.append(m)
 async def kayit(pg, ad):
-    await pg.click('[data-act=onb-next]'); await pg.fill('#f-name', ad); await pg.click('[data-act=onb-next]')
+    await pg.click('[data-act=onb-next]'); await pg.click('[data-act=onb-next]'); await pg.fill('#f-name', ad); await pg.click('[data-act=onb-next]'); await pg.click('[data-act=onb-next]'); await pg.click('[data-act=onb-next]')
     await pg.click('[data-act=motiv][data-v=kesif]'); await pg.click('[data-act=onb-finish-skip]'); await pg.wait_for_timeout(300)
 async def ben(pg):
     await pg.evaluate("(()=>{const a=window.MY_APP;a.view='home';a.tab='profil';window.MY_APP_RENDER();})()"); await pg.wait_for_timeout(150)
@@ -55,7 +55,7 @@ async def main():
         await pg.evaluate("(()=>{const a=window.MY_APP;a.st.xp=30;})()"); await pg.evaluate("localStorage.setItem(Object.keys(localStorage).find(k=>k.startsWith('matematik_yolu_v1:')), JSON.stringify(window.MY_APP.st))")
         # Uygulamayı yeniden aç
         await pg.reload(); await pg.wait_for_timeout(700)
-        ok(sorted(await secici_adlar(pg)) == ['Toprak', 'Ömer'], 'Açılışta «Kim oynuyor?» iki oyuncuyu gösterir')
+        _ad = await secici_adlar(pg); ok(sorted(_ad) == ['Toprak', 'Ömer'], f'Açılışta «Kim oynuyor?» iki oyuncuyu gösterir {_ad}')
         await pg.screenshot(path=OUT + 'profil_01_secici.png')
         await pg.click('.sec-kart:has-text("Toprak")'); await pg.wait_for_timeout(900)
         ok(await pg.evaluate("window.MY_APP.st.profile.name==='Toprak' && window.MY_APP.st.xp===120"), 'Toprak seçilince Toprak\'ın ilerlemesi gelir')
@@ -80,6 +80,7 @@ async def main():
         # ---- Pilot: kardeşlerin kaydı ayrı ----
         d = await sayfa(); await d.goto(APP + '?pilot=EV1'); await d.wait_for_timeout(600)
         await d.fill('#f-pd-ad', 'Ali'); await d.check('#f-pd-onay'); await d.click('[data-act=pd-katil]'); await d.wait_for_timeout(600)
+        await d.click('[data-act=onb-next]'); await d.click('[data-act=onb-next]')
         await d.click('[data-act=motiv][data-v=kesif]'); await d.click('[data-act=onb-finish-skip]'); await d.wait_for_timeout(300)
         c1 = await d.evaluate("window.MY_APP.st.pilot.cihaz")
         await d.evaluate("window.MY_APP_START('lesson','g_temel')"); await d.wait_for_timeout(1300)
@@ -87,6 +88,7 @@ async def main():
         await ben(d); await d.click('[data-act=oyuncu-ac]'); await d.click('[data-act=oyuncu-ekle]'); await d.wait_for_timeout(900)
         ok(await d.query_selector('[data-act=pd-katil]') is not None, 'Pilot telefonunda kardeşe de veli karşılaması gelir')
         await d.fill('#f-pd-ad', 'Ayşe'); await d.check('#f-pd-onay'); await d.click('[data-act=pd-katil]'); await d.wait_for_timeout(600)
+        await d.click('[data-act=onb-next]'); await d.click('[data-act=onb-next]')
         await d.click('[data-act=motiv][data-v=kesif]'); await d.click('[data-act=onb-finish-skip]'); await d.wait_for_timeout(300)
         c2 = await d.evaluate("window.MY_APP.st.pilot.cihaz")
         ok(c1 and c2 and c1 != c2 and len(KAT) == 2, 'Kardeşlerin pilot numaraları ayrı')
@@ -104,6 +106,7 @@ async def main():
         await ben(d); await d.click('[data-act=oyuncu-ac]'); await d.fill('#f-sec-ad', 'Deniz'); await d.click('[data-act=sec-gir]'); await d.wait_for_timeout(900)
         ok(await d.query_selector('#f-pd-ad') is not None and await d.input_value('#f-pd-ad') == 'Deniz', 'Yeni rumuz: veli karşılaması rumuzla dolu gelir')
         await d.check('#f-pd-onay'); await d.click('[data-act=pd-katil]'); await d.wait_for_timeout(600)
+        await d.click('[data-act=onb-next]'); await d.click('[data-act=onb-next]')
         await d.click('[data-act=motiv][data-v=kesif]'); await d.click('[data-act=onb-finish-skip]'); await d.wait_for_timeout(300)
         ok(await d.evaluate("window.MY_APP.st.profile.name==='Deniz' && window.MY_APP.st.xp===0") and len(KAT) == 3, 'Yeni rumuz ayrı kayıt ve ayrı pilot numarası')
         # Davet ekranında var olan rumuzu yazmak o kayda döndürür (yeni boş kayıt kalmaz)
