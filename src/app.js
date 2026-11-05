@@ -1615,8 +1615,11 @@
   const vitrinGoster = () => !A.st.profile && !A.secici && !pilotDavet() && !vitrinUygulamaMi() && !vitrinGecti() && E.profiller().liste.length < 2;
   function viewVitrin() {
     const img = (f, alt, cls) => `<img src="${PI_GORSEL}${f}" alt="${alt}" class="${cls || ''}" loading="lazy" decoding="async">`;
+    // Kostümlü Pi (Supabase gorsel deposu); gelmezse normal Pi
+    const kostum = (id, yedek, cls) => KOSTUM_KOK ? `<img src="${KOSTUM_KOK}${id}.png" alt="" class="${cls}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${PI_GORSEL}${yedek}'">` : img(yedek, '', cls);
     const kart = (g, b, t) => `<div class="vt-kart vt-gor">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
     const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" style="background-image:url(${PI_GORSEL}fon_${k}.webp)"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
+    const yildiz = Array.from({ length: 28 }, (_, i) => `<i style="left:${(i * 37) % 100}%;top:${(i * 53) % 100}%;--i:${i % 7}"></i>`).join('');
     const sss = [
       ['Ücretli mi?', 'Şu an bütün konular ve özellikler ücretsiz. İleride ek özellikler için isteğe bağlı bir aile aboneliği gelebilir; uygulamada reklam ve elmas satışı hiçbir zaman olmayacak.'],
       ['Hesap açmak gerekiyor mu?', 'Hayır. E-posta, telefon ya da gerçek ad istemiyoruz; çocuğunuz bir takma adla hemen başlar. İlerleme telefonda saklanır.'],
@@ -1625,15 +1628,20 @@
       ['Aynı telefonu iki kardeş kullanabilir mi?', 'Evet. Her çocuk kendi adıyla girer; ilerlemeleri, rozetleri ve veli raporları ayrı tutulur.'],
       ['Çocuğumun verileri nerede?', 'Varsayılan olarak yalnızca telefonda. Yedek, hatırlatma ya da geliştirme araştırması gibi internete veri gönderen özellikler yalnızca siz şifreli Veli alanından onay verirseniz açılır. Ayrıntılar gizlilik politikasında.']
     ].map(([q, a]) => `<details class="vt-sss"><summary>${q}</summary><p>${a}</p></details>`).join('');
+    const telefon = (f, alt, cls) => `<div class="vt-tel ${cls}"><div class="vt-tel-ekran">${img(f, alt, '')}</div></div>`;
     return `<div class="vt">
-      <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik Yolu</b></div><button class="vt-link" data-act="vt-giris">Devam ediyorum</button></header>
-      <section class="vt-hero"><div class="vt-hero-pi"><div class="vt-semboller" aria-hidden="true">${['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('')}</div>${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
-        <div class="vt-hero-yazi"><span class="vt-rozet">5. sınıf · 7 bölge · 35 konu</span><h1>Matematiği <em>oyun gibi</em> öğren.</h1>
-        <p class="vt-alt">5. sınıf matematiği için, her çocuğa kendi yolunu çizen ve hatasından öğreten ücretsiz uygulama.</p>
-        <div class="vt-cta"><button class="btn" data-act="vt-basla">Hemen başla</button><button class="btn ghost" data-act="vt-giris">Başka telefonda kullanıyordum</button></div>
-        <p class="vt-guven">Reklamsız · Hesap gerekmez · Maarif Modeli programına uygun</p></div></section>
+      <div class="vt-gece">
+        <div class="vt-yildizlar" aria-hidden="true">${yildiz}</div><div class="vt-aurora" aria-hidden="true"></div>
+        <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik Yolu</b></div><button class="vt-link" data-act="vt-giris">Devam ediyorum</button></header>
+        <section class="vt-hero"><div class="vt-hero-pi"><div class="vt-isik" aria-hidden="true"></div><div class="vt-semboller" aria-hidden="true">${['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('')}</div>${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
+          <div class="vt-hero-yazi"><span class="vt-rozet">📐 5. sınıf · 7 bölge · 35 konu</span><h1><span>Matematiği</span><span class="sari">oyun gibi öğren.</span></h1>
+          <p class="vt-alt">Her çocuğa kendi yolunu çizen, yanlışın nedenini bilen ve hatasından öğreten ücretsiz uygulama.</p>
+          <div class="vt-cta"><button class="btn vt-btn-sari" data-act="vt-basla">Hemen başla</button><button class="btn ghost vt-btn-cam" data-act="vt-giris">Başka telefonda kullanıyordum</button></div>
+          <p class="vt-guven">Reklamsız · Hesap gerekmez · Maarif Modeli programına uygun</p></div></section>
+      </div>
       <div class="vt-serit" aria-hidden="true"><div>${[0, 1].map(() => ['Her gün bir adım', 'Hatadan öğren', 'Pi seninle', 'Bugünün bölgesi seni bekliyor', 'Sandığı aç', 'Yıldızları topla'].map(t => `<span>${t}</span><b>✦</b>`).join('')).join('')}</div></div>
-      <section class="vt-bolum"><p class="vt-ust-yazi">01 · Nasıl çalışır</p><h2>Her ders <em>kısa</em> ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
+      <section class="vt-bolum vt-ilk"><p class="vt-ust-yazi">01 · Nasıl çalışır</p><h2>Her ders <em>kısa</em> ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
+        <div class="vt-teller vt-gor" aria-label="Uygulamadan ekranlar">${telefon('vt_anlatim.webp', 'Pi konuyu anlatıyor', 'sol')}${telefon('vt_harita.webp', 'Matematik Diyarı haritası', 'orta')}${telefon('vt_ders.webp', 'Ders sorusu', 'sag')}</div>
         <div class="vt-kartlar">
           ${kart('pi_roket.webp', 'Sana özel yol', 'Doğru ve yanlışlarına bakarak soruların zorluğunu ve tekrar zamanını ayarlar. Unutmaya başladığın konuyu sana yeniden getirir.')}
           ${kart('pi_dusun.webp', 'Hatadan öğren', 'Yanlış şıkkın nedenini bilir: «Payda büyüdükçe kesir büyür» gibi bir tuzağa düştüysen tam onu anlatır, sonra kolay bir soruyla geri dönmeni sağlar.')}
@@ -1642,14 +1650,28 @@
         </div></section>
       <section class="vt-bolum vt-dene"><p class="vt-ust-yazi">02 · Hemen dene</p><h2>Bir soru çöz, <em>farkı hisset.</em></h2><p class="vt-giris">Yanlış yapmaktan korkma: Pi, yanlışın nedenini bilir.</p>
         <div class="vt-demo vt-gor" id="vt-demo">${vitrinDemo()}</div></section>
-      <section class="vt-bolum vt-harita"><p class="vt-ust-yazi">03 · Harita</p><h2>Matematik Diyarı'nda <em>7 bölge,</em> 35 konu</h2><p class="vt-giris">Doğal sayılardan olasılığa, okuldaki sırayla ilerleyen tek bir harita. Bu hafta okulda işlenen konu haritada işaretlenir.</p>
+      <div class="vt-gece vt-avci-bant">
+        <section class="vt-bolum vt-avci"><p class="vt-ust-yazi">03 · Hata Avcısı</p><h2><span>Hatayı bul.</span> <span class="sari">Sebebini söyle.</span></h2>
+          <div class="vt-sinema vt-gor" aria-label="Dedektif Pi, Ece'nin defterindeki hatayı buluyor">
+            <div class="vt-sn-pi"><div class="vt-sn-isik" aria-hidden="true"></div>${kostum('dedektif', 'pi_dusun.webp', 'vt-sn-pi-img')}</div>
+            <div class="vt-defter"><div class="vt-defter-bas">✏️ Ece'nin defteri</div>
+              <ol><li><span>${U.fr(3, 4)} ile ${U.fr(3, 8)}: paylar eşit.</span></li><li class="hatali"><span>Paydası büyük olan daha büyüktür.</span><b class="vt-damga">HATA!</b></li><li><span>O hâlde ${U.fr(3, 8)} &gt; ${U.fr(3, 4)}.</span></li></ol>
+              <div class="vt-buyutec" aria-hidden="true">🔍</div><div class="vt-kivilcim" aria-hidden="true">${'<i></i>'.repeat(8)}</div></div>
+          </div>
+          <p class="vt-sn-yazi">Pi'nin dedektif oyunu: başkasının çözümündeki hatanın <b>ilk başladığı adımı</b> bul, kimin haklı olduğuna karar ver, hatanın sebebini söyle. Ezber değil, muhakeme.</p></section>
+      </div>
+      <section class="vt-bolum vt-harita"><p class="vt-ust-yazi">04 · Harita</p><h2>Matematik Diyarı'nda <em>7 bölge,</em> 35 konu</h2><p class="vt-giris">Doğal sayılardan olasılığa, okuldaki sırayla ilerleyen tek bir harita. Bu hafta okulda işlenen konu haritada işaretlenir.</p>
         <div class="vt-bolgeler">${bolge}<button class="vt-bolge vt-bolge-cta" data-act="vt-basla"><b>🗺️</b><span>Yola çık →</span></button></div></section>
-      <section class="vt-bolum vt-seri-bolum"><p class="vt-ust-yazi">04 · Seri ve ödüller</p><h2>Her gün bir adım. <em>Her adımda biraz daha ileri.</em></h2>
-        <div class="vt-seri vt-gor"><div class="vt-seri-bas"><span class="vt-alev">🔥</span><div><b>Bugün de geldin!</b><span>Kaçırdığın gün için seri koruyucun var; kimse seni suçlamaz.</span></div></div>
-          <div class="vt-gunler">${['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((g, i) => `<div class="vt-gun ${i < 5 ? 'dolu' : ''}" style="--i:${i}"><i>${i < 5 ? '🔥' : ''}</i><span>${g}</span></div>`).join('')}</div></div>
-        <div class="vt-ligler vt-gor">${[['🥉', 'Bronz'], ['🥈', 'Gümüş'], ['🥇', 'Altın'], ['💚', 'Zümrüt'], ['💎', 'Elmas']].map(([e, a], i) => `<div class="vt-lig" style="--i:${i}"><b>${e}</b><span>${a}</span></div>`).join('')}</div>
-        <p class="vt-giris" style="margin-bottom:0">Haftalık ligde XP topla, bir üst lige çık. Sandıklar, çıkartma albümü ve Pi'nin kostümleri çalışarak kazanılır.</p></section>
-      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><p class="vt-ust-yazi" style="text-align:left">05 · Veliler için</p><h2>Çocuğunuz <em>neyi neden</em> yanlış yapıyor?</h2>
+      <section class="vt-bolum vt-seri-bolum"><p class="vt-ust-yazi">05 · Lig ve seri</p><h2>Her gün bir adım. <em>Her adımda biraz daha ileri.</em></h2>
+        <div class="vt-ikili">
+          <div class="vt-sahne vt-gor"><div class="vt-sahne-gorsel vt-lig-sahne"><div class="vt-parilti" aria-hidden="true"></div>${kostum('kral', 'pi_sevin.webp', 'vt-kral')}
+            ${[['🥈', 'Gümüş', 'sol'], ['🥇', 'Altın', 'orta'], ['💎', 'Elmas', 'sag']].map(([e, a, c]) => `<div class="vt-lig-rozet ${c}"><b>${e}</b><span>${a}</span></div>`).join('')}</div>
+            <p class="vt-ust-yazi">Lig yolculuğun</p><h3>Hedefin hep bir üst lig.</h3><p>Haftalık ligde XP topla; Bronz'dan Elmas'a yüksel. İlk haftanda ligden düşmezsin.</p></div>
+          <div class="vt-sahne vt-gor vt-seri"><div class="vt-sahne-gorsel"><div class="vt-alevli">${img('pi_sevin.webp', '', 'vt-seri-pi')}<span class="vt-alev" aria-hidden="true">🔥</span></div>
+            <div class="vt-gunler">${['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((g, i) => `<div class="vt-gun ${i < 5 ? 'dolu' : ''}" style="--i:${i}"><i>${i < 5 ? '🔥' : ''}</i><span>${g}</span></div>`).join('')}</div></div>
+            <p class="vt-ust-yazi">Günlük serin</p><h3>Bugün de geldin. Yarın da görüşelim.</h3><p>Gelemediğin gün seri koruyucun devreye girer. Kimse seni suçlamaz.</p></div>
+        </div></section>
+      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><p class="vt-ust-yazi" style="text-align:left">06 · Veliler için</p><h2>Çocuğunuz <em>neyi neden</em> yanlış yapıyor?</h2>
         <ul class="vt-liste">
           <li><b>Haftalık rapor.</b> Raporda güçlü ve zorlanılan konular, sık düşülen kavram yanılgıları ve öneriler.</li>
           <li><b>Problem çözmenin hangi adımında zorlanıyor?</b> Anlama, plan yapma, hesaplama ve kontrol adımları ayrı ayrı ölçülür.</li>
@@ -1660,9 +1682,12 @@
           ${[['Açılar', 86, 'var(--ok)'], ['Kesirler', 58, 'var(--accent)'], ['Alan ve çevre', 74, 'var(--blue)']].map(([a, y, r]) => `<div class="vt-cubuk"><span>${a}</span><i><b style="--w:${y}%;background:${r}"></b></i><em>%${y}</em></div>`).join('')}
           <div class="vt-rapor-not">🔎 Sık görülen tuzak: <b>paydası büyük olan kesir daha büyüktür</b> sanmak.</div>
           <div class="vt-rapor-not">🧩 Hesaplamada değil, <b>problemi anlamada</b> zorlanıyor.</div></div></section>
-      <section class="vt-bolum"><p class="vt-ust-yazi">06 · Merak edilenler</p><h2>Sık sorulanlar</h2>${sss}</section>
-      <section class="vt-son">${img('pi_sevin.webp', '', 'vt-son-pi')}<h2>Pi seni <em>bekliyor!</em></h2><button class="btn" data-act="vt-basla">Hemen başla</button></section>
-      <footer class="vt-alt-bilgi"><nav><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></nav><p>© 2026 Matematik Yolu</p></footer>
+      <section class="vt-bolum"><p class="vt-ust-yazi">07 · Merak edilenler</p><h2>Sık sorulanlar</h2>${sss}</section>
+      <div class="vt-gece vt-final-bant">
+        <div class="vt-yildizlar" aria-hidden="true">${yildiz}</div>
+        <section class="vt-son vt-gor"><div class="vt-roket">${img('pi_roket.webp', '', 'vt-son-pi')}<i class="vt-iz" aria-hidden="true"></i></div><h2><span>Pi seni</span> <span class="sari">bekliyor!</span></h2><p class="vt-alt">İlk dersin birkaç dakika sürer.</p><button class="btn vt-btn-sari" data-act="vt-basla">Hemen başla</button></section>
+        <footer class="vt-alt-bilgi"><nav><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></nav><p>© 2026 Matematik Yolu · Türkiye'de geliştirildi</p></footer>
+      </div>
     </div>`;
   }
 
