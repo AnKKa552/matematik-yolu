@@ -447,6 +447,9 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 - Öğretmen paneli: sınıf bazında beceri ısı haritası, en sık yanılgılar.
 
 ### Faz C — Mağaza
+- **Durum (05.11.2026):** Play geliştirici hesabı açıldı (kişisel hesap, geliştirici adı «Matematik Yolu», herkese açık e-posta `destek@matematikyolu.com` → Cloudflare e-posta yönlendirmesiyle proje sahibinin Hotmail'ine; satıcı durumu «tacir değil»; para kazanma «henüz karar vermedim»). Kimlik doğrulaması bekleniyor; sonra telefon doğrulama ve «Uygulama oluştur». Yeni kişisel hesapta yayından önce **12 test kullanıcısıyla 14 günlük kapalı test** zorunlu (pilot aileleri). **Para kazanmaya geçilirse kişisel hesapta ev adresi mağazada görünür** (şirket/sanal ofis o zaman düşünülecek).
+- **Gizlilik politikası:** `https://matematikyolu.com/gizlilik/` (kaynak `src/gizlilik.html`, `build.py` kopyalar; Ayarlar'da bağlantı). İçerik uygulamanın gerçek veri akışını anlatır: telefonda kalanlar, isteğe bağlı yedek/bildirim/pilot, teknik kayıtlar, sağlayıcılar. **Yeni veri toplayan bir özellik eklenince bu sayfa da güncellenmeli.** KVKK uzmanı incelemesi bekliyor.
+- Çevrimdışı katman yalnız uygulamanın kendi sayfasını (`/`, `/index.html`) çevrimdışı kopyaya yazar; önceden `ogretmen.html` ya da başka bir sayfa açılınca uygulamanın yerine geçebiliyordu (05.11.2026 düzeltildi).
 - Google Play: PWA'yı **Trusted Web Activity** olarak paketle (PWABuilder) veya Capacitor ile sar.
 - Play Store'da dijital içerik satışında Google Play Faturalandırma kullanılmalıdır. Web'den satışta Türkiye'de çalışan ödeme altyapıları (ör. iyzico, PayTR) kullanılabilir.
 - Play Store "Aileler" politikaları ve çocuk uygulaması gereksinimleri yayın öncesi kontrol edilir.

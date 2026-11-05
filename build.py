@@ -36,4 +36,6 @@ P = R/'docs'; P.mkdir(exist_ok=True); (P/'.nojekyll').touch(); (P/'CNAME').write
 for f in ['index.html', 'ogretmen.html', 'config.js', 'sw.js', 'manifest.webmanifest']:
     if (D/f).exists(): shutil.copy(D/f, P/f)
 if (D/'img').exists(): shutil.copytree(D/'img', P/'img', dirs_exist_ok=True)
+# Gizlilik politikası: matematikyolu.com/gizlilik/ (Play mağazası için zorunlu)
+for K in (D, P): (K/'gizlilik').mkdir(exist_ok=True); shutil.copy(S/'gizlilik.html', K/'gizlilik'/'index.html')
 print('docs/ güncellendi')

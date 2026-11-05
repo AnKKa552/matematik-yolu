@@ -766,6 +766,7 @@
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
         <button class="btn ghost small" data-act="oyuncu-ac">👥 ${E.profiller().liste.length > 1 ? 'Oyuncu değiştir' : 'Kardeş ekle (aynı telefonda)'}</button>
+        <a class="btn ghost small" href="gizlilik/" target="_blank" rel="noopener">🔒 Gizlilik politikası</a>
         ${aileHazir() ? `<div class="oy-ben">${A.st.oyuncu ? `<span class="sm">🧒 Oyuncu adın: ${oyYaz(A.st.oyuncu)}</span>` : ''}<button class="btn ghost small" data-act="oy-ac">📲 Başka telefondaki ilerlememi getir</button></div>` : ''}
       </div></div>${nav()}`;
   }
