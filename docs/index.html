@@ -1251,6 +1251,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 @media (max-width:520px){.vt-sinema{grid-template-columns:1fr 1.5fr}.vt-defter{padding:12px 10px 10px}.vt-sahne-gorsel{height:230px}}
 @media (prefers-reduced-motion:reduce){.vt-yildizlar i,.vt-aurora,.vt-isik,.vt-parilti,.vt-roket .vt-son-pi{animation:none}.vt-buyutec{opacity:1}}
 .vt-son .vt-alt{margin-left:auto!important;margin-right:auto}
+.onb-veli-not{text-align:center;font-size:13px;font-weight:700;color:var(--muted);margin:2px 0 0}.onb-veli-not a{color:var(--brand);font-weight:800;display:inline-block;padding:10px 2px}
 </style>
 </head>
 <body>
@@ -6229,7 +6230,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   }
   function viewOnboard0() { A._onbBalon = null; A._onbAdim = 0;
     const semboller = ['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('');
-    return `<div class="onb onb-0"><div class="onb-hero"><div class="onb-semboller" aria-hidden="true">${semboller}</div>${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center onb-baslik">Merhaba, ben <em>Pi</em>!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}</div>`;
+    return `<div class="onb onb-0"><div class="onb-hero"><div class="onb-semboller" aria-hidden="true">${semboller}</div>${PI_GORSEL ? `<img class="hero" src="${PI_GORSEL}kahraman.webp" alt="Pi" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',150)">` : mascot('happy', 150)}</div><h1 class="center onb-baslik">Merhaba, ben <em>Pi</em>!</h1><div class="center"><button class="chip" data-act="pi-hello">🔊 Pi'yi dinle</button></div><p class="center muted" style="font-size:18px;font-weight:700">5. sınıf matematiğini seninle oyun gibi öğreneceğiz. Her öğrenci başka bir çiçektir; ben de sana en uygun yolu bulacağım. 🌸</p><div style="flex:1"></div><button class="btn" data-act="onb-next">Başlayalım</button>${aileHazir() ? '<button class="btn ghost" data-act="onb-kod">📲 Başka telefonda kullanıyordum</button>' : ''}<p class="onb-veli-not">Veliler için: <a href="gizlilik/" target="_blank" rel="noopener">Gizlilik politikası</a> · <a href="kosullar/" target="_blank" rel="noopener">Kullanım koşulları</a></p></div>`;
   }
   function viewOnboard1() { const o = A.onb, d = o.data;
     if (o.step === 'oyuncu') return `<div class="onb"><h2>Tekrar hoş geldin! 👋</h2>
