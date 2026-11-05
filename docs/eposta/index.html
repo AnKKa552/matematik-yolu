@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haftalık Rapor · Matematik Yolu</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../img/simge2_192.png" type="image/png">
+<style>
+:root{--bg:#f6f5ff;--kart:#fff;--yazi:#1d1b2e;--soluk:#5c5875;--ana:#5B4BFF;--cizgi:#e4e1f5}
+@media (prefers-color-scheme:dark){:root{--bg:#121022;--kart:#1c1932;--yazi:#ecebf7;--soluk:#a9a5c4;--ana:#9d93ff;--cizgi:#2e2a4a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--yazi);font:17px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:grid;place-items:center}
+main{max-width:460px;margin:0 auto;padding:24px 16px;text-align:center}
+.kart{background:var(--kart);border:2px solid var(--cizgi);border-radius:22px;padding:22px 18px}
+img.pi{width:140px;height:auto}
+h1{font-size:1.4rem;margin:8px 0}
+p{color:var(--soluk);margin:8px 0}
+button,.dugme{display:inline-block;font:inherit;font-weight:800;border:0;border-radius:14px;padding:13px 22px;margin-top:12px;cursor:pointer;background:var(--ana);color:#fff;text-decoration:none;min-height:48px}
+button[disabled]{opacity:.6}
+.ikincil{background:transparent;color:var(--ana);border:2px solid var(--cizgi)}
+</style>
+</head>
+<body>
+<main><div class="kart" id="k"><img class="pi" src="../img/pi_konus.webp" alt=""><h1>Bir saniye…</h1></div>
+<p style="font-size:14px;margin-top:14px"><a href="../" style="color:var(--ana)">Matematik Yolu</a> · <a href="../gizlilik/" style="color:var(--ana)">Gizlilik politikası</a></p></main>
+<script src="../config.js"></script>
+<script>
+(function () {
+  var k = document.getElementById('k'), q = new URLSearchParams(location.search), onay = q.get('onay'), cikis = q.get('cikis');
+  function goster(resim, baslik, metin, dugme) { k.innerHTML = '<img class="pi" src="../img/' + resim + '" alt=""><h1>' + baslik + '</h1><p>' + metin + '</p>' + (dugme || ''); }
+  function cagir(govde) {
+    var c = window.MY_CONFIG || {};
+    return fetch(c.supabaseUrl + '/functions/v1/veli-eposta', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: c.anonKey }, body: JSON.stringify(govde) }).then(function (r) { return r.json(); });
+  }
+  // Bağlantıyı açmak tek başına bir şey yapmaz (e-posta güvenlik tarayıcıları bağlantıları kendiliğinden açabilir): veli düğmeye dokunur
+  if (onay) {
+    goster('pi_konus.webp', 'Adresinizi onaylayın', 'Onayladığınızda çocuğunuzun haftalık gelişim raporu her pazar akşamı bu adrese gelir. Çalışılmayan haftalarda e-posta gönderilmez.', '<button id="d">Adresimi onayla</button>');
+    document.getElementById('d').onclick = function () { this.disabled = true; this.textContent = 'Onaylanıyor…';
+      cagir({ is: 'onayla', token: onay }).then(function (r) {
+        if (r && r.ok) goster('pi_sevin.webp', 'Onaylandı! 🎉', 'İlk rapor bu pazar akşamı ' + r.eposta + ' adresine gelecek. Her e-postanın altında raporları durdurma bağlantısı bulunur.', '<a class="dugme" href="../">Uygulamayı aç</a>');
+        else goster('pi_dusun.webp', 'Bu bağlantı geçerli değil', 'Bağlantı daha önce kullanılmış ya da süresi dolmuş olabilir. Uygulamadaki Veli alanından yeni bir onay e-postası isteyebilirsiniz.');
+      }).catch(function () { goster('pi_dusun.webp', 'Bağlantı kurulamadı', 'İnternet bağlantınızı kontrol edip sayfayı yenileyin.'); });
+    };
+  } else if (cikis) {
+    goster('pi_konus.webp', 'Raporları durdurmak mı istiyorsunuz?', 'Durdurduğunuzda e-posta adresiniz sistemimizden hemen silinir ve size bir daha rapor gönderilmez.', '<button id="d">Evet, raporları durdur</button><br><a class="dugme ikincil" href="../">Vazgeç</a>');
+    document.getElementById('d').onclick = function () { this.disabled = true;
+      cagir({ is: 'cikis', token: cikis }).then(function (r) {
+        if (r && r.ok) goster('pi_sevin.webp', 'Raporlar durduruldu', 'E-posta adresiniz silindi. İsterseniz uygulamanın Veli alanından yeniden açabilirsiniz.');
+        else goster('pi_dusun.webp', 'Bu bağlantı geçerli değil', 'Raporlar zaten durdurulmuş olabilir. Sorun sürerse destek@matematikyolu.com adresine yazın.');
+      }).catch(function () { goster('pi_dusun.webp', 'Bağlantı kurulamadı', 'İnternet bağlantınızı kontrol edip sayfayı yenileyin.'); });
+    };
+  } else goster('pi_konus.webp', 'Matematik Yolu', 'Bu sayfa haftalık rapor e-postalarındaki bağlantılar içindir.', '<a class="dugme" href="../">Uygulamayı aç</a>');
+})();
+</script>
+</body>
+</html>

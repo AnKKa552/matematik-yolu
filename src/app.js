@@ -857,7 +857,7 @@
   const aileKodTemiz = (k) => String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
   const aileKodGecerli = (k) => /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{16}$/.test(k);
   // Buluta giden kopya: veliye ait iletişim ve güvenlik bilgileri çıkarılır
-  const aileTemiz = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.veli; delete c.bildirim; delete c.aile; delete c.pilot;
+  const aileTemiz = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.veli; delete c.bildirim; delete c.aile; delete c.pilot; delete c.eposta;
     if (c.profile) { delete c.profile.parentName; delete c.profile.parentPhone; delete c.profile.parentEmail; delete c.profile.kvkk; } return c; };
   const aileOzet = (d) => ({ ad: (d.profile || {}).name || '—', xp: d.xp || 0, konu: SKILLS.filter(s => d.skills && d.skills[s.id] && d.skills[s.id].n > 0).length, seri: d.streak || 0 });
   let aileZaman = null, aileGidiyor = false;
@@ -867,7 +867,7 @@
     const yerel = A.st, p = yerel.profile || {};
     A.st = Object.assign(E.fresh(), uzak);
     A.st.profile = Object.assign({}, uzak.profile || {}, { parentName: p.parentName, parentPhone: p.parentPhone, parentEmail: p.parentEmail, kvkk: p.kvkk });
-    if (yerel.veli) A.st.veli = yerel.veli; if (yerel.bildirim) A.st.bildirim = yerel.bildirim; if (yerel.pilot) A.st.pilot = yerel.pilot; else delete A.st.pilot;
+    if (yerel.veli) A.st.veli = yerel.veli; if (yerel.bildirim) A.st.bildirim = yerel.bildirim; if (yerel.pilot) A.st.pilot = yerel.pilot; else delete A.st.pilot; if (yerel.eposta) A.st.eposta = yerel.eposta; else delete A.st.eposta;
     A.st.aile = { kod, onay: (yerel.aile && yerel.aile.onay) || Date.now(), surum, son: Date.now(), kirli: false };
     E.save(A.st);
   }
@@ -1031,7 +1031,7 @@
     A.secici = false; A.view = 'home'; A.tab = 'yol'; A.ses = null; A.q = null; A.fb = null; A.veliAcik = false; A.onb = { step: 0, data: {} };
     A.oy = null; A.oyModal = null; A.oyBulunan = null; A.aileBulunan = null; A._ekran = null; pilotSonAcilis = 0;
     if (!id && rumuz) { A.onb.data.name = rumuz; A.onb.rumuzlu = true; if (!pilotDavet()) A.onb.step = 'his'; }
-    if (A.st.profile) { E.save(A.st); pilotAcilis(); setTimeout(aileKontrol, 500); seriBak(); }
+    if (A.st.profile) { E.save(A.st); pilotAcilis(); setTimeout(aileKontrol, 500); setTimeout(epostaRaporYukle, 3000); seriBak(); }
     render();
   }
   /* Davet bağlantısı (04.11.2026, proje sahibinin önerisi): pilot ailesine …/?pilot=5A bağlantısı gider. İlk açılışta, kayıttan
@@ -1198,6 +1198,57 @@
   const bildirimKaydet = () => { const b = bil(); if (!b.abone) return Promise.resolve(); return rpc('bildirim_kaydet', { p_endpoint: b.abone.endpoint, p_p256dh: b.abone.keys.p256dh, p_auth: b.abone.keys.auth, p_saat1: b.saat1, p_saat2: b.saat2, p_acik: b.acik, p_son_ders: A.st.lastDay, p_seri: A.st.streak }); };
   // Ders bitince ve uygulama açılınca: bugün çalıştıysa sunucu hatırlatma göndermez
   const bildirimDers = () => { const b = A.st.bildirim; if (b && b.acik && b.abone && A.st.lastDay) rpc('bildirim_ders', { p_endpoint: b.abone.endpoint, p_gun: A.st.lastDay, p_seri: A.st.streak }).catch(() => { }); };
+  /* =================== HAFTALIK RAPOR E-POSTASI (06.11.2026) ===================
+     Veli, şifreli Veli alanında e-postasını yazar ve onay verir; adrese gelen bağlantıyla doğrulanır. Raporu telefon hazırlar
+     (E.parentReport) ve ders sonlarında en çok 3 saatte bir sunucuya yükler; sunucu her pazar 18.00'de gönderir.
+     O hafta çalışılmadıysa yüklenmez, e-posta da gitmez. Kimlik: telefonda rastgele cihaz + gizli anahtar (st.eposta);
+     bulut yedeğine girmez. Sunucu: functions/veli-eposta, veli_eposta.sql. Fonksiyon kurulu değilse kart görünmez. */
+  const EPOSTA_RIZA = 'rapor-eposta-v1';
+  let epostaKurulu = null;
+  const epostaAdres = () => MY_CONFIG.supabaseUrl + '/functions/v1/veli-eposta';
+  const epostaCagir = (govde) => fetch(epostaAdres(), { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: MY_CONFIG.anonKey }, body: JSON.stringify(govde) }).then(r => r.json());
+  const epostaRastgele = (n) => { const b = new Uint8Array(n); crypto.getRandomValues(b); return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const epostaKimlik = () => { if (!A.st.eposta || !A.st.eposta.cihaz) A.st.eposta = { cihaz: epostaRastgele(18), gizli: epostaRastgele(24) }; return A.st.eposta; };
+  // Veli alanı açılınca bir kez: fonksiyon kurulu mu, adres onaylandı mı?
+  function epostaBak() {
+    if (!aileAyarli()) return;
+    const e = A.st.eposta, g = e && e.cihaz ? { is: 'durum', cihaz: e.cihaz, gizli: e.gizli } : { is: 'durum' };
+    epostaCagir(g).then(r => {
+      const once = epostaKurulu; epostaKurulu = !!(r && r.kurulu);
+      if (e && e.durum && r && r.kurulu) {
+        if (!r.var) delete A.st.eposta.durum; else { e.durum = r.onayli ? 'onayli' : 'bekliyor'; e.eposta = r.eposta; }
+        E.save(A.st);
+      }
+      if (A.tab === 'veli' && A.veliAcik && A.view !== 'lesson' && (once !== epostaKurulu || e)) render();
+    }).catch(() => { });
+  }
+  // Ders sonunda ve açılışta: onaylı adres varsa ve bu hafta çalışıldıysa raporu yükle (en çok 3 saatte bir)
+  function epostaRaporYukle(zorla) {
+    const e = A.st.eposta; if (!aileAyarli() || !e || e.durum !== 'onayli' || !A.st.profile) return;
+    if (!zorla && e.yuklendi && Date.now() - e.yuklendi < 3 * 3600e3) return;
+    const R = E.parentReport(A.st); if (!R.lessons) return;
+    epostaCagir({ is: 'rapor', cihaz: e.cihaz, gizli: e.gizli, rapor: R.text }).then(r => {
+      if (r && r.ok) { e.yuklendi = Date.now(); E.save(A.st); }
+      else if (r && (r.hata === 'yok' || r.hata === 'onaysiz')) { e.durum = r.hata === 'yok' ? undefined : 'bekliyor'; E.save(A.st); }
+    }).catch(() => { });
+  }
+  function epostaKart() {
+    if (!aileAyarli() || epostaKurulu !== true) return '';
+    const e = A.st.eposta || {};
+    if (e.durum === 'onayli' && !A.epostaDegis) return `<div class="card eposta-kart"><b>📬 Haftalık rapor e-postası açık</b>
+      <p class="muted sm" style="margin:6px 0 8px">Her pazar akşamı <b>${esc(e.eposta || '')}</b> adresine gidiyor. Çocuğunuzun çalışmadığı haftalarda e-posta gönderilmez.</p>
+      <div class="row" style="gap:8px"><button class="btn ghost small grow" data-act="eposta-degis">✏️ Adresi değiştir</button><button class="btn ghost small grow" data-act="eposta-sil">🛑 Raporları durdur</button></div></div>`;
+    if (e.durum === 'bekliyor' && !A.epostaDegis) return `<div class="card eposta-kart"><b>📩 Onay e-postası gönderildi</b>
+      <p class="muted sm" style="margin:6px 0 8px"><b>${esc(e.eposta || '')}</b> adresine bir bağlantı gönderdik. Bağlantıya dokunduğunuzda haftalık raporlar başlar. Gelmediyse gereksiz (spam) klasörüne bakın.</p>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn small grow" data-act="eposta-yenile">🔄 Onayladım</button><button class="btn ghost small grow" data-act="eposta-degis">✏️ Adresi değiştir</button><button class="btn ghost small grow" data-act="eposta-sil">Vazgeç</button></div></div>`;
+    return `<div class="card eposta-kart"><b>📬 Haftalık raporu e-postanıza gönderelim mi?</b>
+      <p class="muted sm" style="margin:6px 0 8px">Her pazar akşamı çocuğunuzun güçlü ve zorlandığı konuları, düştüğü tuzakları ve gelecek hafta için bir öneriyi gönderelim. Reklam ya da tanıtım e-postası göndermeyiz.</p>
+      <div class="field"><label for="f-eposta">E-posta adresiniz</label><input id="f-eposta" type="email" inputmode="email" autocomplete="email" placeholder="ornek@eposta.com" maxlength="254" value="${esc(A.epostaTaslak || '')}"></div>
+      <details class="aile-detay"><summary class="sm"><b>Neler saklanır?</b></summary><p class="sm muted" style="margin:6px 0 0">Saklanan: e-posta adresiniz, çocuğunuzun uygulamadaki adı ve gönderilmeyi bekleyen haftalık rapor metni (gönderilince silinir). Sunucu Frankfurt'ta (Supabase); e-postalar bir e-posta gönderim hizmetiyle iletilir. Onaylanmayan adres 7 günde silinir. «Raporları durdur» ya da her e-postadaki bağlantıyla adresiniz hemen silinir. Ayrıntılar <a href="gizlilik/" target="_blank" rel="noopener">gizlilik politikasında</a>.</p></details>
+      <label class="aile-onay"><input type="checkbox" id="f-eposta-onay"> <span class="sm">Velisi olarak, haftalık raporun bu adrese gönderilmesine ve bunun için adresimin saklanmasına onay veriyorum.</span></label>
+      <div class="row" style="gap:8px;margin-top:8px"><button class="btn grow" data-act="eposta-kaydet">Onay e-postası gönder</button>${A.epostaDegis ? '<button class="btn ghost" data-act="eposta-vazgec">Vazgeç</button>' : ''}</div></div>`;
+  }
+
   function bildirimKart() {
     const b = bil(), destek = bilDestek(), ios = /iphone|ipad/i.test(navigator.userAgent), izinYok = destek && Notification.permission === 'denied';
     const chip = (act, t, on, dis) => `<button class="chip ${on ? 'on' : ''}" data-act="${act}" data-v="${t}" ${dis ? 'disabled' : ''}>${t.replace(':', '.')}</button>`;
@@ -1213,6 +1264,7 @@
 
   function viewParent() {
     if (!A.veliAcik) return veliKapisi();
+    if (!A._epostaBakildi) { A._epostaBakildi = true; setTimeout(epostaBak, 0); }
     const p = A.st.profile || {}, R = E.parentReport(A.st), txt = R.text;
     const phone = String(p.parentPhone || '').replace(/\D/g, ''), intl = phone.startsWith('90') ? phone : phone.startsWith('0') ? '9' + phone : phone.length === 10 ? '90' + phone : phone;
     const wa = `https://wa.me/${intl}?text=${encodeURIComponent(txt)}`, tg = `https://t.me/share/url?url=${encodeURIComponent('Matematik Yolu')}&text=${encodeURIComponent(txt)}`, mail = `mailto:${encodeURIComponent(p.parentEmail || '')}?subject=${encodeURIComponent('Matematik Yolu – Haftalık Rapor: ' + (p.name || ''))}&body=${encodeURIComponent(txt)}`;
@@ -1221,12 +1273,13 @@
       ${veliGorsel(R)}
       <details class="card rmetin"><summary><b>📝 Gönderilecek mesaj metni</b> <span class="muted sm">(WhatsApp/e-posta ile bu gider)</span></summary><pre class="report">${esc(txt)}</pre></details>
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
+      ${epostaKart()}
       ${aileKart()}
       ${pilotKart()}
       ${CL && CL.oturum ? cloudCard() : ''}
       ${bildirimKart()}
       ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
-      <p class="muted sm" style="margin:10px 0 0">Bu prototipte rapor tek dokunuşla gönderilir. Her hafta <b>otomatik</b> gönderim, sunucu sürümünde (WhatsApp Business API / e-posta servisi) veli onayıyla çalışır.</p></div>`}
+      <p class="muted sm" style="margin:10px 0 0">Raporu yukarıdaki düğmelerle istediğiniz an paylaşabilirsiniz.${epostaKurulu === true ? ' Her hafta kendiliğinden gelmesi için «Haftalık rapor e-postası» kartını kullanın.' : ''}</p></div>`}
       <div class="card" style="margin-top:14px"><b>Tehlikeli bölge</b><p class="muted sm" style="margin:6px 0 10px">Çocuğun bütün ilerlemesi, rozetleri, veli bilgileri ve veli şifresi bu cihazdan silinir. Geri alınamaz.</p><button class="btn ghost small" data-act="reset" style="color:var(--bad)">Tüm verileri sıfırla</button></div></div>${nav()}`;
   }
 
@@ -1864,7 +1917,7 @@
     clearInterval(A.timer); stopVoice();
     if (A.ses.mode === 'placement') E.applyPlacement(A.st, A.ses);
     if (A.ses.mode === 'speed') A.st.speedBest = Math.max(A.st.speedBest, A.ses.correct);
-    A.result = E.finish(A.st, A.ses); bildirimDers(); pilotDers('ders_bitti'); if (A.ses.mode === 'olcme' && A.st.olcme && A.st.olcme[A.ses.form]) { const o = A.st.olcme[A.ses.form]; pilot('test', { form: A.ses.form, n: o.n, dogru: o.dogru, sure: o.sure, beceri: Object.fromEntries(o.beceri) }); } if (!['placement', 'hazir', 'olcme'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } A.dersSandik = A.result.sandik ? { n: A.result.sandik, dokun: 0, acik: false, od: sandikOdulleri(A.result.sandik, A.result.gemsWon, ['speed', 'placement', 'hazir'].includes(A.ses.mode) ? null : dersTemasi(A.ses), CIK_SANS[A.result.sandik]) } : null; A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
+    A.result = E.finish(A.st, A.ses); bildirimDers(); pilotDers('ders_bitti'); setTimeout(() => epostaRaporYukle(), 2500); if (A.ses.mode === 'olcme' && A.st.olcme && A.st.olcme[A.ses.form]) { const o = A.st.olcme[A.ses.form]; pilot('test', { form: A.ses.form, n: o.n, dogru: o.dogru, sure: o.sure, beceri: Object.fromEntries(o.beceri) }); } if (!['placement', 'hazir', 'olcme'].includes(A.ses.mode)) { const h = hazine(); if (h.anahtar < HAZINE_ANAHTAR && !h.acildi) { h.anahtar++; setTimeout(() => toast(h.anahtar >= HAZINE_ANAHTAR ? '🗝️ Bütün anahtarlar tamam! Hazine sandığı haritada.' : `🗝️ Hazine anahtarı ${h.anahtar}/${HAZINE_ANAHTAR}`), 1200); } } A.dersSandik = A.result.sandik ? { n: A.result.sandik, dokun: 0, acik: false, od: sandikOdulleri(A.result.sandik, A.result.gemsWon, ['speed', 'placement', 'hazir'].includes(A.ses.mode) ? null : dersTemasi(A.ses), CIK_SANS[A.result.sandik]) } : null; A.endSteps = endAdimlari(A.result, A.ses); A.endStep = 0; save(); if (CL) CL.dersBitti(A.ses).then(() => { if (A.tab === 'lig' && A.view !== 'lesson') render(); }); A.view = 'end'; A.fb = null; render(); sfx.win(); confetti(); setTimeout(sayacBaslat, 60); if (!['placement', 'speed', 'hazir'].includes(A.ses.mode)) for (let i = 1; i <= yildizSayisi(A.result.acc); i++) setTimeout(() => tone(660 + 160 * i, .22, 'triangle'), 900 + i * 350 + 150); if (!['speed', 'placement'].includes(A.ses.mode)) sahneOyna('bitti'); setTimeout(() => piSay(A.ses && A.ses.mode === 'speed' ? 'rekor' : A.result.trophy && A.result.trophy.pass ? 'bolge_kupa' : A.result.quests && A.result.quests.got.length ? 'gorev' : 'bitti'), 500);
     if (A.result.newBadges.length) setTimeout(sfx.badge, 700);
   }
 
@@ -1981,7 +2034,21 @@
       case 'buy-freeze': if (A.st.freezes >= E.KORUYUCU_EN_FAZLA) { toast(`🧊 En fazla ${E.KORUYUCU_EN_FAZLA} seri koruyucu taşıyabilirsin. Elindekiler seni koruyor!`); break; } if (A.st.gems >= 50) { A.st.gems -= 50; A.st.freezes++; save(); render(); toast('🧊 Seri koruyucu alındı!'); } else toast('Yeterli elmasın yok. Ders yaparak kazanabilirsin!'); break;
       case 'reset': { const cok = E.profiller().liste.length > 1, ad = esc((A.st.profile && A.st.profile.name) || 'bu oyuncu');
         A.modal = confirmModal(cok ? `${ad} silinsin mi?` : 'Tüm veriler silinsin mi?', cok ? `Yalnız ${ad} adlı oyuncunun ilerlemesi, rozetleri ve öğrenme parmak izi bu cihazdan kalıcı olarak silinir. Diğer oyuncular olduğu gibi kalır.` : 'İlerleme, rozetler, öğrenme parmak izi ve veli bilgileri bu cihazdan kalıcı olarak silinir.', 'reset-yes', 'Evet, sil', 'Vazgeç'); render(); break; }
-      case 'reset-yes': if (pilotAcik()) pilotAyril(true); A.modal = null; pilotKuyrukYaz([]); A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; A.view = 'home'; A.veliAcik = false; A.secici = !!A.st.profile && E.profiller().liste.length > 1; render(); break;
+      case 'eposta-kaydet': {
+        const v2 = ((document.getElementById('f-eposta') || {}).value || '').trim().toLowerCase(); A.epostaTaslak = v2;
+        if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v2)) { toast('Geçerli bir e-posta adresi yazın.'); break; }
+        if (!(document.getElementById('f-eposta-onay') || {}).checked) { toast('Göndermek için onay kutusunu işaretleyin.'); break; }
+        const k = epostaKimlik(); el.disabled = true; el.textContent = 'Gönderiliyor…';
+        epostaCagir({ is: 'kaydet', cihaz: k.cihaz, gizli: k.gizli, eposta: v2, ad: (A.st.profile || {}).name || '', riza: EPOSTA_RIZA }).then(r => {
+          if (r && r.ok) { k.durum = r.onayli ? 'onayli' : 'bekliyor'; k.eposta = r.eposta; k.riza = EPOSTA_RIZA; k.at = Date.now(); A.epostaDegis = false; A.epostaTaslak = ''; E.save(A.st); render(); toast(r.onayli ? '✓ Adres kaydedildi' : '📩 Onay e-postası gönderildi'); if (r.onayli) epostaRaporYukle(true); }
+          else { render(); toast(r && r.hata === 'eposta' ? 'Bu e-posta adresi geçerli görünmüyor.' : r && r.hata === 'cok' ? 'Bugün çok deneme yapıldı. Yarın tekrar deneyin.' : 'Şu an gönderilemedi. Biraz sonra tekrar deneyin.'); }
+        }).catch(() => { render(); toast('İnternet bağlantısını kontrol edip tekrar deneyin.'); });
+        break; }
+      case 'eposta-yenile': epostaBak(); toast('Bakılıyor…'); setTimeout(() => { const e = A.st.eposta; if (e && e.durum === 'onayli') { toast('✓ Onaylandı! Raporlar her pazar gelecek.'); epostaRaporYukle(true); } else if (e && e.durum === 'bekliyor') toast('Henüz onaylanmamış. E-postadaki bağlantıya dokunun.'); }, 1800); break;
+      case 'eposta-degis': A.epostaDegis = true; render(); break;
+      case 'eposta-vazgec': A.epostaDegis = false; render(); break;
+      case 'eposta-sil': { const e = A.st.eposta; if (e && e.cihaz) epostaCagir({ is: 'sil', cihaz: e.cihaz, gizli: e.gizli }).catch(() => { }); delete A.st.eposta; A.epostaDegis = false; E.save(A.st); render(); toast('Raporlar durduruldu, adresiniz silindi.'); break; }
+      case 'reset-yes': if (pilotAcik()) pilotAyril(true); if (A.st.eposta && A.st.eposta.durum && aileAyarli()) epostaCagir({ is: 'sil', cihaz: A.st.eposta.cihaz, gizli: A.st.eposta.gizli }).catch(() => { }); A.modal = null; pilotKuyrukYaz([]); A.st = E.reset(); A.onb = { step: 0, data: {} }; A.tab = 'yol'; A.view = 'home'; A.veliAcik = false; A.secici = !!A.st.profile && E.profiller().liste.length > 1; render(); break;
       case 'copy': try { navigator.clipboard.writeText(E.parentReport(A.st).text).then(() => toast('Rapor kopyalandı ✓'), () => toast('Kopyalanamadı')); } catch (e) { toast('Kopyalanamadı'); } break;
       case 'edit-profile': A.veliDuzenle = true; render(); break;
       case 'veli-vazgec': A.veliDuzenle = false; render(); break;
@@ -2075,7 +2142,7 @@
   // Seri koruyucu: açılışta ve uygulamaya geri dönülünce (gece yarısını geçtiyse) kendiliğinden kontrol edilir
   const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
     setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
-  seriBak(); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); } });
+  seriBak(); setTimeout(epostaRaporYukle, 3000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); } });
   // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
   { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
     if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }

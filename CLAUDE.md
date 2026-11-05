@@ -184,6 +184,16 @@ Telefon değişince ilerleme kaybolmasın diye; satış öncesi zorunlu. **E-pos
 - Test: `python3 test/e2e_pilot.py` (onaysız katılım yok, katılmadan olay yok, alan listesi, kişisel bilgi sızmaz, yarıda bırakma, internetsiz bekleme, test akışı, ayrılınca silme ve sonrasında sessizlik); `node test/test_plan.js` (formların tohumlu ve paralel olması).
 - **KVKK:** bilgilendirme ve onay metni (`pilot-v1`) yayın öncesi hukukçuya gösterilmeli (§1-6). Rastgele numara da kişisel veri sayılabilir (takma adlı veri); bu yüzden onay, silme ve süre sınırı var.
 
+### 3.9 Haftalık rapor e-postası (06.11.2026, proje sahibiyle kararlaştırıldı)
+E-posta **içeriği kilitlemek için değil**, veliye somut bir karşılık (her pazar rapor) karşılığında istenir; içerik kilidi ücretli sürüme kadar yok (pilot verisini bozmasın, okul takvimiyle çakışmasın, çocuktan e-posta istenmesin). Ajanların uygulamayı denemesi için e-posta gerekmez (hesapsız çalışır).
+- **Akış:** şifreli Veli alanında «📬 Haftalık raporu e-postanıza gönderelim mi?» kartı (`epostaKart` in app.js; yedek kartının üstünde) → adres + onay kutusu (`rapor-eposta-v1`) → sunucu doğrulama e-postası atar → veli `matematikyolu.com/eposta/?onay=…` sayfasında **düğmeye dokunarak** onaylar (bağlantıyı açmak tek başına onaylamaz: e-posta güvenlik tarayıcıları bağlantıları kendiliğinden açar) → kart «açık». Kart, «Adresi değiştir», «Raporları durdur» (sunucudan siler).
+- **Rapor:** telefon `E.parentReport(...).text` metnini ders sonunda ve açılışta en çok 3 saatte bir yükler (yalnız son 7 günde ders varsa). Sunucu her pazar 18.00 (TR) son 8 günde yüklenmiş raporu gönderir ve metni siler; çalışılmayan hafta e-posta yok (dürtme yok, §1-7). Konu: «Haftalık matematik raporu · <ad>» (ek uyumu derdi olmasın diye ad sonda).
+- **Kimlik:** telefonda rastgele `st.eposta = {cihaz, gizli, durum, eposta(maskeli), yuklendi}`; sunucu gizlinin özetini saklar. Bulut yedeğine girmez (`aileTemiz`), geri yüklemede bu telefonunki korunur. «Tüm verileri sıfırla» adresi de siler.
+- **Sunucu:** `sunucu/supabase/veli_eposta.sql` (kurulu: tablo `veli_eposta`, `veli_eposta_sayac`, `veli_eposta_say`, pg_cron `veli-eposta-gonder` pazar 15.00 UTC) + `functions/veli-eposta` (kurulu, verify_jwt kapalı; işler: durum/kaydet/onayla/rapor/sil/cikis/gonder). Fren: ağ başına günde 10, adres başına 3, cihaz başına 3 doğrulama e-postası. Her rapor e-postasında «Raporları artık istemiyorum» bağlantısı (satır kimliği + HMAC) ve tek dokunuşla çıkış başlığı (List-Unsubscribe-Post, fonksiyona POST). Onaylanmayan adres 7 günde, eski sayaçlar 3 günde silinir (gönderim işinin içinde).
+- **Gönderim sağlayıcısı:** ortam değişkenleri (Supabase → Edge Functions → Secrets) `EPOSTA_SAGLAYICI` = `brevo` | `resend`, `EPOSTA_ANAHTAR`, isteğe bağlı `EPOSTA_GONDEREN` (varsayılan `rapor@matematikyolu.com`). **Anahtar yoksa fonksiyon `{kurulu:false}` der ve kart hiç görünmez** (06.11.2026 itibarıyla kurulu değil). Gönderen alan adı sağlayıcıda doğrulanmalı (DNS: SPF/DKIM). **Dikkat:** Cloudflare e-posta yönlendirmesinin SPF kaydı var; alan adında tek SPF kaydı olabilir, sağlayıcının `include:`'u aynı kayda eklenir.
+- **Gizlilik:** politika §3.4 ve sağlayıcı tablosu güncellendi; sağlayıcı seçilince konumu tabloya yazılmalı. KVKK: adres + rapor metni yurt dışındaki sağlayıcıya gider (Supabase ile aynı aktarım sorusu, hukukçuya).
+- Test: `python3 test/e2e_eposta.py` (kurulu değilken kart yok, onaysız/geçersiz adres reddi, doğrulama, sayfada düğmesiz onay yok, yanlış belirteç, onaydan önce rapor yok, açılışta rapor yükleme, durdurma, çıkış sayfası).
+
 ### 3.8 Aynı telefonda kardeşler (04.11.2026, proje sahibinin isteği)
 Proje sahibi aynı telefonda iki bağlantıyla iki "öğrenci" açınca ikisinin aynı kaydı gördüğünü fark etti; evde iki 5. sınıf öğrencisi olan aile de aynı sorunu yaşar.
 - **Depolama** (`engine.js`): her çocuğun durumu ayrı `localStorage` anahtarında; ilk çocuk eski anahtarı (`matematik_yolu_v1`) kullanır, diğerleri `matematik_yolu_v1:<id>`. Liste `matematik_yolu_profiller = {aktif, liste}`. `E.profiller / profilId / profilOku / profilSec / profilYeni / profilSil`; `E.reset()` yalnız etkin çocuğu siler, varsa diğerine geçer. Mevcut kullanıcıların kaydı yerinde kalır.
@@ -491,6 +501,7 @@ test/test_sahne.py        ← 35 konunun adım adım sahneleri: SVG geçerliliğ
 test/e2e_profil.py        ← aynı telefonda kardeşler: ayrı kayıt, seçici, ayrı pilot numarası
 test/e2e_pilot.py         ← pilot kaydı ve başlangıç/bitiş testi: uçtan uca (sahte sunucu)
 test/e2e_aile.py          ← aile kodu ile yedek + oyuncu adı/resimli şifre: dört telefonlu uçtan uca test (sahte sunucu)
+test/e2e_eposta.py        ← haftalık rapor e-postası: kart, doğrulama, yükleme, durdurma (sahte sunucu)
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
 ```
 
@@ -542,7 +553,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py`, `python3 test/e2e_pilot.py` ve `python3 test/e2e_profil.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py`, `python3 test/e2e_pilot.py`, `python3 test/e2e_profil.py` ve `python3 test/e2e_eposta.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.

@@ -92,6 +92,14 @@ nav.icindekiler a{display:inline-block;margin:2px 10px 2px 0}
 <li>Katılmamak uygulamanın hiçbir özelliğini kısıtlamaz.</li>
 </ul>
 
+<h3>3.4 Haftalık rapor e-postası</h3>
+<ul>
+<li><b>Amaç:</b> Velinin istediği e-posta adresine her pazar çocuğunun haftalık gelişim raporunu göndermek. Reklam ya da tanıtım e-postası gönderilmez.</li>
+<li><b>Ne saklanır:</b> Velinin yazdığı e-posta adresi, onay zamanı ve onay metninin sürümü, çocuğun uygulamadaki adı (e-postada kardeşleri ayırmak için), telefonda üretilen rastgele bir numara ve gönderilmeyi bekleyen son rapor metni (haftalık çalışma süresi, doğruluk, güçlü ve destek gereken konular, sık düşülen kavram yanılgıları, öneri).</li>
+<li><b>Doğrulama:</b> Adres, gelen e-postadaki düğmeyle onaylanmadan hiçbir rapor gönderilmez. Onaylanmayan adres 7 gün içinde silinir.</li>
+<li><b>Süre:</b> Rapor metni gönderildikten sonra silinir. Çocuğun o hafta çalışmadığı haftalarda e-posta gönderilmez. Veli, Veli alanındaki "Raporları durdur" düğmesiyle ya da her e-postanın altındaki bağlantıyla istediği an çıkar; adres hemen silinir.</li>
+</ul>
+
 <h2 id="teknik">4. Teknik kayıtlar</h2>
 <ul>
 <li><b>Pi'nin soru okuması:</b> Çocuk bir soruyu sesli dinlemek istediğinde, uygulamanın kendi ürettiği soru metni sunucumuza gönderilir; sunucumuz bu metni seslendirme hizmetine iletir. Seslendirme hizmetine yalnızca soru metni gider; çocuğa ait hiçbir bilgi, IP adresi dahil, gönderilmez. Aşırı kullanımı önlemek için sunucumuzda bağlantının IP adresinin karıştırılmış (geri çevrilemeyen) hâliyle günlük bir sayaç tutulur ve en fazla 30 gün sonra silinir. Bu kayıt, hizmetin güvenliği ve kötüye kullanımın önlenmesi amacıyla meşru menfaate dayanır.</li>
@@ -103,8 +111,9 @@ nav.icindekiler a{display:inline-block;margin:2px 10px 2px 0}
 <p>Veriler satılmaz ve reklam ya da pazarlama amacıyla kimseyle paylaşılmaz. Yalnızca hizmeti çalıştırmak için şu hizmet sağlayıcılar kullanılır:</p>
 <div class="tablo"><table>
 <tr><th>Sağlayıcı</th><th>Ne için</th><th>Konum</th></tr>
-<tr><td>Supabase</td><td>Bulut yedeği, bildirim kaydı, araştırma kayıtları, soru okuma</td><td>Frankfurt, Almanya (AB)</td></tr>
+<tr><td>Supabase</td><td>Bulut yedeği, bildirim kaydı, araştırma kayıtları, haftalık rapor e-postası kaydı, soru okuma</td><td>Frankfurt, Almanya (AB)</td></tr>
 <tr><td>ElevenLabs</td><td>Soru metnini Pi'nin sesine çevirme. Kişisel veri gitmez; yalnızca uygulamanın ürettiği soru metni gider.</td><td>ABD</td></tr>
+<tr><td>E-posta gönderim hizmeti</td><td>Yalnızca haftalık rapor e-postasını açan velilere doğrulama ve rapor e-postalarının iletilmesi (e-posta adresi ve rapor metni)</td><td>Sağlayıcı seçildiğinde burada belirtilecektir</td></tr>
 <tr><td>GitHub (Microsoft)</td><td>Uygulama sayfasının barındırılması</td><td>ABD</td></tr>
 <tr><td>Cloudflare</td><td>Alan adı ve e-posta yönlendirme</td><td>Küresel</td></tr>
 <tr><td>Google</td><td>Uygulama mağazasından indirildiyse Google Play (Google'ın kendi gizlilik politikası geçerlidir)</td><td>Küresel</td></tr>
