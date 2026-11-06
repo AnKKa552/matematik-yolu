@@ -1228,3 +1228,4 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .vt-son .vt-alt{margin-left:auto!important;margin-right:auto}
 .onb-veli-not{text-align:center;font-size:13px;font-weight:700;color:var(--muted);margin:2px 0 0}.onb-veli-not a{color:var(--brand);font-weight:800;display:inline-block;padding:10px 2px}
 .eposta-kart{margin-top:14px}
+.altalta{margin:10px auto 2px;display:flex;justify-content:center}.altalta svg{display:block}.hintbox .altalta{color:var(--ink)}

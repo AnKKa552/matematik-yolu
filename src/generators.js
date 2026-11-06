@@ -399,7 +399,7 @@
       const ans = op === '+' ? a + b : a - b;
       // elde unutma yanlışı
       const noCarry = op === '+' ? +String(a).split('').reverse().map((d, i) => (+d + +(String(b).split('').reverse()[i] || 0)) % 10).reverse().join('') : +String(a).split('').reverse().map((d, i) => Math.abs(+d - +(String(b).split('').reverse()[i] || 0))).reverse().join('');
-      return Q({ type: 'input', prompt: `${fmtN(a)} ${op} ${fmtN(b)} = ?`, answer: String(ans), inputMis: noCarry !== ans ? [{ v: noCarry, mis: 'elde_unutma' }] : [], steps: ['Sayıları basamaklarını hizalayarak alt alta yaz.', op === '+' ? 'Birlerden başla; 10 ve üzerini eldeye aktar.' : 'Birlerden başla; üstteki rakam küçükse soldan onluk boz.', `Sonuç: ${fmtN(ans)}`] });
+      return Q({ type: 'input', prompt: `${fmtN(a)} ${op} ${fmtN(b)} = ?`, answer: String(ans), ipucuGorsel: U.altAltaGorsel(a, b, op === '+' ? '+' : '−', 'ipucu'), cozumGorsel: U.altAltaGorsel(a, b, op === '+' ? '+' : '−', 'cozum'), inputMis: noCarry !== ans ? [{ v: noCarry, mis: 'elde_unutma' }] : [], steps: ['Sayıları basamaklarını hizalayarak alt alta yaz.', op === '+' ? 'Birlerden başla; 10 ve üzerini eldeye aktar.' : 'Birlerden başla; üstteki rakam küçükse soldan onluk boz.', `Sonuç: ${fmtN(ans)}`] });
     }
     if (lv === 2) {
       const b = ri(10000, 40000), c = ri(20000, 60000);

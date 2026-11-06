@@ -28,6 +28,43 @@
     const ack = set.slice(0, -1).map((h, i) => `<span class="parca-et" style="--r:${R[i % R.length]}"><b>${h} →</b> ${set.slice(i + 1).map(k => h + k).join(', ')}</span>`).join('');
     return `<div class="parca-gorsel">${svg}<div class="parca-ack">${ack}</div></div>`;
   };
+  // Alt alta toplama/çıkarma (06.11.2026, proje sahibinin önerisi). mod 'ipucu': yalnız basamakları hizalı sayılar ve boş sonuç
+  // kutuları (cevabı söylemez). mod 'cozum': eldeler (toplama) ya da onluk bozmalar (çıkarma: üstü çizili rakam, yeni değeri üstte)
+  // ve sonuç. Basamak adları sütun başında; her sütun ayrı renkte şeritle ayrılır.
+  U.altAltaGorsel = (a, b, op, mod) => {
+    const ans = op === '+' ? a + b : a - b, n = Math.max(String(a).length, String(b).length, String(ans).length);
+    const hane = (x) => String(x).padStart(n, ' ').split('').map(c => c === ' ' ? null : +c);
+    const A = hane(a), B = hane(b), C = hane(ans), cozum = mod === 'cozum';
+    const AD = ['birler', 'onlar', 'yüzler', 'binler', 'on binler', 'yüz binler', 'milyonlar'];
+    const W = 46, x0 = 44, Wt = x0 + n * W + 10, X = (i) => x0 + i * W + W / 2;  // i: soldan sütun
+    // eldeler / bozmalar (sağdan hesap)
+    const ust = Array(n).fill(null), cizik = Array(n).fill(false), elde = Array(n).fill(false);
+    if (cozum) {
+      if (op === '+') { let e = 0; for (let k = n - 1; k >= 0; k--) { const t = (A[k] || 0) + (B[k] || 0) + e; e = t >= 10 ? 1 : 0; if (e && k > 0) elde[k - 1] = true; } }
+      else { const cur = A.map(v => v || 0); for (let k = n - 1; k >= 0; k--) { if (cur[k] < (B[k] || 0)) { cur[k] += 10; cur[k - 1] -= 1; } }
+        // ödünç zinciri: −1 olan sütun da yukarıdaki döngüde +10 aldı (0 → 9)
+        for (let k = 0; k < n; k++) if (A[k] !== null && cur[k] !== A[k]) { ust[k] = cur[k]; cizik[k] = true; } }
+    }
+    const R = ['#5B4BFF', '#FF8A00', '#12B886', '#E64980', '#228BE6', '#7048E8', '#F59F00'];
+    let g = '';
+    for (let i = 0; i < n; i++) {
+      const bas = n - 1 - i, r = R[bas % R.length];
+      g += `<rect x="${x0 + i * W + 3}" y="26" width="${W - 6}" height="${cozum ? 178 : 160}" rx="9" fill="${r}" opacity=".09"/>`;
+      g += `<text x="${X(i)}" y="18" text-anchor="middle" font-size="${AD[bas].length > 7 ? 9.5 : 11}" font-weight="800" fill="${r}">${AD[bas]}</text>`;
+      if (cozum && (ust[i] !== null || elde[i])) g += `<text x="${X(i)}" y="${cozum ? 52 : 50}" text-anchor="middle" font-size="16" font-weight="900" fill="#E64980">${elde[i] ? '1' : ust[i]}</text>`;
+      const yA = cozum ? 86 : 66, yB = yA + 38, yC = yB + 50;
+      if (A[i] !== null) g += `<text x="${X(i)}" y="${yA}" text-anchor="middle" font-size="28" font-weight="900" fill="currentColor">${A[i]}</text>` + (cizik[i] ? `<line x1="${X(i) - 11}" y1="${yA - 4}" x2="${X(i) + 11}" y2="${yA - 18}" stroke="#E64980" stroke-width="3" stroke-linecap="round"/>` : '');
+      if (B[i] !== null) g += `<text x="${X(i)}" y="${yB}" text-anchor="middle" font-size="28" font-weight="900" fill="currentColor">${B[i]}</text>`;
+      if (cozum) { if (C[i] !== null) g += `<text x="${X(i)}" y="${yC}" text-anchor="middle" font-size="28" font-weight="900" fill="#12B886">${C[i]}</text>`; }
+      else g += `<rect x="${X(i) - 15}" y="${yC - 28}" width="30" height="36" rx="7" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4" opacity=".55"/>`;
+    }
+    const yA = cozum ? 86 : 66, yB = yA + 38;
+    g += `<text x="${x0 - 22}" y="${yB}" text-anchor="middle" font-size="28" font-weight="900" fill="currentColor">${op === '+' ? '+' : '−'}</text>`;
+    g += `<line x1="${x0 - 36}" y1="${yB + 12}" x2="${x0 + n * W}" y2="${yB + 12}" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`;
+    const H = cozum ? 210 : 192;
+    const etiket = cozum ? (op === '+' ? 'Alt alta toplama: kırmızı 1, yan sütuna geçen elde' : 'Alt alta çıkarma: üstü çizili rakamdan onluk bozuldu, yeni değeri kırmızıyla üstünde') : 'Sayıları alt alta yaz: her rakam kendi basamağının altında';
+    return `<div class="altalta"><svg viewBox="0 0 ${Wt} ${H}" width="100%" style="max-width:${Math.round(Wt * 1.15)}px" role="img" aria-label="${etiket}">${g}</svg></div>`;
+  };
   U.fr = (n, d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
   U.mixed = (w, n, d) => `<span class="mx">${w}${U.fr(n, d)}</span>`;
   U.norm = (s) => String(s).trim().toLowerCase().replace(/[\s  ]/g, '').replace(/\./g, '').replace('%', '%');
