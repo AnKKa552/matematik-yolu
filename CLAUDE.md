@@ -194,6 +194,15 @@ E-posta **içeriği kilitlemek için değil**, veliye somut bir karşılık (her
 - **Gizlilik:** politika §3.4 ve sağlayıcı tablosu güncellendi; sağlayıcı seçilince konumu tabloya yazılmalı. KVKK: adres + rapor metni yurt dışındaki sağlayıcıya gider (Supabase ile aynı aktarım sorusu, hukukçuya).
 - Test: `python3 test/e2e_eposta.py` (kurulu değilken kart yok, onaysız/geçersiz adres reddi, doğrulama, sayfada düğmesiz onay yok, yanlış belirteç, onaydan önce rapor yok, açılışta rapor yükleme, durdurma, çıkış sayfası).
 
+### 3.10 İsimsiz soru istatistiği (06.11.2026, proje sahibinin isteği: "pilot şart değil, bağlanan herkes için")
+Amaç: yazılımı geliştirmek için hangi soru kalıbında hata yapıldığını, nerede uzun düşünüldüğünü, hangi yanılgının sık olduğunu, dersin nerede bırakıldığını görmek. **Herkes için varsayılan açık**, ama kişiye bağlı değil (pilot kaydından farkı bu; pilot ayrıntılı ve onaylı olarak aynen sürer).
+- **Telefonda toplanır** (`istatCevap`, `istatOlay`, `istatGonder` in app.js; kova `localStorage.my_istat`, kardeşler ortak): her (mod, beceri, seviye, tür, kalıp) için cevap sayısı, ilk denemede doğru / ipucuyla / çözüm, toplam süre, süre dağılımı (<10 sn, 10–30, 30–60, 1–2 dk, 2 dk+), yanılgı sayıları; ders başına başlatma/bitirme/bırakma ve kaçıncı soruda bırakıldı. Kalıp = `pilotKalip` (sayısız metnin 8 haneli özeti) + okunabilir örnek metin (`E.kalipAnahtari`, uygulamanın ürettiği metin; çocuğun bilgisi asla soru metnine girmez).
+- **Yalnız toplamlar gider:** cihaz numarası, ad, zaman damgası, cevap sırası, yazılan cevap yok. Gönderim: ilk cevaptan 60 sn sonra, ders bitince/bırakılınca 3 sn sonra, uygulama arka plana geçince, açılışta 6 sn sonra. Gönderilince telefonda silinir; sunucu hata verirse geri konur.
+- **Kapatma:** Ben → Ayarlar → «Uygulamayı geliştirmemize yardım et» (`st.settings.istat === false`); kapatınca bekleyen sayılar silinir.
+- **Sunucu** (`sunucu/supabase/istatistik.sql`, kurulu): tablolar `istat_soru` (gün + kalıp başına toplamlar), `istat_kalip` (kalıp → örnek metin), `istat_ders`, `istat_gunluk` (çağrı sayacı); fonksiyon `istatistik_kaydet(p)` (anon; çağrı başına 200 soru + 50 ders satırı, satır başına 300 cevap, uygulama geneli günde 100 000 çağrı; bozuk satır atlanır). Okuma sorguları dosyanın başında. Sahte veri gönderilebilir (kimlik yok); sayılar eğilim gösterir, kesin ölçüm pilottan gelir.
+- **Gizlilik:** politika §4'te anlatılıyor (anonim istatistik). Play «Veri güvenliği» formunda «Uygulama etkinliği (anonim, toplu)» olarak bildirilmeli. KVKK: hukukçuya anonim sayıldığı teyit ettirilmeli (§1-6).
+- Test: `python3 test/e2e_istat.py`.
+
 ### 3.8 Aynı telefonda kardeşler (04.11.2026, proje sahibinin isteği)
 Proje sahibi aynı telefonda iki bağlantıyla iki "öğrenci" açınca ikisinin aynı kaydı gördüğünü fark etti; evde iki 5. sınıf öğrencisi olan aile de aynı sorunu yaşar.
 - **Depolama** (`engine.js`): her çocuğun durumu ayrı `localStorage` anahtarında; ilk çocuk eski anahtarı (`matematik_yolu_v1`) kullanır, diğerleri `matematik_yolu_v1:<id>`. Liste `matematik_yolu_profiller = {aktif, liste}`. `E.profiller / profilId / profilOku / profilSec / profilYeni / profilSil`; `E.reset()` yalnız etkin çocuğu siler, varsa diğerine geçer. Mevcut kullanıcıların kaydı yerinde kalır.
@@ -505,6 +514,7 @@ test/test_sahne.py        ← 35 konunun adım adım sahneleri: SVG geçerliliğ
 test/e2e_profil.py        ← aynı telefonda kardeşler: ayrı kayıt, seçici, ayrı pilot numarası
 test/e2e_pilot.py         ← pilot kaydı ve başlangıç/bitiş testi: uçtan uca (sahte sunucu)
 test/e2e_aile.py          ← aile kodu ile yedek + oyuncu adı/resimli şifre: dört telefonlu uçtan uca test (sahte sunucu)
+test/e2e_istat.py         ← isimsiz soru istatistiği: toplama, kimliksiz gönderim, kapatma (sahte sunucu)
 test/e2e_eposta.py        ← haftalık rapor e-postası: kart, doğrulama, yükleme, durdurma (sahte sunucu)
 test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Playwright)
 ```
@@ -557,7 +567,7 @@ test/e2e.py               ← telefon boyutunda uçtan uca tarayıcı testi (Pla
 ---
 
 ## 13. Ajanlar için çalışma kuralları
-- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py`, `python3 test/e2e_pilot.py`, `python3 test/e2e_profil.py` ve `python3 test/e2e_eposta.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
+- Bir değişiklikten sonra **her zaman**: `node test/test_generators.js` → `node test/test_plan.js` → `python3 build.py` → `python3 test/test_sahne.py` → (mümkünse) `python3 test/e2e.py`, `python3 test/e2e_aile.py`, `python3 test/e2e_pilot.py`, `python3 test/e2e_profil.py` `python3 test/e2e_eposta.py` ve `python3 test/e2e_istat.py`. (e2e artık depodaki güncel `dist/`i açar; 17.10.2026'ya kadar sabit bir yoldan eski bir kopyayı açıyordu.)
 - Yeni dosya ekleme yerine mevcut yapıyı genişlet. Kütüphane eklemeden önce gerekçe yaz; tek dosya PWA yapısı korunur (Faz A).
 - Kullanıcıya görünen her metin Türkçe, 10–11 yaşa uygun, kısa cümleli. Teknik terimleri kitabın kullandığı adlarla yaz (bütünler, tümler, sıklık tablosu…).
 - Emin olmadığın bir bilgiyi (fiyat, mevzuat ayrıntısı, platform politikası) kesinmiş gibi yazma; "doğrulanmalı" diye işaretle.

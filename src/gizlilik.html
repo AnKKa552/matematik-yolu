@@ -34,7 +34,7 @@ nav.icindekiler a{display:inline-block;margin:2px 10px 2px 0}
 </head>
 <body>
 <main>
-<header><img src="../img/simge2_192.png" alt=""><div><h1>Gizlilik Politikası</h1><div class="soluk">Matematik Yolu · Son güncelleme: 5 Kasım 2026</div></div></header>
+<header><img src="../img/simge2_192.png" alt=""><div><h1>Gizlilik Politikası</h1><div class="soluk">Matematik Yolu · Son güncelleme: 6 Kasım 2026</div></div></header>
 
 <div class="kart ozet">
 <p><b>Kısaca:</b> Matematik Yolu, 5. sınıf öğrencileri için bir matematik uygulamasıdır. Reklam göstermez, verileri satmaz ve kimseyle paylaşmaz.</p>
@@ -104,15 +104,16 @@ nav.icindekiler a{display:inline-block;margin:2px 10px 2px 0}
 <h2 id="teknik">4. Teknik kayıtlar</h2>
 <ul>
 <li><b>Pi'nin soru okuması:</b> Çocuk bir soruyu sesli dinlemek istediğinde, uygulamanın kendi ürettiği soru metni sunucumuza gönderilir; sunucumuz bu metni seslendirme hizmetine iletir. Seslendirme hizmetine yalnızca soru metni gider; çocuğa ait hiçbir bilgi, IP adresi dahil, gönderilmez. Aşırı kullanımı önlemek için sunucumuzda bağlantının IP adresinin karıştırılmış (geri çevrilemeyen) hâliyle günlük bir sayaç tutulur ve en fazla 30 gün sonra silinir. Bu kayıt, hizmetin güvenliği ve kötüye kullanımın önlenmesi amacıyla meşru menfaate dayanır.</li>
+<li><b>İsimsiz soru istatistiği:</b> Uygulamayı geliştirmek için telefon, çözülen soruları kendi içinde soru türüne göre <b>sayar</b> (ör. "bu soru türünde 3 cevap, 1'i ilk denemede doğru, toplam 52 saniye, bir kez şu yaygın hata") ve yalnızca bu toplamları sunucumuza gönderir; dersin başlatılma, bitirilme ve kaçıncı soruda bırakılma sayıları da aynı şekilde gider. Çocuğun adı, cihaz numarası, cevap saati, cevapların sırası ya da yazdığı cevap gönderilmez; sunucumuzda bir sayının hangi çocuktan geldiği bilinemez. Bu nedenle bu toplamlar kişisel veri niteliği taşımayan anonim istatistiklerdir. Ayarlar'daki "Uygulamayı geliştirmemize yardım et" kutusundan istediğiniz an kapatabilirsiniz; kapatınca telefonda bekleyen sayılar da silinir.</li>
 <li><b>Barındırma ve ağ:</b> Uygulama sayfasını sunan GitHub ile alan adı hizmetini veren Cloudflare, her internet sitesinde olduğu gibi bağlantının teknik kayıtlarını (IP adresi, zaman, tarayıcı türü) kısa süre tutabilir. Yazı tipleri dahil uygulamanın bütün dosyaları kendi sitemizden yüklenir.</li>
-<li>Uygulamada reklam, reklam kimliği, analiz ya da takip aracı (ör. Google Analytics, Firebase Analytics, Facebook SDK) <b>bulunmaz</b>.</li>
+<li>Uygulamada reklam, reklam kimliği ya da üçüncü taraf analiz ve takip aracı (ör. Google Analytics, Firebase Analytics, Facebook SDK) <b>bulunmaz</b>.</li>
 </ul>
 
 <h2 id="paylasim">5. Verilerin paylaşılması ve aktarılması</h2>
 <p>Veriler satılmaz ve reklam ya da pazarlama amacıyla kimseyle paylaşılmaz. Yalnızca hizmeti çalıştırmak için şu hizmet sağlayıcılar kullanılır:</p>
 <div class="tablo"><table>
 <tr><th>Sağlayıcı</th><th>Ne için</th><th>Konum</th></tr>
-<tr><td>Supabase</td><td>Bulut yedeği, bildirim kaydı, araştırma kayıtları, haftalık rapor e-postası kaydı, soru okuma</td><td>Frankfurt, Almanya (AB)</td></tr>
+<tr><td>Supabase</td><td>Bulut yedeği, bildirim kaydı, araştırma kayıtları, isimsiz soru istatistiği, haftalık rapor e-postası kaydı, soru okuma</td><td>Frankfurt, Almanya (AB)</td></tr>
 <tr><td>ElevenLabs</td><td>Soru metnini Pi'nin sesine çevirme. Kişisel veri gitmez; yalnızca uygulamanın ürettiği soru metni gider.</td><td>ABD</td></tr>
 <tr><td>E-posta gönderim hizmeti</td><td>Yalnızca haftalık rapor e-postasını açan velilere doğrulama ve rapor e-postalarının iletilmesi (e-posta adresi ve rapor metni)</td><td>Sağlayıcı seçildiğinde burada belirtilecektir</td></tr>
 <tr><td>GitHub (Microsoft)</td><td>Uygulama sayfasının barındırılması</td><td>ABD</td></tr>

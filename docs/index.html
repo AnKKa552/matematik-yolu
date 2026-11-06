@@ -5446,6 +5446,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
         <label class="check"><input type="checkbox" data-act="set-sound" ${A.st.settings.sound ? 'checked' : ''}> Ses efektleri</label>
         <label class="check"><input type="checkbox" data-act="set-voice" ${A.st.settings.voice ? 'checked' : ''}> Sesli anlatım (Pi soruları okusun)</label>
         <label class="check"><input type="checkbox" data-act="set-siklar" ${A.st.settings.siklar ? 'checked' : ''} ${A.st.settings.voice ? '' : 'disabled'}> <span>Pi şıkları da okusun <span class="muted sm">(🔊'ya dokununca)</span></span></label>
+        <label class="check"><input type="checkbox" data-act="set-istat" ${A.st.settings.istat !== false ? 'checked' : ''}> <span>Uygulamayı geliştirmemize yardım et <span class="muted sm">(isimsiz soru istatistiği: hangi soru kalıbı kaç kez doğru/yanlış, ne kadar sürdü; kim olduğun gönderilmez)</span></span></label>
         <label class="check"><input type="checkbox" data-act="set-kolay" ${A.st.settings.kolay ? 'checked' : ''}> <span>Okuma kolaylığı <span class="muted sm">(büyük ve aralıklı yazı)</span></span></label>
         ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
@@ -5619,6 +5620,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   // Soru kalıbının kısa özeti (sayılar atılmış metin): hangi soru türünde zorlanıldığını görmek için, metnin kendisi gitmez
   const pilotKalip = (q) => { const t = E.kalipAnahtari(q); let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16).padStart(8, '0'); };
   function pilot(tur, veri) {
+    istatOlay(tur, veri);
     if (!pilotAcik()) return;
     const k = pilotKuyruk(); k.push({ tur, veri: veri || {}, z: Date.now() }); pilotKuyrukYaz(k);
     clearTimeout(pilotZaman); pilotZaman = setTimeout(() => pilotGonder(), ['ders_bitti', 'ders_birak', 'test'].includes(tur) ? 1500 : 30000);
@@ -5644,11 +5646,61 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   E.yanilgiNotu = (st, q, mis) => { pilotIlkMis = mis || pilotIlkMis; return pilotYanilgi0(st, q, mis); };
   E.record = (st, ses, q, res, ms, hinted, kanit) => {
     const n0 = ses.answered.length, g = pilotKayit0(st, ses, q, res, ms, hinted, kanit);
-    if (pilotAcik()) { const a = ses.answered.length > n0 ? ses.answered[ses.answered.length - 1] : null;
-      pilot('cevap', { mod: ses.mode, beceri: q.skill, sev: q.level, tur: q.type || 'mc', hata: q.hata, asama: q.atolye ? q.atolye.asama : undefined,
-        ok: !!res.ok, kanit: a ? a.kanit : 'tahmin', mis: res.mis || pilotIlkMis || undefined, ms: Math.min(600000, Math.round((ms || 0) / 100) * 100), telafi: q.rescue ? 1 : undefined, kalip: pilotKalip(q) }); }
+    if (pilotAcik() || istatAcik()) { const a = ses.answered.length > n0 ? ses.answered[ses.answered.length - 1] : null;
+      const veri = { mod: ses.mode, beceri: q.skill, sev: q.level, tur: q.type || 'mc', hata: q.hata, asama: q.atolye ? q.atolye.asama : undefined,
+        ok: !!res.ok, kanit: a ? a.kanit : 'tahmin', mis: res.mis || pilotIlkMis || undefined, ms: Math.min(600000, Math.round((ms || 0) / 100) * 100), telafi: q.rescue ? 1 : undefined, kalip: pilotKalip(q) };
+      istatCevap(veri, q); if (pilotAcik()) pilot('cevap', veri); }
     pilotIlkMis = null; return g;
   };
+  /* İsimsiz soru istatistiği (06.11.2026, proje sahibinin isteği: pilot şart olmadan herkes için; sunucu/supabase/istatistik.sql).
+     Telefon cevapları kalıp kalıp TOPLAR (kaç cevap, kaçı ilk denemede doğru, toplam süre, süre dağılımı, yanılgı sayıları)
+     ve yalnız toplamları gönderir; cihaz numarası, ad, zaman damgası, cevap sırası gitmez. Kardeşler aynı kovayı kullanır
+     (zaten kimse ayırt edilmez). Ayarlar → "Uygulamayı geliştirmemize yardım et" ile kapanır (A.st.settings.istat === false). */
+  const ISTAT = 'my_istat';
+  let istatGidiyor = false, istatZaman = null;
+  const istatAcik = () => !!(A.st && A.st.profile && A.st.settings && A.st.settings.istat !== false);
+  const istatOku = () => { try { const v = JSON.parse(localStorage.getItem(ISTAT) || '{}'); return { soru: v.soru || {}, ders: v.ders || {} }; } catch (e) { return { soru: {}, ders: {} }; } };
+  const istatYaz = (v) => { try { localStorage.setItem(ISTAT, JSON.stringify(v)); } catch (e) { } };
+  const istatPlanla = (sn) => { clearTimeout(istatZaman); istatZaman = setTimeout(() => istatGonder(), sn * 1000); };
+  function istatCevap(v, q) {
+    if (!istatAcik() || !v.beceri || !v.sev || v.kanit === 'tahmin') return;
+    const b = istatOku(), an = [v.mod, v.beceri, v.sev, v.tur, v.kalip].join('|');
+    const s = b.soru[an] || (b.soru[an] = { mod: v.mod, beceri: v.beceri, sev: v.sev, tur: v.tur, kalip: v.kalip, metin: E.kalipAnahtari(q).slice(0, 300), n: 0, ilk: 0, ipucu: 0, cozum: 0, ms: 0, kova: [0, 0, 0, 0, 0], mis: {} });
+    if (s.n >= 300) return;
+    s.n++; if (v.kanit === 'ilk') s.ilk++; else if (v.kanit === 'ipucu') s.ipucu++; else if (v.kanit === 'cozum') s.cozum++;
+    s.ms += v.ms; s.kova[v.ms < 10000 ? 0 : v.ms < 30000 ? 1 : v.ms < 60000 ? 2 : v.ms < 120000 ? 3 : 4]++;
+    if (v.mis && /^[a-z_]{2,40}$/.test(v.mis)) s.mis[v.mis] = (s.mis[v.mis] || 0) + 1;
+    istatYaz(b); istatPlanla(60);
+  }
+  function istatOlay(tur, v) {
+    if (!istatAcik() || !['ders_basla', 'ders_bitti', 'ders_birak'].includes(tur) || !v || !v.mod) return;
+    const b = istatOku(), bec = v.beceri || '-', an = v.mod + '|' + bec;
+    const d = b.ders[an] || (b.ders[an] = { mod: v.mod, beceri: bec, basla: 0, bitti: 0, birak: 0, bs: {} });
+    if (tur === 'ders_basla') d.basla++; else if (tur === 'ders_bitti') d.bitti++;
+    else { d.birak++; const no = String(Math.min(99, (v.n || 0) + 1)); d.bs[no] = (d.bs[no] || 0) + 1; }
+    istatYaz(b); istatPlanla(tur === 'ders_basla' ? 60 : 3);
+  }
+  async function istatGonder() {
+    if (istatGidiyor || !aileAyarli()) return;
+    const b = istatOku(), soru = Object.values(b.soru), ders = Object.values(b.ders);
+    if (!soru.length && !ders.length) return;
+    if (!istatAcik()) { istatYaz({ soru: {}, ders: {} }); return; }
+    istatGidiyor = true; istatYaz({ soru: {}, ders: {} });
+    const geriKoy = (sx, dx) => { const y = istatOku();
+      sx.forEach(s => { const an = [s.mod, s.beceri, s.sev, s.tur, s.kalip].join('|'), o = y.soru[an];
+        if (!o) { y.soru[an] = s; return; } ['n', 'ilk', 'ipucu', 'cozum', 'ms'].forEach(k => o[k] += s[k]); s.kova.forEach((x, i) => o.kova[i] += x); Object.entries(s.mis).forEach(([k, x]) => o.mis[k] = (o.mis[k] || 0) + x); });
+      dx.forEach(d => { const an = d.mod + '|' + d.beceri, o = y.ders[an];
+        if (!o) { y.ders[an] = d; return; } ['basla', 'bitti', 'birak'].forEach(k => o[k] += d[k]); Object.entries(d.bs).forEach(([k, x]) => o.bs[k] = (o.bs[k] || 0) + x); });
+      istatYaz(y); };
+    try {
+      for (let i = 0; i < Math.max(soru.length, 1); i += 200) {
+        const sx = soru.slice(i, i + 200), dx = i === 0 ? ders.slice(0, 50) : [];
+        let r = null; try { r = await rpc('istatistik_kaydet', { p: { soru: sx, ders: dx } }); } catch (e) { }
+        if (!r || !r.ok) { geriKoy(soru.slice(i), i === 0 ? ders : []); return; }
+      }
+      if (ders.length > 50) geriKoy([], ders.slice(50));
+    } finally { istatGidiyor = false; }
+  }
   const pilotDers = (tur) => { const s = A.ses; if (!s) return; pilot(tur, { mod: s.mode, beceri: s.skill || undefined, n: s.answered.length, ilk: s.answered.filter(a => a.kanit === 'ilk').length, sure: Math.round((Date.now() - s.start) / 1000) }); };
   function pilotKart() {
     if (!pilotAcik() && pilotSunucu !== true) return '';
@@ -6690,6 +6742,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'p-place': startSession('placement', null); break;
       case 'set-sound': A.st.settings.sound = el.checked; save(); break;
       case 'set-voice': A.st.settings.voice = el.checked; save(); render(); break;
+      case 'set-istat': A.st.settings.istat = el.checked; save(); if (!el.checked) istatYaz({ soru: {}, ders: {} }); toast(el.checked ? '💙 Teşekkürler! Sorular isimsiz olarak sayılacak.' : 'Kapatıldı. Bu telefondan istatistik gönderilmeyecek.'); break;
       case 'set-siklar': A.st.settings.siklar = el.checked; save(); if (el.checked) toast('Soruda 🔊\'ya dokununca Pi şıkları da okuyacak.'); break;
       case 'set-kolay': A.st.settings.kolay = el.checked; save(); kolayUygula(); break;
       case 'goal': A.st.dailyGoal = +v; save(); render(); break;
@@ -6827,7 +6880,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   // Seri koruyucu: açılışta ve uygulamaya geri dönülünce (gece yarısını geçtiyse) kendiliğinden kontrol edilir
   const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
     setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
-  seriBak(); setTimeout(epostaRaporYukle, 3000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); } });
+  seriBak(); setTimeout(epostaRaporYukle, 3000); setTimeout(istatGonder, 6000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); istatGonder(); } });
   // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
   { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
     if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }
