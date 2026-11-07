@@ -679,7 +679,7 @@
      ortada asıl içerik, sağda sayaçlar + yan panel (günlük hedef, bugün bunu yap, günlük görevler, lig sıran). Telefonda
      yan panel hiç çizilmez. Ders, kayıt ve tanıtım ekranları tek sütun kalır. */
   const masaGenis = () => window.innerWidth >= 1100;
-  let masaSon = masaGenis(); addEventListener('resize', () => { const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); } });
+  let masaSon = masaGenis(); addEventListener('resize', () => { const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); else $app.classList.toggle('ders-genis', m && !!A.st.profile); } });
   function yanPanel() {
     const st = A.st, txp = todayXP(), hedef = st.dailyGoal, gorevde = A.tab === 'pratik', ligde = A.tab === 'lig', O = gorevde ? null : bugunOneri(), Q = E.quests(st), L = E.league(st), sira = L.rows.findIndex(r => r.me) + 1;
     const yuzde = Math.min(100, Math.round(100 * txp / hedef));
@@ -1419,6 +1419,7 @@
     if (fmt === 'adim') body = `${DERS_SAHNE[id] ? `<div class="visbox ders-sahne" data-sahne="${id}">${DERS_SAHNE[id](0)}</div>` : ''}<ol>${c.map(x => `<li class="dp">${x}</li>`).join('')}</ol>`;
     if (fmt === 'kural') body = `<div class="rule">${parcala(c)}</div>`;
     const rec = E.formatRank(A.st)[0];
+    if (fmt === 'gorsel' || (fmt === 'adim' && DERS_SAHNE[id])) body = `<div class="lcard-govde f-${fmt}">${body}</div>`;
     return `<div class="lcard"><div class="ftabs">${Object.entries(FORMATS).map(([k, f]) => `<button class="chip ${k === fmt ? 'on' : ''}" data-act="${act}" data-v="${k}">${f.icon} ${f.name}${rec.f === k && rec.n >= 2 ? ' ★' : ''}</button>`).join('')}</div>
       <div class="row" style="justify-content:space-between;margin-bottom:4px"><h3>${esc(s.title)}</h3><button class="chip" data-act="say-card" data-v="${fmt}" data-s="${id}">▶️ Pi anlatsın</button></div>${body}</div>`;
   }
@@ -1455,7 +1456,7 @@
     const badge = q.temel ? `<div class="temel-not">🔎 <b>Kısa bir kontrol (${q.temel.sira}/${E.TEMEL_SORU})</b>: «${esc(SKILL[q.temel.pre].title)}» konusundan. «${esc(SKILL[q.temel.sk].title)}» konusunun temeline bakıyoruz.</div>` : isNew ? '<span class="tag new">✨ YENİ KONSEPT</span>' : q.exam ? '<span class="tag">🏆 Bölge sınavı</span>' : q.rescue ? '<div class="rescue-note">💪 Hadi bir daha deneyelim! Bu soru aynı konudan, biraz daha kolay.</div>' : q.hata ? '<span class="tag hata">🔍 Hata Avcısı</span>' : q.atolye ? `<span class="tag atolye">🧩 Problem Atölyesi · ${q.atolye.no || 1}. problem</span>` : q.review ? '<span class="tag ok">⏰ Tekrar sorusu</span>' : q.replay ? '<span class="tag warm">🕵️ Eski hatan</span>' : q.ref ? '<span class="tag">📗 Kitaptaki soru tipinden</span>' : '';
     const hint = A.showHint ? `<div class="hintbox">💡 ${ampulIpucu(q)}${q.ipucuGorsel || ''}</div>` : '';
     return `<div class="lesson">${head}<div class="lbody" id="lbody">${badge}<div class="muted sm" style="font-weight:800;margin-top:6px">${esc(s.title).toLocaleUpperCase('tr-TR')} · ${'●'.repeat(q.level)}${'○'.repeat(3 - q.level)}</div>
-      ${q.atolye ? atolyePanel(q) : ''}<div class="qrow">${piKonus(104, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div>
+      ${q.atolye ? atolyePanel(q) : ''}<div class="dsol"><div class="qrow">${piKonus(104, 'say-q')}<div class="qprompt balon">${q.prompt} <button class="say" data-act="say-q" aria-label="Soruyu oku">🔊</button></div></div>${hint}${q.visual ? `<div class="visbox">${q.visual}</div>` : ''}${q.defter ? defterHTML(q) : ''}</div><div class="dsag">${A.ikinci && !A.fb ? `<div class="ikinci"><b>🤔 Bir daha düşün!</b>${A.ikinci.once ? ` <span class="muted sm">(Önceki cevabın: ${esc(A.ikinci.once)})</span>` : ''}<div>💡 ${A.ikinci.ipucu}</div></div>` : ''}${ans}</div></div>
       ${A.fb || q.type === 'match' ? '' : `<div class="lfoot">${ses.mode !== 'speed' && ses.mode !== 'olcme' ? `<button class="btn ghost hintb" data-act="hint" aria-label="İpucu">💡</button>` : ''}<button class="btn ${ready ? 'ok' : ''}" data-act="check" ${ready ? '' : 'disabled'}>Kontrol et</button></div>`}
       ${A.fb ? feedbackSheet() : ''}</div>`;
   }
@@ -1965,6 +1966,7 @@
     const masa = !A.secici && !pilotDavetGoster() && !vitrinGoster() && !!A.st.profile && A.view !== 'lesson' && A.view !== 'end' && masaGenis();
     if (masa) h += yanPanel();
     $app.classList.toggle('masa', !!masa);
+    $app.classList.toggle('ders-genis', !A.secici && !!A.st.profile && (A.view === 'lesson' || A.view === 'end') && masaGenis());
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
