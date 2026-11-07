@@ -44,5 +44,5 @@ if (D/'img').exists(): shutil.copytree(D/'img', P/'img', dirs_exist_ok=True)
 if (D/'font').exists(): shutil.copytree(D/'font', P/'font', dirs_exist_ok=True)
 # Gizlilik politikası: matematikyolu.com/gizlilik/ (Play mağazası için zorunlu)
 for K in (D, P):
-    for ad in ('gizlilik', 'kosullar', 'eposta'): (K/ad).mkdir(exist_ok=True); shutil.copy(S/(ad + '.html'), K/ad/'index.html')
+    for ad in ('gizlilik', 'kosullar', 'eposta', 'hakkimizda', 'cocuklar', 'veri-sil', 'ogretmenler'): (K/ad).mkdir(exist_ok=True); shutil.copy(S/(ad + '.html'), K/ad/'index.html')
 print('docs/ güncellendi')

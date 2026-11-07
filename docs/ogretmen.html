@@ -425,7 +425,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .komsu .kbal{position:absolute;top:calc(100% + 8px);left:-14px;width:160px;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:7px 10px;font-size:12.5px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 4px 0 var(--line);opacity:0;transform:translateY(-6px) scale(.9);transform-origin:30% 0;pointer-events:none;transition:opacity .2s,transform .2s}
 .komsu .kbal:after{content:'';position:absolute;left:56px;top:-9px;border:8px solid transparent;border-bottom-color:var(--line);border-top:0}
 .komsu .kbal.acik{opacity:1;transform:none}
-.komsu:after{content:'💬';position:absolute;top:-2px;right:-4px;font-size:16px;animation:float 1.8s ease-in-out infinite}
+.komsu:after{content:'';width:20px;height:20px;background:url(img/emo/speech_balloon.webp) center/contain no-repeat;position:absolute;top:-2px;right:-4px;font-size:16px;animation:float 1.8s ease-in-out infinite}
 .komsu.tik:after{display:none}
 .k-sal img{animation:kSal 3.2s ease-in-out infinite}
 .k-egil img{animation:kEgil 4s ease-in-out infinite}
@@ -1273,6 +1273,79 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 :root[data-theme="dark"] .qbar:not(.light) i{background:#7A5A00}
 /* Veli şifresi (4 rakam): tarayıcının «Şifre kaydedilsin mi?» penceresi çıkmasın diye password değil, yazı gizlenir */
 .pin-gizli{-webkit-text-security:disc;text-security:disc;letter-spacing:.3em}
+/* 3B simgeler (Fluent 3D, 07.11.2026): metindeki emojinin yerini alır, yazı boyutuyla büyür */
+img.emj{width:1.18em;height:1.18em;vertical-align:-.22em;display:inline-block;object-fit:contain;-webkit-user-drag:none;user-select:none;pointer-events:none}
+
+/* ===== Vitrin 3 (07.11.2026): üst menü, ada yolu ana görseli, tek renk vurgu, güven şeridi, geniş alt bilgi ===== */
+.vt-ust{gap:12px}
+.vt-logo b span{color:var(--accent)}
+.vt-menu{display:none}
+.vt-ust-sag{display:flex;align-items:center;gap:6px}
+.vt-ust-basla{min-height:44px;padding:8px 16px;font-size:14px}
+@media (min-width:900px){.vt-menu{display:flex;gap:4px}.vt-menu a{color:#E6E1FF;font-weight:800;font-size:15px;text-decoration:none;padding:10px 12px;border-radius:12px}.vt-menu a:hover{background:rgba(255,255,255,.08)}}
+/* tek vurgu rengi: açık zeminde mor, koyu zeminde sarı */
+.vt h1 em,.vt h2 em{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--brand-ink)}
+.vt-gece h1 em,.vt-gece h2 em{color:#FFD15C}
+/* ada yolu */
+.vt-adalar{position:relative;width:min(420px,88vw);aspect-ratio:400/300;margin:8px auto 0}
+.vt-ada-iz{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.vt-ada{position:absolute;border-radius:50%;background-size:cover;background-position:center;box-shadow:0 10px 0 #2E2870,0 0 0 4px rgba(255,255,255,.85),0 24px 40px rgba(0,0,0,.35);z-index:1}
+.vt-ada.sol{width:27%;aspect-ratio:1;left:0;top:50%}
+.vt-ada.orta{width:36%;aspect-ratio:1;left:32%;top:40%}
+.vt-ada.sag{width:27%;aspect-ratio:1;right:0;top:50%}
+.vt-ada.kilit{filter:grayscale(.7) brightness(.75)}
+.vt-ada-kilit{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(24px,6vw,36px)}
+.vt-ada-etiket{position:absolute;z-index:4;left:50%;bottom:-26px;transform:translateX(-50%);white-space:nowrap;background:#fff;color:#1E1B4B;font-weight:900;font-size:12px;padding:4px 10px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.vt-ada-etiket.sari{background:#FFD15C;color:#3A2600}
+.vt-adalar .vt-ada-pi{position:absolute;width:34%;left:33%;top:6%;z-index:2;animation:vtSuz 4s ease-in-out infinite;filter:drop-shadow(0 14px 16px rgba(0,0,0,.4))}
+.vt-bayrak{position:absolute;z-index:2;left:60%;top:22%;font-size:clamp(22px,5vw,32px);transform:rotate(8deg)}
+@media (prefers-reduced-motion:reduce){.vt-adalar .vt-ada-pi{animation:none}}
+@media (min-width:760px){.vt-adalar{width:min(520px,44vw)}}
+/* güven şeridi */
+.vt-guven-liste{list-style:none;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0;margin:18px 0 0}
+.vt-guven-liste li{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#E6E1FF;font-weight:800;font-size:14px;padding:6px 12px;border-radius:999px}
+@media (min-width:760px){.vt-guven-liste{justify-content:flex-start}}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+/* alt bilgi */
+.vt-alt-sutun{display:grid;grid-template-columns:1fr;gap:18px;text-align:left;max-width:900px;margin:0 auto 18px}
+.vt-alt-sutun div{display:flex;flex-direction:column;gap:6px}
+.vt-alt-sutun b{color:#fff;font-size:14px;letter-spacing:.04em}
+.vt-alt-sutun a{color:#CFC8FF;text-decoration:none;font-weight:700;font-size:14px;padding:4px 0}
+@media (min-width:640px){.vt-alt-sutun{grid-template-columns:repeat(3,1fr)}}
+html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasında (menü bağlantıları); uygulamada kaydırma anında olmalı */
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ===== Bilgisayar düzeni (07.11.2026): ≥1100 px sekmeli ekranlarda üç sütun ===== */
+.nav-logo{display:none}
+.yan{display:none}
+@media (min-width:1100px){
+  #app.masa{max-width:1200px;display:grid;grid-template-columns:230px minmax(0,600px) 300px;grid-template-rows:auto 1fr;column-gap:28px;align-items:start;justify-content:center;padding:0 24px}
+  #app.masa .nav{position:sticky;top:0;left:auto;transform:none;grid-column:1;grid-row:1/span 2;height:100vh;width:auto;max-width:none;flex-direction:column;justify-content:flex-start;gap:6px;border:0;border-right:2px solid var(--line);background:transparent;padding:22px 18px 22px 0}
+  #app.masa .nav-logo{display:flex;align-items:center;gap:10px;font-size:20px;margin:0 0 18px 6px;color:var(--brand-ink)}
+  #app.masa .nav-logo img{border-radius:12px} #app.masa .nav-logo span{color:var(--accent-ink)}
+  #app.masa .nav button{flex-direction:row;justify-content:flex-start;gap:14px;font-size:16px;padding:12px 14px;border-radius:14px;width:100%;min-width:0}
+  #app.masa .nav button .ic{font-size:28px}
+  #app.masa .nav button:hover{background:var(--surface2)}
+  #app.masa .topbar{grid-column:3;grid-row:1;position:sticky;top:0;padding:22px 0 10px;background:var(--bg)}
+  #app.masa .scroll{grid-column:2;grid-row:1/span 2;padding:12px 0 60px;min-width:0}
+  #app.masa .yan{display:flex;flex-direction:column;gap:14px;grid-column:3;grid-row:2;position:sticky;top:78px}
+  .yan-kart{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:default;padding:14px 16px}
+  button.yan-kart{cursor:pointer}
+  .yan-bas{font-size:12px;font-weight:900;letter-spacing:.06em;color:var(--brand-ink);margin-bottom:8px;text-transform:uppercase}
+  .yan-ic{font-size:30px}
+  .yan-git{display:inline-block;margin-top:8px;font-weight:900;color:var(--brand-ink)}
+  .yan-gorev{display:flex;gap:10px;align-items:center;margin-top:8px}.yan-gorev>span{font-size:22px}
+  .yan-gorev.tamam{opacity:.6}
+  #app.masa .path.harita{margin-left:0;margin-right:0;border-radius:24px;overflow:hidden}
+  #app.masa .path.harita.tek>.bolge{margin:0}
+}
+/* Dar telefon: kenar adaların etiketi ekrandan taşmasın, logo tek satır kalsın */
+.vt-logo b{white-space:nowrap}
+.vt-ada.sol .vt-ada-etiket{left:0;transform:none}
+.vt-ada.sag .vt-ada-etiket{left:auto;right:0;transform:none}
+@media (max-width:400px){.vt-logo{font-size:17px;gap:8px}.vt-logo img{width:34px;height:34px}.vt-ada-etiket{font-size:11px;padding:3px 8px}.vt-ust .vt-link{font-size:14px}}
+.vt-ada.sol{z-index:2}
+@media (max-width:400px){.vt-yildiz{display:none}}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -3946,7 +4019,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-11-07 22bf0b7', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-07 a535d11', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

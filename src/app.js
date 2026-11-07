@@ -562,7 +562,7 @@
   const PRAISE = window.MY_PI_LINES.bravo;
   const PRAISE_RESCUE = window.MY_PI_LINES.telafi;
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
-  const toast = (msg) => { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
+  const toast = (msg) => { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = emojiSar(msg); document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
 
   /* ---------------- Konfeti ---------------- */
   function confetti() {
@@ -575,12 +575,12 @@
   /* =================== GÖRÜNÜMLER =================== */
   const okulSet = () => new Set((E.okulKonusu(A.st) || { sk: [] }).sk);
   const unlocked = (sk) => { if (!sk.prereq.length || okulSet().has(sk.id)) return true; const p = A.st.skills[sk.prereq[0]]; return p.lessons > 0 || E.eff(p) >= 0.5 || A.st.skills[sk.id].n > 0 || E.eff(A.st.skills[sk.id]) >= 0.3; };
-  const goalRing = () => { const v = Math.min(1, todayXP() / A.st.dailyGoal), r = 15, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 38 38" aria-label="Günlük hedef ${todayXP()}/${A.st.dailyGoal} XP"><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" transform="rotate(-90 19 19)"/><text x="19" y="23" text-anchor="middle" font-size="11" font-weight="900" fill="var(--ink)">⚡</text></svg>`; };
+  const goalRing = () => { const v = Math.min(1, todayXP() / A.st.dailyGoal), r = 15, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 38 38" aria-label="Günlük hedef ${todayXP()}/${A.st.dailyGoal} XP"><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - v)}" transform="rotate(-90 19 19)"/><image href="img/emo/high_voltage.webp" x="11" y="11" width="16" height="16"/></svg>`; };
   // Üst çubuk: her simgeye dokununca ne olduğunu kısa bir cümleyle söyler (çocuk 🧊'nin ne olduğunu bilemez)
   const topbar = () => `<div class="topbar"><button class="stat fire" data-act="ust" data-v="seri" aria-label="Seri"><span class="ic">🔥</span>${A.st.streak}</button><button class="stat gem" data-act="ust" data-v="elmas" aria-label="Elmas"><span class="ic">💎</span>${A.st.gems}</button><button class="stat" data-act="ust" data-v="hedef" aria-label="Günlük hedef">${(A.st.roket || {}).kalan > 0 ? '<span class="roket-rozet" aria-hidden="true">🚀</span>' : ''}${goalRing()}<span class="sm">${todayXP()}/${A.st.dailyGoal}</span></button><button class="stat" data-act="ust" data-v="koruyucu" aria-label="Seri koruyucu"><span class="ic">🧊</span>${A.st.freezes}</button></div>`;
   const UST = { seri: () => `🔥 Serin <b>${A.st.streak} gün</b>. Her gün en az bir ders yaparsan büyür.`, elmas: () => `💎 <b>${A.st.gems} elmasın</b> var. Ders sonundaki ve yoldaki sandıklardan kazanırsın. Seri koruyucu alırsın ya da Pi'ye kostüm alırsın (Pi'ye dokun).`,
     hedef: () => `⚡ Bugünkü hedefin: <b>${todayXP()}/${A.st.dailyGoal} XP</b>. Doğru cevaplarla dolar.${(A.st.roket || {}).kalan > 0 ? `<br>🚀 Roket Gücün açık: sonraki <b>${A.st.roket.kalan} dersinde 2 kat XP</b>!` : ''}`, koruyucu: () => `🧊 <b>${A.st.freezes} seri koruyucun</b> var. Ders yapamadığın gün kendiliğinden kullanılır, serin bozulmaz. En fazla ${E.KORUYUCU_EN_FAZLA} tane taşıyabilirsin.` };
-  const nav = () => `<nav class="nav">${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
+  const nav = () => `<nav class="nav"><div class="nav-logo" aria-hidden="true"><img src="${PI_GORSEL}simge2_192.png" alt="" width="40" height="40"><b>Matematik<span> Yolu</span></b></div>${[['yol', '🏠', 'Yol'], ['kitap', '📚', 'Kitap'], ['pratik', '🎯', 'Görev'], ['lig', '🏆', 'Lig'], ['profil', '🧠', 'Ben'], ['veli', '👨‍👩‍👧', 'Veli']].map(([k, i, t]) => `<button data-act="tab" data-v="${k}" class="${A.tab === k ? 'on' : ''}"><span class="ic">${i}</span>${t}</button>`).join('')}</nav>`;
 
   /* Harita mahallesi: her temanın kendine has komşusu (özgün karakterler, ses yok: konuşan tek ses Pi) */
   const KOMSU = {
@@ -640,7 +640,7 @@
     const greet = A.st.profile ? `Merhaba ${esc(A.st.profile.name.split(' ')[0])}!` : 'Merhaba!';
     const due = E.dueSkills(A.st).length, simdiki = curRef.found || A.theme;
     return `${topbar()}<div class="scroll">
-      <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? `<b>${due}</b> konu tekrar bekliyor ⏰` : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
+      <div class="row" style="margin:4px 0 10px">${dolapPi(64)}<div class="speech grow">${greet} ${due ? (due === 1 ? 'Bir konunu tazeleme zamanı geldi 🔁' : 'Bugün kısa bir tekrar yapalım mı? 🔁') : A.st.streak ? `Serin ${A.st.streak} gün, devam! 🔥` : 'Bugün bir ders yapalım mı? 🚀'}</div></div>
       <div class="diyar-bas"><div><b>🗺️ ${DIYAR}</b><span class="muted sm"> · ${done}/${SKILLS.length} konu · ${Object.keys(A.st.trophies).length}/7 kupa</span></div><div class="bar"><i style="width:${Math.round(100 * done / SKILLS.length)}%"></i></div></div>
       ${okulKart()}${pilotTestKart()}${yedekUyari()}
       <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
@@ -675,6 +675,21 @@
 
   // "Bugün bunu yap": tek, net öneri (Duolingo'nun "sonraki adım" fikri). Öncelik: unutulmaya yüz tutmuş konu →
   // birikmiş hatalar → yoldaki sıradaki konu. Gerekçesi çocuğa tek cümleyle söylenir.
+  /* Bilgisayar düzeni (07.11.2026): 1100 px ve üstünde sekmeli ekranlarda üç sütun: solda menü (alt menünün dikey hâli),
+     ortada asıl içerik, sağda sayaçlar + yan panel (günlük hedef, bugün bunu yap, günlük görevler, lig sıran). Telefonda
+     yan panel hiç çizilmez. Ders, kayıt ve tanıtım ekranları tek sütun kalır. */
+  const masaGenis = () => window.innerWidth >= 1100;
+  let masaSon = masaGenis(); addEventListener('resize', () => { const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); } });
+  function yanPanel() {
+    const st = A.st, txp = todayXP(), hedef = st.dailyGoal, gorevde = A.tab === 'pratik', ligde = A.tab === 'lig', O = gorevde ? null : bugunOneri(), Q = E.quests(st), L = E.league(st), sira = L.rows.findIndex(r => r.me) + 1;
+    const yuzde = Math.min(100, Math.round(100 * txp / hedef));
+    return `<aside class="yan" aria-label="Özet">
+      <div class="card yan-kart"><div class="yan-bas">⚡ Günlük hedef</div><div class="qbar"><i style="width:${yuzde}%"></i><span>${txp} / ${hedef} XP</span></div><p class="sm muted" style="margin:8px 0 0">${txp >= hedef ? 'Bugünkü hedefin tamam! 🎉' : `Hedefe ${hedef - txp} XP kaldı.`}</p></div>
+      ${O ? `<button class="card yan-kart yan-oneri" data-act="${O.act}" ${O.v ? `data-v="${O.v}"` : ''}><div class="yan-bas">BUGÜN BUNU YAP</div><div class="row" style="gap:10px;align-items:center"><span class="yan-ic">${O.ic}</span><b style="text-align:left">${esc(O.t)}</b></div><span class="yan-git">Başla ›</span></button>` : ''}
+      ${gorevde ? '' : `<div class="card yan-kart"><div class="yan-bas">🎯 Günlük görevler</div>${Q.list.map(q => `<div class="yan-gorev ${q.ok ? 'tamam' : ''}"><span>${q.ikon}</span><div class="grow"><div class="sm" style="font-weight:800">${q.ad}</div><div class="qbar"><i style="width:${Math.round(100 * q.v / q.hedef)}%"></i><span>${q.v} / ${q.hedef}</span></div></div></div>`).join('')}</div>`}
+      ${ligde ? '' : `<button class="card yan-kart" data-act="tab" data-v="lig"><div class="yan-bas">🏆 ${L.tier} Ligi</div><p style="margin:4px 0 0;font-weight:800">Bu hafta ${sira}. sıradasın</p><p class="sm muted" style="margin:2px 0 0">${L.daysLeft} gün kaldı</p></button>`}
+    </aside>`;
+  }
   function bugunOneri() {
     const st = A.st, calisilan = SKILLS.filter(s => st.skills[s.id].n > 0), due = E.dueSkills(st), ms = st.mistakes.length;
     const siradaki = SKILLS.find(s => unlocked(s) && E.eff(st.skills[s.id]) < 0.7) || SKILLS.find(s => E.eff(st.skills[s.id]) < 0.85);
@@ -796,7 +811,7 @@
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
         <button class="btn ghost small" data-act="oyuncu-ac">👥 ${E.profiller().liste.length > 1 ? 'Oyuncu değiştir' : 'Kardeş ekle (aynı telefonda)'}</button>
-        <a class="btn ghost small" href="gizlilik/" target="_blank" rel="noopener">🔒 Gizlilik politikası</a>
+        <div class="row" style="gap:8px;flex-wrap:wrap"><a class="btn ghost small grow" href="gizlilik/" target="_blank" rel="noopener">🔒 Gizlilik politikası</a><a class="btn ghost small grow" href="cocuklar/" target="_blank" rel="noopener">🧒 Çocuklar ve veliler için</a><a class="btn ghost small grow" href="veri-sil/" target="_blank" rel="noopener">🗑️ Verileri silme</a></div>
         ${aileHazir() ? `<div class="oy-ben">${A.st.oyuncu ? `<span class="sm">🧒 Oyuncu adın: ${oyYaz(A.st.oyuncu)}</span>` : ''}<button class="btn ghost small" data-act="oy-ac">📲 Başka telefondaki ilerlememi getir</button></div>` : ''}
       </div></div>${nav()}`;
   }
@@ -1773,7 +1788,7 @@
     // Kostümlü Pi (Supabase gorsel deposu); gelmezse normal Pi
     const kostum = (id, yedek, cls) => KOSTUM_KOK ? `<img src="${KOSTUM_KOK}${id}.png" alt="" class="${cls}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${PI_GORSEL}${yedek}'">` : img(yedek, '', cls);
     const kart = (g, b, t) => `<div class="vt-kart vt-gor">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
-    const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" data-bg="${PI_GORSEL}fon_${k}.webp"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
+    const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" data-bg="${PI_GORSEL}fon_${k}_k.webp"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
     const yildiz = Array.from({ length: 28 }, (_, i) => `<i style="left:${(i * 37) % 100}%;top:${(i * 53) % 100}%;--i:${i % 7}"></i>`).join('');
     const sss = [
       ['Ücretli mi?', 'Şu an bütün konular ve özellikler ücretsiz. İleride ek özellikler için isteğe bağlı bir aile aboneliği gelebilir; uygulamada reklam ve elmas satışı hiçbir zaman olmayacak.'],
@@ -1781,21 +1796,31 @@
       ['Ders kitabıyla uyumlu mu?', 'Konular ve sıralama 5. sınıf Maarif Modeli matematik programına göre hazırlandı; okulda işlenen haftanın konusu haritada işaretlenir. Sorular ve anlatımlar bize aittir, ders kitabından kopyalanmaz. Matematik Yolu, Millî Eğitim Bakanlığının resmî uygulaması değildir.'],
       ['Telefon değişirse ilerleme kaybolur mu?', 'Veli alanından bulut yedeğini açarsanız kaybolmaz. Yeni telefonda aile kodu ya da çocuğun oyuncu adı ve resimli şifresiyle kaldığı yerden devam eder.'],
       ['Aynı telefonu iki kardeş kullanabilir mi?', 'Evet. Her çocuk kendi adıyla girer; ilerlemeleri, rozetleri ve veli raporları ayrı tutulur.'],
-      ['Çocuğumun verileri nerede?', 'Varsayılan olarak yalnızca telefonda. Yedek, hatırlatma ya da geliştirme araştırması gibi internete veri gönderen özellikler yalnızca siz şifreli Veli alanından onay verirseniz açılır. Ayrıntılar gizlilik politikasında.']
+      ['Çocuğumun verileri nerede?', 'Varsayılan olarak yalnızca telefonda. Uygulama ilk açıldığında size tek bir izin sorarız: ilerlemenin yedeklenmesi ve uygulamayı geliştirmek için isimsiz kullanım kaydı. Onay vermeden de her şey çalışır; istediğiniz an Veli bölümünden kapatıp sildirebilirsiniz. Ayrıntılar <a href="cocuklar/">çocuklar için gizlilik özetinde</a>.'],
+      ['Kim yapıyor?', 'Matematik Yolu, Türkiye\'de çocuklar ve veliler için bağımsız olarak geliştirilen bir eğitim uygulamasıdır. Sorular bir matematik öğretmeni tarafından incelendi. <a href="hakkimizda/">Hakkımızda</a>']
     ].map(([q, a]) => `<details class="vt-sss"><summary>${q}</summary><p>${a}</p></details>`).join('');
     const telefon = (f, alt, cls) => `<div class="vt-tel ${cls}"><div class="vt-tel-ekran">${img(f, alt, '')}</div></div>`;
     return `<div class="vt">
       <div class="vt-gece">
         <div class="vt-yildizlar" aria-hidden="true">${yildiz}</div><div class="vt-aurora" aria-hidden="true"></div>
-        <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik Yolu</b></div><button class="vt-link" data-act="vt-giris">Devam ediyorum</button></header>
-        <section class="vt-hero"><div class="vt-hero-pi"><div class="vt-isik" aria-hidden="true"></div><div class="vt-semboller" aria-hidden="true">${['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('')}</div>${img('kahraman.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-pi')}</div>
+        <header class="vt-ust"><div class="vt-logo"><img src="${PI_GORSEL}simge2_192.png" alt="" width="36" height="36"><b>Matematik<span> Yolu</span></b></div>
+          <nav class="vt-menu" aria-label="Sayfa bölümleri"><a href="#vt-nasil">Nasıl çalışır</a><a href="#vt-dene">Bir soru dene</a><a href="#vt-veli">Veliler</a><a href="ogretmenler/">Öğretmenler</a><a href="#vt-sss">Sorular</a></nav>
+          <div class="vt-ust-sag"><button class="vt-link" data-act="vt-giris">Giriş</button><button class="btn small vt-btn-sari vt-ust-basla" data-act="vt-basla">Başla</button></div></header>
+        <section class="vt-hero"><div class="vt-hero-pi"><div class="vt-isik" aria-hidden="true"></div><div class="vt-semboller" aria-hidden="true">${['+', '×', '½', '÷', 'π', '%', '−', '='].map((t, i) => `<i style="--i:${i}">${t}</i>`).join('')}</div>
+            <div class="vt-adalar" role="img" aria-label="Matematik Diyarı: bir bölge bitti, Pi bugünün bölgesinde, sıradaki bölge kilitli">
+              <svg class="vt-ada-iz" viewBox="0 0 400 260" aria-hidden="true"><path d="M70 190 C 120 250, 160 120, 200 150 S 300 250, 330 170" fill="none" stroke="#FFD15C" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14"/></svg>
+              <div class="vt-ada sol" style="background-image:url(${PI_GORSEL}fon_t1_k.webp)"><span class="vt-ada-etiket"><span class="vt-yildiz">⭐⭐⭐ </span>Şekil Kasabası</span></div>
+              <div class="vt-ada orta" style="background-image:url(${PI_GORSEL}fon_t4_k.webp)"><span class="vt-ada-etiket sari">Bugünün bölgesi</span></div>
+              <div class="vt-ada sag kilit" style="background-image:url(${PI_GORSEL}fon_t7_k.webp)"><span class="vt-ada-kilit">🔒</span><span class="vt-ada-etiket">Sıradaki bölge</span></div>
+              ${img('pi_sevin.webp', 'Pi, Matematik Yolu\'nun maskotu', 'vt-ada-pi')}<span class="vt-bayrak" aria-hidden="true">🚩</span>
+            </div></div>
           <div class="vt-hero-yazi"><span class="vt-rozet">📐 5. sınıf · 7 bölge · 35 konu</span><h1><span>Matematiği</span><span class="sari">oyun gibi öğren.</span></h1>
           <p class="vt-alt">Her çocuğa kendi yolunu çizen, yanlışın nedenini bilen ve hatasından öğreten ücretsiz uygulama.</p>
-          <div class="vt-cta"><button class="btn vt-btn-sari" data-act="vt-basla">Hemen başla</button><button class="btn ghost vt-btn-cam" data-act="vt-giris">Başka telefonda kullanıyordum</button></div>
-          <p class="vt-guven">Reklamsız · Hesap gerekmez · Maarif Modeli programına uygun</p></div></section>
+          <div class="vt-cta"><button class="btn vt-btn-sari" data-act="vt-basla">Hemen başla</button><a class="btn ghost vt-btn-cam" href="#vt-dene">Bir soru dene ↓</a></div>
+          <ul class="vt-guven-liste"><li>🎁 Ücretsiz</li><li>🚫 Reklam yok</li><li>🔒 Hesap gerekmez</li><li>📗 Maarif programı</li></ul></div></section>
       </div>
       <div class="vt-serit" aria-hidden="true"><div>${[0, 1].map(() => ['Her gün bir adım', 'Hatadan öğren', 'Pi seninle', 'Bugünün bölgesi seni bekliyor', 'Sandığı aç', 'Yıldızları topla'].map(t => `<span>${t}</span><b>✦</b>`).join('')).join('')}</div></div>
-      <section class="vt-bolum vt-ilk"><p class="vt-ust-yazi">01 · Nasıl çalışır</p><h2>Her ders <em>kısa</em> ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
+      <section class="vt-bolum vt-ilk" id="vt-nasil"><p class="vt-ust-yazi">01 · Nasıl çalışır</p><h2>Her ders <em>kısa</em> ve oyun gibi</h2><p class="vt-giris">Birkaç dakikalık derslerle her gün biraz ilerle. Pi, sana göre hızlanır ya da yavaşlar.</p>
         <div class="vt-teller vt-gor" aria-label="Uygulamadan ekranlar">${telefon('vt_anlatim.webp', 'Pi konuyu anlatıyor', 'sol')}${telefon('vt_harita.webp', 'Matematik Diyarı haritası', 'orta')}${telefon('vt_ders.webp', 'Ders sorusu', 'sag')}</div>
         <div class="vt-kartlar">
           ${kart('pi_roket.webp', 'Sana özel yol', 'Doğru ve yanlışlarına bakarak soruların zorluğunu ve tekrar zamanını ayarlar. Unutmaya başladığın konuyu sana yeniden getirir.')}
@@ -1803,7 +1828,7 @@
           ${kart('pi_konus.webp', 'Pi anlatıyor', 'Her konunun sesli mini dersi var: şekil adım adım çizilir, Pi anlatır. Görselle, hikâyeyle ya da kısa kuralla; hangisi işine yarıyorsa.')}
           ${kart('sandik_acik.webp', 'Ödüller ve seri', 'Yıldızlar, sandıklar, çıkartma albümü, Pi\'nin kostümleri ve haftalık lig. Hepsi çalışarak kazanılır; hiçbiri parayla satılmaz.')}
         </div></section>
-      <section class="vt-bolum vt-dene"><p class="vt-ust-yazi">02 · Hemen dene</p><h2>Bir soru çöz, <em>farkı hisset.</em></h2><p class="vt-giris">Yanlış yapmaktan korkma: Pi, yanlışın nedenini bilir.</p>
+      <section class="vt-bolum vt-dene" id="vt-dene"><p class="vt-ust-yazi">02 · Hemen dene</p><h2>Bir soru çöz, <em>farkı hisset.</em></h2><p class="vt-giris">Yanlış yapmaktan korkma: Pi, yanlışın nedenini bilir.</p>
         <div class="vt-demo vt-gor" id="vt-demo">${vitrinDemo()}</div></section>
       <div class="vt-gece vt-avci-bant">
         <section class="vt-bolum vt-avci"><p class="vt-ust-yazi">03 · Hata Avcısı</p><h2><span>Hatayı bul.</span> <span class="sari">Sebebini söyle.</span></h2>
@@ -1826,7 +1851,7 @@
             <div class="vt-gunler">${['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((g, i) => `<div class="vt-gun ${i < 5 ? 'dolu' : ''}" style="--i:${i}"><i>${i < 5 ? '🔥' : ''}</i><span>${g}</span></div>`).join('')}</div></div>
             <p class="vt-ust-yazi">Günlük serin</p><h3>Bugün de geldin. Yarın da görüşelim.</h3><p>Gelemediğin gün seri koruyucun devreye girer. Kimse seni suçlamaz.</p></div>
         </div></section>
-      <section class="vt-bolum vt-veli"><div class="vt-veli-yazi"><p class="vt-ust-yazi" style="text-align:left">06 · Veliler için</p><h2>Çocuğunuz <em>neyi neden</em> yanlış yapıyor?</h2>
+      <section class="vt-bolum vt-veli" id="vt-veli"><div class="vt-veli-yazi"><p class="vt-ust-yazi" style="text-align:left">06 · Veliler için</p><h2>Çocuğunuz <em>neyi neden</em> yanlış yapıyor?</h2>
         <ul class="vt-liste">
           <li><b>Haftalık rapor.</b> Raporda güçlü ve zorlanılan konular, sık düşülen kavram yanılgıları ve öneriler.</li>
           <li><b>Problem çözmenin hangi adımında zorlanıyor?</b> Anlama, plan yapma, hesaplama ve kontrol adımları ayrı ayrı ölçülür.</li>
@@ -1837,11 +1862,15 @@
           ${[['Açılar', 86, 'var(--ok)'], ['Kesirler', 58, 'var(--accent)'], ['Alan ve çevre', 74, 'var(--blue)']].map(([a, y, r]) => `<div class="vt-cubuk"><span>${a}</span><i><b style="--w:${y}%;background:${r}"></b></i><em>%${y}</em></div>`).join('')}
           <div class="vt-rapor-not">🔎 Sık görülen tuzak: <b>paydası büyük olan kesir daha büyüktür</b> sanmak.</div>
           <div class="vt-rapor-not">🧩 Hesaplamada değil, <b>problemi anlamada</b> zorlanıyor.</div></div></section>
-      <section class="vt-bolum"><p class="vt-ust-yazi">07 · Merak edilenler</p><h2>Sık sorulanlar</h2>${sss}</section>
+      <section class="vt-bolum" id="vt-sss"><p class="vt-ust-yazi">07 · Merak edilenler</p><h2>Sık sorulanlar</h2>${sss}</section>
       <div class="vt-gece vt-final-bant">
         <div class="vt-yildizlar" aria-hidden="true">${yildiz}</div>
         <section class="vt-son vt-gor"><div class="vt-roket">${img('pi_roket.webp', '', 'vt-son-pi')}<i class="vt-iz" aria-hidden="true"></i></div><h2><span>Pi seni</span> <span class="sari">bekliyor!</span></h2><p class="vt-alt">İlk dersin birkaç dakika sürer.</p><button class="btn vt-btn-sari" data-act="vt-basla">Hemen başla</button></section>
-        <footer class="vt-alt-bilgi"><nav><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></nav><p>© 2026 Matematik Yolu · Türkiye'de geliştirildi</p></footer>
+        <footer class="vt-alt-bilgi"><div class="vt-alt-sutun">
+          <div><b>Keşfet</b><a href="#vt-nasil">Nasıl çalışır</a><a href="#vt-dene">Bir soru dene</a><a href="hakkimizda/">Hakkımızda</a></div>
+          <div><b>Birlikte</b><a href="#vt-veli">Veliler için</a><a href="ogretmenler/">Öğretmenler için</a><a href="#vt-sss">Sık sorulanlar</a></div>
+          <div><b>Gizlilik ve destek</b><a href="cocuklar/">Çocuklar için gizlilik</a><a href="gizlilik/">Gizlilik politikası</a><a href="kosullar/">Kullanım koşulları</a><a href="veri-sil/">Verilerimi sil</a><a href="mailto:destek@matematikyolu.com">destek@matematikyolu.com</a></div>
+        </div><p>© 2026 Matematik Yolu · Reklamsız · Türkiye'de geliştirildi</p></footer>
       </div>
     </div>`;
   }
@@ -1865,6 +1894,24 @@
     return soru + siklar + fb;
   }
   // Kaydırınca beliren bölümler. Hareket azaltılmışsa ya da IntersectionObserver yoksa her şey baştan görünür.
+  /* Simgeler (07.11.2026, görsel tutarlılık): telefon emojileri her cihazda farklı ve düz görünüyordu; Pi'nin 3B diliyle uyumlu
+     Microsoft Fluent 3D simgeleri (MIT lisansı, img/emo/, 96 px webp) kullanılır. render() çıktısındaki metin parçalarında
+     eşleşen emoji <img class="emj"> olur; etiket içi (öznitelik), <textarea>, <svg>, <option>, <title> atlanır (rapor metni,
+     çizimler ve seçme kutuları düz kalır). Yeni emoji eklenirse EMO tablosuna eklenip img/emo/'ya indirilmeli (CLAUDE.md §3.13). */
+  const EMO = {"⏰":"alarm_clock","⏱":"stopwatch","⏳":"hourglass_not_done","☁":"cloud","⚖":"balance_scale","⚠":"warning","⚡":"high_voltage","⚽":"soccer_ball","✅":"check_mark_button","✉":"envelope","✏":"pencil","✨":"sparkles","❓":"red_question_mark","➕":"plus","⭐":"star","🌈":"rainbow","🌋":"volcano","🌟":"glowing_star","🌱":"seedling","🌳":"deciduous_tree","🌸":"cherry_blossom","🌻":"sunflower","🍉":"watermelon","🍎":"red_apple","🍕":"pizza","🍦":"soft_ice_cream","🍩":"doughnut","🍫":"chocolate_bar","🎁":"wrapped_gift","🎂":"birthday_cake","🎈":"balloon","🎉":"party_popper","🎓":"graduation_cap","🎡":"ferris_wheel","🎨":"artist_palette","🎬":"clapper_board","🎯":"bullseye","🎲":"game_die","🎵":"musical_note","🏀":"basketball","🏁":"chequered_flag","🏅":"sports_medal","🏆":"trophy","🏙":"cityscape","🏟":"stadium","🏠":"house","🏡":"house_with_garden","🏦":"bank","🏫":"school","🏰":"castle","🏷":"label","🐉":"dragon","🐘":"elephant","🐙":"octopus","🐢":"turtle","🐧":"penguin","🐨":"koala","🐬":"dolphin","🐯":"tiger_face","🐰":"rabbit_face","🐼":"panda","👆":"backhand_index_pointing_up","👇":"backhand_index_pointing_down","👋":"waving_hand","👍":"thumbs_up","👑":"crown","👕":"t_shirt","👤":"bust_in_silhouette","👥":"busts_in_silhouette","💎":"gem_stone","💙":"blue_heart","💚":"green_heart","💛":"yellow_heart","💡":"light_bulb","💪":"flexed_biceps","💬":"speech_balloon","💯":"hundred_points","💵":"dollar_banknote","📅":"calendar","📈":"chart_increasing","📊":"bar_chart","📋":"clipboard","📌":"pushpin","📏":"straight_ruler","📐":"triangular_ruler","📒":"ledger","📖":"open_book","📗":"green_book","📘":"blue_book","📚":"books","📝":"memo","📞":"telephone_receiver","📥":"inbox_tray","📩":"envelope_with_arrow","📬":"open_mailbox_with_raised_flag","📱":"mobile_phone","📲":"mobile_phone_with_arrow","📴":"mobile_phone_off","📺":"television","🔁":"repeat_button","🔄":"counterclockwise_arrows_button","🔊":"speaker_high_volume","🔍":"magnifying_glass_tilted_left","🔎":"magnifying_glass_tilted_right","🔑":"key","🔒":"locked","🔔":"bell","🔕":"bell_with_slash","🔢":"input_numbers","🔥":"fire","🔧":"wrench","🔬":"microscope","🔷":"large_blue_diamond","🔺":"red_triangle","🕵":"detective","🖼":"framed_picture","🗑":"wastebasket","🗝":"old_key","🗳":"ballot_box_with_ballot","🗺":"world_map","😄":"grinning_face_with_smiling_eyes","😟":"worried_face","🙂":"slightly_smiling_face","🙌":"raising_hands","🚀":"rocket","🚗":"automobile","🚫":"prohibited","🚲":"bicycle","🛑":"stop_sign","🛒":"shopping_cart","🛠":"hammer_and_wrench","🛡":"shield","🤔":"thinking_face","🤖":"robot","🤝":"handshake","🤩":"star_struck","🥇":"1st_place_medal","🥈":"2nd_place_medal","🥉":"3rd_place_medal","🥧":"pie","🦁":"lion","🦅":"eagle","🦉":"owl","🦊":"fox","🦋":"butterfly","🦒":"giraffe","🦔":"hedgehog","🧊":"ice","🧑‍🏫":"teacher","🧒":"child","🧠":"brain","🧩":"puzzle_piece","🧬":"dna","🧭":"compass","🧮":"abacus","🧱":"brick","🧸":"teddy_bear","🧾":"receipt","🪙":"coin","🪜":"ladder","🪤":"mouse_trap","🪵":"wood","👨‍👩‍👧":"busts_in_silhouette"};
+  const EMO_RE = new RegExp('(' + Object.keys(EMO).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gu');
+  const EMO_ATLA = /^<(textarea|svg|option|title|select)\b/i, EMO_BIT = /^<\/(textarea|svg|option|title|select)\s*>/i;
+  function emojiSar(html) {
+    if (!html) return html;
+    const P = html.split(/(<[^>]*>)/); let atla = 0;
+    for (let i = 0; i < P.length; i++) {
+      const p = P[i]; if (!p) continue;
+      if (p[0] === '<') { if (EMO_ATLA.test(p) && !/\/>$/.test(p)) atla++; else if (EMO_BIT.test(p)) atla = Math.max(0, atla - 1); continue; }
+      if (atla || !/[\u2600-\u27BF\u2B50\u23E9-\u23FA\u231A\u231B\uD83C-\uD83E]/.test(p)) continue;
+      P[i] = p.replace(/\uFE0F/g, '').replace(EMO_RE, (e) => `<img class="emj" src="img/emo/${EMO[e]}.webp" alt="${e}" draggable="false">`);
+    }
+    return P.join('');
+  }
   /* Yeni sürüm uyarısı (07.11.2026): build.py her yayında sw.js'e sürüm özeti yazar; tarayıcı yeni service worker'ı kurup
      devraldığında (controllerchange) açık sayfa hâlâ eski koddadır. Ders sırasında hiçbir şey göstermeyiz; ders dışındayken
      üstte küçük bir şerit: «Yeni sürüm hazır · Yenile». Uygulama arka plandan dönünce güncelleme yoklanır. */
@@ -1881,6 +1928,7 @@
     const f = el.getAttribute('data-fon'), b = el.getAttribute('data-bg');
     if (f) { el.style.setProperty('--fon', `url(${f})`); el.removeAttribute('data-fon'); GEC_YUKLU.add(f); }
     if (b) { el.style.backgroundImage = `url(${b})`; el.removeAttribute('data-bg'); GEC_YUKLU.add(b); }
+    if (b && el.parentElement) el.parentElement.querySelectorAll('[data-bg]').forEach(gecUygula);
   }
   function gecYukle() {
     const L = $app.querySelectorAll('[data-fon],[data-bg]'); if (!L.length) return;
@@ -1914,12 +1962,15 @@
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     h += surumSerit();
+    const masa = !A.secici && !pilotDavetGoster() && !vitrinGoster() && !!A.st.profile && A.view !== 'lesson' && A.view !== 'end' && masaGenis();
+    if (masa) h += yanPanel();
+    $app.classList.toggle('masa', !!masa);
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
     const onceki = A._ekran, sc0 = $app.querySelector('.scroll'), y0 = scrollY, t0 = sc0 ? sc0.scrollTop : 0;
     $app.classList.toggle('genis', A._vitrin = vitrinGoster() && !A.secici && !pilotDavetGoster());
-    $app.innerHTML = h;
+    $app.innerHTML = emojiSar(h);
     A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'vitrin') vitrinCanlandir();
     gecYukle();

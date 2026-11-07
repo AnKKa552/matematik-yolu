@@ -105,7 +105,7 @@ async def main():
             await pg.click('[data-act=okul]', force=True); await pg.wait_for_timeout(250); await pg.screenshot(path=OUT+'05b_okul_modal.png')
             await pg.click('[data-act=close-modal].btn', force=True); await pg.wait_for_timeout(150)
         # bir ders: 4. tema kesirler
-        await pg.click('[data-act=theme][data-v=t4]'); await pg.wait_for_timeout(200)
+        await pg.click('[data-act=theme][data-v=t4]'); await pg.wait_for_timeout(900)
         await pg.screenshot(path=OUT+'06_home_t4.png')
         await pg.click('[data-act=node][data-v=f_tur]', force=True); await pg.wait_for_timeout(200); await pg.screenshot(path=OUT+'07_skill_modal.png')
         await pg.click('[data-act=start]'); await pg.wait_for_timeout(1200)
