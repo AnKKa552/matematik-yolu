@@ -1376,3 +1376,6 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 .ss.acik .ss-sahne{width:min(230px,58vw);margin-top:calc(1 * var(--vh1))}
 .ss.acik .ss-ust{margin-top:calc(3 * var(--vh1))}
 .ss > .btn{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:3;box-shadow:0 6px 0 var(--brand-d,#3a2bd0),0 10px 24px rgba(0,0,0,.35);flex:none}
+/* Çarkta mavi olmayan dilimler sarı/kırmızı (07.11.2026, proje sahibi: «mavi dediği alanda renk göremiyorum») */
+.vis .sy{fill:#FFC233;stroke:var(--surface);stroke-width:2} .vis .sr{fill:#FF6B6B;stroke:var(--surface);stroke-width:2}
+.vis .sb{fill:#2F80FF}

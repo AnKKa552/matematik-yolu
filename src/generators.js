@@ -756,7 +756,7 @@
     return Q({ prompt: soru, options: mc(deger, [[tersi, 'olay_tur'], [fr(1, 2), 'olay_tur'], [pick(['10', '100']), 'olasilik_buyuk']]), steps: ['Kesin olay → olasılık 1', 'İmkânsız olay → olasılık 0', 'Olasılık 0 ile 1 arasındadır; 1\'den büyük olamaz.'] });
   };
   GEN.p_spektrum = (lv) => {
-    const n = pick([4, 6, 8]), k = ri(0, n), cols = shuffle(Array.from({ length: n }, (_, i) => i < k ? 'sb' : 'c0b'));
+    const n = pick([4, 6, 8]), k = ri(0, n), cols = shuffle(Array.from({ length: n }, (_, i) => i < k ? 'sb' : (i % 2 ? 'sy' : 'sr')));  // 07.11.2026: mavi olmayan dilimler de belirgin renkte (gri dilimler «hiç renk yok» gibi görünüyordu)
     if (lv === 1) {
       // 03.11.2026: kök hep "MAVİ dilim" idi; şimdi bazen "mavi OLMAYAN dilim" (tümleyeni düşünmek de ölçülür)
       const degil = Math.random() < 0.4, kh = degil ? n - k : k;
@@ -764,7 +764,7 @@
       return Q({ prompt: degil ? 'Çark çevrildiğinde okun mavi OLMAYAN bir dilimde durması nasıl bir olaydır?' : pick(['Çark çevrildiğinde okun MAVİ dilimde durması nasıl bir olaydır?', 'Bu çark çevrilince okun MAVİ bir dilime gelmesi için hangisi söylenebilir?']), visual: V.spinner(cols), options: mc(t, ['İmkânsız', 'Az olası', 'Eşit olası', 'Çok olası', 'Kesin'].filter(x => x !== t).map(x => [x, x === 'Az olası' || x === 'Çok olası' ? 'az_cok' : 'olay_tur'])), steps: [degil ? `${n} dilimden ${k} tanesi mavi, ${n - k} tanesi mavi değil.` : `${n} dilimden ${k} tanesi mavi.`, kh * 2 < n ? 'Yarısından az → az olası' : kh * 2 > n ? 'Yarısından fazla → çok olası' : kh * 2 === n ? 'Tam yarısı → eşit olası' : ''].filter(Boolean) });
     }
     if (lv === 2) {
-      let kk = Math.max(1, Math.min(n - 1, k)); if (2 * kk === n) kk = Math.random() < .5 ? kk - 1 : kk + 1; const cc = shuffle(Array.from({ length: n }, (_, i) => i < kk ? 'sb' : 'c0b'));
+      let kk = Math.max(1, Math.min(n - 1, k)); if (2 * kk === n) kk = Math.random() < .5 ? kk - 1 : kk + 1; const cc = shuffle(Array.from({ length: n }, (_, i) => i < kk ? 'sb' : (i % 2 ? 'sy' : 'sr')));
       if (Math.random() < 0.4) { const m = n - kk;
         return Q({ prompt: 'Çark çevrildiğinde okun mavi OLMAYAN bir dilimde durma olasılığı kaçtır?', visual: V.spinner(cc), options: mc(fr(m, n), [[fr(kk, n), 'olasilik_oran'], [fr(m, kk), 'olasilik_oran'], [fr(n, m), 'olasilik_buyuk']]), steps: [`Parça: mavi olmayan ${m} dilim. Bütün: ${n} dilim.`, `Mavi olmayan dilimler bütünün ${fr(m, n)} kadarı.`] }); }
       return Q({ prompt: pick(['Çark çevrildiğinde okun MAVİ dilimde durma olasılığı kaçtır?', 'Bu çarkta okun MAVİ bir dilime gelme olasılığını hangi kesir gösterir?']), visual: V.spinner(cc), options: mc(fr(kk, n), [[fr(n - kk, n), 'olasilik_oran'], [fr(kk, n - kk === kk ? n + 1 : n - kk), 'olasilik_oran'], [fr(n, kk), 'olasilik_buyuk']]), steps: [`Parça: ${kk} mavi dilim. Bütün: ${n} dilim.`, `Mavi dilimler bütünün ${fr(kk, n)} kadarı.`] });
