@@ -471,6 +471,7 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 | 5–7'li seri | "DURDURULAMAZ!" altın yazı, 3 havai fişek, ekran sarsılır, Pi zıplar | fanfar + Pi |
 | 8+ seri | "EFSANE!" gökkuşağı yazı, 5 havai fişek + konfeti, Pi zıplar | büyük fanfar + Pi |
 | Telafi doğru | 🌱→🌿→🌳 filiz büyür, "Hatandan öğrendin!" | yumuşak yükselen melodi + Pi |
+- **Doğru cevap efektleri kodla üretilir (07.11.2026, proje sahibinin ekran kaydı: «doğru yapınca hata yapmışız gibi bir ses patlıyor»):** ElevenLabs ile üretilmiş `sfx_ok/fire/unstop/legend/grow` artık çalmaz; yerine `tools/efekt_uret.py` (numpy + ffmpeg) yalnız majör akor notalarıyla yumuşak çan sesleri üretir (bas/gürültü/ani vuruş yok, tepe −3 dB, kısa yankı): doğru = sol→do iki nota, 3'lü seri = do-mi-sol-do arpej, 5'li = iki oktav arpej + akor, 8'li = Fa→Do akor geçişi, telafi = La majör arp. Dosyalar uygulamayla gelir (`src/pwa/img/efekt/*.mp3`, 12–30 KB); gelmezse kendi sentez sesimiz çalar. `sfx_bad/win/badge/swoosh` sunucudakiler kalır.
 - Telefon titreşimi: normal 25 ms, seri/telafi kısa desen.
 - "Hareketi azalt" açık cihazlarda sadece büyük ✓ ve +XP gösterilir.
 - Canvas parçacık motoru (kütüphane yok) → düşük pil ve dosya maliyeti.

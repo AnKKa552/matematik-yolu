@@ -4951,7 +4951,14 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   try { if (navigator.connection) navigator.connection.addEventListener('change', () => { if (CEVRIMDISI.bekle) setTimeout(cevrimdisiHazirla, 3000); }); } catch (e) { }
   document.addEventListener('pointerdown', function ilk() { document.removeEventListener('pointerdown', ilk); onYukle(); }, { once: true });
   const sesCal = (key, tok) => sesAl(key).then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); });
-  ['ok', 'bad', 'win', 'fire', 'unstop', 'legend', 'grow', 'badge', 'swoosh'].forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { const key = 'sfx_' + k; if (A.st.settings.sound && AUDIO.keys && AUDIO.keys.has(key) && AUDIO.blob[key]) { try { const au = new Audio(AUDIO.blob[key]); au.volume = .7; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
+  /* Doğru cevap efektleri uygulamayla gelir (07.11.2026, proje sahibi: «doğru yapınca hata yapmışız gibi bir ses patlıyor»):
+     tools/efekt_uret.py ile kodla, yalnız majör akor notalarıyla üretilen yumuşak çan sesleri (img/efekt/*.mp3). Önceden
+     yapay zekâyla üretilmiş sfx_ok/fire/unstop/legend/grow çalıyordu. Dosya gelmezse yine kendi sentez sesimiz çalar. */
+  const YEREL_EFEKT = { ok: 1, fire: 1, unstop: 1, legend: 1, grow: 1 }, EFEKT_SES = {};
+  const efektHazirla = () => Object.keys(YEREL_EFEKT).forEach(k => { if (EFEKT_SES[k]) return; try { const au = new Audio('img/efekt/' + k + '.mp3'); au.preload = 'auto'; au.load(); EFEKT_SES[k] = au; } catch (e) { } });
+  document.addEventListener('pointerdown', efektHazirla, { once: true });
+  Object.keys(YEREL_EFEKT).forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { if (!A.st.settings.sound) return; efektHazirla(); const kaynak = EFEKT_SES[k]; if (kaynak) { try { const au = kaynak.cloneNode(); au.volume = .65; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
+  ['bad', 'win', 'badge', 'swoosh'].forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { const key = 'sfx_' + k; if (A.st.settings.sound && AUDIO.keys && AUDIO.keys.has(key) && AUDIO.blob[key]) { try { const au = new Audio(AUDIO.blob[key]); au.volume = .7; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
   const stopVoice = () => { AUDIO.tok++; dudakDur(); try { if (AUDIO.cur) { AUDIO.cur.pause(); AUDIO.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } };
   // robot=false: Pi'nin sabit replikleri. Pi sesi çalamazsa robot ses yerine sessiz kalınır (karakter bozulmasın).
   const say = (key, html, robot = true) => {
