@@ -86,6 +86,35 @@
   // Sık çalan kısa replikleri ve efektleri arka planda önceden indir (ilk dokunuştan sonra, ~1 MB)
   const onYukle = () => AUDIO.hazir.then(() => { if (!AUDIO.keys) return; const l = [...AUDIO.keys].filter(k => k.startsWith('pi_') || k.startsWith('sfx_')); let n = 0; const tek = () => { if (n >= l.length) return; sesAl(l[n++]).catch(() => { }).finally(() => setTimeout(tek, 120)); }; tek(); tek(); });
   AUDIO.hazir.then(() => setTimeout(() => { try { if (A.view !== 'lesson' && A.tab === 'profil') render(); } catch (e) { } }, 0));
+  /* İnternetsiz kullanım için ön yükleme (07.11.2026): Pi'nin konu anlatımı (kart_*) ve yanılgı açıklaması (mis_*) sesleri
+     açılıştan 25 sn sonra, yalnız uygun bağlantıda (veri tasarrufu kapalı, mobil veri değil, 2G/3G değil) arka planda tek tek
+     telefona indirilir. Belleğe açılmaz (blob yok), yalnız ses deposuna yazılır; sonraki çalışta oradan gelir. Uygulamanın
+     şu an kullandığı sürüm adları alınır (KART_SES_SURUM, MIS_SES_SURUM), eskileri indirilmez. */
+  const CEVRIMDISI = { hazir: 0, toplam: 0, bekle: false, calisiyor: false };
+  const baglantiUygun = () => { const c = navigator.connection; if (!c) return true; return !c.saveData && c.type !== 'cellular' && !/(^|-)(2g|3g)$/.test(c.effectiveType || ''); };
+  async function cevrimdisiHazirla() {
+    if (CEVRIMDISI.calisiyor || !AUDIO.keys || !('caches' in window)) return;
+    const istenen = [];
+    try { const C = window.MY_CUR; C.SKILLS.forEach(sk => Object.keys(C.FORMATS).forEach(f => istenen.push(kartSes(sk.id, f)))); Object.keys(window.MY_MIS || {}).forEach(id => istenen.push(misSes(id))); } catch (e) { return; }
+    const liste = [...new Set(istenen)].filter(k => AUDIO.keys.has(k));
+    let depo; try { depo = await caches.open(SES_DEPO); } catch (e) { return; }
+    const var_ = new Set((await depo.keys()).map(r => r.url));
+    const eksik = liste.filter(k => !var_.has(new URL(AUDIO.base + k + '.mp3', location.href).href));
+    CEVRIMDISI.toplam = liste.length; CEVRIMDISI.hazir = liste.length - eksik.length;
+    if (!eksik.length) return;
+    if (!baglantiUygun()) { CEVRIMDISI.bekle = true; return; }
+    CEVRIMDISI.calisiyor = true; CEVRIMDISI.bekle = false;
+    try {
+      for (const k of eksik) {
+        if (!baglantiUygun() || !navigator.onLine) { CEVRIMDISI.bekle = true; break; }
+        const url = AUDIO.base + k + '.mp3';
+        try { const r = await fetch(url, { mode: 'cors' }); if (r.ok) { await depo.put(url, r); CEVRIMDISI.hazir++; } } catch (e) { break; }
+        await new Promise(ok => setTimeout(ok, 400));
+      }
+    } finally { CEVRIMDISI.calisiyor = false; }
+  }
+  AUDIO.hazir.then(() => setTimeout(cevrimdisiHazirla, 25000));
+  try { if (navigator.connection) navigator.connection.addEventListener('change', () => { if (CEVRIMDISI.bekle) setTimeout(cevrimdisiHazirla, 3000); }); } catch (e) { }
   document.addEventListener('pointerdown', function ilk() { document.removeEventListener('pointerdown', ilk); onYukle(); }, { once: true });
   const sesCal = (key, tok) => sesAl(key).then(u => { if (tok !== AUDIO.tok) return; const a = new Audio(u); AUDIO.cur = a; dudakBagla(a); return a.play(); });
   ['ok', 'bad', 'win', 'fire', 'unstop', 'legend', 'grow', 'badge', 'swoosh'].forEach(k => { const synth = sfx[k]; sfx[k] = (...a) => { const key = 'sfx_' + k; if (A.st.settings.sound && AUDIO.keys && AUDIO.keys.has(key) && AUDIO.blob[key]) { try { const au = new Audio(AUDIO.blob[key]); au.volume = .7; au.play().catch(() => synth(...a)); return; } catch (e) { } } synth(...a); }; });
@@ -600,7 +629,7 @@
       return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label ${OK.has(s.id) ? 'okul' : ''}">${OK.has(s.id) ? '🏫 ' : ''}${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const kupa = A.st.trophies[th.id], acik = kupa || done === sks.length;
-    return `<section class="bolge" id="bolge-${th.id}" style="--fon:url(img/fon_${th.id}.webp)">
+    return `<section class="bolge" id="bolge-${th.id}" ${GEC_YUKLU.has('img/fon_' + th.id + '.webp') ? `style="--fon:url(img/fon_${th.id}.webp)"` : `data-fon="img/fon_${th.id}.webp"`}>
       <div class="bolge-kapi bg-${th.color}"><div class="bk-ic">${th.icon}</div><div class="grow"><div class="bk-ust">${th.no}. BÖLGE · ${done}/${sks.length} konu</div><h2>${bolgeAd(th.id)}</h2><div class="bk-alt">${esc(th.title)} · <span>📗 Kitabında: ${th.book}. Kitap, ${th.no}. Tema</span></div></div>${kupa ? '<div class="bk-kupa" aria-label="Kupa kazanıldı">🏆</div>' : ''}</div>
       ${nodes}<div class="node-wrap"><button class="node ${acik ? '' : 'locked'}" style="${kupa ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : acik ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="${bolgeAd(th.id)} sınavı">${kupa ? '🏆' : '🎓'}</button><div class="node-label">${kupa ? 'Kupa kazanıldı!' : 'Bölge Sınavı'}</div></div>
     </section>`;
@@ -763,7 +792,7 @@
         <label class="check"><input type="checkbox" data-act="set-siklar" ${A.st.settings.siklar ? 'checked' : ''} ${A.st.settings.voice ? '' : 'disabled'}> <span>Pi şıkları da okusun <span class="muted sm">(🔊'ya dokununca)</span></span></label>
         <label class="check"><input type="checkbox" data-act="set-istat" ${A.st.settings.istat !== false ? 'checked' : ''}> <span>Uygulamayı geliştirmemize yardım et <span class="muted sm">(isimsiz soru istatistiği: hangi soru kalıbı kaç kez doğru/yanlış, ne kadar sürdü; kim olduğun gönderilmez)</span></span></label>
         <label class="check"><input type="checkbox" data-act="set-kolay" ${A.st.settings.kolay ? 'checked' : ''}> <span>Okuma kolaylığı <span class="muted sm">(büyük ve aralıklı yazı)</span></span></label>
-        ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>`; })()}
+        ${(() => { const d = AUDIO.durum, n = AUDIO.keys ? AUDIO.keys.size : 0; const [c, t] = d === 'hazir' ? ['ok', `Pi'nin sesi hazır (${n} kayıt)`] : d === 'yukleniyor' ? ['', 'Pi\'nin sesi yükleniyor…'] : ['bad', 'Pi\'nin sesi yüklenemedi; internet bağlantını kontrol et']; return `<div class="vstat ${c}"><span class="dot"></span>${t}<button class="say" style="margin-left:auto" data-act="pi-hello" aria-label="Pi'yi dinle">🔊</button></div>${CEVRIMDISI.toplam ? `<p class="sm muted" style="margin:4px 0 0">📴 İnternetsiz kullanım için: konu anlatımı ve açıklama sesleri ${CEVRIMDISI.hazir}/${CEVRIMDISI.toplam} indirildi${CEVRIMDISI.hazir < CEVRIMDISI.toplam ? (CEVRIMDISI.bekle ? ' (Wi-Fi bekleniyor)' : '') : ' ✓'}</p>` : ''}`; })()}
         <div><b class="sm">Günlük hedef</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${[20, 50, 80, 120].map(g => `<button class="chip ${A.st.dailyGoal === g ? 'on' : ''}" data-act="goal" data-v="${g}">${g} XP</button>`).join('')}</div></div>
         <button class="btn ghost small" data-act="buy-freeze">🧊 Seri koruyucu al (50 💎)</button>
         <button class="btn ghost small" data-act="oyuncu-ac">👥 ${E.profiller().liste.length > 1 ? 'Oyuncu değiştir' : 'Kardeş ekle (aynı telefonda)'}</button>
@@ -787,12 +816,12 @@
       <div class="card veli-cocuk"><b>Merhaba ${ad}! 🙂</b> Burası anne-baban için. Kendi gelişimini görmek istersen <b>Ben</b> sekmesine bak.<button class="btn small" style="margin-top:10px" data-act="tab" data-v="profil">🧠 Ben sekmesine git</button></div>`;
     if (!V || !V.pin) return `${topbar()}<div class="scroll">${ust}
       <div class="card"><b>Velisi misiniz? Önce bir şifre belirleyin.</b><p class="muted sm" style="margin:6px 0 10px">Haftalık gelişim raporu, veli bilgileri ve onaylar bu şifrenin arkasında durur. 4 rakam; çocuğunuzun bilmediği bir şifre seçin.</p>
-        <div class="field"><label>Şifre (4 rakam)</label><input id="f-pin1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password"></div>
-        <div class="field"><label>Şifre tekrar</label><input id="f-pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password"></div>
+        <div class="field"><label for="f-pin1">Şifre (4 rakam)</label><input id="f-pin1" class="pin-gizli" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" data-lpignore="true"></div>
+        <div class="field"><label for="f-pin2">Şifre tekrar</label><input id="f-pin2" class="pin-gizli" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" data-lpignore="true"></div>
         <button class="btn" style="margin-top:8px" data-act="veli-pin-kur">Şifreyi belirle ve gir</button></div></div>${nav()}`;
     return `${topbar()}<div class="scroll">${ust}
       <div class="card"><b>Veli şifresi</b>
-        <div class="field"><input id="f-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Veli şifresi" placeholder="• • • •"></div>
+        <div class="field"><input id="f-pin" class="pin-gizli" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Veli şifresi" placeholder="• • • •"></div>
         <button class="btn" style="margin-top:8px" data-act="veli-pin-gir">Gir</button>
         <button class="btn ghost small" style="margin-top:8px" data-act="veli-unuttum">Şifremi unuttum</button></div></div>${nav()}`;
   }
@@ -1353,7 +1382,7 @@
       ${bildirimKart()}
       ${A.veliDuzenle ? veliBilgiFormu(p) : `<div class="card" style="margin-top:14px"><b>Veli: ${esc(p.parentName || '—')}</b><div class="muted sm">📞 ${esc(p.parentPhone || 'telefon eklenmedi')} · ✉️ ${esc(p.parentEmail || 'e-posta eklenmedi')}</div><button class="btn ghost small" style="margin-top:10px" data-act="edit-profile">Bilgileri düzenle</button>
       <p class="muted sm" style="margin:10px 0 0">Raporu yukarıdaki düğmelerle istediğiniz an paylaşabilirsiniz.${epostaKurulu === true ? ' Her hafta kendiliğinden gelmesi için «Haftalık rapor e-postası» kartını kullanın.' : ''}</p></div>`}
-      <div class="card" style="margin-top:14px"><b>Tehlikeli bölge</b><p class="muted sm" style="margin:6px 0 10px">Çocuğun bütün ilerlemesi, rozetleri, veli bilgileri ve veli şifresi bu cihazdan silinir. Geri alınamaz.</p><button class="btn ghost small" data-act="reset" style="color:var(--bad)">Tüm verileri sıfırla</button></div></div>${nav()}`;
+      <div class="card" style="margin-top:14px"><b>Tehlikeli bölge</b><p class="muted sm" style="margin:6px 0 10px">Çocuğun bütün ilerlemesi, rozetleri, veli bilgileri ve veli şifresi bu cihazdan silinir. Geri alınamaz.</p><button class="btn ghost small" data-act="reset" style="color:var(--bad-ink)">Tüm verileri sıfırla</button></div></div>${nav()}`;
   }
 
   /* ---------------- Beceri sayfası (modal) ---------------- */
@@ -1692,7 +1721,7 @@
   function onbPiImg(f, boy) { return PI_GORSEL ? `<img src="${PI_GORSEL}${f}" alt="Pi" width="${boy}" height="${boy}" onerror="this.outerHTML=window.MY_MASCOT_SVG('happy',${boy})">` : mascot('happy', boy); }
   function onbUst() {
     const akis = onbAkis(), i = Math.max(0, akis.indexOf(A.onb.step)), y = Math.round(i / (akis.length - 1) * 100);
-    return `<div class="onb-ust"><button class="onb-geri" data-act="onb-geri" aria-label="Geri">←</button><div class="onb-bar" role="progressbar" aria-valuenow="${y}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(6, y)}%"></i></div></div>`;
+    return `<div class="onb-ust"><button class="onb-geri" data-act="onb-geri" aria-label="Geri">←</button><div class="onb-bar" role="progressbar" aria-label="Kayıt ilerlemesi" aria-valuenow="${y}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(6, y)}%"></i></div></div>`;
   }
   // Pi ve konuşma balonu; balon metni değişince yeniden "patlar", aynı kalınca kıpırdamaz
   function onbPi(yazi, gorsel) {
@@ -1744,7 +1773,7 @@
     // Kostümlü Pi (Supabase gorsel deposu); gelmezse normal Pi
     const kostum = (id, yedek, cls) => KOSTUM_KOK ? `<img src="${KOSTUM_KOK}${id}.png" alt="" class="${cls}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${PI_GORSEL}${yedek}'">` : img(yedek, '', cls);
     const kart = (g, b, t) => `<div class="vt-kart vt-gor">${img(g, '', 'vt-kart-img')}<h3>${b}</h3><p>${t}</p></div>`;
-    const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" style="background-image:url(${PI_GORSEL}fon_${k}.webp)"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
+    const bolge = Object.keys(BOLGE).map((k, i) => `<div class="vt-bolge" data-bg="${PI_GORSEL}fon_${k}.webp"><span>${i + 1}. ${BOLGE[k]}</span></div>`).join('');
     const yildiz = Array.from({ length: 28 }, (_, i) => `<i style="left:${(i * 37) % 100}%;top:${(i * 53) % 100}%;--i:${i % 7}"></i>`).join('');
     const sss = [
       ['Ücretli mi?', 'Şu an bütün konular ve özellikler ücretsiz. İleride ek özellikler için isteğe bağlı bir aile aboneliği gelebilir; uygulamada reklam ve elmas satışı hiçbir zaman olmayacak.'],
@@ -1836,6 +1865,30 @@
     return soru + siklar + fb;
   }
   // Kaydırınca beliren bölümler. Hareket azaltılmışsa ya da IntersectionObserver yoksa her şey baştan görünür.
+  /* Yeni sürüm uyarısı (07.11.2026): build.py her yayında sw.js'e sürüm özeti yazar; tarayıcı yeni service worker'ı kurup
+     devraldığında (controllerchange) açık sayfa hâlâ eski koddadır. Ders sırasında hiçbir şey göstermeyiz; ders dışındayken
+     üstte küçük bir şerit: «Yeni sürüm hazır · Yenile». Uygulama arka plandan dönünce güncelleme yoklanır. */
+  if ('serviceWorker' in navigator) {
+    let vardi = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!vardi) { vardi = true; return; } A.yeniSurum = true; if (A.view !== 'lesson') render(); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => { }); });
+  }
+  const surumSerit = () => A.yeniSurum && !A.yeniSurumSonra && A.view !== 'lesson' && A.view !== 'end' ? `<div class="surum-serit" role="status">✨ Yeni sürüm hazır <button class="btn small" data-act="surum-yenile">Yenile</button><button class="surum-x" data-act="surum-sonra" aria-label="Sonra">✕</button></div>` : '';
+  /* Manzara resimleri ekrana yaklaşınca yüklenir (07.11.2026, zayıf telefon ölçümü): 7 bölge fonu ~900 KB; hepsi açılışta
+     inince yavaş 4G'de ilk açılışı ve ses indirmeyi yavaşlatıyordu. Yüklenen bir daha beklemez (GEC_YUKLU). */
+  const GEC_YUKLU = new Set(); let gecGozcu = null;
+  function gecUygula(el) {
+    const f = el.getAttribute('data-fon'), b = el.getAttribute('data-bg');
+    if (f) { el.style.setProperty('--fon', `url(${f})`); el.removeAttribute('data-fon'); GEC_YUKLU.add(f); }
+    if (b) { el.style.backgroundImage = `url(${b})`; el.removeAttribute('data-bg'); GEC_YUKLU.add(b); }
+  }
+  function gecYukle() {
+    const L = $app.querySelectorAll('[data-fon],[data-bg]'); if (!L.length) return;
+    if (!('IntersectionObserver' in window)) { L.forEach(gecUygula); return; }
+    if (gecGozcu) gecGozcu.disconnect();
+    gecGozcu = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { gecUygula(e.target); gecGozcu.unobserve(e.target); } }), { rootMargin: '900px 400px' });
+    L.forEach(el => gecGozcu.observe(el));
+  }
   function vitrinCanlandir() {
     const kok = $app.querySelector('.vt'); if (!kok) return;
     let az = false; try { az = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
@@ -1860,6 +1913,7 @@
     else if (A.view === 'lesson') h = viewLesson();
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
+    h += surumSerit();
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git
@@ -1868,6 +1922,7 @@
     $app.innerHTML = h;
     A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'vitrin') vitrinCanlandir();
+    gecYukle();
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
       if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
@@ -2174,6 +2229,8 @@
       case 'yedek-uyari-kapat': A.st.yedekUyariKapat = Date.now(); save(); render(); break;
       case 'oy-giris': if (A.oy && !A.oy.bekle) oyGiris(); break;
       case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
+      case 'surum-yenile': save(); try { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); istatGonder(); } catch (e) { } setTimeout(() => location.reload(), 600); break;
+      case 'surum-sonra': A.yeniSurumSonra = true; render(); break;
       case 'izin-ver': { const c = document.getElementById('f-izin-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
         const b = document.querySelector('[data-act=izin-ver]'); if (b) { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
         (async () => { if (!pilotAcik()) await pilotKatil(null); A.st.izin = { karar: 'evet', surum: IZIN_RIZA, at: Date.now() }; save();
@@ -2232,6 +2289,6 @@
     try { if (CL.oturum && A.st.profile) { await CL.ogrenciHazirla(A.st.profile); const uzak = await CL.cek(A.st); if (uzak && (uzak.xp || 0) > (A.st.xp || 0)) { A.st = Object.assign(E.fresh(), uzak); E.save(A.st); toast('☁️ İlerlemen buluttan yüklendi'); } else CL.kaydet(A.st); await CL.ligYenile(); } } catch (e) { }
     render();
   });
-  window.MY_APP = A; window.MY_MASCOT = mascot; window.MY_APP_RENDER = render; window.MY_APP_START = startSession; window.MY_DERS_SAHNE = DERS_SAHNE;
+  window.MY_CEVRIMDISI = { durum: CEVRIMDISI, hazirla: cevrimdisiHazirla }; window.MY_APP = A; window.MY_MASCOT = mascot; window.MY_APP_RENDER = render; window.MY_APP_START = startSession; window.MY_DERS_SAHNE = DERS_SAHNE;
   render();
 })();

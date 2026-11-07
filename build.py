@@ -29,6 +29,10 @@ ojs = '\n'.join((S/f).read_text() for f in ['core.js', 'generators.js', 'curricu
 import shutil
 for f in (S/'pwa').glob('*'):
     if f.is_file(): shutil.copy(f, D/f.name)
+# Uygulama her değiştiğinde sw.js de değişsin: tarayıcı yeni sürümü fark eder, uygulama «Yeni sürüm hazır» der (07.11.2026)
+import hashlib
+_h = hashlib.sha256((D/'index.html').read_bytes()).hexdigest()[:10]
+(D/'sw.js').write_text((S/'pwa'/'sw.js').read_text() + f"\n// uygulama sürümü: {_h}\n")
 # Görseller (src/pwa/img) → dist/img ve docs/img
 if (S/'pwa'/'img').exists(): shutil.copytree(S/'pwa'/'img', D/'img', dirs_exist_ok=True)
 if (S/'pwa'/'font').exists(): shutil.copytree(S/'pwa'/'font', D/'font', dirs_exist_ok=True)
