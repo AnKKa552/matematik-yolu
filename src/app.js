@@ -1919,10 +1919,31 @@
      üstte küçük bir şerit: «Yeni sürüm hazır · Yenile». Uygulama arka plandan dönünce güncelleme yoklanır. */
   if ('serviceWorker' in navigator) {
     let vardi = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!vardi) { vardi = true; return; } A.yeniSurum = true; if (A.view !== 'lesson') render(); });
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => { }); });
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!vardi) { vardi = true; return; } A.yeniSurum = true; surumOtomatik(); });
+    const yokla = () => navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => { });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') yokla(); else surumOtomatik(true); });
+    setInterval(() => { if (document.visibilityState === 'visible') yokla(); }, 10 * 60 * 1000);
+    try { if (sessionStorage.getItem('my_guncellendi')) { sessionStorage.removeItem('my_guncellendi'); setTimeout(() => toast('✨ Matematik Yolu güncellendi'), 900); } } catch (e) { }
   }
-  const surumSerit = () => A.yeniSurum && !A.yeniSurumSonra && A.view !== 'lesson' && A.view !== 'end' ? `<div class="surum-serit" role="status">✨ Yeni sürüm hazır <button class="btn small" data-act="surum-yenile">Yenile</button><button class="surum-x" data-act="surum-sonra" aria-label="Sonra">✕</button></div>` : '';
+  /* Otomatik güncelleme (07.11.2026, proje sahibi: «alttaki Yenile yazısını görmek zor; değişiklikleri kullanıcı hemen görsün»):
+     yeni sürüm devralınınca sayfa kendiliğinden yenilenir, ama yalnız güvenli anda: ders, ders sonu, sandık sahnesi, açık pencere,
+     kayıt ve yazı yazılan bir kutu yokken. Değilse beklenir; çocuk haritaya dönünce (render) ya da uygulama arka plana geçince yenilenir.
+     Önce kayıt ve bekleyen gönderimler yapılır. Döngüye girmesin diye 2 dakikada en fazla bir kez. */
+  function surumGuvenli(arka) {
+    if (A.view === 'lesson' || A.view === 'end' || A.sahne || A.modal || A.oyModal || A.secici) return false;
+    if (!A.st || !A.st.profile) return false;
+    if (arka) return true;
+    const el = document.activeElement; return !(el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+  }
+  let surumYenileniyor = false;
+  function surumOtomatik(arka) {
+    if (!A.yeniSurum || surumYenileniyor || !surumGuvenli(arka)) return;
+    try { const son = +sessionStorage.getItem('my_guncelleme_at') || 0; if (Date.now() - son < 120000) return; sessionStorage.setItem('my_guncelleme_at', String(Date.now())); sessionStorage.setItem('my_guncellendi', '1'); } catch (e) { }
+    surumYenileniyor = true; save();
+    try { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); istatGonder(); } catch (e) { }
+    setTimeout(() => location.reload(), arka ? 50 : 500);
+  }
+  const surumSerit = () => A.yeniSurum && !A.yeniSurumSonra && !surumYenileniyor && A.view !== 'lesson' && A.view !== 'end' && !surumGuvenli() ? `<div class="surum-serit" role="status">✨ Yeni sürüm hazır <button class="btn small" data-act="surum-yenile">Yenile</button><button class="surum-x" data-act="surum-sonra" aria-label="Sonra">✕</button></div>` : '';
   /* Manzara resimleri ekrana yaklaşınca yüklenir (07.11.2026, zayıf telefon ölçümü): 7 bölge fonu ~900 KB; hepsi açılışta
      inince yavaş 4G'de ilk açılışı ve ses indirmeyi yavaşlatıyordu. Yüklenen bir daha beklemez (GEC_YUKLU). */
   const GEC_YUKLU = new Set(); let gecGozcu = null;
@@ -1964,6 +1985,7 @@
     else if (A.view === 'end') h = viewEnd();
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     h += surumSerit();
+    if (A.yeniSurum) setTimeout(() => surumOtomatik(), 0);
     const masa = !A.secici && !pilotDavetGoster() && !vitrinGoster() && !!A.st.profile && A.view !== 'lesson' && A.view !== 'end' && masaGenis();
     if (masa) h += yanPanel();
     $app.classList.toggle('masa', !!masa);
