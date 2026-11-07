@@ -1605,6 +1605,66 @@
    "key": "mis_aci_olcu",
    "grup": "yanilgi",
    "text": "Özel açıların ölçülerini karıştırma. Dik açı doksan derece, doğru açı yüz seksen derece, tam açı üç yüz altmış derecedir. Doğru açı iki dik açı, tam açı iki doğru açı eder."
+  },
+  {
+   "key": "pi_bravo_1",
+   "grup": "pi",
+   "text": "Süpersin!"
+  },
+  {
+   "key": "pi_bravo_2",
+   "grup": "pi",
+   "text": "Bomba gibisin!"
+  },
+  {
+   "key": "pi_bravo_3",
+   "grup": "pi",
+   "text": "Kendine güven, yapıyorsun!"
+  },
+  {
+   "key": "pi_bravo_4",
+   "grup": "pi",
+   "text": "İşte bu! Tam isabet!"
+  },
+  {
+   "key": "pi_bravo_5",
+   "grup": "pi",
+   "text": "Roket gibisin!"
+  },
+  {
+   "key": "pi_bravo_6",
+   "grup": "pi",
+   "text": "Efsanesin!"
+  },
+  {
+   "key": "pi_bravo_7",
+   "grup": "pi",
+   "text": "Beynin ateş aldı!"
+  },
+  {
+   "key": "pi_bravo_8",
+   "grup": "pi",
+   "text": "Sen bu işi biliyorsun!"
+  },
+  {
+   "key": "pi_bravo_9",
+   "grup": "pi",
+   "text": "Şampiyon gibi düşündün!"
+  },
+  {
+   "key": "pi_bravo_10",
+   "grup": "pi",
+   "text": "Durmak yok, devam!"
+  },
+  {
+   "key": "pi_bravo_11",
+   "grup": "pi",
+   "text": "Harikasın, böyle devam!"
+  },
+  {
+   "key": "pi_bravo_12",
+   "grup": "pi",
+   "text": "Çok iyi düşündün!"
   }
  ]
 }

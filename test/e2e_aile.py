@@ -58,6 +58,7 @@ async def telefon(b):
     await pg.route(re.compile(r'.*/rest/v1/rpc/.*'), yol)
     await pg.route(re.compile(r'.*cdn\.jsdelivr\.net.*'), lambda r: r.abort())
     await pg.goto(APP); await pg.wait_for_timeout(500)
+    if await pg.query_selector('[data-act=pd-hayir]'): await pg.click('[data-act=pd-hayir]'); await pg.wait_for_timeout(200)
     await pg.evaluate("window.MY_APP.st.settings.voice=false; window.MY_APP.st.settings.sound=false")
     return ctx, pg, errs
 async def main():
@@ -71,9 +72,9 @@ async def main():
         await A.evaluate("""(()=>{const a=window.MY_APP; a.st.xp=850; a.st.streak=4; a.st.skills.g_temel.n=12; a.st.skills.g_temel.pL=.8; a.st.skills.n_okuma.n=6;
           a.st.profile.parentPhone='05321112233'; a.st.profile.parentName='Ayşe Hanım'; a.st.profile.parentEmail='veli@ornek.com'; a.view='home'; a.tab='veli'; window.MY_APP_RENDER();})()""")
         await A.fill('#f-pin1', '4826'); await A.fill('#f-pin2', '4826'); await A.click('[data-act=veli-pin-kur]'); await A.wait_for_timeout(300)
-        await A.click('[data-act=aile-ac]'); await A.wait_for_timeout(300)
+        await A.click('[data-act=izin-ver]'); await A.wait_for_timeout(300)
         ok(await A.query_selector('.aile-kod') is None, 'Onay kutusu işaretlenmeden yedek açılmaz')
-        await A.check('#f-aile-onay'); await A.click('[data-act=aile-ac]'); await A.wait_for_timeout(800)
+        await A.check('#f-izin-onay'); await A.click('[data-act=izin-ver]'); await A.wait_for_timeout(800)
         kod = await A.inner_text('.aile-kod')
         ok(bool(re.fullmatch(r'[A-Z2-9]{4}(-[A-Z2-9]{4}){3}', kod)) and not re.search('[ILO01]', kod), f'Aile kodu üretildi ve okunaklı: {kod}')
         await A.screenshot(path=OUT + 'aile_01_yedek_acik.png', full_page=True)

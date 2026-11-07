@@ -1,11 +1,13 @@
 /* ============================================================
    Pi'nin replikleri — tek kaynak.
    Hem uygulama (yazı + ses anahtarı) hem ses üretim betiği bunu kullanır.
-   Ses dosyası adı: pi_<grup>_<sıra>.mp3  (ör. pi_dogru_3.mp3)
+   Ses dosyası adı: pi_<grup>_<sıra>.mp3  (ör. pi_bravo_3.mp3)
    ============================================================ */
 (function (G) {
   const L = {
-    dogru: ['Harika!', 'Süpersin!', 'Mükemmel!', 'Tam isabet!', 'Bravo!', 'Çok iyi!', 'İşte bu!', 'Matematik dehası!', 'Şahane!', 'Kafana sağlık!'],
+    // 07.11.2026 (proje sahibi: daha modern, gaza getiren): eski 'dogru' grubu yerine; yeni ad, telefonda saklanan eski sesler çalınmasın.
+    // Zekâya değil çabaya/düşünmeye ve özgüvene övgü (Dweck: "zekisin" övgüsü zorlukta pes etmeyi artırabiliyor).
+    bravo: ['Süpersin!', 'Bomba gibisin!', 'Kendine güven, yapıyorsun!', 'İşte bu! Tam isabet!', 'Roket gibisin!', 'Efsanesin!', 'Beynin ateş aldı!', 'Sen bu işi biliyorsun!', 'Şampiyon gibi düşündün!', 'Durmak yok, devam!', 'Harikasın, böyle devam!', 'Çok iyi düşündün!'],
     telafi: ['Hatandan öğrendin!', 'İşte gerçek öğrenme bu!', 'Geri döndün, harika!', 'Gördün mü, yapabiliyorsun!'],
     yanlis: ['Sorun değil, birlikte bakalım.', 'Hata yapmak öğrenmenin parçası.', 'Neredeyse! Şimdi nedenine bakalım.', 'Hiç dert etme, bir daha deneyeceğiz.', 'Bu soru biraz zordu, ama sen pes etmezsin.', 'Güzel denemeydi! Gel, birlikte çözelim.'],
     aciklama: ['Gel, nerede karıştığına birlikte bakalım.', 'Şuraya bir bak, bence burada küçük bir karışıklık oldu.'],

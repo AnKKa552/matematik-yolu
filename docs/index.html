@@ -1695,11 +1695,13 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 /* ============================================================
    Pi'nin replikleri — tek kaynak.
    Hem uygulama (yazı + ses anahtarı) hem ses üretim betiği bunu kullanır.
-   Ses dosyası adı: pi_<grup>_<sıra>.mp3  (ör. pi_dogru_3.mp3)
+   Ses dosyası adı: pi_<grup>_<sıra>.mp3  (ör. pi_bravo_3.mp3)
    ============================================================ */
 (function (G) {
   const L = {
-    dogru: ['Harika!', 'Süpersin!', 'Mükemmel!', 'Tam isabet!', 'Bravo!', 'Çok iyi!', 'İşte bu!', 'Matematik dehası!', 'Şahane!', 'Kafana sağlık!'],
+    // 07.11.2026 (proje sahibi: daha modern, gaza getiren): eski 'dogru' grubu yerine; yeni ad, telefonda saklanan eski sesler çalınmasın.
+    // Zekâya değil çabaya/düşünmeye ve özgüvene övgü (Dweck: "zekisin" övgüsü zorlukta pes etmeyi artırabiliyor).
+    bravo: ['Süpersin!', 'Bomba gibisin!', 'Kendine güven, yapıyorsun!', 'İşte bu! Tam isabet!', 'Roket gibisin!', 'Efsanesin!', 'Beynin ateş aldı!', 'Sen bu işi biliyorsun!', 'Şampiyon gibi düşündün!', 'Durmak yok, devam!', 'Harikasın, böyle devam!', 'Çok iyi düşündün!'],
     telafi: ['Hatandan öğrendin!', 'İşte gerçek öğrenme bu!', 'Geri döndün, harika!', 'Gördün mü, yapabiliyorsun!'],
     yanlis: ['Sorun değil, birlikte bakalım.', 'Hata yapmak öğrenmenin parçası.', 'Neredeyse! Şimdi nedenine bakalım.', 'Hiç dert etme, bir daha deneyeceğiz.', 'Bu soru biraz zordu, ama sen pes etmezsin.', 'Güzel denemeydi! Gel, birlikte çözelim.'],
     aciklama: ['Gel, nerede karıştığına birlikte bakalım.', 'Şuraya bir bak, bence burada küçük bir karışıklık oldu.'],
@@ -5215,7 +5217,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   // Sahip olunan kostümler önceden indirilir: çevrimdışı katman saklar, internet yokken de alınan kostüm görünür
   setTimeout(() => { try { (dolap().sahip || []).filter(k => k !== 'normal').forEach(k => { const im = new Image(); im.src = kostumSrc(k); }); } catch (e) { } }, 2500);
 
-  const PRAISE = window.MY_PI_LINES.dogru;
+  const PRAISE = window.MY_PI_LINES.bravo;
   const PRAISE_RESCUE = window.MY_PI_LINES.telafi;
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const toast = (msg) => { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -5586,10 +5588,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       else if (a.kirli) aileGonder();
     } catch (e) { }
   }
-  async function aileAc() {
-    if (!aileHazir()) return toast('Sunucu bağlantısı yok. İnternetini kontrol et.');
+  async function aileAc(sessiz) {
+    if (!aileHazir()) return sessiz ? null : toast('Sunucu bağlantısı yok. İnternetini kontrol et.');
     const kod = aileKodUret(); A.st.aile = { kod, onay: Date.now(), surum: 0, kirli: true }; save();
-    await aileGonder(true); render();
+    await aileGonder(true); if (sessiz) { if (A.tab === 'veli' && A.view !== 'lesson') render(); return; } render();
     if (A.st.aile && A.st.aile.son) toast('☁️ Yedek açıldı. Aile kodunu güvenli bir yere kaydedin.'); else toast('Yedek kaydedilemedi, internet gelince tekrar denenecek.');
   }
   // Kodla geri yükleme: önce özet gösterilir, onaylanınca yüklenir
@@ -5706,17 +5708,12 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (!pilotAcik() && pilotSunucu !== true) return '';
     const p = A.st.pilot;
     if (pilotAcik()) { const bekleyen = pilotKuyruk().length;
-      return `<div class="card aile-kart"><b>🔬 Pilot çalışmadasınız</b>${p.grup ? ` <span class="muted sm">· grup ${esc(p.grup)}</span>` : ''}
+      return `<div class="card aile-kart"><b>🔬 Geliştirme katkısı açık</b>${p.grup ? ` <span class="muted sm">· grup ${esc(p.grup)}</span>` : ''}
       <p class="muted sm" style="margin:6px 0 6px">Çocuğunuzun uygulamayı nasıl kullandığı isimsiz olarak kaydediliyor. Katkınız için teşekkürler!</p>
       <p class="sm muted" style="margin:0 0 8px">Gönderilen kayıt: <b>${p.gonderilen || 0}</b>${bekleyen ? ` · gönderilmeyi bekleyen: ${bekleyen}` : ''}${p.hata ? ' · ⏳ internet gelince gönderilecek' : ''}</p>
       ${olcmeBolum()}
-      <button class="btn ghost small" data-act="pilot-ayril" style="margin-top:10px">Pilottan ayrıl ve kayıtları sil</button></div>`; }
-    return `<div class="card aile-kart"><b>🔬 Pilot çalışmaya katıl (isteğe bağlı)</b>
-      <p class="muted sm" style="margin:6px 0 8px">Uygulamayı birkaç aileyle deneyerek geliştiriyoruz. Katılırsanız çocuğunuzun uygulamayı nasıl kullandığı <b>isimsiz</b> olarak kaydedilir: hangi konuda kaç soru çözdüğü, hangi soruda zorlandığı, dersi nerede bıraktığı. Katılmasanız da uygulama aynen çalışır.</p>
-      <details class="aile-detay"><summary class="sm"><b>Neler kaydedilir, neler kaydedilmez?</b></summary><p class="sm muted" style="margin:6px 0 0"><b>Kaydedilen:</b> uygulamanın açıldığı zaman, başlanan ve bitirilen dersler, her cevabın konusu, zorluk seviyesi, doğru mu yanlış mı olduğu, ipucu kullanılıp kullanılmadığı, yanlış cevabın hangi tipik hatadan geldiği ve cevap süresi. <b>Kaydedilmeyen:</b> çocuğunuzun ve sizin adınız, telefon, e-posta, aile kodu, oyuncu adı, konum, yazılan herhangi bir metin. Bu telefona rastgele bir numara verilir; numaradan kim olduğunuz anlaşılmaz. Kayıtlar en fazla 13 ay saklanır ve yalnız uygulamayı geliştirmek için kullanılır. İstediğiniz an «Pilottan ayrıl» diyerek bütün kayıtları silebilirsiniz.</p></details>
-      <div class="field" style="margin-top:8px"><label class="sm" for="f-pilot-grup">Pilot grubu kodu (size verildiyse, ör. 5A)</label><input id="f-pilot-grup" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="isteğe bağlı"></div>
-      <label class="aile-onay"><input type="checkbox" id="f-pilot-onay"> <span class="sm">Velisi olarak, çocuğumun uygulama kullanımının bu açıklamaya göre isimsiz kaydedilmesine onay veriyorum.</span></label>
-      <button class="btn" data-act="pilot-katil" style="margin-top:8px">Pilota katıl</button></div>`;
+      <button class="btn ghost small" data-act="pilot-ayril" style="margin-top:10px">Kaydı durdur ve sil</button></div>`; }
+    return '';
   }
   // Ön test / son test: aynı 10 konudan iki paralel form; son test, başlangıç testinden en az OLCME_ARA_GUN gün sonra açılır
   const OLCME_ARA_GUN = 14;
@@ -5737,7 +5734,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     const cihaz = (A.st.pilot && A.st.pilot.cihaz) || pilotCihazUret();
     try { const r = await rpc('pilot_katil', { p_cihaz: cihaz, p_riza: PILOT_RIZA, p_grup: grup || null });
       if (!r || !r.ok) { toast(r && r.hata === 'grup' ? 'Grup kodu en fazla 12 harf ya da rakam olabilir.' : 'Katılım kaydedilemedi, biraz sonra tekrar deneyin.'); return false; }
-      A.st.pilot = { acik: true, karar: 'evet', cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('💙 Katıldınız. Teşekkürler!'); return true;
+      A.st.pilot = { acik: true, karar: 'evet', cihaz, grup: (grup || '').toUpperCase().replace(/[^A-Z0-9-]/g, '') || null, onay: { surum: PILOT_RIZA, at: Date.now() }, gonderilen: 0 }; pilotKuyrukYaz([]); save(); pilotSonAcilis = 0; pilotAcilis(); render(); toast('💙 Teşekkürler!'); return true;
     } catch (e) { toast('İnternete bağlanılamadı, biraz sonra tekrar deneyin.'); return false; }
   }
   /* Aynı telefonda kardeşler (04.11.2026, §3.8): «Kim oynuyor?» seçicisi. Her çocuğun ilerlemesi, veli raporu, yedeği ve pilot
@@ -5780,27 +5777,36 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
   const pilotDavet = () => { try { return localStorage.getItem(PILOT_DAVET); } catch (e) { return null; } };
   function pilotDavetSil() { try { localStorage.removeItem(PILOT_DAVET); } catch (e) { } }
   // Davet ekranındaki rumuz: kayıtlı değilse zorunlu. Bu telefonda aynı rumuzlu öğrenci varsa ona geçilir (kaldığı yerden).
-  function pdRumuz() { if (A.st.profile) return true; const ad = ((document.getElementById('f-pd-ad') || {}).value || '').trim();
+  function pdRumuz() { if (A.st.profile || !pilotDavet()) return true; const ad = ((document.getElementById('f-pd-ad') || {}).value || '').trim();
     if (ad.length < 2) { toast('Öğrencinin rumuzunu yazın (en az 2 harf).'); const i = document.getElementById('f-pd-ad'); if (i) i.focus(); return false; }
     A.onb.data.name = ad; A.onb.rumuzlu = true; A.onb.step = 'his'; return true; }
-  function pdMevcut(karar) { if (A.st.profile) return false; const o = rumuzBul(A.onb.data.name); if (!o || o.aktif) return false;
+  function pdMevcut(karar) { if (A.st.profile || !pilotDavet()) return false; const o = rumuzBul(A.onb.data.name); if (!o || o.aktif) return false;
     const bos = E.profilId(); A.st = E.profilSec(o.id); E.profilSil(bos); A.onb = { step: 0, data: {} }; A.secici = false;
-    if (!(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar))) { if (karar === 'evet') { pilotKatil(pilotDavet()); return true; } A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); }
+    if (!(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar))) { if (karar === 'evet') { izinVer(pilotDavet()); return true; } A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; A.st.izin = A.st.izin || { karar: 'hayir', at: Date.now() }; save(); }
     toast(`👋 Tekrar hoş geldin, ${A.st.profile.name}!`); render(); return true; }
-  const pilotDavetGoster = () => !!pilotDavet() && !(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar));
+  const izinKarar = () => !!(A.st.izin || (A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar)) || (A.st.aile && A.st.aile.kod));
+  // Davetle gelende her zaman (kayıtlı çocukta da); davetsiz ilk açılışta tanıtım sayfasından sonra, kayıttan önce
+  const pilotDavetGoster = () => !A.secici && (pilotDavet() ? !(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar)) : (aileAyarli() && !A.st.profile && A.onb.step === 0 && !izinKarar() && !vitrinGoster()));
+  /* Tek izin ekranı (07.11.2026, proje sahibinin isteği): veli uygulamayı ilk açtığında (kayıttan önce) tek bir onay kutusuyla
+     hem ilerlemenin bulut yedeğine hem kullanımın isimsiz kaydına (pilot kaydı) izin verir; Veli bölümünde ayrı ayrı onay
+     formları yok. Onay şart değildir ("Onay vermeden devam et"), uygulama onaysız da tamamen çalışır (KVKK: özgür irade).
+     Yedek, kayıt bitince açılır (profil olmadan gönderilecek ilerleme yok). Pilot bağlantısıyla gelene rumuz da sorulur. */
+  const IZIN_RIZA = 'izin-v1';
   function viewPilotDavet() {
+    const davet = !!pilotDavet();
     return `<div class="onb pdavet">
       <div class="pd-veli">👨‍👩‍👧 Bu ekran veliler için. Lütfen çocuğunuzla birlikte açın.</div>
       <div class="center" style="margin-top:12px">${mascot('happy', 110)}</div>
-      <h2 class="center" style="margin:6px 0 8px">Bize yardım eder misiniz?</h2>
-      <p style="margin:0 0 12px">Merhaba! Matematik Yolu'nu 5. sınıf çocukları için daha iyi hâle getirmeye çalışıyoruz ve bunu sizin gibi birkaç aileyle birlikte deniyoruz. Çocuğunuz uygulamayı her zamanki gibi kullanacak; biz de hangi sorularda zorlandığını <b>isimsiz</b> olarak göreceğiz. Böylece zor gelen soruları düzeltip anlatımları iyileştireceğiz.</p>
-      <div class="card pd-liste"><b>✅ Kaydettiklerimiz</b><ul><li>Hangi soruda ne kadar düşünüldüğü</li><li>Hangi soruların doğru ya da yanlış yapıldığı, yanlışın hangi tipik hatadan geldiği</li><li>İpucu kullanılıp kullanılmadığı, dersin nerede bırakıldığı</li><li>Başta ve iki hafta sonra çözülen 10 soruluk kısa testin sonucu</li></ul>
-      <b>🚫 Asla kaydetmediklerimiz</b><ul><li>Çocuğunuzun ve sizin adınız</li><li>Telefon, e-posta, konum</li><li>Uygulamaya yazılan herhangi bir metin</li></ul></div>
-      <details class="aile-detay"><summary class="sm"><b>Ayrıntılar</b></summary><p class="sm muted" style="margin:6px 0 0">Bu telefona rastgele bir numara verilir; kayıtlar yalnız bu numarayla tutulur ve numaradan kim olduğunuz anlaşılmaz. Kayıtlar Almanya'daki (Frankfurt) sunucularda en fazla 13 ay saklanır, yalnız uygulamayı geliştirmek için kullanılır, kimseyle paylaşılmaz ve satılmaz. Veli bölümündeki «Pilottan ayrıl» düğmesiyle istediğiniz an ayrılabilir, bütün kayıtları silebilirsiniz. Katılmasanız da uygulama aynen çalışır.</p></details>
-      ${A.st.profile ? `<p class="sm" style="margin:10px 0 0">Öğrenci: <b>${esc(A.st.profile.name)}</b></p>` : `<div class="field" style="margin-top:10px"><label for="f-pd-ad"><b>Öğrencinin rumuzu</b> <span class="muted sm">(takma ad; gerçek adı yazmanız gerekmez)</span></label><input id="f-pd-ad" maxlength="20" autocomplete="off" placeholder="Örn: Kaplan Ela" value="${esc(A.onb.data.name || '')}"><p class="muted sm" style="margin:4px 0 0">Aynı telefonu kullanan her öğrenci kendi rumuzuyla girer; kayıtları ayrı tutulur. Rumuz yalnız bu telefonda kalır, sunucuya gönderilmez.</p></div>`}
-      <label class="aile-onay" style="margin-top:10px"><input type="checkbox" id="f-pd-onay"> <span class="sm">Velisi olarak bu açıklamayı okudum; çocuğumun uygulama kullanımının isimsiz kaydedilmesine onay veriyorum.</span></label>
-      <button class="btn" data-act="pd-katil" style="margin-top:10px">Katılıyorum 💙</button>
-      <button class="btn ghost" data-act="pd-hayir">Katılmadan devam et</button></div>`;
+      <h2 class="center" style="margin:6px 0 8px">Hoş geldiniz! Başlamadan tek bir izin</h2>
+      <p style="margin:0 0 12px">Matematik Yolu ücretsiz ve eğitim odaklı bir uygulamadır. Sizden yalnız iki şey için izin istiyoruz; ikisi de çocuğunuzun yararına:</p>
+      <div class="card pd-liste"><b>☁️ İlerlemesi kaybolmasın</b><ul><li>Telefon değişir ya da uygulama silinirse çocuğunuz kaldığı yerden devam edebilsin diye ilerlemesi yedeklenir.</li></ul>
+      <b>🔬 Uygulama daha iyi olsun</b><ul><li>Hangi soruda zorlandığı, ne kadar düşündüğü, dersi nerede bıraktığı <b>isimsiz</b> olarak kaydedilir; zor gelen soruları ve anlatımları buna göre düzeltiriz.</li></ul>
+      <b>🚫 Asla kaydetmediklerimiz</b><ul><li>Sizin adınız, telefonunuz, e-postanız, konumunuz</li><li>Uygulamaya yazılan herhangi bir metin</li></ul></div>
+      <details class="aile-detay"><summary class="sm"><b>Ayrıntılar</b></summary><p class="sm muted" style="margin:6px 0 0">Yedekte çocuğunuzun uygulamadaki adı ve öğrenme durumu (konular, yıldızlar, rozetler) saklanır; size özel bir aile koduyla açılır, kod sunucuda tutulmaz. Kullanım kaydı bu telefona verilen rastgele bir numarayla tutulur, numaradan kim olduğunuz anlaşılmaz. Veriler Almanya'daki (Frankfurt) sunucularda saklanır, reklam ya da pazarlama için kullanılmaz, kimseyle paylaşılmaz. İstediğiniz an Veli bölümünden kapatıp sildirebilirsiniz. <a href="gizlilik/" target="_blank" rel="noopener">Gizlilik politikası</a></p></details>
+      ${A.st.profile ? `<p class="sm" style="margin:10px 0 0">Öğrenci: <b>${esc(A.st.profile.name)}</b></p>` : davet ? `<div class="field" style="margin-top:10px"><label for="f-pd-ad"><b>Öğrencinin rumuzu</b> <span class="muted sm">(takma ad; gerçek adı yazmanız gerekmez)</span></label><input id="f-pd-ad" maxlength="20" autocomplete="off" placeholder="Örn: Kaplan Ela" value="${esc(A.onb.data.name || '')}"></div>` : ''}
+      <label class="aile-onay" style="margin-top:10px"><input type="checkbox" id="f-pd-onay"> <span class="sm">Velisi olarak bu açıklamayı okudum; çocuğumun ilerlemesinin yedeklenmesine ve uygulama kullanımının isimsiz kaydedilmesine onay veriyorum.</span></label>
+      <button class="btn" data-act="pd-katil" style="margin-top:10px">Onaylıyorum, başlayalım 💙</button>
+      <button class="btn ghost" data-act="pd-hayir">Onay vermeden devam et</button>${!A.st.profile && E.profiller().liste.length > 1 ? '<button class="btn ghost small" data-act="onb-iptal" style="margin-top:6px">← Oyunculara dön</button>' : ''}</div>`;
   }
   // Çocuğun haritasında: başlangıç testi bekliyorsa ya da bitiş testinin zamanı geldiyse küçük bir davet kartı
   function pilotTestKart() {
@@ -5809,23 +5815,39 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     if (!o.son && Date.now() - o.on.at >= OLCME_ARA_GUN * 86400000) return `<div class="card pilot-test"><b>🎯 Bitiş testi zamanı!</b><p class="sm muted" style="margin:4px 0 8px">İki hafta önce çözdüğün testin yeni sayılı hâli. Bakalım ne kadar ilerledin!</p><button class="btn small" data-act="olcme" data-v="son">Başla</button></div>`;
     return '';
   }
+  // Tek onay: pilot kaydı hemen, yedek kayıt varsa hemen, yoksa kayıt bitince (onb-finish) açılır
+  async function izinVer(grup) {
+    await pilotKatil(grup || null); // sunucuya ulaşılamazsa kayıt kapalı kalır; Veli bölümündeki kart yeniden dener
+    A.st.izin = { karar: 'evet', surum: IZIN_RIZA, at: Date.now() }; save();
+    if (A.st.profile) yedekIzinle();
+    return true;
+  }
+  function yedekIzinle() {
+    if (!A.st.izin || A.st.izin.karar !== 'evet' || (A.st.aile && A.st.aile.kod) || !A.st.profile) return;
+    const ac = () => aileHazir() ? aileAc(true) : null;
+    if (aileHazir()) ac(); else aileSunucuBak().then(ac);
+  }
   async function pilotAyril(sessiz) {
     const p = A.st.pilot; if (!p || !p.cihaz) return true;
     let silindi = false; try { const r = await rpc('pilot_ayril', { p_cihaz: p.cihaz }); silindi = !!(r && r.ok); } catch (e) { }
     if (!silindi) { if (!sessiz) toast('Sunucuya ulaşılamadı; kayıtlar silinemedi. İnternete bağlanıp tekrar deneyin.'); return false; }
     A.st.pilot = { acik: false }; pilotKuyrukYaz([]); E.save(A.st); if (!sessiz) { render(); toast('Pilottan ayrıldınız, kayıtlar silindi.'); } return true;
   }
+  // Veli bölümü: onay verilmemişse (ya da biri kapatılmışsa) tek kutulu tek kart
+  function izinKart() {
+    if (!aileAyarli() || ((A.st.aile && A.st.aile.kod) && pilotAcik())) return '';
+    return `<div class="card aile-kart"><b>☁️ Yedek ve geliştirme izni</b>
+      <p class="muted sm" style="margin:6px 0 8px">İzin verirseniz çocuğunuzun ilerlemesi yedeklenir (telefon değişirse kaybolmaz) ve hangi sorularda zorlandığı <b>isimsiz</b> olarak kaydedilir. Adınız, telefonunuz, e-postanız kaydedilmez. <a href="gizlilik/" target="_blank" rel="noopener">Ayrıntılar</a></p>
+      <label class="aile-onay"><input type="checkbox" id="f-izin-onay"> <span class="sm">Velisi olarak çocuğumun ilerlemesinin yedeklenmesine ve uygulama kullanımının isimsiz kaydedilmesine onay veriyorum.</span></label>
+      <button class="btn" data-act="izin-ver" style="margin-top:8px">İzin ver</button>
+      <details class="aile-detay" style="margin-top:10px"><summary class="sm"><b>Başka telefonda kullanıyordum, kodum var</b></summary><div class="field"><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div><button class="btn ghost small" data-act="aile-bul" data-v="veli">Yedeği bul</button></details></div>`;
+  }
   function aileKart() {
     if (!aileHazir()) return '';
     const a = A.st.aile;
     if (A.aileBulunan && !A.oyModal) return aileBulunanKart(A.aileBulunan, 'aile-vazgec');
     if (a && a.kod && A.oy && A.oy.mod === 'kur') return oyKurHtml();
-    if (!a || !a.kod) return `<div class="card aile-kart"><b>☁️ İlerlemeyi yedekle (aile kodu)</b>
-      <p class="muted sm" style="margin:6px 0 8px">Telefon değişirse ya da uygulama silinirse çocuğunuzun ilerlemesi kaybolmasın. E-posta ya da şifre gerekmez: size özel bir <b>aile kodu</b> oluşturulur, yeni telefonda bu kodu yazmanız yeterli.</p>
-      <details class="aile-detay"><summary class="sm"><b>Neler saklanır?</b></summary><p class="sm muted" style="margin:6px 0 0">Saklanan: çocuğunuzun adı ve uygulamadaki öğrenme durumu (konular, yıldızlar, cevap istatistikleri, rozetler). <b>Saklanmayan:</b> sizin adınız, telefonunuz, e-postanız, veli şifreniz. Kodun kendisi sunucuda tutulmaz, yalnız şifrelenmiş özeti tutulur. Oyuncu adı oluşturursanız adın ve resimli şifrenin de yalnız şifrelenmiş özeti tutulur. 18 ay kullanılmayan yedek kendiliğinden silinir; dilediğiniz an "Yedeği sil" ile silebilirsiniz.</p></details>
-      <label class="aile-onay"><input type="checkbox" id="f-aile-onay"> <span class="sm">Velisi olarak, çocuğumun öğrenme verisinin bu amaçla sunucuda saklanmasına onay veriyorum.</span></label>
-      <button class="btn" data-act="aile-ac" style="margin-top:8px">Yedeği aç ve aile kodu oluştur</button>
-      <details class="aile-detay" style="margin-top:10px"><summary class="sm"><b>Başka telefonda kullanıyordum, kodum var</b></summary><div class="field"><input id="f-aile-kod" placeholder="ABCD-EFGH-JKMN-PQRS" autocomplete="off" autocapitalize="characters" maxlength="19"></div><button class="btn ghost small" data-act="aile-bul" data-v="veli">Yedeği bul</button></details></div>`;
+    if (!a || !a.kod) return '';
     const ne = a.hata === 'yok' ? '⚠️ Bu kodun yedeği sunucuda yok (silinmiş olabilir). "Şimdi yedekle" ile yeniden oluşturun.' : a.hata ? '⏳ Son yedekleme olmadı; internet gelince tekrar denenecek.' : a.son ? `✓ Son yedek: ${new Date(a.son).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}` : '⏳ Yedekleniyor…';
     const mesaj = encodeURIComponent(`Matematik Yolu aile kodu: ${aileKodYaz(a.kod)}\nYeni telefonda uygulamayı açıp "Başka telefonda kullanıyordum" deyin ve bu kodu yazın. Kodu kimseyle paylaşmayın.`);
     return `<div class="card aile-kart"><b>☁️ Yedek açık</b>
@@ -6011,6 +6033,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       <details class="card rmetin"><summary><b>📝 Gönderilecek mesaj metni</b> <span class="muted sm">(WhatsApp/e-posta ile bu gider)</span></summary><pre class="report">${esc(txt)}</pre></details>
       <div class="share" style="margin-top:12px"><a class="btn wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a><a class="btn tg" href="${tg}" target="_blank" rel="noopener">Telegram</a><a class="btn ghost" href="${mail}">E-posta</a><button class="btn ghost" data-act="copy">Kopyala</button></div>
       ${epostaKart()}
+      ${izinKart()}
       ${aileKart()}
       ${pilotKart()}
       ${CL && CL.oturum ? cloudCard() : ''}
@@ -6619,7 +6642,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
     // Sayı söyleyen replik ("Üç doğru üst üste!") yalnız seri tam o sayıdayken; 4, 6, 7… doğruda sayısız replik (25.10.2026)
     const seriSoyle = (grup, sayili, n) => { const arr = PI[grup] || [], sayisiz = arr.map((_, i) => i).filter(i => i !== sayili), i = st === n ? Math.floor(Math.random() * arr.length) : pick(sayisiz); if (arr[i]) say(`pi_${grup}_${i + 1}`, arr[i], false); };
     if (tier === 'fire') seriSoyle('seri3', 0, 3); else if (tier === 'unstop') seriSoyle('seri5', 1, 5); else if (tier === 'legend') seriSoyle('seri8', -1, 8); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
-    else if (Math.random() < 0.4) say(`pi_dogru_${PRAISE.indexOf(word) + 1}`, word, false);
+    else if (Math.random() < 0.4) say(`pi_bravo_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   // Sayı cevabı doğruya gerçekten yakın mı? ("Neredeyse!", "Az kaldı!" yalnız o zaman söylenir)
   const cevapYakin = (q) => { if (q.type !== 'input') return false; const v = parseFloat(String(A.input).replace(',', '.')), a = parseFloat(String(q.answer).replace(',', '.')); return isFinite(v) && isFinite(a) && v !== a && Math.abs(v - a) <= Math.max(1, Math.abs(a) * 0.1); };
@@ -6838,6 +6861,10 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'yedek-uyari-kapat': A.st.yedekUyariKapat = Date.now(); save(); render(); break;
       case 'oy-giris': if (A.oy && !A.oy.bekle) oyGiris(); break;
       case 'onb-kod-geri': A.onb.step = 0; A.aileBulunan = null; render(); break;
+      case 'izin-ver': { const c = document.getElementById('f-izin-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
+        const b = document.querySelector('[data-act=izin-ver]'); if (b) { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
+        (async () => { if (!pilotAcik()) await pilotKatil(null); A.st.izin = { karar: 'evet', surum: IZIN_RIZA, at: Date.now() }; save();
+          if (!(A.st.aile && A.st.aile.kod)) await aileAc(); render(); })(); break; }
       case 'pilot-katil': { const c = document.getElementById('f-pilot-onay'), g = document.getElementById('f-pilot-grup'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; } pilotKatil(g ? g.value.trim() : ''); break; }
       case 'oyuncu-sec': if (v === E.profilId() && A.st.profile) { A.secici = false; render(); } else oyuncuGec(v); break;
       case 'oyuncu-ekle': oyuncuGec(null); break;
@@ -6847,8 +6874,8 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'pd-katil': { if (!pdRumuz()) break; const c = document.getElementById('f-pd-onay'); if (!c || !c.checked) { toast('Önce onay kutusunu işaretleyin.'); break; }
         if (pdMevcut('evet')) break;
         const b = document.querySelector('[data-act=pd-katil]'); if (b) { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
-        pilotKatil(pilotDavet()).then(ok => { if (!ok) { render(); return; } if (A.st.profile && !(A.st.olcme && A.st.olcme.on)) { A.modal = confirmModal('Kısa bir test çözelim mi?', 'Çocuğunuz şimdi 10 soruluk başlangıç testini çözebilir (yaklaşık 10 dakika). İsterseniz sonra da haritadan başlatabilir.', 'pd-test', 'Şimdi başla', 'Sonra'); render(); } }); break; }
-      case 'pd-hayir': if (!pdRumuz()) break; if (pdMevcut('hayir')) break; A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; save(); render(); break;
+        izinVer(pilotDavet()).then(ok => { if (!ok) { render(); return; } if (A.st.profile && !(A.st.olcme && A.st.olcme.on)) { A.modal = confirmModal('Kısa bir test çözelim mi?', 'Çocuğunuz şimdi 10 soruluk başlangıç testini çözebilir (yaklaşık 10 dakika). İsterseniz sonra da haritadan başlatabilir.', 'pd-test', 'Şimdi başla', 'Sonra'); render(); } }); break; }
+      case 'pd-hayir': if (!pdRumuz()) break; if (pdMevcut('hayir')) break; if (pilotDavet()) A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; A.st.izin = { karar: 'hayir', at: Date.now() }; save(); render(); break;
       case 'sec-gir': { const ad = ((document.getElementById('f-sec-ad') || {}).value || '').trim(); if (ad.length < 2) { toast('Rumuz en az 2 harf olsun.'); break; }
         const o = rumuzBul(ad); if (o) { if (o.aktif) { A.secici = false; render(); } else oyuncuGec(o.id); toast(`👋 Tekrar hoş geldin, ${o.s.profile.name}!`); } else oyuncuGec(null, ad); break; }
       case 'pd-test': A.modal = null; A.olcmeForm = 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break;
@@ -6866,7 +6893,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
       case 'pi-hello': piSay('hosgeldin'); break;
       case 'say-mis': say(misSes(v), MIS[v].t + '. ' + MIS[v].fix); break;
       case 'motiv': A.onb.data.motivation = v; render(); break;
-      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, kaynak: d.kaynak, his: d.his, created: Date.now() }; if ([20, 50, 80, 120].includes(+d.hedef)) A.st.dailyGoal = +d.hedef; save(); if (act === 'onb-finish' && v === 'olcme') { A.olcmeForm = 'on'; startSession('olcme', null); } else if (act === 'onb-finish') startSession('placement', null); else render(); break; }
+      case 'onb-finish': case 'onb-finish-skip': { const d = A.onb.data; A.st.profile = { name: d.name, parentName: d.parentName, parentPhone: d.parentPhone, parentEmail: d.parentEmail, kvkk: !!d.kvkk, motivation: d.motivation, kaynak: d.kaynak, his: d.his, created: Date.now() }; if ([20, 50, 80, 120].includes(+d.hedef)) A.st.dailyGoal = +d.hedef; save(); setTimeout(yedekIzinle, 1500); if (act === 'onb-finish' && v === 'olcme') { A.olcmeForm = 'on'; startSession('olcme', null); } else if (act === 'onb-finish') startSession('placement', null); else render(); break; }
     }
   });
   document.addEventListener('keydown', (e) => {

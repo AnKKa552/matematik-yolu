@@ -19,6 +19,7 @@ def ok(c, m):
     print(('✓ ' if c else 'HATA: ') + m)
     if not c: HATA.append(m)
 async def kayit(pg, ad):
+    if await pg.query_selector('[data-act=pd-hayir]'): await pg.click('[data-act=pd-hayir]'); await pg.wait_for_timeout(200)
     await pg.click('[data-act=onb-next]'); await pg.click('[data-act=onb-next]'); await pg.fill('#f-name', ad); await pg.click('[data-act=onb-next]'); await pg.click('[data-act=onb-next]'); await pg.click('[data-act=onb-next]')
     await pg.click('[data-act=motiv][data-v=kesif]'); await pg.click('[data-act=onb-finish-skip]'); await pg.wait_for_timeout(300)
 async def ben(pg):
@@ -39,6 +40,7 @@ async def main():
             await g.route(re.compile(r'.*/rest/v1/rpc/.*'), yol); await g.route(re.compile(r'.*cdn\.jsdelivr\.net.*'), lambda r: r.abort())
             return g
         pg = await sayfa(); await pg.goto(APP); await pg.wait_for_timeout(600)
+        if await pg.query_selector('[data-act=pd-hayir]'): await pg.click('[data-act=pd-hayir]'); await pg.wait_for_timeout(200)
         await kayit(pg, 'Toprak')
         await pg.evaluate("(()=>{const a=window.MY_APP;a.st.xp=120;a.st.gems=77;a.st.veli={tuz:'x',pin:'y'};window.MY_APP_SAVE&&0;})()")
         await pg.evaluate("localStorage.setItem('matematik_yolu_v1', JSON.stringify(window.MY_APP.st))")
@@ -47,7 +49,9 @@ async def main():
         await pg.click('[data-act=oyuncu-ac]'); await pg.wait_for_timeout(200)
         ok(await secici_adlar(pg) == ['Toprak'], 'Seçici açılır, tek oyuncu görünür')
         await pg.click('[data-act=oyuncu-ekle]'); await pg.wait_for_timeout(800)
-        ok(await pg.query_selector('[data-act=onb-iptal]') is not None and await pg.query_selector('[data-act=onb-next]') is not None, 'Kardeş için kayıt başlar, geri dönme düğmesi var')
+        ok(await pg.query_selector('[data-act=onb-iptal]') is not None and await pg.query_selector('[data-act=pd-katil]') is not None, 'Kardeş için önce izin ekranı, geri dönme düğmesi var')
+        await pg.click('[data-act=pd-hayir]'); await pg.wait_for_timeout(200)
+        ok(await pg.query_selector('[data-act=onb-iptal]') is not None and await pg.query_selector('[data-act=onb-next]') is not None, 'Sonra kayıt başlar, geri dönme düğmesi var')
         await kayit(pg, 'Ömer')
         st = await pg.evaluate("({ad:window.MY_APP.st.profile.name, xp:window.MY_APP.st.xp, gems:window.MY_APP.st.gems, veli:!!window.MY_APP.st.veli})")
         ok(st['ad'] == 'Ömer' and st['xp'] == 0 and st['gems'] != 77, f'Kardeş sıfırdan başlar: {st}')
@@ -119,7 +123,9 @@ async def main():
         v = await (await b.new_context(viewport={'width': 390, 'height': 844})).new_page(); await v.goto(APP); await v.wait_for_timeout(700)
         ok(await v.query_selector('.vt') is not None, 'İlk ziyarette vitrin görünür')
         await v.click('[data-act=vt-basla] >> nth=0'); await v.wait_for_timeout(300)
-        ok(await v.query_selector('[data-act=onb-next]') is not None, 'Hemen başla → kayıt')
+        ok(await v.query_selector('[data-act=pd-katil]') is not None, 'Hemen başla → önce veliye tek izin ekranı')
+        await v.click('[data-act=pd-hayir]'); await v.wait_for_timeout(200)
+        ok(await v.query_selector('[data-act=onb-next]') is not None, 'İzin ekranından sonra kayıt')
         await v.reload(); await v.wait_for_timeout(700); ok(await v.query_selector('.vt') is None, 'Bir kez geçilen vitrin yeniden gelmez')
         v2 = await (await b.new_context(viewport={'width': 390, 'height': 844})).new_page(); await v2.goto(APP + '?pilot=VT1'); await v2.wait_for_timeout(700)
         ok(await v2.query_selector('.vt') is None and await v2.query_selector('[data-act=pd-katil]') is not None, 'Pilot bağlantısında vitrin yok, veli karşılaması gelir')

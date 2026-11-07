@@ -14,6 +14,8 @@ async def main():
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e)))
         pg.on('console', lambda m: errs.append('CONSOLE '+m.text) if m.type=='error' and 'fonts' not in m.text else None)
         await pg.goto(APP); await pg.wait_for_timeout(600)
+        assert await pg.query_selector('[data-act=pd-katil]') and not await pg.query_selector('#f-pd-ad'), 'İlk açılışta tek izin ekranı (rumuz yok)'
+        await pg.screenshot(path=OUT+'00_izin.png'); await pg.click('[data-act=pd-hayir]'); await pg.wait_for_timeout(200)
         await pg.evaluate("window.MY_APP.st.settings.voice=false; window.MY_APP.st.settings.sound=false")
         await pg.screenshot(path=OUT+'01_welcome.png')
         await pg.click('[data-act=onb-next]')
