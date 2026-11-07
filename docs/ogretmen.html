@@ -23,7 +23,7 @@
 @font-face{font-family:'Lexend';font-style:normal;font-weight:600;font-display:swap;src:url(font/lexend-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Lexend';font-style:normal;font-weight:700;font-display:swap;src:url(font/lexend-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:'Lexend';font-style:normal;font-weight:700;font-display:swap;src:url(font/lexend-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-:root{
+:root{--vh1:1vh;--dvh1:1dvh;
   --bg:#F5F4FF; --surface:#FFFFFF; --surface2:#F0EFFA; --ink:#1E1B4B; --muted:#6B6893; --line:#E3E1F3;
   --brand:#5B4BFF; --brand-d:#4334D9; --brand-t:#E8E5FF;
   /* Yazı tonları (07.11.2026, erişilebilirlik denetimi): açık zeminde en az 4,5:1 kontrast */
@@ -125,7 +125,7 @@ h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
 .speech{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;font-weight:700;position:relative}
 
 /* ---------- Ders ekranı ---------- */
-.lesson{display:flex;flex-direction:column;min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+.lesson{display:flex;flex-direction:column;min-height:calc(calc(100 * var(--dvh1)) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
 .lhead{display:flex;align-items:center;gap:12px;padding:14px 16px}
 .x{background:none;border:0;font-size:26px;color:var(--muted);cursor:pointer;padding:0 4px;line-height:1}
 .prog{flex:1;height:16px;background:var(--line);border-radius:10px;overflow:hidden}
@@ -180,7 +180,7 @@ h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
 :root[data-theme="dark"] .rescue-note{background:#3A2A10;border-color:#6B4A12;color:#FFD08A} :root[data-theme="dark"] .hintbox{background:#3A3010;color:#FFE08A}
 
 /* ---------- Geri bildirim sayfası ---------- */
-.sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;z-index:30;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;animation:up .28s cubic-bezier(.2,1.2,.4,1);max-height:78vh;overflow-y:auto}
+.sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;z-index:30;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;animation:up .28s cubic-bezier(.2,1.2,.4,1);max-height:calc(78 * var(--vh1));overflow-y:auto}
 @keyframes up{from{transform:translate(-50%,100%)}to{transform:translate(-50%,0)}}
 .sheet.okc{background:var(--ok-bg)} .sheet.badc{background:var(--bad-bg)} .sheet.neutral{background:var(--surface);border-top:2px solid var(--line)}
 .sheet h3{font-size:22px;display:flex;align-items:center;gap:8px}
@@ -191,7 +191,7 @@ h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
 .steps{margin:6px 0 0;padding-left:22px} .steps li{margin:3px 0;font-weight:700}
 .scrim{position:fixed;inset:0;background:rgba(15,12,40,.45);z-index:25;animation:fade .2s}
 @keyframes fade{from{opacity:0}}
-.modal{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;z-index:40;background:var(--bg);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;animation:up .28s cubic-bezier(.2,1.2,.4,1)}
+.modal{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;z-index:40;background:var(--bg);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:calc(88 * var(--vh1));overflow-y:auto;animation:up .28s cubic-bezier(.2,1.2,.4,1)}
 .shake{animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 
@@ -211,7 +211,7 @@ h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
 .steps4.col{flex-direction:column;align-items:center}
 
 /* ---------- Sonuç ekranı ---------- */
-.end{display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 16px;gap:14px;min-height:100vh;min-height:100dvh}
+.end{display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 16px;gap:14px;min-height:calc(100 * var(--vh1));min-height:calc(100 * var(--dvh1))}
 .end h1{font-size:30px;color:var(--accent)}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
 .tile{border-radius:16px;border:2px solid;overflow:hidden;font-weight:900}
@@ -250,7 +250,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .btn.wa{background:#25D366;box-shadow:0 4px 0 #1B9E4B} .btn.tg{background:#2AABEE;box-shadow:0 4px 0 #1C82B8}
 
 /* ---------- Form / karşılama ---------- */
-.onb{padding:24px 16px 40px;display:flex;flex-direction:column;gap:14px;min-height:100vh;min-height:100dvh}
+.onb{padding:24px 16px 40px;display:flex;flex-direction:column;gap:14px;min-height:calc(100 * var(--vh1));min-height:calc(100 * var(--dvh1))}
 .field label{display:block;font-weight:900;font-size:14px;margin:0 0 6px}
 .field input{width:100%;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:700 17px 'Nunito',sans-serif}
 .field input:focus{outline:none;border-color:var(--brand)}
@@ -338,7 +338,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .sheet.partc{background:#3D3110} :root:not([data-theme="light"]) .sheet.partc h3{color:#FFD36B} }
 :root[data-theme="dark"] .sheet.partc{background:#3D3110} :root[data-theme="dark"] .sheet.partc h3{color:#FFD36B}
 /* ara ve yükleme ekranı */
-.mid{min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 16px;text-align:center;animation:fade .25s}
+.mid{min-height:calc(calc(100 * var(--dvh1)) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 16px;text-align:center;animation:fade .25s}
 .mid h1{font-size:28px;color:var(--brand-ink);text-wrap:balance;animation:fxPop .7s cubic-bezier(.2,1.6,.4,1) both}
 /* görevler */
 .mbanner{display:flex;align-items:center;gap:12px;background:var(--accent);color:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 0 var(--accent-d);margin-top:4px}
@@ -493,7 +493,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 .kl-pin{animation:pop .3s ease-out;transform-box:fill-box;transform-origin:50% 100%}
 
 /* Harita manzarası: her temanın aydınlık 3B arka planı (koyu temada alacakaranlık tonu) */
-.path.harita{margin:12px -16px 0;padding:70px 16px 60px;min-height:calc(100vh - 290px);background:var(--fon) center top/cover no-repeat,linear-gradient(#BFE9FF,#E9FBF1);isolation:isolate}
+.path.harita{margin:12px -16px 0;padding:70px 16px 60px;min-height:calc(calc(100 * var(--vh1)) - 290px);background:var(--fon) center top/cover no-repeat,linear-gradient(#BFE9FF,#E9FBF1);isolation:isolate}
 .path.harita:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,var(--bg) 0,rgba(255,255,255,0) 70px,rgba(255,255,255,0) calc(100% - 90px),var(--bg) 100%)}
 .path.harita .node-label{background:rgba(255,255,255,.92);color:#2A2660;padding:3px 10px;border-radius:12px;box-shadow:0 2px 0 rgba(30,27,75,.12)}
 .path.harita .node.locked{background:rgba(255,255,255,.9);box-shadow:0 7px 0 rgba(120,115,170,.55);color:#8E8AB8}
@@ -535,7 +535,7 @@ pre.report{white-space:pre-wrap;font-family:inherit;font-size:15px;font-weight:6
 /* Sandık ekranı */
 .sandik-ekran{background:radial-gradient(circle at 50% 40%,#9B7BFF,#5B3FD9 70%);color:#fff;justify-content:center}
 .sandik-ekran.acik{background:radial-gradient(circle at 50% 40%,#7FD3FF,#2E7BE0 70%)}
-.sandik-ust{margin-top:12vh;font-weight:900;letter-spacing:.12em;font-size:20px;opacity:.95}
+.sandik-ust{margin-top:calc(12 * var(--vh1));font-weight:900;letter-spacing:.12em;font-size:20px;opacity:.95}
 .sandik{border:0;background:none;padding:0;cursor:pointer;width:min(260px,70vw);-webkit-tap-highlight-color:transparent}
 .sandik img{width:100%;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.3))}
 .sandik-ekran:not(.acik) .sandik{animation:sandikSalla 1.6s ease-in-out infinite}
@@ -849,10 +849,10 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .ss-efsane{background:radial-gradient(circle at 50% 42%,#FFB547,#C2410C 60%,#5B1A0A 100%)}
 .ss.acik{background:radial-gradient(circle at 50% 40%,#7FD3FF,#2E7BE0 72%)}
 .ss-efsane.acik{background:radial-gradient(circle at 50% 38%,#FFE38A,#F59E0B 55%,#9A3412 100%)}
-.ss-ust{margin-top:5vh;font-weight:800;font-size:15px;opacity:.9}
-.ss-serit{margin-top:2vh;font-weight:900;letter-spacing:.14em;font-size:19px;padding:7px 22px;border-radius:999px;background:rgba(0,0,0,.22);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.ss-ust{margin-top:calc(5 * var(--vh1));font-weight:800;font-size:15px;opacity:.9}
+.ss-serit{margin-top:calc(2 * var(--vh1));font-weight:900;letter-spacing:.14em;font-size:19px;padding:7px 22px;border-radius:999px;background:rgba(0,0,0,.22);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
 .ss-efsane .ss-serit{background:linear-gradient(90deg,#B45309,#F59E0B,#B45309);text-shadow:0 2px 0 rgba(0,0,0,.25)}
-.ss-sahne{position:relative;width:min(300px,78vw);aspect-ratio:1;display:grid;place-items:center;margin-top:3vh}
+.ss-sahne{position:relative;width:min(300px,78vw);aspect-ratio:1;display:grid;place-items:center;margin-top:calc(3 * var(--vh1))}
 .ss-halka{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 8%,rgba(255,255,255,.28) 8% 12%,transparent 12% 25%,rgba(255,255,255,.28) 25% 29%,transparent 29% 42%,rgba(255,255,255,.28) 42% 46%,transparent 46% 58%,rgba(255,255,255,.28) 58% 62%,transparent 62% 75%,rgba(255,255,255,.28) 75% 79%,transparent 79% 92%,rgba(255,255,255,.28) 92% 96%,transparent 96%);-webkit-mask:radial-gradient(circle,transparent 18%,#000 30%,#000 62%,transparent 71%);mask:radial-gradient(circle,transparent 18%,#000 30%,#000 62%,transparent 71%);animation:ssDon 9s linear infinite;opacity:.55}
 .ss-ahsap .ss-halka{opacity:.25}
 .ss-efsane .ss-halka{opacity:.9;animation-duration:5s}
@@ -868,7 +868,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .ss.patla .ss-isik{animation:ssPatla .45s ease-out forwards}
 .ss.patla .ss-sandik img{animation:ssVur2 .4s ease-out}
 .ss.acik .ss-sandik img{animation:sandikAc .5s cubic-bezier(.3,1.6,.5,1)}
-.ss-dokun{margin-top:2vh;font-size:26px;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.2);animation:ssNabiz 1s ease-in-out infinite}
+.ss-dokun{margin-top:calc(2 * var(--vh1));font-size:26px;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.2);animation:ssNabiz 1s ease-in-out infinite}
 .ss-nokta{display:flex;gap:10px;margin-top:10px}
 .ss-nokta i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.3);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55);transition:transform .2s,background .2s}
 .ss-nokta i.on{background:#FFD43B;transform:scale(1.25);box-shadow:0 0 10px #FFD43B}
@@ -905,7 +905,7 @@ svg.iz-neon .iz-yol{stroke:#2EC5FF}svg.iz-pembe .iz-yol{stroke:#FF5FA8}svg.iz-go
 .okul-degis{flex:none;border:0;border-radius:12px;background:#fff;color:#3156C9;font-weight:900;padding:0 14px;min-height:44px;cursor:pointer;font-family:inherit;box-shadow:0 2px 0 #C9DDFF}
 .okul-kucuk{margin:6px 0 2px;border:2px dashed var(--line);background:none;border-radius:999px;padding:8px 14px;font-weight:800;color:var(--muted);cursor:pointer;font-family:inherit;min-height:44px}
 .node-label.okul{color:#3156C9;font-weight:900}
-.okul-modal{max-height:86vh;overflow:auto}
+.okul-modal{max-height:calc(86 * var(--vh1));overflow:auto}
 .okul-grup{margin-top:10px}
 .okul-grup-ad{font-weight:900;font-size:13px;color:var(--muted);margin-bottom:6px}
 .okul-izgara{display:flex;flex-wrap:wrap;gap:6px}
@@ -971,7 +971,7 @@ html.kolay .card p,html.kolay .muted{line-height:1.65}
 .oy-hayvanlar+.field{margin-top:12px}
 .oy-hata{color:var(--bad-ink);font-weight:800;margin:8px 0}
 .oy-giris .btn{margin-top:8px}
-.oy-modal{max-height:88vh;overflow-y:auto}
+.oy-modal{max-height:calc(88 * var(--vh1));overflow-y:auto}
 .oy-ben{display:flex;flex-direction:column;gap:6px;margin-top:4px}
 .yedek-uyari{display:flex;gap:10px;align-items:center;margin:10px 0;border:2px solid var(--brand);background:var(--brand-t)}
 .yedek-uyari .yu-ikon{font-size:26px}
@@ -1320,7 +1320,7 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 .yan{display:none}
 @media (min-width:820px){
   #app.masa{max-width:1200px;display:grid;grid-template-columns:200px minmax(0,640px);grid-template-rows:auto 1fr;column-gap:24px;align-items:start;justify-content:center;padding:0 20px}
-  #app.masa .nav{position:sticky;top:0;left:auto;transform:none;grid-column:1;grid-row:1/span 2;height:100vh;width:auto;max-width:none;flex-direction:column;justify-content:flex-start;gap:6px;border:0;border-right:2px solid var(--line);background:transparent;padding:22px 18px 22px 0}
+  #app.masa .nav{position:sticky;top:0;left:auto;transform:none;grid-column:1;grid-row:1/span 2;height:calc(100 * var(--vh1));width:auto;max-width:none;flex-direction:column;justify-content:flex-start;gap:6px;border:0;border-right:2px solid var(--line);background:transparent;padding:22px 18px 22px 0}
   #app.masa .nav-logo{display:flex;align-items:center;gap:10px;font-size:20px;margin:0 0 18px 6px;color:var(--brand-ink)}
   #app.masa .nav-logo img{border-radius:12px} #app.masa .nav-logo span{color:var(--accent-ink)}
   #app.masa .nav button{flex-direction:row;justify-content:flex-start;gap:14px;font-size:16px;padding:12px 14px;border-radius:14px;width:100%;min-width:0}
@@ -1383,8 +1383,8 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 @media (min-width:820px){
   #app.ders-genis .lfoot{position:sticky;bottom:0;z-index:5}
   #app.ders-genis .lcard-govde>.visbox{min-height:240px}
-  #app.ders-genis .lcard-govde>.visbox svg{max-height:min(380px,48vh)}
-  #app.ders-genis .vis{max-height:min(400px,50vh)}
+  #app.ders-genis .lcard-govde>.visbox svg{max-height:min(380px,calc(48 * var(--vh1)))}
+  #app.ders-genis .vis{max-height:min(400px,calc(50 * var(--vh1)))}
   #app.ders-genis .dsag .pad{max-width:480px;margin-left:auto;margin-right:auto}
 }
 @media (min-width:820px){
@@ -1393,6 +1393,7 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   #app.ders-genis .kes-svg.pie{max-width:320px}
   #app.ders-genis .gr-svg{max-width:500px} #app.ders-genis .gr-tablo{max-width:500px;font-size:16px}
 }
+.visbox.kural-sekil{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}.visbox.kural-sekil svg{max-height:150px;width:auto;max-width:48%;height:auto}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -4066,7 +4067,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-11-07 cbc765f', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-07 e08338b', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

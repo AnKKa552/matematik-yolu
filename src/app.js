@@ -678,9 +678,19 @@
   /* Bilgisayar düzeni (07.11.2026): 820 px ve üstünde sekmeli ekranlarda iki, 1180 px ve üstünde üç sütun: solda menü (alt menünün dikey hâli),
      ortada asıl içerik, sağda sayaçlar + yan panel (günlük hedef, bugün bunu yap, günlük görevler, lig sıran). Telefonda
      yan panel hiç çizilmez. Ders, kayıt ve tanıtım ekranları tek sütun kalır. */
-  const masaGenis = () => window.innerWidth >= 820; 
-  const dersGenis = () => masaGenis() && window.innerWidth >= window.innerHeight * 0.9;  // derste iki sütun yalnız yatay ekranda (dik tablette ve telefonda «Masaüstü sitesi»nde boşluk kalmasın)  // 820–1179 iki sütun (tablet, «Masaüstü sitesi»), 1180+ üç sütun (CSS)
-  let masaSon = masaGenis(); addEventListener('resize', () => { const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); } if (A.view === 'lesson') $app.classList.toggle('ders-genis', dersGenis() && !!A.st.profile); });
+  /* Telefonda Chrome «Masaüstü sitesi» (07.11.2026, proje sahibinin iki ekran görüntüsü): tarayıcı sayfayı ~980 px sanıp
+     küçültüyor, uygulama ekranın ortasında minicik bir şerit kalıyordu. Dokunmatik ekranda sayfa genişliği telefonun gerçek
+     genişliğinin 1,3 katından fazlaysa uygulama ekranlarına CSS zoom verilir: uygulama telefondaki gibi tam ekran görünür.
+     Tanıtım sayfası (kendi geniş düzeni var) yakınlaştırılmaz. Genişlik kararları yakınlaştırılmış genişlikle verilir. */
+  const masaustuOran = () => { try { const sw = Math.min(screen.width, screen.height), dok = matchMedia('(pointer:coarse)').matches; return dok && sw > 0 && window.innerWidth > sw * 1.3 ? window.innerWidth / sw : 1; } catch (e) { return 1; } };
+  let yakinOran = 1;
+  const yakinlastir = (acik) => { const o = acik ? masaustuOran() : 1; if (o !== yakinOran) { yakinOran = o; document.documentElement.style.zoom = o === 1 ? '' : String(o); vhAyarla(); document.documentElement.classList.toggle('masaustu-modu', o !== 1); } };
+  // Yakınlaştırılmış sayfada vh birimi de yakınlaşır (ekranın 2,4 katı yükseklik çıkıyordu); bu yüzden CSS vh yerine --vh1/--dvh1 kullanır.
+  function vhAyarla() { const r = document.documentElement.style; if (yakinOran === 1) { r.removeProperty('--vh1'); r.removeProperty('--dvh1'); return; } const v = (window.innerHeight / yakinOran / 100) + 'px'; r.setProperty('--vh1', v); r.setProperty('--dvh1', v); }
+  const etkinGen = () => window.innerWidth / yakinOran, etkinYuk = () => window.innerHeight / yakinOran;
+  const masaGenis = () => etkinGen() >= 820;
+  const dersGenis = () => masaGenis() && etkinGen() >= etkinYuk() * 0.9;  // derste iki sütun yalnız yatay ekranda (dik tablette ve telefonda «Masaüstü sitesi»nde boşluk kalmasın)  // 820–1179 iki sütun (tablet, «Masaüstü sitesi»), 1180+ üç sütun (CSS)
+  let masaSon = masaGenis(); addEventListener('resize', () => { if (yakinOran !== 1) vhAyarla(); if (yakinOran !== 1 || masaustuOran() !== 1) { const o = yakinOran; yakinOran = 0; yakinlastir(o !== 1 || !(vitrinGoster() && !A.st.profile)); } const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); } if (A.view === 'lesson') $app.classList.toggle('ders-genis', dersGenis() && !!A.st.profile); });
   function yanPanel() {
     const st = A.st, txp = todayXP(), hedef = st.dailyGoal, gorevde = A.tab === 'pratik', ligde = A.tab === 'lig', O = gorevde ? null : bugunOneri(), Q = E.quests(st), L = E.league(st), sira = L.rows.findIndex(r => r.me) + 1;
     const yuzde = Math.min(100, Math.round(100 * txp / hedef));
@@ -1418,7 +1428,8 @@
     if (fmt === 'gorsel') body = `<p>${parcala(c.text)}</p><div class="visbox cizim">${c.vis()}</div>`;
     if (fmt === 'hikaye') body = `<div class="row" style="align-items:flex-start">${mascot('happy', 56)}<p class="grow">${parcala(c)}</p></div>`;
     if (fmt === 'adim') body = `${DERS_SAHNE[id] ? `<div class="visbox ders-sahne" data-sahne="${id}">${DERS_SAHNE[id](0)}</div>` : ''}<ol>${c.map(x => `<li class="dp">${x}</li>`).join('')}</ol>`;
-    if (fmt === 'kural') body = `<div class="rule">${parcala(c)}</div>`;
+    // Kısa ve net kartın altında konunun şekli de durur (07.11.2026, proje sahibi: kart tek satır kalıp ekranın çoğu boş görünüyordu)
+    if (fmt === 'kural') { let sek = ''; try { sek = s.cards.gorsel && s.cards.gorsel.vis ? s.cards.gorsel.vis() : ''; } catch (e) { } body = `<div class="rule">${parcala(c)}</div>${sek ? `<div class="visbox kural-sekil">${sek}</div>` : ''}`; }
     const rec = E.formatRank(A.st)[0];
     if (fmt === 'gorsel' || (fmt === 'adim' && DERS_SAHNE[id])) body = `<div class="lcard-govde f-${fmt}">${body}</div>`;
     return `<div class="lcard"><div class="ftabs">${Object.entries(FORMATS).map(([k, f]) => `<button class="chip ${k === fmt ? 'on' : ''}" data-act="${act}" data-v="${k}">${f.icon} ${f.name}${rec.f === k && rec.n >= 2 ? ' ★' : ''}</button>`).join('')}</div>
@@ -1986,6 +1997,7 @@
     else h = { yol: viewHome, kitap: viewBooks, pratik: viewPractice, lig: viewLeague, profil: viewProfile, veli: viewParent }[A.tab]();
     h += surumSerit();
     if (A.yeniSurum) setTimeout(() => surumOtomatik(), 0);
+    yakinlastir(!(vitrinGoster() && !A.st.profile));
     const masa = !A.secici && !pilotDavetGoster() && !vitrinGoster() && !!A.st.profile && A.view !== 'lesson' && A.view !== 'end' && masaGenis();
     if (masa) h += yanPanel();
     $app.classList.toggle('masa', !!masa);
