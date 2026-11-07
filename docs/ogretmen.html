@@ -1394,6 +1394,13 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   #app.ders-genis .gr-svg{max-width:500px} #app.ders-genis .gr-tablo{max-width:500px;font-size:16px}
 }
 .visbox.kural-sekil{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}.visbox.kural-sekil svg{max-height:150px;width:auto;max-width:48%;height:auto}
+/* Sandık sahnesi uzun ödül listesinde kaydırılabilir, «Devam» düğmesi hep görünür (07.11.2026, proje sahibinin ekran görüntüsü:
+   hazine sandığı + çıkartma + seri koruyucu ekrana sığmadı, düğme aşağıda kaldı, kaydırılamadı) */
+.ss-tam{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ss-tam .ss{overflow:visible;overflow-x:clip;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.ss.acik .ss-sahne{width:min(230px,58vw);margin-top:calc(1 * var(--vh1))}
+.ss.acik .ss-ust{margin-top:calc(3 * var(--vh1))}
+.ss > .btn{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:3;box-shadow:0 6px 0 var(--brand-d,#3a2bd0),0 10px 24px rgba(0,0,0,.35);flex:none}
 </style>
 <style>/* Öğretmen inceleme paneli — uygulamanın renk belirteçlerini kullanır (style.css :root) */
 body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding:0 0 40px}
@@ -4067,7 +4074,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-11-07 dcb2f63', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-07 9b90cd2', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
