@@ -4948,7 +4948,7 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   const stopVoice = () => { AUDIO.tok++; dudakDur(); try { if (AUDIO.cur) { AUDIO.cur.pause(); AUDIO.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } };
   // robot=false: Pi'nin sabit replikleri. Pi sesi çalamazsa robot ses yerine sessiz kalınır (karakter bozulmasın).
   const say = (key, html, robot = true) => {
-    if (!A.st.settings.voice) return; stopVoice(); const tok = AUDIO.tok;
+    if (!A.st.settings.voice) return; stopVoice(); const tok = AUDIO.tok; A.sonSes = key;  // sonSes: testler için
     const calis = () => {
       if (tok !== AUDIO.tok) return;
       if (key && AUDIO.keys && AUDIO.keys.has(key)) { sesCal(key, tok).catch(() => { if (robot && tok === AUDIO.tok) ttsSpeak(toSpeech(html)); }); return; }
@@ -6914,7 +6914,7 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   const seriSahnesi = (st) => st === 3 ? 'ates' : st === 5 ? 'durdurulamaz' : (st === 8 || (st > 8 && st % 5 === 0)) ? 'efsane' : null;
   function celebrate(q, gain) {
     const st = A.ses.streak, b = document.querySelector('[data-act="check"]'), r = b ? b.getBoundingClientRect() : null;
-    const word = q.rescue ? pick(PRAISE_RESCUE) : pick(PRAISE); A.fb.word = word;
+    const word = q.rescue ? pick(PRAISE_RESCUE) : pick(PRAISE.filter(w => w !== A.sonOvgu)); if (!q.rescue) A.sonOvgu = word; A.fb.word = word;
     // Telafi doğrusu: hatasını düzelten çocuğa aksiyonlu "güçlendin" sahnesi (oynatılamazsa eski filiz efekti)
     if (q.rescue && A.ses.mode !== 'speed' && sahneOyna('telafi')) { sfx.grow(); if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch (e) { } setTimeout(() => say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false), 300); return; }
     const tier = window.MY_FX ? window.MY_FX.correct({ streak: st, rescue: q.rescue, xp: gain, word, origin: r ? { x: r.left + r.width / 2, y: r.top } : null }) : 'normal';
@@ -6924,8 +6924,11 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
     const sh = seriSahnesi(st); if (sh && !q.rescue) setTimeout(() => sahneOyna(sh), 350);
     // Sayı söyleyen replik ("Üç doğru üst üste!") yalnız seri tam o sayıdayken; 4, 6, 7… doğruda sayısız replik (25.10.2026)
     const seriSoyle = (grup, sayili, n) => { const arr = PI[grup] || [], sayisiz = arr.map((_, i) => i).filter(i => i !== sayili), i = st === n ? Math.floor(Math.random() * arr.length) : pick(sayisiz); if (arr[i]) say(`pi_${grup}_${i + 1}`, arr[i], false); };
-    if (tier === 'fire') seriSoyle('seri3', 0, 3); else if (tier === 'unstop') seriSoyle('seri5', 1, 5); else if (tier === 'legend') seriSoyle('seri8', -1, 8); else if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
-    else if (Math.random() < 0.4) say(`pi_bravo_${PRAISE.indexOf(word) + 1}`, word, false);
+    // 07.11.2026 (proje sahibi: «doğru yaptıkça Pi gaza getirmiyor»): her doğruda Pi konuşur. Seri replikleri yalnız 3, 5, 8 ve
+    // sonra her 5'te (sahnelerle aynı anlar); aradaki doğrularda övgü (aynısı üst üste gelmez). Eskiden övgü %40 olasılıktaydı.
+    if (tier === 'rescue') say(`pi_telafi_${PRAISE_RESCUE.indexOf(word) + 1}`, word, false);
+    else if (st === 3) seriSoyle('seri3', 0, 3); else if (st === 5) seriSoyle('seri5', 1, 5); else if (st >= 8 && (st - 8) % 5 === 0) seriSoyle('seri8', -1, 8);
+    else say(`pi_bravo_${PRAISE.indexOf(word) + 1}`, word, false);
   }
   // Sayı cevabı doğruya gerçekten yakın mı? ("Neredeyse!", "Az kaldı!" yalnız o zaman söylenir)
   const cevapYakin = (q) => { if (q.type !== 'input') return false; const v = parseFloat(String(A.input).replace(',', '.')), a = parseFloat(String(q.answer).replace(',', '.')); return isFinite(v) && isFinite(a) && v !== a && Math.abs(v - a) <= Math.max(1, Math.abs(a) * 0.1); };
