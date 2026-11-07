@@ -675,11 +675,12 @@
 
   // "Bugün bunu yap": tek, net öneri (Duolingo'nun "sonraki adım" fikri). Öncelik: unutulmaya yüz tutmuş konu →
   // birikmiş hatalar → yoldaki sıradaki konu. Gerekçesi çocuğa tek cümleyle söylenir.
-  /* Bilgisayar düzeni (07.11.2026): 1100 px ve üstünde sekmeli ekranlarda üç sütun: solda menü (alt menünün dikey hâli),
+  /* Bilgisayar düzeni (07.11.2026): 820 px ve üstünde sekmeli ekranlarda iki, 1180 px ve üstünde üç sütun: solda menü (alt menünün dikey hâli),
      ortada asıl içerik, sağda sayaçlar + yan panel (günlük hedef, bugün bunu yap, günlük görevler, lig sıran). Telefonda
      yan panel hiç çizilmez. Ders, kayıt ve tanıtım ekranları tek sütun kalır. */
-  const masaGenis = () => window.innerWidth >= 1100;
-  let masaSon = masaGenis(); addEventListener('resize', () => { const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); else $app.classList.toggle('ders-genis', m && !!A.st.profile); } });
+  const masaGenis = () => window.innerWidth >= 820; 
+  const dersGenis = () => masaGenis() && window.innerWidth >= window.innerHeight * 0.9;  // derste iki sütun yalnız yatay ekranda (dik tablette ve telefonda «Masaüstü sitesi»nde boşluk kalmasın)  // 820–1179 iki sütun (tablet, «Masaüstü sitesi»), 1180+ üç sütun (CSS)
+  let masaSon = masaGenis(); addEventListener('resize', () => { const m = masaGenis(); if (m !== masaSon) { masaSon = m; if (A.view !== 'lesson') render(); } if (A.view === 'lesson') $app.classList.toggle('ders-genis', dersGenis() && !!A.st.profile); });
   function yanPanel() {
     const st = A.st, txp = todayXP(), hedef = st.dailyGoal, gorevde = A.tab === 'pratik', ligde = A.tab === 'lig', O = gorevde ? null : bugunOneri(), Q = E.quests(st), L = E.league(st), sira = L.rows.findIndex(r => r.me) + 1;
     const yuzde = Math.min(100, Math.round(100 * txp / hedef));
@@ -1966,7 +1967,7 @@
     const masa = !A.secici && !pilotDavetGoster() && !vitrinGoster() && !!A.st.profile && A.view !== 'lesson' && A.view !== 'end' && masaGenis();
     if (masa) h += yanPanel();
     $app.classList.toggle('masa', !!masa);
-    $app.classList.toggle('ders-genis', !A.secici && !!A.st.profile && (A.view === 'lesson' || A.view === 'end') && masaGenis());
+    $app.classList.toggle('ders-genis', !A.secici && !!A.st.profile && (A.view === 'lesson' || A.view === 'end') && dersGenis());
     if (A.modal) h += '<div class="modal-bg" data-act="close-modal"></div>' + A.modal;
     if (A.sahne) h += `<div class="ss-tam" role="dialog" aria-label="Sandık">${sandikSahneHtml(A.sahne, 'sahne-kapat')}</div>`;
     // Tek harita uzun: aynı ekranda yeniden çizerken kaydırma yerinde kalsın; haritaya yeni gelince sıradaki düğüme git

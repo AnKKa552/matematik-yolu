@@ -1290,20 +1290,19 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasında (menü bağlantıları); uygulamada kaydırma anında olmalı */
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
-/* ===== Bilgisayar düzeni (07.11.2026): ≥1100 px sekmeli ekranlarda üç sütun ===== */
+/* ===== Bilgisayar düzeni (07.11.2026): sekmeli ekranlarda ≥820 px iki, ≥1180 px üç sütun ===== */
 .nav-logo{display:none}
 .yan{display:none}
-@media (min-width:1100px){
-  #app.masa{max-width:1200px;display:grid;grid-template-columns:230px minmax(0,600px) 300px;grid-template-rows:auto 1fr;column-gap:28px;align-items:start;justify-content:center;padding:0 24px}
+@media (min-width:820px){
+  #app.masa{max-width:1200px;display:grid;grid-template-columns:200px minmax(0,640px);grid-template-rows:auto 1fr;column-gap:24px;align-items:start;justify-content:center;padding:0 20px}
   #app.masa .nav{position:sticky;top:0;left:auto;transform:none;grid-column:1;grid-row:1/span 2;height:100vh;width:auto;max-width:none;flex-direction:column;justify-content:flex-start;gap:6px;border:0;border-right:2px solid var(--line);background:transparent;padding:22px 18px 22px 0}
   #app.masa .nav-logo{display:flex;align-items:center;gap:10px;font-size:20px;margin:0 0 18px 6px;color:var(--brand-ink)}
   #app.masa .nav-logo img{border-radius:12px} #app.masa .nav-logo span{color:var(--accent-ink)}
   #app.masa .nav button{flex-direction:row;justify-content:flex-start;gap:14px;font-size:16px;padding:12px 14px;border-radius:14px;width:100%;min-width:0}
   #app.masa .nav button .ic{font-size:28px}
   #app.masa .nav button:hover{background:var(--surface2)}
-  #app.masa .topbar{grid-column:3;grid-row:1;position:sticky;top:0;padding:22px 0 10px;background:var(--bg)}
-  #app.masa .scroll{grid-column:2;grid-row:1/span 2;padding:12px 0 60px;min-width:0}
-  #app.masa .yan{display:flex;flex-direction:column;gap:14px;grid-column:3;grid-row:2;position:sticky;top:78px}
+  #app.masa .topbar{grid-column:2;grid-row:1;position:sticky;top:0;padding:16px 0 8px;background:var(--bg);z-index:6}
+  #app.masa .scroll{grid-column:2;grid-row:2;padding:8px 0 60px;min-width:0}
   .yan-kart{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:default;padding:14px 16px}
   button.yan-kart{cursor:pointer}
   .yan-bas{font-size:12px;font-weight:900;letter-spacing:.06em;color:var(--brand-ink);margin-bottom:8px;text-transform:uppercase}
@@ -1312,7 +1311,14 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   .yan-gorev{display:flex;gap:10px;align-items:center;margin-top:8px}.yan-gorev>span{font-size:22px}
   .yan-gorev.tamam{opacity:.6}
   #app.masa .path.harita{margin-left:0;margin-right:0;border-radius:24px;overflow:hidden}
-  #app.masa .path.harita.tek>.bolge{margin:0}
+  #app.masa .path.harita.tek>.bolge{margin:0;align-self:stretch;width:auto}
+}
+/* Geniş bilgisayar (≥1180 px): sağda üst çubuk + özet paneli ile üç sütun. 820–1179 px (tablet, telefonda «Masaüstü sitesi»): iki sütun */
+@media (min-width:1180px){
+  #app.masa{grid-template-columns:230px minmax(0,600px) 300px;column-gap:28px;padding:0 24px}
+  #app.masa .topbar{grid-column:3;grid-row:1;padding:22px 0 10px}
+  #app.masa .scroll{grid-column:2;grid-row:1/span 2;padding:12px 0 60px}
+  #app.masa .yan{display:flex;flex-direction:column;gap:14px;grid-column:3;grid-row:2;position:sticky;top:78px}
 }
 /* Dar telefon: kenar adaların etiketi ekrandan taşmasın, logo tek satır kalsın */
 .vt-logo b{white-space:nowrap}
@@ -1321,8 +1327,8 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 @media (max-width:400px){.vt-logo{font-size:17px;gap:8px}.vt-logo img{width:34px;height:34px}.vt-ada-etiket{font-size:11px;padding:3px 8px}.vt-ust .vt-link{font-size:14px}}
 .vt-ada.sol{z-index:2}
 @media (max-width:400px){.vt-yildiz{display:none}}
-/* ===== Bilgisayarda ders (07.11.2026): ≥1100 px geniş ekran; soru solda, cevap sağda; şekiller büyük ===== */
-@media (min-width:1100px){
+/* ===== Bilgisayarda ders (07.11.2026): ≥820 px geniş ekran; soru solda, cevap sağda; şekiller büyük ===== */
+@media (min-width:820px){
   #app.ders-genis{max-width:1120px}
   #app.ders-genis .lhead{padding:22px 36px 10px;gap:18px}
   #app.ders-genis .lhead .prog{height:18px}
@@ -1349,14 +1355,14 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   #app.ders-genis .lcard-govde>p,#app.ders-genis .lcard-govde>ol{margin:0}
   #app.ders-genis .end{max-width:640px;margin:0 auto;width:100%}
 }
-@media (min-width:1100px){
+@media (min-width:820px){
   #app.ders-genis .lfoot{position:sticky;bottom:0;z-index:5}
   #app.ders-genis .lcard-govde>.visbox{min-height:240px}
   #app.ders-genis .lcard-govde>.visbox svg{max-height:min(380px,48vh)}
   #app.ders-genis .vis{max-height:min(400px,50vh)}
   #app.ders-genis .dsag .pad{max-width:480px;margin-left:auto;margin-right:auto}
 }
-@media (min-width:1100px){
+@media (min-width:820px){
   #app.ders-genis .olc-svg{max-width:480px}
   #app.ders-genis .kes-svg{max-width:440px}
   #app.ders-genis .kes-svg.pie{max-width:320px}
