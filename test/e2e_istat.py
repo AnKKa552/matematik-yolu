@@ -7,9 +7,10 @@ def ok(c, m):
     print(('✓ ' if c else 'HATA: ') + m)
     if not c: HATA.append(m)
 
-GELEN = []; S = {'cevap': {'ok': True, 'alindi': 1}}
+GELEN = []; ZIYARET = []; S = {'cevap': {'ok': True, 'alindi': 1}}
 async def yol(route):
-    GELEN.append(json.loads(route.request.post_data or '{}'))
+    g = json.loads(route.request.post_data or '{}')
+    (ZIYARET if 'ziyaret' in (g.get('p') or {}) else GELEN).append(g)
     await route.fulfill(status=200 if S['cevap'] else 500, content_type='application/json', body=json.dumps(S['cevap'] or {}))
 
 async def main():
@@ -48,6 +49,18 @@ async def main():
         for s in (GELEN[0]['p']['soru'] if GELEN else []): anahtarlar |= set(s)
         ok(anahtarlar <= {'mod', 'beceri', 'sev', 'tur', 'kalip', 'metin', 'n', 'ilk', 'ipucu', 'cozum', 'ms', 'kova', 'mis'}, f'yalnız izinli alanlar {sorted(anahtarlar)}')
         ok(await pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('my_istat')||'{}').soru||{}).length") == 0, 'gönderilince telefonda silindi')
+        # İsimsiz kullanıcı sayacı: günde bir kez, yalnız bayraklar
+        await pg.wait_for_timeout(3500)
+        ok(len(ZIYARET) == 1, f'ziyaret günde bir kez gönderildi ({len(ZIYARET)})')
+        z = ZIYARET[0]['p']['ziyaret'] if ZIYARET else {}
+        ok(set(z) <= {'gun', 'hafta', 'ay', 'yeni', 'donus', 'kayitli'} and z.get('gun') == 1 and z.get('yeni') == 1, f'ziyaret yalnız bayrak {z}')
+        ok('Zeynep' not in json.dumps(ZIYARET) and 'kurulum' not in json.dumps(ZIYARET), 'ziyarette ad ya da tarih yok')
+        await pg.evaluate("Object.defineProperty(document,'visibilityState',{configurable:true,get:()=>'visible'});document.dispatchEvent(new Event('visibilitychange'))"); await pg.wait_for_timeout(600)
+        ok(len(ZIYARET) == 1, 'aynı gün ikinci kez sayılmadı')
+        await pg.evaluate("(()=>{const z=JSON.parse(localStorage.getItem('my_ziyaret'));const d=new Date();d.setDate(d.getDate()-3);const f=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');z.gun=f(d);z.kurulum=f(d);localStorage.setItem('my_ziyaret',JSON.stringify(z));document.dispatchEvent(new Event('visibilitychange'))})()"); await pg.wait_for_timeout(600)
+        z2 = ZIYARET[-1]['p']['ziyaret'] if len(ZIYARET) > 1 else {}
+        ok(len(ZIYARET) == 2 and z2.get('yeni') == 0 and z2.get('donus') == 'd2_7', f'ertesi açılışta geri gelme kovası {z2}')
+        await pg.evaluate("Object.defineProperty(document,'visibilityState',{configurable:true,get:()=>'hidden'})")
         # Sunucu hata verirse geri konur
         S['cevap'] = None
         await pg.evaluate("""(()=>{const A=window.MY_APP,E=window.MY_E;const s=A.ses;const q=E.makeQ('f_denk',1,true);E.record(A.st,s,q,{ok:true},8000,false,'ilk');})()""")
@@ -68,6 +81,8 @@ async def main():
         await pg.evaluate("""(()=>{const A=window.MY_APP,E=window.MY_E;window.MY_APP_START('lesson','f_denk');const s=A.ses;const q=E.makeQ('f_denk',1,true);E.record(A.st,s,q,{ok:true},8000,false,'ilk');})()""")
         await pg.evaluate("document.dispatchEvent(new Event('visibilitychange'))"); await pg.wait_for_timeout(800)
         ok(len(GELEN) == n0 and await pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('my_istat')||'{}').soru||{}).length") == 0, 'kapalıyken hiçbir şey toplanmaz, gönderilmez')
+        await pg.evaluate("localStorage.removeItem('my_ziyaret');Object.defineProperty(document,'visibilityState',{configurable:true,get:()=>'visible'});document.dispatchEvent(new Event('visibilitychange'))"); await pg.wait_for_timeout(600)
+        ok(len(ZIYARET) == 2, 'istatistik kapalıyken ziyaret de gönderilmez')
         ok(not errs, f'Sayfa hatası yok {errs[:2]}')
         await b.close()
     print('BİTTİ hata:', len(HATA))

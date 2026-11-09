@@ -1078,6 +1078,30 @@
       if (ders.length > 50) geriKoy([], ders.slice(50));
     } finally { istatGidiyor = false; }
   }
+  /* İsimsiz kullanıcı sayacı (09.11.2026, proje sahibi: "kaç kişi sistemi kullanıyor bilelim").
+     IP ya da cihaz numarası SAKLANMADAN sayar: telefon kendi içinde "bugün / bu hafta / bu ay sayıldım mı" bilgisini tutar
+     (localStorage my_ziyaret) ve günün ilk açılışında yalnız evet/hayır bayrakları gönderir. Sunucu sadece sayıları artırır;
+     bir sayının hangi telefondan geldiği bilinemez. Telefonun ilk açılış günü telefonda kalır, sunucuya yalnız
+     "kaç gün sonra geri geldi" kovası gider (geri gelme oranı için). Ayarlar'daki istatistik düğmesi kapalıysa gönderilmez. */
+  const ZIYARET = 'my_ziyaret';
+  let ziyaretGidiyor = false;
+  const yerelGun = (t) => { const d = t || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  async function ziyaretSay() {
+    if (ziyaretGidiyor || !aileAyarli()) return;
+    if (A.st && A.st.settings && A.st.settings.istat === false) return;
+    let z = {}; try { z = JSON.parse(localStorage.getItem(ZIYARET) || '{}') || {}; } catch (e) { }
+    const now = new Date(), gun = yerelGun(now);
+    if (z.gun === gun) return;
+    const pzt = new Date(now); pzt.setDate(now.getDate() - ((now.getDay() + 6) % 7)); const hafta = yerelGun(pzt), ay = gun.slice(0, 7);
+    const kur = z.kurulum || gun, fark = Math.round((new Date(gun) - new Date(kur)) / 864e5);
+    const v = { gun: 1, hafta: z.hafta === hafta ? 0 : 1, ay: z.ay === ay ? 0 : 1, yeni: z.kurulum ? 0 : 1,
+      donus: !z.kurulum ? '' : fark <= 1 ? 'd1' : fark <= 7 ? 'd2_7' : fark <= 30 ? 'd8_30' : 'd31',
+      kayitli: A.st && A.st.profile ? 1 : 0 };
+    ziyaretGidiyor = true;
+    try { const r = await rpc('istatistik_kaydet', { p: { ziyaret: v } });
+      if (r && r.ok) { try { localStorage.setItem(ZIYARET, JSON.stringify({ gun, hafta, ay, kurulum: kur })); } catch (e) { } }
+    } catch (e) { } finally { ziyaretGidiyor = false; }
+  }
   const pilotDers = (tur) => { const s = A.ses; if (!s) return; pilot(tur, { mod: s.mode, beceri: s.skill || undefined, n: s.answered.length, ilk: s.answered.filter(a => a.kanit === 'ilk').length, sure: Math.round((Date.now() - s.start) / 1000) }); };
   function pilotKart() {
     if (!pilotAcik() && pilotSunucu !== true) return '';
@@ -2375,7 +2399,7 @@
   // Seri koruyucu: açılışta ve uygulamaya geri dönülünce (gece yarısını geçtiyse) kendiliğinden kontrol edilir
   const seriBak = () => { try { const r = A.st.profile && E.seriKontrol(A.st); if (!r) return; save(); if (A.view !== 'lesson') render();
     setTimeout(() => toast(r.tip === 'korundu' ? `🧊 ${r.gun > 1 ? r.gun + ' gün' : 'Dün'} gelemedin; seri koruyucun serini korudu! Kalan koruyucu: ${r.kalan}` : '🌱 Yeni bir seri başlıyor! Konuların ve yıldızların yerinde duruyor. Bugün 1. gün olsun mu?'), 900); } catch (e) { } };
-  seriBak(); setTimeout(epostaRaporYukle, 3000); setTimeout(istatGonder, 6000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); istatGonder(); } });
+  seriBak(); setTimeout(epostaRaporYukle, 3000); setTimeout(istatGonder, 6000); setTimeout(ziyaretSay, 4000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { seriBak(); aileKontrol(); pilotAcilis(); ziyaretSay(); } else { if (A.st.aile && A.st.aile.kirli) aileGonder(); pilotGonder(); istatGonder(); } });
   // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
   { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
     if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }

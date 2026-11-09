@@ -49,6 +49,15 @@ create table if not exists public.istat_ders (
   birak_soru jsonb not null default '{}', -- kaçıncı soruda bırakıldı → kaç kez
   primary key (gun, mod, beceri)
 );
+-- İsimsiz kullanıcı sayacı (09.11.2026): telefon günün ilk açılışında yalnız bayrak gönderir; IP/cihaz numarası yok.
+-- tur: gun (o gün açan telefon), hafta (haftada ilk kez açan), ay (ayda ilk kez), yeni (ilk kez açan), kayitli (kaydı olan),
+--      d1 / d2_7 / d8_30 / d31 (ilk açılıştan kaç gün sonra geri geldi).
+-- Okuma: günlük:  select gun, sayi from istat_ziyaret where tur='gun' order by gun desc;
+--        haftalık tekil: select date_trunc('week', gun)::date hafta, sum(sayi) from istat_ziyaret where tur='hafta' group by 1 order by 1 desc;
+--        aylık tekil:    select to_char(gun,'YYYY-MM') ay, sum(sayi) from istat_ziyaret where tur='ay' group by 1 order by 1 desc;
+create table if not exists public.istat_ziyaret (gun date not null, tur text not null, sayi int not null default 0, primary key (gun, tur));
+alter table public.istat_ziyaret enable row level security;
+revoke all on public.istat_ziyaret from anon, authenticated;
 create table if not exists public.istat_gunluk (gun date primary key, cagri int not null default 0);
 alter table public.istat_soru enable row level security;
 alter table public.istat_kalip enable row level security;
@@ -120,6 +129,13 @@ begin
           birak_soru = (select coalesce(jsonb_object_agg(key, v), '{}') from (select key, sum(value::int) v from (select * from jsonb_each_text(d.birak_soru) union all select * from jsonb_each_text(excluded.birak_soru)) u group by key) t);
       alindi := alindi + 1;
     end loop;
+  end if;
+  if jsonb_typeof(p->'ziyaret') = 'object' and (p->'ziyaret'->>'gun') = '1' then
+    insert into istat_ziyaret as z (gun, tur, sayi)
+      select g, t, 1 from unnest(array['gun','hafta','ay','yeni','kayitli']) t where (p->'ziyaret'->>t) = '1'
+      union all select g, p->'ziyaret'->>'donus', 1 where (p->'ziyaret'->>'donus') in ('d1','d2_7','d8_30','d31')
+      on conflict (gun, tur) do update set sayi = z.sayi + 1;
+    alindi := alindi + 1;
   end if;
   return jsonb_build_object('ok', true, 'alindi', alindi);
 end $$;
