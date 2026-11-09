@@ -1,0 +1,58 @@
+# Play paketi (TWA) derlemesi — 09.11.2026
+# android/ değişince imzasız .aab derlenir ve `android-cikti` dalına konur.
+# İmzalama GitHub'da YAPILMAZ: yükleme anahtarı depoda yok, paket ajan oturumunda imzalanır.
+name: Android paketi
+
+on:
+  push:
+    branches: [main]
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-paket
+  cancel-in-progress: true
+
+jobs:
+  derle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Paketi derle
+        id: derle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          set +e
+          ./gradlew --no-daemon --stacktrace bundleRelease > ../derleme.log 2>&1
+          echo "kod=$?" >> "$GITHUB_OUTPUT"
+          tail -60 ../derleme.log
+
+      - name: Çıktıyı android-cikti dalına koy
+        run: |
+          mkdir -p /tmp/cikti
+          cp derleme.log /tmp/cikti/
+          if [ -f android/app/build/outputs/bundle/release/app-release.aab ]; then
+            cp android/app/build/outputs/bundle/release/app-release.aab /tmp/cikti/matematikyolu-imzasiz.aab
+          fi
+          echo "${{ github.sha }} kod=${{ steps.derle.outputs.kod }}" > /tmp/cikti/DURUM.txt
+          cd /tmp/cikti
+          git init -q -b android-cikti
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -qm "Android paketi: ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" android-cikti
+
+      - name: Derleme hatası
+        if: steps.derle.outputs.kod != '0'
+        run: exit 1

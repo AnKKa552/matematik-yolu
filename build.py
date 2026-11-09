@@ -51,4 +51,7 @@ _m = _json.loads((R/'data'/'mufredat.json').read_text())
 _adlar = _json.dumps({'beceri': {b['id']: b['ad'] for b in _m['beceriler']}, 'mis': {k: v['ad'] for k, v in _m['yanilgilar'].items()}}, ensure_ascii=False).replace('</', '<\\/')
 for K in (D, P):
     (K/'yonetim').mkdir(exist_ok=True); (K/'yonetim'/'index.html').write_text((S/'yonetim.html').read_text().replace('/*ADLAR*/{}', _adlar))
+# Play (TWA) doğrulaması (09.11.2026): matematikyolu.com/.well-known/assetlinks.json
+# Yükleme anahtarının parmak izi; Play App Signing anahtarı Play Console'dan alınınca listeye eklenmeli.
+(P/'.well-known').mkdir(exist_ok=True); shutil.copy(S/'assetlinks.json', P/'.well-known'/'assetlinks.json')
 print('docs/ güncellendi')

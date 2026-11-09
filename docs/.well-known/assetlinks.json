@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.matematikyolu.app",
+      "sha256_cert_fingerprints": [
+        "0D:4C:EB:A6:93:73:03:6B:62:2E:FA:4A:67:6D:20:08:69:46:6C:15:6C:17:DE:3E:ED:71:2D:F7:D9:21:4A:21"
+      ]
+    }
+  }
+]
