@@ -45,4 +45,10 @@ if (D/'font').exists(): shutil.copytree(D/'font', P/'font', dirs_exist_ok=True)
 # Gizlilik politikası: matematikyolu.com/gizlilik/ (Play mağazası için zorunlu)
 for K in (D, P):
     for ad in ('gizlilik', 'kosullar', 'eposta', 'hakkimizda', 'cocuklar', 'veri-sil', 'ogretmenler'): (K/ad).mkdir(exist_ok=True); shutil.copy(S/(ad + '.html'), K/ad/'index.html')
+# Yönetim sayfası (09.11.2026): matematikyolu.com/yonetim/ — yönetici adı + şifre (sunucu/supabase/yonetici.sql)
+import json as _json
+_m = _json.loads((R/'data'/'mufredat.json').read_text())
+_adlar = _json.dumps({'beceri': {b['id']: b['ad'] for b in _m['beceriler']}, 'mis': {k: v['ad'] for k, v in _m['yanilgilar'].items()}}, ensure_ascii=False).replace('</', '<\\/')
+for K in (D, P):
+    (K/'yonetim').mkdir(exist_ok=True); (K/'yonetim'/'index.html').write_text((S/'yonetim.html').read_text().replace('/*ADLAR*/{}', _adlar))
 print('docs/ güncellendi')
