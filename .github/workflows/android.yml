@@ -1,7 +1,7 @@
 # Play paketi (TWA) derlemesi — 09.11.2026
 # android/ değişince imzasız .aab derlenir ve `android-cikti` dalına konur.
 # İmzalama GitHub'da YAPILMAZ: yükleme anahtarı depoda yok, paket ajan oturumunda imzalanır.
-# 10.11.2026: faturalama sorunu çözüldü, derleme yeniden başlatıldı (2. deneme).
+# 10.11.2026: faturalama sorunu çözüldü, derleme yeniden başlatıldı (3. deneme).
 name: Android paketi
 
 on:
