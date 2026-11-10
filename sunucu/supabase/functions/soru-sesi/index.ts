@@ -3,7 +3,15 @@
 // Güvenlik: metin yalnızca uygulamanın üretebileceği kelimelerden oluşabilir (sozluk.ts) → Pi'ye keyfî cümle söyletilemez.
 // Maliyet sınırı: cihaz başına günde CIHAZ_ADET yeni ses, tüm uygulama için günde TOPLAM_KARAKTER karakter.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-import { SOZLUK } from "./sozluk.ts";
+// Sözlük veritabanındaki soru_sozluk tablosundan okunur (10 dk bellekte tutulur): yeni kelime eklemek için fonksiyonu
+// yeniden yüklemek gerekmez. Kaynak: sozluk.ts (node tools/soru_sozluk.js üretir), tabloya sunucu/supabase/soru_sozluk.sql ile aktarılır.
+let SOZLUK = new Set<string>(), sozlukZaman = 0;
+const sozlukAl = async (sb: ReturnType<typeof createClient>) => {
+  if (SOZLUK.size && Date.now() - sozlukZaman < 600_000) return SOZLUK;
+  const { data, error } = await sb.rpc("soru_sozluk_al");
+  if (!error && Array.isArray(data) && data.length > 500) { SOZLUK = new Set(data as string[]); sozlukZaman = Date.now(); }
+  return SOZLUK;
+};
 
 const VOICE = "A2XgcJ6lQVEFeIaIUyrc", MODEL = "eleven_v4", AYAR = { stability: 0.5, similarity_boost: 0.8, use_speaker_boost: true };
 const CIHAZ_ADET = +(Deno.env.get("SORU_SESI_CIHAZ_ADET") ?? 100);
@@ -21,10 +29,12 @@ Deno.serve(async (req) => {
   if (metin.length < 3 || metin.length > 260) return yanit({ hata: "uzunluk" }, 400);
   if (!/^[ !"'(),.0-9:?A-Za-zÇÖÜçöüĞğİıŞşâîû-]+$/.test(metin)) return yanit({ hata: "karakter" }, 400);
   const kelimeler = metin.toLocaleLowerCase("tr-TR").match(/[a-zçğıöşüâîû]+/g) ?? [];
-  const yabanci = kelimeler.filter((w) => !SOZLUK.has(w));
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const sozluk = await sozlukAl(sb);
+  if (!sozluk.size) return yanit({ hata: "sozluk okunamadı" }, 503);
+  const yabanci = kelimeler.filter((w) => !sozluk.has(w));
   if (yabanci.length) return yanit({ hata: "sozluk", kelime: yabanci.slice(0, 3) }, 422);
   const anahtar = (await ozet(metin)).slice(0, 32), yol = `soru/${anahtar}.mp3`;
-  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const depo = sb.storage.from("sesler"), url = depo.getPublicUrl(yol).data.publicUrl;
   // 2) Daha önce üretildiyse hemen dön (kredi yok)
   const var_ = await fetch(url, { method: "HEAD" });

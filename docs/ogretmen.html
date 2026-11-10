@@ -3200,6 +3200,98 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
       [H('olasilik_oran', 0, [`Payda (bütün): kırmızı olmayan toplar, ${m}`, l1, `Olasılık = ${fr(r, m)}`], fr(r, m))], ['olasilik_buyuk', 'az_cok']);
   };
 
+  // ---- 10.11.2026: kalan 14 becerinin senaryoları (35/35). Sayısız konularda sonuç tırnak içinde bir yargıdır. ----
+  SEN.g_temel = (lv) => {
+    const n = lv === 1 ? 3 : ri(3, 5), L = pick([['A', 'B', 'C', 'D', 'E'], ['K', 'L', 'M', 'N', 'P'], ['P', 'R', 'S', 'T', 'U']]).slice(0, n);
+    const ilk = L.slice(1).map(x => L[0] + x), son = []; for (let i = 1; i < n; i++) for (let j = i + 1; j < n; j++) son.push(L[i] + L[j]);
+    const yan = L.slice(1).map((x, i) => L[i] + x), top = ilk.length + son.length;
+    return S(`${L.join(', ')} noktaları aynı doğru üzerinde, bu sırayla duruyor. Bu noktalarla kaç doğru parçası oluşur?`,
+      [`${L[0]} noktasından başlayanlar: ${ilk.join(', ')} (${ilk.length} tane)`, `Sonraki noktalardan başlayanlar: ${son.join(', ')} (${son.length} tane)`, `Toplam: ${ilk.length} + ${son.length} = ${top} doğru parçası`], `${top} doğru parçası`,
+      [H('nokta_sayma', 0, [`Yalnız yan yana noktalar birleşir: ${yan.join(', ')}`, 'Arada nokta atlayan doğru parçası sayılmaz', `Toplam: ${yan.length} doğru parçası`], `${yan.length} doğru parçası`)], ['dp_dogru', 'dp_uzunluk']);
+  };
+  SEN.g_dikme_paralel = (lv) => {
+    const [a, b, c] = pick([['a', 'b', 'c'], ['d', 'e', 'f'], ['k', 'l', 'm']]);
+    if (Math.random() < 0.5) { const l0 = `${a} doğrusu ${b} doğrusuyla 90° yapar`, l1 = `${c} doğrusu da ${b} doğrusuyla 90° yapar`;
+      return S(`${a} doğrusu ${b} doğrusuna dik. ${c} doğrusu da ${b} doğrusuna dik. ${a} ile ${c} doğruları birbirine göre nasıldır?`, [l0, l1, 'Aynı doğruya dik olan iki doğru birbirine paraleldir'], '"Paralel"',
+        [H('paralel_kesisen', 2, [l0, l1, 'Aynı doğruya dik olan iki doğru birbirine de diktir'], '"Dik"')], ['dik_yatay', 'paralel_kesen']); }
+    const l0 = `${a} ile ${b} paralel: ikisi de aynı yöne uzanır`, l1 = `${c} doğrusu ${b} doğrusuyla 90° yapar`;
+    return S(`${a} doğrusu ${b} doğrusuna paralel. ${c} doğrusu ${b} doğrusuna dik. ${a} ile ${c} doğruları birbirine göre nasıldır?`, [l0, l1, `${c} doğrusu ${a} doğrusuyla da 90° yapar`], '"Dik"',
+      [H('paralel_kesisen', 2, [l0, l1, `${c} doğrusu ${a} doğrusuyla hiç kesişmez`], '"Paralel"')], ['dik_yatay', 'paralel_kesen']);
+  };
+  SEN.g_aci = (lv) => {
+    let d; do { d = lv === 3 ? ri(3, 33) * 5 : ri(2, 16) * 10; } while (d === 90);
+    const sag = Math.random() < 0.5, taraf = sag ? 'sağdaki' : 'soldaki', dogruSira = sag ? 'iç' : 'dış', yanlisSira = sag ? 'dış' : 'iç';
+    const ic = sag ? d : 180 - d, dis = 180 - ic;
+    return S(`Açıölçerde açının bir kolu ${taraf} 0 çizgisinde. Diğer kol iç sırada ${ic}, dış sırada ${dis} sayısını gösteriyor. Açının ölçüsü kaç derecedir?`,
+      [`Kol ${taraf} 0 çizgisinde: 0 ile başlayan sıra ${dogruSira} sıradır`, `${U.cap(dogruSira)} sırada okunan sayı: ${d}`, `Açının ölçüsü ${d}°`], `${d}°`,
+      [H('iletki_ters', 0, [`Kol ${taraf} 0 çizgisinde: ${yanlisSira} sıra okunur`, `${U.cap(yanlisSira)} sırada okunan sayı: ${180 - d}`, `Açının ölçüsü ${180 - d}°`], `${180 - d}°`)], ['aci_olcme', 'aci_tur']);
+  };
+  SEN.g_cokgen = (lv) => {
+    const x = ri(lv === 3 ? 21 : 6, lv === 3 ? 33 : 16) * 5, l0 = 'İç açı ile aynı köşedeki dış açı yan yana durur, birlikte bir doğru açı oluşturur';
+    return S(`Bir çokgenin bir iç açısı ${x}°. Aynı köşedeki dış açı kaç derecedir?`, [l0, `İç açı + dış açı = 180°`, `Dış açı = 180 − ${x} = ${180 - x}°`], `${180 - x}°`,
+      [H('dis_aci', 1, [l0, 'İç açı + dış açı = 360°', `Dış açı = 360 − ${x} = ${360 - x}°`], `${360 - x}°`)], ['tumler_butunler', 'cokgen_sayi']);
+  };
+  SEN.n_karsilastir = (lv) => {
+    const k = lv === 3 ? 5 : 4, ds = [0, ...shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, k - 1)], sirali = [...ds].sort((p, q) => p - q), karisik = shuffle(ds);
+    const dogru = [sirali[1], 0, ...sirali.slice(2)].join(''), l0 = `Rakamları küçükten büyüğe sırala: ${sirali.join(', ')}`;
+    return S(`${karisik.join(', ')} rakamlarını birer kez kullanarak yazılabilecek en küçük ${k === 4 ? 'dört' : 'beş'} basamaklı sayı kaçtır?`,
+      [l0, `Sayı 0 ile başlayamaz: başa ${sirali[1]}, hemen ardına 0 yazılır`, `En küçük sayı: ${fmtN(Number(dogru))}`], fmtN(Number(dogru)),
+      [H('sifir_basta', 1, [l0, 'En küçük rakam en başa yazılır: başa 0 gelir', `En küçük sayı: ${sirali.join('')}`], sirali.join(''))], ['ilk_rakam', 'basamak_karsilastir']);
+  };
+  SEN.n_tahmin = (lv) => {
+    const yuz = lv === 3 || Math.random() < 0.5, kes = Math.random() < 0.5;   // kes: doğru yuvarlama aşağı (hatalı öğrenci hep yukarı yuvarlar)
+    const ust = ri(1, 8), sag = kes ? ri(1, 4) : ri(5, 9), bin = ri(1, 9), N = yuz ? bin * 1000 + ust * 100 + sag * 10 + ri(1, 9) : bin * 100 + ust * 10 + sag, to = yuz ? 100 : 10;
+    const asagi = Math.floor(N / to) * to, yukari = asagi + to, ad = yuz ? 'yüzler' : 'onlar', l0 = `${U.cap(ad)} basamağındaki rakam: ${ust}. Sağındaki rakam: ${sag}`;
+    const soru = `${fmtN(N)} sayısını en yakın ${yuz ? 'yüzlüğe' : 'onluğa'} yuvarla.`;
+    return kes ? S(soru, [l0, `${sag}, 5'ten küçük: ${ad} basamağı aynı kalır`, `Sonuç: ${fmtN(asagi)}`], fmtN(asagi), [H('yuvarlama_yukari', 1, [l0, `Yuvarlarken ${ad} basamağı hep 1 artar`, `Sonuç: ${fmtN(yukari)}`], fmtN(yukari))], ['yuvarlama_kesme', 'basamak_kayma'])
+      : S(soru, [l0, `${sag}, 5'ten küçük değil: ${ad} basamağı 1 artar`, `Sonuç: ${fmtN(yukari)}`], fmtN(yukari), [H('yuvarlama_kesme', 1, [l0, `Sağdaki rakamlar atılır, ${ad} basamağı aynı kalır`, `Sonuç: ${fmtN(asagi)}`], fmtN(asagi))], ['yuvarlama_yukari', 'basamak_kayma']);
+  };
+  SEN.f_tur = (lv) => {
+    let d, w, r; do { d = ri(3, lv === 3 ? 9 : 6); w = ri(1, lv === 3 ? 5 : 3); r = ri(1, d - 1); } while (w === r);
+    const n = w * d + r, l0 = `${n} ÷ ${d} işleminde bölüm ${w}, kalan ${r}`;
+    return S(`${fr(n, d)} bileşik kesrini tam sayılı kesir olarak yaz.`, [l0, 'Bölüm tam kısım olur, kalan pay olur, payda değişmez', `Sonuç: ${mixed(w, r, d)}`], mixed(w, r, d),
+      [H('tamsayili', 1, [l0, 'Kalan tam kısım olur, bölüm pay olur, payda değişmez', `Sonuç: ${mixed(r, w, d)}`], mixed(r, w, d))], ['kesir_tur', 'pay_payda_ters']);
+  };
+  SEN.f_ondalik = (lv) => {
+    const p = ri(1, 9);
+    return S(`${fr(p, 100)} kesrini ondalık gösterimle yaz.`, ['Payda 100: virgülden sonra 2 basamak olur', `${p} tek basamaklı: önüne 0 yazılır`, `Sonuç: ${fmtD(p / 100)}`], fmtD(p / 100),
+      [H('ondalik_basamak', 0, ['Payda 100: virgülden sonra 1 basamak olur', `${p} virgülden hemen sonra yazılır`, `Sonuç: ${fmtD(p / 10)}`], fmtD(p / 10))], ['ondalik_parca', 'ondalik_okunus']);
+  };
+  SEN.s_arastirma = (lv) => {
+    const konu = pick(['en sevilen meyveyi', 'en çok oynanan oyunu', 'okula nasıl gelindiğini', 'en sevilen dersi']);
+    return S(`${pick(NAMES)}, sınıfında ${konu} araştıracak. İlk yapması gereken iş nedir?`, ['Araştırma bir soruyla başlar', 'Soru belli olunca veriler toplanır ve düzenlenir', 'İlk iş: araştırma sorusunu belirleme'], '"Araştırma sorusunu belirleme"',
+      [H('adim_sira', 0, ['Araştırma grafik çizmekle başlar', 'Grafik çizilince veriler toplanır', 'İlk iş: veri görselleştirme'], '"Veri görselleştirme"')], ['veri_kaynak', 'anket_kural']);
+  };
+  SEN.s_daire = (lv) => {
+    const [p, k] = pick([[10, 10], [20, 5], [25, 4], [50, 2]]), T = ri(1, 4) * 20, X = pick(pick(CATS).filter(c => !c.includes('.'))).toLocaleLowerCase('tr-TR'), l1 = `${T} ÷ ${k} = ${T / k}`;
+    return S(`Daire grafiğine göre ${T} öğrencinin %${p} kadarı ${X} seçmiş. ${U.cap(X)} seçen kaç öğrenci vardır?`, [`%${p}, bütünün ${fr(1, k)} kadarıdır`, l1, `Sonuç: ${T / k} öğrenci`], `${T / k} öğrenci`,
+      [H('dilim_oran', 0, [`%${p}, ${p} öğrenci demektir`, 'Başka işlem gerekmez', `Sonuç: ${p} öğrenci`], `${p} öğrenci`)], ['daire_toplam', 'grafik_okuma']);
+  };
+  SEN.s_okuryazar = (lv) => {
+    const T = ri(20, 30), a = ri(Math.floor(T / 2) + 1, T - 4), X = pick(pick(CATS).filter(c => !c.includes('.'))).toLocaleLowerCase('tr-TR'), l0 = `Veri yalnız bu sınıftan toplandı: ${T} öğrenci`;
+    return S(`${T} kişilik bir sınıfta ${a} öğrenci ${X} seçti. Bu veriye göre "Okuldaki bütün öğrenciler ${X} sever" denebilir mi?`, [l0, `${X} seçmeyenler de var: ${T} − ${a} = ${T - a} öğrenci`, 'Bir sınıfın verisi bütün okul için kesin yargı vermez'], '"Denemez"',
+      [H('asiri_genelleme', 1, [l0, `En çok seçilen ${X}: çoğunluk ne derse herkes için geçerlidir`, 'Bir sınıfın verisi bütün okul için yeterlidir'], '"Denebilir"')], ['grafik_okuma', 'eksen_yanilsama']);
+  };
+  SEN.e_ozellik = (lv) => {
+    const a = ri(3, 9), b = pick([10, 20, 30]), c = ri(2, 9);
+    return S(`${a} × (${b} + ${c}) işlemini dağılma özelliğiyle yap.`, [`Dağıt: ${a} × ${b} + ${a} × ${c}`, `${a * b} + ${a * c}`, `Sonuç: ${a * b + a * c}`], String(a * b + a * c),
+      [H('dagilma_eksik', 0, [`Dağıt: ${a} × ${b} + ${c}`, `${a * b} + ${c}`, `Sonuç: ${a * b + c}`], String(a * b + c))], ['ozellik_karis', 'oncelik_soldan']);
+  };
+  SEN.e_algoritma = (lv) => {
+    const x = ri(2, 9), m = ri(2, lv === 3 ? 6 : 4), c = ri(2, 9), l0 = `Başla: sayı ${x}`;
+    return S(`Bir algoritmanın adımları: Bir. Sayıyı al. İki. Sayıyı ${m} ile çarp. Üç. Sonuca ${c} ekle. Başlangıç sayısı ${x} ise sonuç kaç olur?`,
+      [l0, `Önce ${m} ile çarp: ${x} × ${m} = ${x * m}`, `Sonra ${c} ekle: ${x * m} + ${c} = ${x * m + c}`], String(x * m + c),
+      [H('algoritma_sira', 1, [l0, `Önce ${c} ekle: ${x} + ${c} = ${x + c}`, `Sonra ${m} ile çarp: ${x + c} × ${m} = ${(x + c) * m}`], String((x + c) * m))], ['karar_dongu', 'dongu_sayma']);
+  };
+  SEN.p_olay = (lv) => {
+    if (Math.random() < 0.5) { const k = ri(3, 9), l0 = `Torbadaki topların hepsi kırmızı: ${k} top`;
+      return S(`Bir torbada yalnız ${k} kırmızı top var. Bu torbadan mavi top çekme olayı nasıl bir olaydır?`, [l0, 'Torbada hiç mavi top yok: mavi top asla çekilemez', 'Bu olay imkânsızdır'], '"İmkânsız"',
+        [H('olay_tur', 1, [l0, 'Mavi top çekmek zordur ama şans yardım ederse olabilir', 'Bu olay mümkündür'], '"Mümkün"')], ['az_cok', 'olasilik_tercih']); }
+    const l0 = 'Sayı küpünün yüzlerindeki sayılar: 1, 2, 3, 4, 5, 6';
+    return S('Bir sayı küpü atılıyor. Üst yüze 7 sayısından küçük bir sayı gelmesi nasıl bir olaydır?', [l0, 'Bu sayıların hepsi 7 sayısından küçük: her atışta olur', 'Bu olay kesindir'], '"Kesin"',
+      [H('olay_tur', 1, [l0, 'Hangi sayının geleceği önceden bilinemez: kesin denemez', 'Bu olay mümkündür'], '"Mümkün"')], ['az_cok', 'olasilik_tercih']);
+  };
+
   const ADIM = (i, s) => `<span class="adno">${i + 1}</span><span class="adtx">${s}</span>`;
   const HATA_YOK = '✅ Hata yok, hepsi doğru';
   const HSORU = (sc) => `<span class="hsoru">${sc.soru}</span><br>`;
@@ -4095,7 +4187,7 @@ body.ogretmen{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui
    ========================================================= */
 (function () {
   const G = window, U = G.MY_U, GEN = G.MY_GEN, MIS = G.MY_MIS, HATA = G.MY_HATA, ATOLYE = G.MY_ATOLYE, CUR = G.MY_CUR;
-  const SURUM = '2026-11-10 72ad19c', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
+  const SURUM = '2026-11-10 a57dc2b', CFG = G.MY_CONFIG || {}, KOD = (new URLSearchParams(location.search).get('kod') || '').trim();
   const KAYIT = 'ogr_inceleme_' + KOD, el = document.getElementById('panel');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
