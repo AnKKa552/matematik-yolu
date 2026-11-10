@@ -42,14 +42,14 @@
       kural: '⊥ : 90° ile kesişir. // : hiç kesişmez. Aynı doğruya dik iki doğru birbirine paraleldir.',
     }),
     S('g_aci', 't1', 'Açılar ve Açı Ölçme', '39–44', {
-      gorsel: { text: 'Açının büyüklüğü kolların ne kadar <b>açıldığına</b> bağlıdır, uzunluğuna değil. 90° (dik açı) referans noktandır.', vis: () => V.angle(45, { label: 'dar' }) + V.angle(90, { label: 'dik' }) + V.angle(135, { label: 'geniş' }) },
+      gorsel: { text: 'Açının büyüklüğü kolların ne kadar <b>açıldığına</b> bağlıdır, uzunluğuna değil. Bir açıyı anlamak için onu dik açıyla (90°) karşılaştır.', vis: () => V.angle(45, { label: 'dar' }) + V.angle(90, { label: 'dik' }) + V.angle(135, { label: 'geniş' }) },
       hikaye: 'Saat tam 3\'te akrep ve yelkovan <b>dik açı</b> yapar (90°). Saat 1\'de aralarındaki açı daha kapalı: <b>dar açı</b>. Saat 5\'te iyice açılır: <b>geniş açı</b>. Saat 6\'da düz bir çizgi: <b>doğru açı</b> (180°)!',
       adim: ['Açıyı bir dik açıyla (defter köşesi) karşılaştır.', 'Daha kapalıysa dar açı (90°\'den küçük).', 'Tam köşe gibiyse dik açı (90°).', 'Daha açıksa geniş açı (90°–180°).', 'Açıölçerle ölçerken köşeyi merkeze, bir kolu 0\'a koy; diğer kolun gösterdiği sayıyı oku.'],
       kural: 'Dar < 90° = Dik < Geniş < 180° = Doğru açı. Tam açı 360°.',
     }),
     S('g_aci_iliski', 't1', 'Tümler, Bütünler, Ters Açılar', '45–56', {
-      gorsel: { text: 'Kesişen iki doğruda karşı karşıya duran açılar (<b>ters açılar</b>) eşittir. Yan yana olan açılar toplamı 180°\'dir.', vis: () => V.crossAngles(60, ['60°', '120°', '60°', '120°']) },
-      hikaye: 'Makas açtığında iki bıçak bir X oluşturur. Üstteki açı ne kadarsa alttaki de o kadardır: <b>ters açılar</b> hep ikizdir! Bir pizza dilimini dik köşeden kesersen iki parçanın açıları toplamı 90° olur: <b>tümler</b>.',
+      gorsel: { text: 'Kesişen iki doğruda karşı karşıya duran açılar (<b>ters açılar</b>) eşittir. Yan yana duran iki açı ise birlikte bir doğru açı oluşturur: toplamları 180°\'dir.', vis: () => V.crossAngles(60, ['60°', '120°', '60°', '120°']) },
+      hikaye: 'Makas açtığında iki bıçak bir X oluşturur. Üstteki açı ne kadarsa alttaki de o kadardır: <b>ters açılar</b> hep ikizdir! Kare bir kekin dik köşesini bıçakla ikiye bölersen iki parçanın açıları toplamı 90° olur: bunlar <b>tümler</b> açılardır. Cetvelin düz kenarı boyunca yan yana duran iki açının toplamı ise 180°: bunlar <b>bütünler</b> açılardır.',
       adim: ['Tümler mi bütünler mi soruluyor? Bak.', 'Tümler: toplam 90° → 90 − verilen.', 'Bütünler: toplam 180° → 180 − verilen.', 'Ters açı: karşıdaki açı → aynı ölçü.'],
       kural: 'Tümler = 90°, Bütünler = 180°, Ters açılar eşittir.',
     }),
@@ -62,20 +62,20 @@
     S('g_ucgen', 't1', 'Üçgenler', '70–85', {
       gorsel: { text: 'Üçgenin üç iç açısını yan yana koyarsan bir <b>doğru açı</b> (180°) oluşur.', vis: () => V.angle(180, { label: '60°+50°+70°' }) },
       hikaye: 'Defne kâğıttan bir üçgen kesti, üç köşesini yırtıp yan yana dizdi. Şaşırdı: köşeler tam bir düz çizgi oluşturdu! Her üçgende iç açılar toplamı <b>180°</b>.',
-      adim: ['İki açı verildiyse topla.', '180\'den çıkar → üçüncü açı.', 'Türünü bulmak için EN BÜYÜK açıya bak.', '90°\'den büyükse geniş, tam 90° ise dik, hepsi küçükse dar açılı.'],
+      adim: ['İki açı verildiyse topla.', '180\'den çıkar → üçüncü açı.', 'Türünü bulmak için EN BÜYÜK açıya bak.', 'En büyük açı 90°\'den büyükse geniş açılı, tam 90° ise dik açılı, üç açı da 90°\'den küçükse dar açılı üçgen.'],
       kural: 'İç açılar toplamı 180°. Eşkenar üçgende her açı 60°. İkizkenarda taban açıları eşit.',
     }),
     /* ---------------- TEMA 2 ---------------- */
     S('n_okuma', 't2', 'Büyük Sayıları Okuma-Yazma', '97–103', {
-      gorsel: { text: 'Sayıyı sağdan <b>üçerli bölüklere</b> ayır: <b>milyar | milyon | bin | birler</b>. Her bölüğü oku, adını ekle.', vis: () => '<div class="blk"><span>12</span><span>045</span><span>799</span><span>150</span></div><div class="blk lbl"><span>milyar</span><span>milyon</span><span>bin</span><span>birler</span></div>' },
+      gorsel: { text: 'Sayıyı sağdan <b>üçerli bölüklere</b> ayır: <b>milyarlar | milyonlar | binler | birler</b>. Her bölüğü oku, bölüğün adını ekle.', vis: () => '<div class="blk"><span>12</span><span>045</span><span>799</span><span>150</span></div><div class="blk lbl"><span>milyar</span><span>milyon</span><span>bin</span><span>birler</span></div>' },
       hikaye: 'Emre, Neptün\'ün Güneş\'e uzaklığını okumak istedi ama sayı çok uzundu! Sağdan üçer üçer ayırdı, her gruba bir isim verdi: birler, binler, milyonlar... Birden sayı kolayca okunur hâle geldi.',
-      adim: ['Sayıyı sağdan üçerli ayır.', 'Bölük adlarını yaz: birler, bin, milyon, milyar.', 'Soldan başlayarak her bölüğü oku ve adını söyle.', '000 olan bölüğün adı okunmaz.', 'Yazarken okunmayan basamaklara 0 koy.'],
+      adim: ['Sayıyı sağdan üçerli ayır.', 'Bölüklerin adlarını sağdan sola yaz: birler, binler, milyonlar, milyarlar.', 'Soldan başlayarak her bölüğü oku ve adını söyle.', '000 olan bölüğün adı okunmaz.', 'Yazarken okunmayan basamaklara 0 koy.'],
       kural: 'Her bölük 3 basamak. "Bin" önünde "bir" söylenmez; "bir milyon" söylenir.',
     }),
     S('n_basamak', 't2', 'Basamak Değeri ve Çözümleme', '103–106', {
       gorsel: { text: 'Rakamın değeri <b>bulunduğu yere</b> göre değişir: 5, yüzler basamağında 500, binler basamağında 5 000 değerindedir.', vis: () => '<div class="blk"><span>5</span><span>0</span><span>0</span></div><div class="blk lbl"><span>yüzler</span><span>onlar</span><span>birler</span></div>' },
       hikaye: 'Bir sinemada aynı koltuk numarası farklı sıralarda farklı yerdir. Rakamlar da öyle: aynı 7, birler sırasında 7, on binler sırasında 70 000 eder!',
-      adim: ['Rakamın hangi basamakta olduğunu sağdan sayarak bul.', 'O basamağın değerini yaz (1, 10, 100, 1 000...).', 'Rakam × basamak değeri = basamak değeri.', 'Çözümleme: sayıyı basamak değerlerinin toplamı olarak yaz.'],
+      adim: ['Rakamın hangi basamakta olduğunu sağdan sayarak bul.', 'O basamağın değerini yaz (1, 10, 100, 1 000...).', 'Rakamı bu değerle çarp: rakamın basamak değerini bulursun.', 'Çözümleme: sayıyı basamak değerlerinin toplamı olarak yaz.'],
       kural: 'Basamak değeri = rakam × basamağın değeri. 4 725 = 4 000 + 700 + 20 + 5.',
     }),
     S('n_karsilastir', 't2', 'Sayıları Karşılaştırma', '107', {
@@ -92,7 +92,7 @@
     }),
     S('n_carpbol', 't2', 'Çarpma ve Bölme', '123–131', {
       gorsel: { text: 'Sıfırları ayır, kalanları çarp, sıfırları geri ekle: 32 × 300 → 32 × 3 = 96 → <b>9 600</b>.', vis: () => '<div class="blk"><span>32</span><span>×</span><span>3<u>00</u></span><span>=</span><span>96<u>00</u></span></div>' },
-      hikaye: 'Tahir hesap makinesiz bir hile keşfetti: 6 000 ÷ 20 için iki sayıdan da birer sıfır sildi, 600 ÷ 2 = 300 buldu. Sıfırlar hem bölünende hem bölende olduğu için silmek sonucu değiştirmedi!',
+      hikaye: 'Tahir hesap makinesi kullanmadan kısa bir yol buldu: 6 000 ÷ 20 için iki sayıdan da birer sıfır sildi, 600 ÷ 2 = 300 buldu. Sıfırlar hem bölünende hem bölende olduğu için silmek sonucu değiştirmedi!',
       adim: ['Sondaki sıfırları say.', 'Çarpmada: sıfırsız kısımları çarp, tüm sıfırları sona ekle.', 'Bölmede: ortak sıfırları sil, sonra böl.', 'İki basamaklı çarpmada ikinci satırı bir basamak sola kaydır.'],
       kural: 'Çarpmada sıfırlar toplanır, bölmede ortak sıfırlar sadeleşir.',
     }),
@@ -104,22 +104,22 @@
     }),
     S('n_tahmin', 't2', 'Yuvarlama ve Tahmin', '121', {
       gorsel: { text: 'Sayı doğrusunda hangi onluğa daha <b>yakın</b>sa oraya yuvarla. Tam ortadaysa (5) yukarı.', vis: () => V.numberLine(40, 50, [{ v: 40, t: '40' }, { v: 45, t: '45' }, { v: 50, t: '50' }], 47) },
-      hikaye: 'Mert markette 47 TL\'lik ürün aldı. "Yaklaşık 50 TL" dedi çünkü 47, 40\'tan çok 50\'ye yakın. Hızlı tahmin, cebindeki paranın yetip yetmeyeceğini hemen gösterdi!',
+      hikaye: 'Mert markette 47 TL\'lik ürün aldı. "Yaklaşık 50 TL" dedi çünkü 47, 50\'ye 40\'tan daha yakın. Hızlı tahmin, cebindeki paranın yetip yetmeyeceğini hemen gösterdi!',
       adim: ['Hangi basamağa yuvarlanacağını bul.', 'Onun sağındaki rakama bak.', '5 veya büyükse bir artır, küçükse aynı bırak.', 'Sağdaki tüm rakamları 0 yap.'],
-      kural: 'Sağdaki rakam ≥ 5 → yukarı; < 5 → aşağı.',
+      kural: 'Sağdaki rakam 5 ya da daha büyükse yukarı, 5\'ten küçükse aşağı yuvarla.',
     }),
     /* ---------------- TEMA 3 ---------------- */
     S('a_cevre', 't3', 'Dikdörtgenin Çevresi', '142–144', {
       gorsel: { text: 'Çevre, şeklin etrafında bir tam tur atınca yürüdüğün yoldur: <b>4 kenarın toplamı</b>.', vis: () => V.rect(8, 4, 'cm') },
       hikaye: 'Nehir, bahçesinin etrafına çit çekecek. Bahçe 8 m\'ye 4 m. Etrafında yürüyerek saydı: 8 + 4 + 8 + 4 = 24 m çit gerekiyor!',
       adim: ['Uzun ve kısa kenarı bul.', 'Topla: uzun + kısa.', '2 ile çarp (her kenardan iki tane var).', 'Birimi yaz: cm, m.'],
-      kural: 'Ç = 2 × (a + b). Karede Ç = 4 × a.',
+      kural: 'Dikdörtgenin çevresi = 2 × (uzun kenar + kısa kenar). Karenin çevresi = 4 × bir kenar.',
     }),
     S('a_alan', 't3', 'Dikdörtgenin Alanı', '145–149', {
       gorsel: { text: 'Alan, şeklin içini dolduran <b>birim karelerin</b> sayısıdır: sıra sayısı × bir sıradaki kare.', vis: () => V.rect(6, 3, '', true) },
       hikaye: 'Odanın zeminini kare parkelerle döşeyen usta, bir sıraya 6 parke dizdi, toplam 3 sıra yaptı. "6 × 3 = 18 parke" dedi. İşte alan buydu!',
-      adim: ['Uzun kenarı bul.', 'Kısa kenarı bul.', 'Çarp: a × b.', 'Birimi kare olarak yaz: cm², m².'],
-      kural: 'A = a × b. Birim: cm², m² (kare birim).',
+      adim: ['Uzun kenarı bul.', 'Kısa kenarı bul.', 'Uzun kenarla kısa kenarı çarp.', 'Birimi kare olarak yaz: cm², m².'],
+      kural: 'Dikdörtgenin alanı = uzun kenar × kısa kenar. Birim: cm², m² (kare birim).',
     }),
     S('a_cevre_alan', 't3', 'Çevre mi Alan mı?', '150–163', {
       gorsel: { text: 'Aynı çevreyle farklı alanlar olabilir! Kenarlar birbirine yaklaştıkça alan büyür.', vis: () => V.rect(5, 1, 'cm') + V.rect(3, 3, 'cm') },
@@ -138,7 +138,7 @@
       gorsel: { text: 'Aynı miktarı farklı parçalarla gösterebilirsin: 1/2 ile 2/4 aynı uzunluktadır.', vis: () => V.bar(1, 2) + V.bar(2, 4) + V.bar(4, 8) },
       hikaye: 'Ada çikolatayı 2 parçaya bölüp 1 parçasını yedi. Emir aynı çikolatayı 4 parçaya bölüp 2 parçasını yedi. Kim daha çok yedi? İkisi de aynı! 1/2 = 2/4.',
       adim: ['Pay ve paydayı AYNI sayıyla çarp → genişletme.', 'Pay ve paydayı AYNI sayıya böl → sadeleştirme.', 'Asla pay ve paydaya sayı EKLEME.'],
-      kural: `${fr('a', 'b')} = ${fr('a × k', 'b × k')} (k ≠ 0)`,
+      kural: `${fr(2, 3)} = ${fr(4, 6)} = ${fr(6, 9)}: pay ve paydayı aynı sayıyla çarp ya da aynı sayıya böl.`,
     }),
     S('f_ondalik', 't4', 'Ondalık Gösterim', '20–27', {
       gorsel: { text: 'Paydası 10 → virgülden sonra <b>1</b> basamak (onda). Paydası 100 → <b>2</b> basamak (yüzde).', vis: () => V.grid100(25) },
@@ -200,13 +200,13 @@
       gorsel: { text: '6 × 12 = 6 × 10 + 6 × 2: dikdörtgeni ikiye böl, alanları topla. Bu <b>dağılma</b>dır!', vis: () => V.rect(12, 6, '', true) },
       hikaye: 'Sevil Öğretmen tahtaya 49 × 12 yazdı. Bir öğrenci 49 × 10 = 490 ve 49 × 2 = 98 bulup topladı: 588! Dağılma özelliği zor bir çarpmayı iki kolay çarpmaya çevirdi.',
       adim: ['Yerleri değişmiş mi? → değişme.', 'Parantezler kaymış mı? → birleşme.', 'Çarpan parantezin içine dağılmış mı? → dağılma.', 'Çıkarma ve bölmede değişme özelliği YOKTUR.'],
-      kural: 'a×b = b×a • (a+b)+c = a+(b+c) • a×(b+c) = a×b + a×c',
+      kural: 'Değişme: 5 × 3 = 3 × 5 • Birleşme: (2 + 3) + 4 = 2 + (3 + 4) • Dağılma: 6 × (10 + 2) = 6 × 10 + 6 × 2',
     }),
     S('e_us', 't6', 'Kare ve Küp', '131–132', {
       gorsel: { text: '4² = 4 × 4: 4 sıra 4 kare. 3³ = 3 × 3 × 3: küp şeklinde 27 top.', vis: () => V.rect(4, 4, '', true) },
       hikaye: 'Sezen not kâğıtlarını panoya 5 sıra 5 sütun yapıştırdı: 5 × 5 = 25 kâğıt. Buna "5\'in karesi" denir ve 5² yazılır. Umay topları 3 × 3 × 3 dizip küp yaptı: 27 top, "3\'ün küpü"!',
       adim: ['Kare: sayıyı kendisiyle 1 kez çarp.', 'Küp: sayıyı kendisiyle 3 kez yan yana yazıp çarp.', 'Asla üs ile çarpma! (5² ≠ 10)'],
-      kural: 'a² = a × a • a³ = a × a × a',
+      kural: '4² = 4 × 4 = 16 • 2³ = 2 × 2 × 2 = 8',
     }),
     S('e_oncelik', 't6', 'İşlem Önceliği', '133–136', {
       gorsel: { text: 'Sıra: <b>Parantez → Üs → Çarpma/Bölme → Toplama/Çıkarma</b>', vis: () => '<div class="steps4"><span>( )</span><span>x²</span><span>× ÷</span><span>+ −</span></div>' },
@@ -229,7 +229,7 @@
     /* ---------------- TEMA 7 ---------------- */
     S('p_olay', 't7', 'Olaylar: Kesin, İmkânsız, Mümkün', '167–169', {
       gorsel: { text: 'Olasılık 0 ile 1 arasındadır: 0 = <b>imkânsız</b>, 1 = <b>kesin</b>, arası = <b>mümkün</b>.', vis: () => V.numberLine(0, 1, [{ v: 0, t: 'İmkânsız' }, { v: 0.5, t: 'Eşit' }, { v: 1, t: 'Kesin' }]) },
-      hikaye: 'Piknik günü yağmur yağar mı? Belki: <b>mümkün</b>. Zarla 7 atabilir miyiz? Asla: <b>imkânsız</b>. Yarın güneş doğacak mı? Kesinlikle: <b>kesin</b>!',
+      hikaye: 'Piknik günü yağmur yağar mı? Belki: <b>mümkün</b>. Sayı küpüyle 7 atabilir miyiz? Asla: <b>imkânsız</b>. Yarın güneş doğacak mı? Kesinlikle: <b>kesin</b>!',
       adim: ['Olay mutlaka oluyor mu? → kesin (1).', 'Asla olamıyor mu? → imkânsız (0).', 'Olabilir de olmayabilir de mi? → mümkün.'],
       kural: 'İmkânsız = 0 • Kesin = 1 • Mümkün: 0 ile 1 arası.',
     }),

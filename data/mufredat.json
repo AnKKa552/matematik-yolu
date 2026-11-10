@@ -158,7 +158,7 @@
           "İki ok varsa → doğru: AB doğrusu",
           "Doğru parçasının uzunluğu |AB| ile gösterilir."
         ],
-        "kural": "[AB] doğru parçası (2 uç) • [AB ışın (1 uç) • AB doğrusu (uç yok) • |AB| uzunluk."
+        "kural": "Doğru parçasının 2 ucu var, uzunluğu ölçülür. • Işının 1 ucu var, tek yöne sonsuz gider. • Doğrunun hiç ucu yok, iki yöne sonsuz gider."
       }
     },
     {
@@ -239,7 +239,7 @@
         "aci_olcu"
       ],
       "anlatim": {
-        "gorsel": "Açının büyüklüğü kolların ne kadar açıldığına bağlıdır, uzunluğuna değil. 90° (dik açı) referans noktandır.",
+        "gorsel": "Açının büyüklüğü kolların ne kadar açıldığına bağlıdır, uzunluğuna değil. Bir açıyı anlamak için onu dik açıyla (90°) karşılaştır.",
         "hikaye": "Saat tam 3'te akrep ve yelkovan dik açı yapar (90°). Saat 1'de aralarındaki açı daha kapalı: dar açı . Saat 5'te iyice açılır: geniş açı . Saat 6'da düz bir çizgi: doğru açı (180°)!",
         "adim": [
           "Açıyı bir dik açıyla (defter köşesi) karşılaştır.",
@@ -269,8 +269,8 @@
         "ters_aci"
       ],
       "anlatim": {
-        "gorsel": "Kesişen iki doğruda karşı karşıya duran açılar ( ters açılar ) eşittir. Yan yana olan açılar toplamı 180°'dir.",
-        "hikaye": "Makas açtığında iki bıçak bir X oluşturur. Üstteki açı ne kadarsa alttaki de o kadardır: ters açılar hep ikizdir! Bir pizza dilimini dik köşeden kesersen iki parçanın açıları toplamı 90° olur: tümler .",
+        "gorsel": "Kesişen iki doğruda karşı karşıya duran açılar ( ters açılar ) eşittir. Yan yana duran iki açı ise birlikte bir doğru açı oluşturur: toplamları 180°'dir.",
+        "hikaye": "Makas açtığında iki bıçak bir X oluşturur. Üstteki açı ne kadarsa alttaki de o kadardır: ters açılar hep ikizdir! Kare bir kekin dik köşesini bıçakla ikiye bölersen iki parçanın açıları toplamı 90° olur: bunlar tümler açılardır. Cetvelin düz kenarı boyunca yan yana duran iki açının toplamı ise 180°: bunlar bütünler açılardır.",
         "adim": [
           "Tümler mi bütünler mi soruluyor? Bak.",
           "Tümler: toplam 90° → 90 − verilen.",
@@ -334,7 +334,7 @@
           "İki açı verildiyse topla.",
           "180'den çıkar → üçüncü açı.",
           "Türünü bulmak için EN BÜYÜK açıya bak.",
-          "90°'den büyükse geniş, tam 90° ise dik, hepsi küçükse dar açılı."
+          "En büyük açı 90°'den büyükse geniş açılı, tam 90° ise dik açılı, üç açı da 90°'den küçükse dar açılı üçgen."
         ],
         "kural": "İç açılar toplamı 180°. Eşkenar üçgende her açı 60°. İkizkenarda taban açıları eşit."
       }
@@ -356,11 +356,11 @@
         "sifir_atlama"
       ],
       "anlatim": {
-        "gorsel": "Sayıyı sağdan üçerli bölüklere ayır: milyar | milyon | bin | birler . Her bölüğü oku, adını ekle.",
+        "gorsel": "Sayıyı sağdan üçerli bölüklere ayır: milyarlar | milyonlar | binler | birler . Her bölüğü oku, bölüğün adını ekle.",
         "hikaye": "Emre, Neptün'ün Güneş'e uzaklığını okumak istedi ama sayı çok uzundu! Sağdan üçer üçer ayırdı, her gruba bir isim verdi: birler, binler, milyonlar... Birden sayı kolayca okunur hâle geldi.",
         "adim": [
           "Sayıyı sağdan üçerli ayır.",
-          "Bölük adlarını yaz: birler, bin, milyon, milyar.",
+          "Bölüklerin adlarını sağdan sola yaz: birler, binler, milyonlar, milyarlar.",
           "Soldan başlayarak her bölüğü oku ve adını söyle.",
           "000 olan bölüğün adı okunmaz.",
           "Yazarken okunmayan basamaklara 0 koy."
@@ -392,7 +392,7 @@
         "adim": [
           "Rakamın hangi basamakta olduğunu sağdan sayarak bul.",
           "O basamağın değerini yaz (1, 10, 100, 1 000...).",
-          "Rakam × basamak değeri = basamak değeri.",
+          "Rakamı bu değerle çarp: rakamın basamak değerini bulursun.",
           "Çözümleme: sayıyı basamak değerlerinin toplamı olarak yaz."
         ],
         "kural": "Basamak değeri = rakam × basamağın değeri. 4 725 = 4 000 + 700 + 20 + 5."
@@ -476,7 +476,7 @@
       ],
       "anlatim": {
         "gorsel": "Sıfırları ayır, kalanları çarp, sıfırları geri ekle: 32 × 300 → 32 × 3 = 96 → 9 600 .",
-        "hikaye": "Tahir hesap makinesiz bir hile keşfetti: 6 000 ÷ 20 için iki sayıdan da birer sıfır sildi, 600 ÷ 2 = 300 buldu. Sıfırlar hem bölünende hem bölende olduğu için silmek sonucu değiştirmedi!",
+        "hikaye": "Tahir hesap makinesi kullanmadan kısa bir yol buldu: 6 000 ÷ 20 için iki sayıdan da birer sıfır sildi, 600 ÷ 2 = 300 buldu. Sıfırlar hem bölünende hem bölende olduğu için silmek sonucu değiştirmedi!",
         "adim": [
           "Sondaki sıfırları say.",
           "Çarpmada: sıfırsız kısımları çarp, tüm sıfırları sona ekle.",
@@ -535,14 +535,14 @@
       ],
       "anlatim": {
         "gorsel": "Sayı doğrusunda hangi onluğa daha yakın sa oraya yuvarla. Tam ortadaysa (5) yukarı.",
-        "hikaye": "Mert markette 47 TL'lik ürün aldı. \"Yaklaşık 50 TL\" dedi çünkü 47, 40'tan çok 50'ye yakın. Hızlı tahmin, cebindeki paranın yetip yetmeyeceğini hemen gösterdi!",
+        "hikaye": "Mert markette 47 TL'lik ürün aldı. \"Yaklaşık 50 TL\" dedi çünkü 47, 50'ye 40'tan daha yakın. Hızlı tahmin, cebindeki paranın yetip yetmeyeceğini hemen gösterdi!",
         "adim": [
           "Hangi basamağa yuvarlanacağını bul.",
           "Onun sağındaki rakama bak.",
           "5 veya büyükse bir artır, küçükse aynı bırak.",
           "Sağdaki tüm rakamları 0 yap."
         ],
-        "kural": "Sağdaki rakam ≥ 5 → yukarı; < 5 → aşağı."
+        "kural": "Sağdaki rakam 5 ya da daha büyükse yukarı, 5'ten küçükse aşağı yuvarla."
       }
     },
     {
@@ -570,7 +570,7 @@
           "2 ile çarp (her kenardan iki tane var).",
           "Birimi yaz: cm, m."
         ],
-        "kural": "Ç = 2 × (a + b). Karede Ç = 4 × a."
+        "kural": "Dikdörtgenin çevresi = 2 × (uzun kenar + kısa kenar). Karenin çevresi = 4 × bir kenar."
       }
     },
     {
@@ -596,10 +596,10 @@
         "adim": [
           "Uzun kenarı bul.",
           "Kısa kenarı bul.",
-          "Çarp: a × b.",
+          "Uzun kenarla kısa kenarı çarp.",
           "Birimi kare olarak yaz: cm², m²."
         ],
-        "kural": "A = a × b. Birim: cm², m² (kare birim)."
+        "kural": "Dikdörtgenin alanı = uzun kenar × kısa kenar. Birim: cm², m² (kare birim)."
       }
     },
     {
@@ -686,7 +686,7 @@
           "Pay ve paydayı AYNI sayıya böl → sadeleştirme.",
           "Asla pay ve paydaya sayı EKLEME."
         ],
-        "kural": "a b = a × k b × k (k ≠ 0)"
+        "kural": "2 3 = 4 6 = 6 9 : pay ve paydayı aynı sayıyla çarp ya da aynı sayıya böl."
       }
     },
     {
@@ -977,7 +977,7 @@
           "Çarpan parantezin içine dağılmış mı? → dağılma.",
           "Çıkarma ve bölmede değişme özelliği YOKTUR."
         ],
-        "kural": "a×b = b×a • (a+b)+c = a+(b+c) • a×(b+c) = a×b + a×c"
+        "kural": "Değişme: 5 × 3 = 3 × 5 • Birleşme: (2 + 3) + 4 = 2 + (3 + 4) • Dağılma: 6 × (10 + 2) = 6 × 10 + 6 × 2"
       }
     },
     {
@@ -1004,7 +1004,7 @@
           "Küp: sayıyı kendisiyle 3 kez yan yana yazıp çarp.",
           "Asla üs ile çarpma! (5² ≠ 10)"
         ],
-        "kural": "a² = a × a • a³ = a × a × a"
+        "kural": "4² = 4 × 4 = 16 • 2³ = 2 × 2 × 2 = 8"
       }
     },
     {
@@ -1112,7 +1112,7 @@
       ],
       "anlatim": {
         "gorsel": "Olasılık 0 ile 1 arasındadır: 0 = imkânsız , 1 = kesin , arası = mümkün .",
-        "hikaye": "Piknik günü yağmur yağar mı? Belki: mümkün . Zarla 7 atabilir miyiz? Asla: imkânsız . Yarın güneş doğacak mı? Kesinlikle: kesin !",
+        "hikaye": "Piknik günü yağmur yağar mı? Belki: mümkün . Sayı küpüyle 7 atabilir miyiz? Asla: imkânsız . Yarın güneş doğacak mı? Kesinlikle: kesin !",
         "adim": [
           "Olay mutlaka oluyor mu? → kesin (1).",
           "Asla olamıyor mu? → imkânsız (0).",
@@ -1141,7 +1141,7 @@
         "olasilik_buyuk"
       ],
       "anlatim": {
-        "gorsel": "Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa az olası, yarısıysa eşit olası, fazlaysa çok olası.",
+        "gorsel": "Mavi dilimler bütün dilimlerin kaçta kaçı? Bu kesir olasılığı gösterir. Yarıdan azsa az olası , yarısıysa eşit olası , fazlaysa çok olası .",
         "hikaye": "Doğum günü çarkında 4 dilimin 3'ü mavi. Duru \"Mavi gelme ihtimali yüksek!\" dedi. Haklıydı: 3/4, yarıdan fazla, yani çok olası .",
         "adim": [
           "Kaç dilim mavi, say (parça).",

@@ -414,7 +414,7 @@
     sv.querySelectorAll('text').forEach((el, k) => el.style.setProperty('--g', (0.5 + 0.1 * k).toFixed(2) + 's')); sv.classList.add('ciz');
   });
   // Metni değişen anlatım kartının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, p_spektrum_gorsel: 2, e_oncelik_hikaye: 2, g_aci_adim: 2, f_tur_adim: 2 };
+  const KART_SES_SURUM = { g_cokgen_hikaye: 2, g_cokgen_adim: 2, g_cokgen_kural: 2, p_spektrum_adim: 2, p_spektrum_gorsel: 2, e_oncelik_hikaye: 2, g_aci_adim: 2, f_tur_adim: 2, g_aci_gorsel: 2, g_aci_iliski_gorsel: 2, g_aci_iliski_hikaye: 2, g_ucgen_adim: 2, n_okuma_gorsel: 2, n_okuma_adim: 2, n_basamak_adim: 2, n_carpbol_hikaye: 2, n_tahmin_hikaye: 2, n_tahmin_kural: 2, a_cevre_kural: 2, a_alan_adim: 2, a_alan_kural: 2, f_denk_kural: 2, e_ozellik_kural: 2, e_us_kural: 2, p_olay_hikaye: 2 };  // 10.11.2026: 17 kartın dili düzeltildi
   const kartSes = (id, f) => `kart_${id}_${f}${KART_SES_SURUM[id + '_' + f] ? '_' + KART_SES_SURUM[id + '_' + f] : ''}`;
   const sayCard = (id, f) => {
     const kart = document.querySelector('.modal .lcard') || document.querySelector('.lcard');
