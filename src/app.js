@@ -1639,7 +1639,7 @@
   const hataNotu = (q) => q.hata ? `<div class="duz">✏️ ${q.steps.filter(x => !/^Doğru sonuç/.test(x)).join('<br>')}</div>` : '';
   // İkinci şans ipucu: önce şıkka/sayıya özel ipucu, sonra sorunun kendi ipucu (atölye adımları), sonra gözlenen yanılgının kuralı. Cevabı asla söylemez.
   // Metni değişen yanılgı açıklamalarının sesi yeni sürüm adıyla üretilir (telefonda saklanan eski ses çalınmasın)
-  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2, cap_yaricap: 2 };
+  const MIS_SES_SURUM = { oruntu_baslangic: 2, oruntu_bir: 2, olasilik_oran: 2, olasilik_buyuk: 2, iletki_ters: 2, adim_sira: 2, cap_yaricap: 2, kesir_tur: 2 };
   const misSes = (id) => `mis_${id}${MIS_SES_SURUM[id] ? '_' + MIS_SES_SURUM[id] : ''}`;
   // 💡 Ampul ipucu (21.10.2026): sorunun kendi ipucu yoksa çözümün 1. adımı GÖSTERİLMEZ (çoğu zaman cevabı söylüyordu,
   // ör. "Pergelin açıklığı yarıçapa eşittir" → cevap). Onun yerine konunun kısa kuralı; kural cevabı içeriyorsa genel yönlendirme.

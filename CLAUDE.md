@@ -18,7 +18,7 @@ Temel felsefe: *Her öğrenci başka bir çiçektir.* Sistem öğrenciyi etiketl
 
 1. **Tek bilgi kaynağı müfredattır.** Konu, beceri ve sıra yalnızca `data/mufredat.json` dosyasından gelir (MEB 5. Sınıf Matematik 1. ve 2. kitap, 7 tema, 35 beceri). Müfredat dışı konu ekleme.
 2. **Hiçbir sorunun cevabı tahminle üretilmez.** Her soru parametrik bir üreticiden (`src/generators.js`) çıkar ve cevabı **kodla hesaplanır**. LLM yalnızca dil, hikâye ve açıklama metni yazabilir. LLM'in yazdığı her sayısal ifade, yayına girmeden önce kodla yeniden hesaplanıp karşılaştırılır.
-3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 113 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
+3. **Her yanlış şık bir kavram yanılgısına bağlıdır.** Rastgele çeldirici yoktur. Çeldirici, belgelenmiş bir öğrenci hatasından türetilir (`MIS` kataloğu, 116 yanılgı). Bu sayede sistem öğrencinin *neyi neden* yanlış yaptığını bilir.
 4. **Kitap = referans kalıp, asla kopya.** Ders kitabındaki her soru tipi bir "kalıp" olarak incelenir; uygulamada o kalıptan **yeni sayılar, yeni bağlam ve yeni metinle** sınırsız varyasyon üretilir. Her varyasyon `q.ref` alanında esinlendiği kitap sayfasını taşır (öğretmen izi; öğrenciye "📗 Kitabındaki soruya benzer · 1. kitap s. 109" olarak görünür). Bkz. §5.2.
 5. **Telif:** MEB kitabının 2. sayfasında şu yazar: *"Her hakkı saklıdır ve Millî Eğitim Bakanlığına aittir. Kitabın metin, soru ve şekilleri kısmen de olsa hiçbir surette alınıp yayımlanamaz."* Bu nedenle ticari üründe:
    - ✅ Kazanımlar, konu adları, kavram listesi, tema sırası ve konuların **bizim kelimelerimizle yeniden anlatımı** serbesttir; fikirler ve müfredat telif konusu değildir. Öğrenci arayüzünde sayfa numarası gösterilmez (müfredat zaten belli); sayfa bilgisi yalnızca iç veride tutulur.
@@ -426,6 +426,16 @@ Maarif'in **problem çözme** becerisi ve okulda artan "yeni nesil" sorular içi
 - **Tema 7:** olasılığı kesin (%100, 1) ve imkânsız (%0, 0) olan olaylar (dil düzeltmesi §5.5'te).
 - 12 yeni yanılgı (katalog 105): `aci_isim`, `paralel_kesen`, `dis_aci`, `cokgen_isim`, `ucgen_aci_siniri`, `cember_insa`, `ondalik_parca`, `daire_toplam`, `grafik_secim`, `ayni_oncelik`, `oruntu_kural`, `oruntu_sabit`. Metni değişen sesler sürüm adıyla üretildi: `mis_iletki_ters_2`, `mis_adim_sira_2`, `kart_g_aci_adim_2`, `kart_f_tur_adim_2`.
 
+### 5.7 Derin denetim: adımlar, ipuçları, yanılgı etiketleri (10.11.2026)
+Her becerinin her soru kalıbından örnek dökülüp (soru, şıklar + yanılgı etiketi, ipucu, adımlar) dört hata sınıfı arandı. Yöntem ileride de kullanılmalı.
+- **Sınıf D, adım cevapla çelişiyor (en ağır):** `p_spektrum` seviye 1'de çarkın bütün dilimleri maviyken (cevap «Kesin») adım «Yarısından fazla → çok olası», hiç mavi yokken (cevap «İmkânsız») «Yarısından az → az olası» diyordu. Düzeltildi. **Kural:** adımların son satırı doğru cevabı söylemeli; uç durumlar (0, hepsi) ayrı yazılmalı.
+- **Sınıf A, «Nasıl çözülür?» soruya özel değil:** birçok soru listesinde (`[soru, doğru, yanlışlar]`) bütün sorulara aynı 2–3 genel cümle çıkıyordu. Artık her sorunun kendi adımları var (listede 4. öge `it[3]`): `g_temel` L2 (gösterimler sorudaki harflerle), `g_cember` L2, `g_dikme_paralel` L3, `e_algoritma`, `s_arastirma` L3, `e_ozellik` «eşitlik doğru mu» (iki taraf hesaplanıp gösterilir), `g_ucgen` (kenarlar sayılarıyla; «iki dik açı olabilir mi» gerekçesiyle), `n_okuma` okunuş (bölükler bu sayı için), `n_carpbol` (sıfırlar sayılır, bölmede sadeleşmiş bölme gösterilir), `e_oruntu` kural («+ 0» yazılmaz), `s_daire` (pay 1 iken «× 1» yok), `s_okuryazar` (adım hep «Muz» diyordu, spor/renk bağlamında da). **Yeni soru eklerken genel kural cümlesi değil, o sorunun çözümü yazılır.**
+- **Sınıf B, ipucu ölçülen bilgiyi veriyor ya da yanlış:** `g_temel` gösterim ipucu («köşeli parantez başlangıç noktasıdır» yanlıştı), `g_aci_iliski` paralel + kesen («dar açılar eşittir» cevabı söylüyordu), `e_us` okunuş, `f_ondalik` tam/ondalık kısım yeniden yazıldı.
+- **Sınıf C, yanılgı etiketi hatayı anlatmıyor:** `n_tahmin` «doğrunun bir fazlası» şıkkı «kesip atma» etiketliydi → yeni **`yuvarlama_yukari`** (hep yukarı yuvarlama), yalnız aşağı yuvarlanan sayıda şık olur; tahmin sorusunda sayılardan biri yukarı biri aşağı yuvarlanır (iki yanılgı da yanlış tahmin verir). «Kaç farklı dikdörtgen» (çevre/alan) → yeni **`cift_sayma`**. «En sade hâli»nde yalnız payı/paydayı bölmek → yeni **`sade_tek`**. `f_tur` boyalı kısım: boş kısım `bos_kisim`, ters `pay_payda_ters`, boyalı/boş `kesir_model` (hepsi `kesir_tur` idi); `f_tur` eşleştirme `kesir_model`. `f_karsilastir` eşit paydada `esit_payda` (yanlışlıkla `pay_payda_ayri` kalmıştı), farklı paydada «paydası büyük olan büyük» sembolü `payda_buyuk`. `n_okuma` eksik bölük sorusunda komşu bölüğü yazmak `boluk_kayma` (hiç eşleme yoktu). `kesir_tur` açıklamasından kitapta olmayan «basit kesir» çıktı (ses `mis_kesir_tur_2`).
+- **Görülmeyen şemaya gönderme:** `e_algoritma` ayran soruları kitaptaki akış şemasına gönderme yapıyordu, çocuk şemayı görmüyordu; algoritmanın adımları artık soruda yazıyor.
+- `data/mufredat.json` yanılgı listesi eskimişti (yeni yanılgılar yoktu); `MIS`'ten yeniden yazıldı (116, `genel` dahil). Yanılgı eklenince json da güncellenmeli (yönetim sayfası adları buradan alır).
+- Bilerek bırakılanlar: `dik_yatay` etiketi «kaç dikme çizilir» yanlışlarında kova gibi kullanılıyor; fiyat karşılaştırmada fiyatlar farklıyken «fiyat aynı» şıkkı yapısal olarak duruyor (şık sayısından cevap anlaşılmasın).
+
 ### 5.2 Kitap kalıbı → varyasyon tablosu (uygulananlar)
 | Kitap kalıbı (sayfa) | Bizim varyasyonumuz | Beceri |
 |---|---|---|
@@ -531,9 +541,9 @@ Yeni kalıp eklerken: kitaptaki sorunun **matematiksel yapısını** çıkar (ne
 ```
 CLAUDE.md                 ← bu belge
 README.md                 ← telefonda çalıştırma / yayınlama
-data/mufredat.json        ← 7 tema, 35 beceri, 113 yanılgı, 140 anlatım (makine okur)
+data/mufredat.json        ← 7 tema, 35 beceri, 116 yanılgı, 140 anlatım (makine okur)
 src/core.js               ← yardımcılar, Türkçe sayı okunuşu, ek uyumu, SVG görseller
-src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (113) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
+src/generators.js         ← 35 parametrik soru üreticisi + yanılgı kataloğu (116) + Hata Avcısı senaryoları (SEN) + Problem Atölyesi şablonları (PROB)
 src/curriculum.js         ← tema/beceri haritası + 4 biçimli anlatım kartları
 src/engine.js             ← BKT, tekrar, bandit, oturum, rozet, veli raporu, lig
 src/app.js                ← arayüz, maskot, ses, akışlar

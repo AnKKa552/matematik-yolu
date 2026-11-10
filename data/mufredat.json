@@ -1162,6 +1162,26 @@
       "ad": "Doğru parçası ile doğruyu karıştırma",
       "duzeltme": "Doğru parçasının iki uç noktası vardır, bu yüzden uzunluğu ölçülebilir. Doğrunun ucu yoktur."
     },
+    "isin_dp": {
+      "ad": "Işın ile doğru parçasını karıştırma",
+      "duzeltme": "Doğru parçasının iki uç noktası vardır, iki ucunda da durur. Işının ise yalnız bir başlangıç noktası vardır ve öbür yönde sonsuza gider."
+    },
+    "dp_uzunluk": {
+      "ad": "Doğru parçası ile uzunluğunu karıştırma",
+      "duzeltme": "Köşeli parantezle yazılan gösterim doğru parçasının kendisidir. İki dik çizgi arasına yazılan gösterim ise o doğru parçasının uzunluğudur."
+    },
+    "isin_yon": {
+      "ad": "Işının başlangıç noktasını karıştırma",
+      "duzeltme": "Işın, adındaki ilk harften başlar ve ikinci harfin olduğu yöne doğru sonsuza gider. Harflerin sırası önemlidir."
+    },
+    "nokta_dogru": {
+      "ad": "Noktalardan geçen doğru sayısını karıştırma",
+      "duzeltme": "İki farklı noktadan yalnız bir doğru geçer. Tek bir noktadan ise sonsuz sayıda doğru geçer, çünkü doğru o noktanın çevresinde her yöne döndürülebilir."
+    },
+    "aci_olcu": {
+      "ad": "Özel açıların ölçülerini karıştırma",
+      "duzeltme": "Dik açı 90°, doğru açı 180°, tam açı 360°tır. Doğru açı iki dik açı, tam açı iki doğru açı eder."
+    },
     "nokta_sayma": {
       "ad": "Doğru parçalarını eksik sayma",
       "duzeltme": "Sadece yan yana olanları değil, aradaki noktaları atlayan doğru parçalarını da say: A-C de bir doğru parçasıdır."
@@ -1185,6 +1205,10 @@
     "iletki_ters": {
       "ad": "Açıölçerde yanlış ölçeği okuma",
       "duzeltme": "Açıölçerde iki sıra sayı vardır. Açının kolu hangi taraftaki 0'dan başlıyorsa o sıradaki sayıyı oku. Açı dar görünüyorsa ölçüsü 90'dan küçük olmalı."
+    },
+    "aci_olcme": {
+      "ad": "Açıölçerle ölçerken yanlış çizgiyi okuma",
+      "duzeltme": "Açıölçerin merkezini açının köşesine, 0 çizgisini sabit kola koy. Diğer kolun geçtiği çizgiye kadar, sabit koldaki 0'dan başlayarak 10'ar 10'ar say, sonra 5'leri ekle."
     },
     "aci_kol": {
       "ad": "Açıyı kol uzunluğuna göre karşılaştırma",
@@ -1270,6 +1294,18 @@
       "ad": "Yuvarlarken sadece kesip atma",
       "duzeltme": "Yuvarlayacağın basamağın sağındaki rakama bak: 5 veya daha büyükse bir artır, 5'ten küçükse aynı bırak."
     },
+    "yuvarlama_yukari": {
+      "ad": "Yuvarlarken hep yukarı yuvarlama",
+      "duzeltme": "Her sayı yukarı yuvarlanmaz. Yuvarlayacağın basamağın sağındaki rakam 5'ten küçükse o basamak aynı kalır, sağındaki basamaklar sıfır olur."
+    },
+    "cift_sayma": {
+      "ad": "Aynı dikdörtgeni iki kez sayma ya da kareyi saymama",
+      "duzeltme": "Kenarları 3 ve 5 olan dikdörtgen ile kenarları 5 ve 3 olan dikdörtgen aynıdır, bir kez sayılır. Kare de özel bir dikdörtgendir, o da sayılır."
+    },
+    "sade_tek": {
+      "ad": "Sadeleştirirken yalnız payı ya da yalnız paydayı bölme",
+      "duzeltme": "Sadeleştirirken pay da payda da aynı sayıya bölünür. Yalnız birini bölersen kesrin değeri değişir."
+    },
     "cevre_yarim": {
       "ad": "Çevreyi hesaplarken sadece iki kenarı toplama",
       "duzeltme": "Çevre, şeklin etrafındaki TÜM kenarların toplamıdır. Dikdörtgenin 4 kenarı vardır: Çevre = 2 × (uzun kenar + kısa kenar)."
@@ -1282,6 +1318,10 @@
       "ad": "Alan birimini yanlış yazma",
       "duzeltme": "Alan birim karelerle ölçülür: cm², m². Uzunluk birimi (cm, m) alan için kullanılmaz."
     },
+    "kare_cevre": {
+      "ad": "Karenin çevresini 2'ye bölerek kenarı bulma",
+      "duzeltme": "Karenin 4 kenarı eşittir. Bir kenar = çevre ÷ 4."
+    },
     "ters_cevre": {
       "ad": "Çevreden kenar bulurken yarıya bölmeyi unutma",
       "duzeltme": "Çevre = 2 × (a + b) olduğu için önce çevreyi 2'ye böl (a + b), sonra bilinen kenarı çıkar."
@@ -1292,7 +1332,7 @@
     },
     "kesir_tur": {
       "ad": "Kesir türlerini karıştırma",
-      "duzeltme": "Pay paydadan küçükse basit, pay 1 ise birim kesir, pay paydaya eşit ya da büyükse bileşik kesirdir."
+      "duzeltme": "Payı 1 olan kesir birim kesirdir. Payı paydasına eşit ya da paydasından büyük olan kesir bileşik kesirdir. Tam kısmı ve kesir kısmı birlikte yazılan gösterim tam sayılı kesirdir."
     },
     "tamsayili": {
       "ad": "Bileşik ↔ tam sayılı kesir dönüşüm hatası",
@@ -1310,6 +1350,10 @@
       "ad": "Ondalık gösterimi yanlış okuma",
       "duzeltme": "Virgülden sonra 1 basamak varsa \"onda\", 2 basamak varsa \"yüzde\" diye okunur: 4,25 → dört tam yüzde yirmi beş."
     },
+    "ondalik_parca": {
+      "ad": "Ondalık gösterimde tam kısım ile ondalık kısmı karıştırma",
+      "duzeltme": "Virgülün solundaki sayı tam kısım, sağındaki sayı ondalık kısımdır: 4,25'te tam kısım 4, ondalık kısım 25'tir."
+    },
     "yuzde_ondalik": {
       "ad": "Yüzdeyi ondalığa yanlış çevirme",
       "duzeltme": "% işareti \"yüzde\", yani paydası 100 demektir: %5 = 5/100 = 0,05 (0,5 değil!)."
@@ -1317,6 +1361,22 @@
     "payda_buyuk": {
       "ad": "\"Paydası büyük olan kesir büyüktür\" sanma",
       "duzeltme": "Payda bütünün kaç parçaya bölündüğünü gösterir. Parça sayısı arttıkça her parça KÜÇÜLÜR: 1/8 < 1/3."
+    },
+    "bos_kisim": {
+      "ad": "Boyalı yerine boş kısmı sayma",
+      "duzeltme": "Kesrin payı, istenen (boyalı) parça sayısıdır. Boş kalan parçaları değil, boyadığın parçaları say."
+    },
+    "pay_payda_ters": {
+      "ad": "Pay ile paydayı karıştırma",
+      "duzeltme": "Payda (alttaki sayı) bütünün kaç EŞ parçaya bölündüğünü, pay (üstteki sayı) bu parçalardan kaçının alındığını söyler."
+    },
+    "kesir_model": {
+      "ad": "Bütünü ve parçaları karıştırma",
+      "duzeltme": "Önce bütünü paydadaki sayı kadar EŞ parçaya böl, sonra paydaki sayı kadar parçayı al. Parça sayısı ile alınan sayıyı ayrı ayrı say."
+    },
+    "cizgi_sayma": {
+      "ad": "Sayı doğrusunda çizgileri sayma",
+      "duzeltme": "Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0'dan başla; her atlama bir parçadır. 0 noktası sayılmaz."
     },
     "pay_payda_ayri": {
       "ad": "Kesirleri karşılaştırırken sadece paya bakma",
@@ -1326,6 +1386,14 @@
       "ad": "\"Basamağı çok olan ondalık sayı büyüktür\" sanma",
       "duzeltme": "Ondalık sayıları karşılaştırırken önce tam kısma, sonra onda birler basamağına bak: 0,7 > 0,58 çünkü 7 onda > 5 onda."
     },
+    "tam_kisim": {
+      "ad": "Ondalık sayılarda önce virgülden sonrasına bakma",
+      "duzeltme": "Önce tam kısma (virgülün soluna) bakılır. 225,11 > 224,91 çünkü 225 > 224; kuruş kısmına sadece tam kısımlar eşitse bakılır."
+    },
+    "esit_payda": {
+      "ad": "Paydaları eşit kesirleri karşılaştıramama",
+      "duzeltme": "Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: 8/12 > 3/12."
+    },
     "sifir_fark": {
       "ad": "Sondaki sıfırın değeri değiştirdiğini sanma",
       "duzeltme": "Ondalık kısmın sonuna eklenen sıfır değeri değiştirmez: 0,7 = 0,70 (7 onda = 70 yüzde)."
@@ -1334,9 +1402,29 @@
       "ad": "Araştırma sorusunu tek kişiye/tek cevaba yönlendirme",
       "duzeltme": "İstatistiksel araştırma sorusu bir GRUBA sorulur ve birden çok farklı cevabı olabilir."
     },
+    "veri_kaynak": {
+      "ad": "Hazır veri ile kendi topladığımız veriyi karıştırma",
+      "duzeltme": "Hazır veri, başkalarının toplayıp yayımladığı veridir (TÜİK, kayıtlar, gazete). Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız."
+    },
+    "anket_kural": {
+      "ad": "Anket hazırlama kurallarını karıştırma",
+      "duzeltme": "Anket soruları kısa, açık ve yönlendirmesiz olur. Katılanların adı ve kişisel bilgileri gizli tutulur."
+    },
     "adim_sira": {
       "ad": "Araştırma adımlarının sırasını karıştırma",
       "duzeltme": "Sıra: 1) Araştırma sorusunu belirleme 2) Verileri toplama ve analize hazırlama 3) Veri görselleştirme ve özetleme 4) Sonuçları yorumlama."
+    },
+    "daire_toplam": {
+      "ad": "Daire grafiğinde dilimlerin toplamını kontrol etmeme",
+      "duzeltme": "Daire grafiğinin tamamı bütündür. Bütün dilimlerin yüzdeleri toplanınca tam %100 etmelidir; etmiyorsa grafik hatalıdır."
+    },
+    "grafik_secim": {
+      "ad": "Veriye uygun grafiği seçememe",
+      "duzeltme": "Nokta grafiğinde her veri bir noktadır; veri çok olunca çizmek ve okumak zorlaşır, sütun grafiği daha kullanışlıdır. Parça-bütün ilişkisi için daire grafiği uygundur."
+    },
+    "grafik_cizim": {
+      "ad": "Sütun grafiğinde sütun boyunu yanlış çizme",
+      "duzeltme": "Her sütunun tepesi, tablodaki sayının eksende yazdığı çizgiye kadar çıkmalı. Eksendeki sayılar 1'er değil 2'şer ya da 5'er artabilir; çizgileri değil, yazan sayıları oku."
     },
     "grafik_okuma": {
       "ad": "Grafikten yanlış değer okuma",
@@ -1390,13 +1478,37 @@
       "ad": "Örüntüde ilk terimi hesaba katmama",
       "duzeltme": "Kural ilk terimi de vermeli. Terimler 1., 2., 3. diye sayılıyorsa: n. terim = ilk terim + (n − 1) × artış. Sadece adım × artış demek ilk terimi unutmak olur."
     },
+    "ayni_oncelik": {
+      "ad": "Aynı öncelikli işlemleri soldan sağa yapmama",
+      "duzeltme": "Çarpma ile bölme aynı önceliktedir; toplama ile çıkarma da aynı önceliktedir. Art arda gelince soldan sağa doğru sırayla yapılır."
+    },
+    "oruntu_kural": {
+      "ad": "Örüntünün kuralını bir adımda deneyip bırakma",
+      "duzeltme": "Kuralı bulmak için adım sayısı ile terimi karşılaştır ve kuralı birkaç adımda dene. 4, 7, 10 örüntüsünde kural: adım sayısının 3 katının 1 fazlası."
+    },
+    "oruntu_sabit": {
+      "ad": "Her örüntünün sabit artışlı olduğunu sanma",
+      "duzeltme": "Bazı örüntülerde artış her adımda değişir (1, 3, 6, 10: artış 2, 3, 4). Böyle örüntülerde \"ilk terim + (adım − 1) × artış\" kuralı kullanılamaz."
+    },
     "oruntu_bir": {
       "ad": "Örüntüde artış sayısını bir fazla sayma",
       "duzeltme": "Terimler 1., 2., 3. diye sayılıyorsa 1. terimde henüz artış yoktur; n. terime kadar (n − 1) kez artış olur."
     },
+    "baslangic_unutma": {
+      "ad": "Başlangıçtaki miktarı eklememe",
+      "duzeltme": "Başta var olan miktar sonuca eklenir: toplam = başlangıç + geçen süre × her seferki artış."
+    },
+    "baslangic_sira": {
+      "ad": "Başlangıç anını 1. adım sanma",
+      "duzeltme": "Başlangıç, hiç zaman geçmemiş andır (0. gün ya da 0. hafta); o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam = başlangıç + n × artış."
+    },
     "algoritma_sira": {
       "ad": "Algoritma adımlarını sırasız uygulama",
       "duzeltme": "Algoritma adımları yazıldığı sırayla, tek tek uygulanır. Her adımdan sonra elindeki sayıyı not et."
+    },
+    "karar_dongu": {
+      "ad": "Karar adımında \"Hayır\" cevabının nereye gittiğini karıştırma",
+      "duzeltme": "Karar kutusunda cevap \"Hayır\" ise ok hangi adımı gösteriyorsa oraya dönülür. Koşul sağlanana kadar o adım tekrarlanır (döngü)."
     },
     "dongu_sayma": {
       "ad": "Döngü tekrarlarını yanlış sayma",
@@ -1410,6 +1522,14 @@
       "ad": "Olasılığın 1'den büyük olabileceğini sanma",
       "duzeltme": "Bir olayın olasılığı 0 ile 1 arasındadır (0 ve 1 dâhil). İmkânsız olayın olasılığı 0, kesin olayın olasılığı 1'dir. İstediğin renkteki toplar, bütün toplardan fazla olamaz."
     },
+    "olasilik_tercih": {
+      "ad": "Olasılığı sevdiği renge ya da şansa göre tahmin etme",
+      "duzeltme": "Olasılık kişisel seçime bağlı değildir. Torbada hangi renkten daha çok top varsa, o rengin çekilme olasılığı daha fazladır."
+    },
+    "iki_sonuc_esit": {
+      "ad": "İki sonuç varsa olasılıkları eşit sanma",
+      "duzeltme": "Sonuçların sayısı değil, her sonucu veren parçaların sayısı önemlidir. 4 yüzü mavi, 2 yüzü kırmızı küpte mavi gelme olasılığı daha fazladır."
+    },
     "olasilik_oran": {
       "ad": "Olasılık kesrini yanlış kurma",
       "duzeltme": "Kesri parça-bütün ilişkisiyle kur: pay, istediğin renkteki dilim ya da top sayısı; payda, bütün dilimlerin ya da topların sayısı."
@@ -1417,94 +1537,6 @@
     "az_cok": {
       "ad": "Az olası ile çok olasıyı karıştırma",
       "duzeltme": "1/2'den küçük olasılıklar az olası, 1/2'den büyükler çok olasıdır. Tam 1/2 ise eşit olasıdır."
-    },
-    "genel": {
-      "ad": "İşlem hatası",
-      "duzeltme": "Çözümü adım adım tekrar kontrol et."
-    },
-    "bos_kisim": {
-      "ad": "Boyalı yerine boş kısmı sayma",
-      "duzeltme": "Kesrin payı, istenen (boyalı) parça sayısıdır. Boş kalan parçaları değil, boyadığın parçaları say."
-    },
-    "pay_payda_ters": {
-      "ad": "Pay ile paydayı karıştırma",
-      "duzeltme": "Payda (alttaki sayı) bütünün kaç EŞ parçaya bölündüğünü, pay (üstteki sayı) bu parçalardan kaçının alındığını söyler."
-    },
-    "kesir_model": {
-      "ad": "Bütünü ve parçaları karıştırma",
-      "duzeltme": "Önce bütünü paydadaki sayı kadar EŞ parçaya böl, sonra paydaki sayı kadar parçayı al. Parça sayısı ile alınan sayıyı ayrı ayrı say."
-    },
-    "cizgi_sayma": {
-      "ad": "Sayı doğrusunda çizgileri sayma",
-      "duzeltme": "Sayı doğrusunda çizgileri değil, ARALIKLARI say. 0'dan başla; her atlama bir parçadır. 0 noktası sayılmaz."
-    },
-    "hata_yeri": {
-      "ad": "Doğru bir adımı hatalı sanma",
-      "duzeltme": "Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır."
-    },
-    "kalan_yok": {
-      "ad": "Bölmede kalanı hesaba katmama",
-      "duzeltme": "Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır."
-    },
-    "istenen_verilen": {
-      "ad": "Verileni istenen sanma",
-      "duzeltme": "Problemde verilen sayıları ve sorulan şeyi ayır. Soru cümlesi (genellikle en sonda) neyin istendiğini söyler; istenen, problemde henüz yazmayan şeydir."
-    },
-    "ara_sonuc": {
-      "ad": "Ara sonucu cevap sanma",
-      "duzeltme": "Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et."
-    },
-    "baslangic_unutma": {
-      "ad": "Başlangıçtaki miktarı eklememe",
-      "duzeltme": "Başta var olan miktar sonuca eklenir: toplam = başlangıç + geçen süre × her seferki artış."
-    },
-    "baslangic_sira": {
-      "ad": "Başlangıç anını 1. adım sanma",
-      "duzeltme": "Başlangıç, hiç zaman geçmemiş andır (0. gün ya da 0. hafta); o anda henüz ekleme yoktur. n gün ya da hafta sonra n kez ekleme olur: toplam = başlangıç + n × artış."
-    },
-    "kontrol_tekrar": {
-      "ad": "Kontrolü aynı yolu tekrarlayarak yapma",
-      "duzeltme": "Aynı yolu tekrarlarsan aynı hatayı yine yapabilirsin. Kontrolde cevaptan geriye gidilir: ters işlemle problemdeki bilinen bir sayıya ulaşılır."
-    },
-    "kontrol_yuzeysel": {
-      "ad": "Cevabın büyüklüğünü kontrol sanma",
-      "duzeltme": "Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin."
-    },
-    "nokta_ad": {
-      "ad": "Çizimi noktayla karıştırma",
-      "duzeltme": "Nokta tek bir yeri gösterir ve boyutu yoktur. Uzayıp giden bir çizgi doğru, ışın ya da doğru parçasıdır; adını uçlarına bakarak verirsin."
-    },
-    "cember_parca": {
-      "ad": "Çemberin parçalarını karıştırma",
-      "duzeltme": "Merkez bir noktadır. Çember yalnızca kenardaki eğri çizgidir. Daire, çember ile iç bölgesinin birleşimidir. Çap ve yarıçap ise doğru parçalarıdır."
-    },
-    "basamak_karsilastir": {
-      "ad": "Eşit basamaklı sayılarda yanlış basamağa bakma",
-      "duzeltme": "Basamak sayıları eşitse soldan başla ve ilk farklı rakamı karşılaştır. Rakamı büyük olan sayı daha büyüktür."
-    },
-    "tahmin_tam": {
-      "ad": "Tahmin yerine tam sonucu hesaplama",
-      "duzeltme": "Tahmin istenince önce sayıları istenen basamağa yuvarlarsın, sonra yuvarlanmış sayılarla işlem yaparsın. Tam sonuç tahmin değildir."
-    },
-    "kare_cevre": {
-      "ad": "Karenin çevresini 2'ye bölerek kenarı bulma",
-      "duzeltme": "Karenin 4 kenarı eşittir. Bir kenar = çevre ÷ 4."
-    },
-    "tam_kisim": {
-      "ad": "Ondalık sayılarda önce virgülden sonrasına bakma",
-      "duzeltme": "Önce tam kısma (virgülün soluna) bakılır. 225,11 > 224,91 çünkü 225 > 224; kuruş kısmına sadece tam kısımlar eşitse bakılır."
-    },
-    "veri_kaynak": {
-      "ad": "Hazır veri ile kendi topladığımız veriyi karıştırma",
-      "duzeltme": "Hazır veri, başkalarının toplayıp yayımladığı veridir (TÜİK, kayıtlar, gazete). Anket, gözlem, görüşme ve ölçümle veriyi kendimiz toplarız."
-    },
-    "anket_kural": {
-      "ad": "Anket hazırlama kurallarını karıştırma",
-      "duzeltme": "Anket soruları kısa, açık ve yönlendirmesiz olur. Katılanların adı ve kişisel bilgileri gizli tutulur."
-    },
-    "karar_dongu": {
-      "ad": "Karar adımında \"Hayır\" cevabının nereye gittiğini karıştırma",
-      "duzeltme": "Karar kutusunda cevap \"Hayır\" ise ok hangi adımı gösteriyorsa oraya dönülür. Koşul sağlanana kadar o adım tekrarlanır (döngü)."
     },
     "sifir_basta": {
       "ad": "En küçük sayıyı 0 ile başlatma",
@@ -1514,41 +1546,33 @@
       "ad": "Fiyatı lira-kuruş olarak yanlış okuma",
       "duzeltme": "Virgülün solu lira, sağı kuruştur. 1 lira 100 kuruş olduğu için virgülden sonra hep 2 basamak yazılır: 14,50 TL → on dört lira elli kuruş."
     },
-    "esit_payda": {
-      "ad": "Paydaları eşit kesirleri karşılaştıramama",
-      "duzeltme": "Paydaları eşit kesirlerde parçalar aynı büyüklüktedir. Payı büyük olan kesir daha büyüktür: 8/12 > 3/12."
+    "istenen_verilen": {
+      "ad": "Verileni istenen sanma",
+      "duzeltme": "Problemde verilen sayıları ve sorulan şeyi ayır. Soru cümlesi (genellikle en sonda) neyin istendiğini söyler; istenen, problemde henüz yazmayan şeydir."
     },
-    "olasilik_tercih": {
-      "ad": "Olasılığı sevdiği renge ya da şansa göre tahmin etme",
-      "duzeltme": "Olasılık kişisel seçime bağlı değildir. Torbada hangi renkten daha çok top varsa, o rengin çekilme olasılığı daha fazladır."
+    "kontrol_tekrar": {
+      "ad": "Kontrolü aynı yolu tekrarlayarak yapma",
+      "duzeltme": "Aynı yolu tekrarlarsan aynı hatayı yine yapabilirsin. Kontrolde cevaptan geriye gidilir: ters işlemle problemdeki bilinen bir sayıya ulaşılır."
     },
-    "iki_sonuc_esit": {
-      "ad": "İki sonuç varsa olasılıkları eşit sanma",
-      "duzeltme": "Sonuçların sayısı değil, her sonucu veren parçaların sayısı önemlidir. 4 yüzü mavi, 2 yüzü kırmızı küpte mavi gelme olasılığı daha fazladır."
+    "kontrol_yuzeysel": {
+      "ad": "Cevabın büyüklüğünü kontrol sanma",
+      "duzeltme": "Sonucun makul görünmesi tahmindir, kanıt değildir. Ters işlemle problemdeki bir bilgiye tam olarak ulaşırsan cevabın doğru olduğunu gösterirsin."
     },
-    "ondalik_parca": {
-      "ad": "Ondalık gösterimde tam kısım ile ondalık kısmı karıştırma",
-      "duzeltme": "Virgülün solundaki sayı tam kısım, sağındaki sayı ondalık kısımdır: 4,25'te tam kısım 4, ondalık kısım 25'tir."
+    "ara_sonuc": {
+      "ad": "Ara sonucu cevap sanma",
+      "duzeltme": "Bulduğun sayı sorunun cevabı mı, yoksa cevaba giden yolda bir ara adım mı? Soru cümlesine dönüp kontrol et."
     },
-    "daire_toplam": {
-      "ad": "Daire grafiğinde dilimlerin toplamını kontrol etmeme",
-      "duzeltme": "Daire grafiğinin tamamı bütündür. Bütün dilimlerin yüzdeleri toplanınca tam %100 etmelidir; etmiyorsa grafik hatalıdır."
+    "kalan_yok": {
+      "ad": "Bölmede kalanı hesaba katmama",
+      "duzeltme": "Kalan, artan kişi ya da eşya demektir. Herkesin binmesi gerekiyorsa artanlar için bir araç daha gerekir: bölümü bir artır."
     },
-    "grafik_secim": {
-      "ad": "Veriye uygun grafiği seçememe",
-      "duzeltme": "Nokta grafiğinde her veri bir noktadır; veri çok olunca çizmek ve okumak zorlaşır, sütun grafiği daha kullanışlıdır. Parça-bütün ilişkisi için daire grafiği uygundur."
+    "hata_ilk": {
+      "ad": "Hatanın başladığı yeri değil, sonucunu seçme",
+      "duzeltme": "İlk hatadan sonraki adımlar o hatayı taşıdığı için onlar da yanlış görünür. Hatanın başladığı yeri bulmak için adımları baştan sırayla kontrol et: ilk yanlış olan hangisi?"
     },
-    "ayni_oncelik": {
-      "ad": "Aynı öncelikli işlemleri soldan sağa yapmama",
-      "duzeltme": "Çarpma ile bölme aynı önceliktedir; toplama ile çıkarma da aynı önceliktedir. Art arda gelince soldan sağa doğru sırayla yapılır."
-    },
-    "oruntu_kural": {
-      "ad": "Örüntünün kuralını bir adımda deneyip bırakma",
-      "duzeltme": "Kuralı bulmak için adım sayısı ile terimi karşılaştır ve kuralı birkaç adımda dene. 4, 7, 10 örüntüsünde kural: adım sayısının 3 katının 1 fazlası."
-    },
-    "oruntu_sabit": {
-      "ad": "Her örüntünün sabit artışlı olduğunu sanma",
-      "duzeltme": "Bazı örüntülerde artış her adımda değişir (1, 3, 6, 10: artış 2, 3, 4). Böyle örüntülerde \"ilk terim + (adım − 1) × artış\" kuralı kullanılamaz."
+    "hata_yeri": {
+      "ad": "Doğru bir adımı hatalı sanma",
+      "duzeltme": "Her adımı kendin yeniden hesapla. Hatalı adım, sonucun bozulmaya başladığı ilk adımdır; sonraki adımlar o hatayı taşır."
     },
     "aci_isim": {
       "ad": "Açıyı adlandırırken köşe harfini yanlış yere yazma",
@@ -1574,37 +1598,25 @@
       "ad": "Çemberlerle inşa edilen üçgenin türünü yanlış bulma",
       "duzeltme": "Üçgenin kenarları iki çemberin yarıçapları ve merkezler arasındaki uzaklıktır. Üçü eşitse eşkenar, ikisi eşitse ikizkenar, hepsi farklıysa çeşitkenar üçgen oluşur."
     },
-    "isin_dp": {
-      "ad": "Işın ile doğru parçasını karıştırma",
-      "duzeltme": "Doğru parçasının iki uç noktası vardır, iki ucunda da durur. Işının ise yalnız bir başlangıç noktası vardır ve öbür yönde sonsuza gider."
+    "nokta_ad": {
+      "ad": "Çizimi noktayla karıştırma",
+      "duzeltme": "Nokta tek bir yeri gösterir ve boyutu yoktur. Uzayıp giden bir çizgi doğru, ışın ya da doğru parçasıdır; adını uçlarına bakarak verirsin."
     },
-    "dp_uzunluk": {
-      "ad": "Doğru parçası ile uzunluğunu karıştırma",
-      "duzeltme": "Köşeli parantezle yazılan gösterim doğru parçasının kendisidir. İki dik çizgi arasına yazılan gösterim ise o doğru parçasının uzunluğudur."
+    "cember_parca": {
+      "ad": "Çemberin parçalarını karıştırma",
+      "duzeltme": "Merkez bir noktadır. Çember yalnızca kenardaki eğri çizgidir. Daire, çember ile iç bölgesinin birleşimidir. Çap ve yarıçap ise doğru parçalarıdır."
     },
-    "isin_yon": {
-      "ad": "Işının başlangıç noktasını karıştırma",
-      "duzeltme": "Işın, adındaki ilk harften başlar ve ikinci harfin olduğu yöne doğru sonsuza gider. Harflerin sırası önemlidir."
+    "basamak_karsilastir": {
+      "ad": "Eşit basamaklı sayılarda yanlış basamağa bakma",
+      "duzeltme": "Basamak sayıları eşitse soldan başla ve ilk farklı rakamı karşılaştır. Rakamı büyük olan sayı daha büyüktür."
     },
-    "nokta_dogru": {
-      "ad": "Noktalardan geçen doğru sayısını karıştırma",
-      "duzeltme": "İki farklı noktadan yalnız bir doğru geçer. Tek bir noktadan ise sonsuz sayıda doğru geçer, çünkü doğru o noktanın çevresinde her yöne döndürülebilir."
+    "tahmin_tam": {
+      "ad": "Tahmin yerine tam sonucu hesaplama",
+      "duzeltme": "Tahmin istenince önce sayıları istenen basamağa yuvarlarsın, sonra yuvarlanmış sayılarla işlem yaparsın. Tam sonuç tahmin değildir."
     },
-    "aci_olcu": {
-      "ad": "Özel açıların ölçülerini karıştırma",
-      "duzeltme": "Dik açı 90°, doğru açı 180°, tam açı 360°tır. Doğru açı iki dik açı, tam açı iki doğru açı eder."
-    },
-    "aci_olcme": {
-      "ad": "Açıölçerle ölçerken yanlış çizgiyi okuma",
-      "duzeltme": "Açıölçerin merkezini açının köşesine, 0 çizgisini sabit kola koy. Diğer kolun geçtiği çizgiye kadar, sabit koldaki 0'dan başlayarak 10'ar 10'ar say, sonra 5'leri ekle."
-    },
-    "grafik_cizim": {
-      "ad": "Sütun grafiğinde sütun boyunu yanlış çizme",
-      "duzeltme": "Her sütunun tepesi, tablodaki sayının eksende yazdığı çizgiye kadar çıkmalı. Eksendeki sayılar 1'er değil 2'şer ya da 5'er artabilir; çizgileri değil, yazan sayıları oku."
-    },
-    "hata_ilk": {
-      "ad": "Hatanın başladığı yeri değil, sonucunu seçme",
-      "duzeltme": "İlk hatadan sonraki adımlar o hatayı taşıdığı için onlar da yanlış görünür. Hatanın başladığı yeri bulmak için adımları baştan sırayla kontrol et: ilk yanlış olan hangisi?"
+    "genel": {
+      "ad": "İşlem hatası",
+      "duzeltme": "Çözümü adım adım tekrar kontrol et."
     }
   },
   "anlatim_bicimleri": {
