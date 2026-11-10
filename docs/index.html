@@ -3915,6 +3915,155 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   const ipucuDuz = (x) => String(x || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
   const ipucuBul = (id, q) => { const p = ipucuDuz(q.prompt); for (const [sk, re, h] of IPUCU) if (sk === id && re.test(p)) return typeof h === 'function' ? h(q) : h; return ''; };
   { const hq = HATA.q; HATA.q = (...a) => { const q = hq(...a); if (!q.hint) q.hint = IPUCU_HATA[q.hata] || ''; return q; }; }
+  /* ---- 10.11.2026: tek ya da az kalıplı seviyelere yeni soru kalıpları (§11 A2 «her beceriye 2. şablon») ----
+     Ölçüm: her seviyede 1500 soru, sayılar/adlar atılmış metin = kalıp. 1 kalıplı seviyeler önce ele alındı. */
+  // n_tahmin: ters yön — hangi sayı yuvarlanınca R olur? Her yanlış şık bir yuvarlama yanılgısının «doğru» sandığı sayıdır.
+  ekle('n_tahmin', [1, 2], 0.4, (lv) => {
+    const to = lv === 1 ? 10 : 100, ad = to === 10 ? 'onluğa' : 'yüzlüğe', yarim = to / 2; let R; do { R = (to === 10 ? ri(101, 999) : ri(11, 99)) * to; } while (R % (to * 10) === 0);
+    let n; do { n = R - yarim + ri(0, to - 1); } while (n === R);
+    const nKes = R + ri(yarim, to - 1), nYuk = R - to + ri(1, yarim - 1);
+    return Q({ prompt: `Aşağıdaki sayılardan hangisi en yakın ${ad} yuvarlanınca ${fmtN(R)} olur?`,
+      options: mc(fmtN(n), [[fmtN(nKes), 'yuvarlama_kesme', `${fmtN(nKes)} sayısında yuvarlayacağın basamağın sağı 5 ya da daha büyük; yukarı yuvarlanır ve ${fmtN(R + to)} olur.`], [fmtN(nYuk), 'yuvarlama_yukari', `${fmtN(nYuk)} sayısında yuvarlayacağın basamağın sağı 5'ten küçük; aşağı yuvarlanır ve ${fmtN(R - to)} olur.`]]),
+      hint: 'Her şıkkı tek tek yuvarla: yuvarlayacağın basamağın sağındaki rakam 5 ya da daha büyükse yukarı, küçükse aşağı.',
+      steps: [`En yakın ${ad} yuvarlanınca ${fmtN(R)} olan sayılar ${fmtN(R - yarim)} ile ${fmtN(R + yarim - 1)} arasındadır.`, `${fmtN(n)} bu aralıkta; yuvarlanınca ${fmtN(R)} olur.`] });
+  });
+  // n_tahmin seviye 3: fark ve çarpım tahmini (biri yukarı, biri aşağı yuvarlanır)
+  ekle('n_tahmin', [3], 0.5, () => {
+    if (Math.random() < 0.5) {
+      let a, b; do { a = ri(5, 9) * 1000 + ri(1, 4) * 100 + ri(0, 99); b = ri(1, 4) * 1000 + ri(5, 9) * 100 + ri(0, 99); } while (a - b < 1500);
+      const ra = Math.round(a / 1000) * 1000, rb = Math.round(b / 1000) * 1000, fa = Math.floor(a / 1000) * 1000, fb = Math.floor(b / 1000) * 1000;
+      return Q({ prompt: `${fmtN(a)} − ${fmtN(b)} farkını sayıları en yakın binliğe yuvarlayarak TAHMİN edin.`,
+        options: mc(fmtN(ra - rb), [[fmtN(fa - fb), 'yuvarlama_kesme', `Sayıları yuvarlamadan kestin. ${fmtN(b)} sayısında yüzler basamağı 5 ya da büyük; ${fmtN(rb)} olur.`], [fmtN(a - b), 'tahmin_tam', 'Bu tam sonuç. Tahminde önce sayıları yuvarlayıp sonra işlem yaparız.']]),
+        hint: 'Önce iki sayıyı ayrı ayrı en yakın binliğe yuvarla (yüzler basamağına bak), sonra yuvarlanmış sayıları çıkar.',
+        steps: [`${fmtN(a)} → ${fmtN(ra)}`, `${fmtN(b)} → ${fmtN(rb)}`, `${fmtN(ra)} − ${fmtN(rb)} = ${fmtN(ra - rb)}`] });
+    }
+    let a = ri(2, 8) * 10 + ri(5, 9), b = ri(2, 9) * 10 + ri(1, 4); if (Math.random() < 0.5) [a, b] = [b, a];
+    const ra = Math.round(a / 10) * 10, rb = Math.round(b / 10) * 10, fa = Math.floor(a / 10) * 10, fb = Math.floor(b / 10) * 10, ca = Math.ceil(a / 10) * 10, cb = Math.ceil(b / 10) * 10;
+    return Q({ prompt: `${a} × ${b} çarpımını sayıları en yakın onluğa yuvarlayarak TAHMİN edin.`,
+      options: mc(fmtN(ra * rb), [[fmtN(fa * fb), 'yuvarlama_kesme', 'Birler basamağını atıp kestin. Birler basamağı 5 ya da büyük olan sayı yukarı yuvarlanır.'], [fmtN(ca * cb), 'yuvarlama_yukari', 'İki sayıyı da yukarı yuvarladın. Birler basamağı 5\'ten küçük olan sayı aşağı yuvarlanır.'], [fmtN(a * b), 'tahmin_tam', 'Bu tam sonuç. Tahminde önce sayıları yuvarlayıp sonra işlem yaparız.']]),
+      hint: 'Önce iki sayıyı ayrı ayrı en yakın onluğa yuvarla (birler basamağına bak), sonra yuvarlanmış sayıları çarp.',
+      steps: [`${a} → ${ra}`, `${b} → ${rb}`, `${ra} × ${rb} = ${fmtN(ra * rb)}`] });
+  });
+  // f_karsilastir: üç kesirden en büyüğü / en küçüğü (seviye 1: eşit payda, seviye 2: eşit pay)
+  ekle('f_karsilastir', [1, 2], 0.4, (lv) => {
+    const enBuyuk = Math.random() < 0.6;
+    if (lv === 1) {
+      const d = ri(6, 12), ps = shuffle(Array.from({ length: d - 1 }, (_, i) => i + 1)).slice(0, 3), s = ps.slice().sort((x, y) => x - y), ok = enBuyuk ? s[2] : s[0];
+      return Q({ prompt: `${ps.map(p => fr(p, d)).join(', ')}<br>Bu kesirlerden hangisi en ${enBuyuk ? 'büyüktür' : 'küçüktür'}?`, fixed: true,
+        options: ps.map(p => p === ok ? { t: fr(p, d), ok: true } : { t: fr(p, d), ok: false, mis: 'esit_payda', ac: `Paydalar eşit (${d}): bütün aynı sayıda eş parçaya bölünmüş. Payı ${enBuyuk ? 'en büyük' : 'en küçük'} olan, ${enBuyuk ? 'en çok' : 'en az'} parçayı alır.` }),
+        hint: 'Paydalar eşit: her kesirde parçalar aynı büyüklükte. Kaç parça alındığına bak.',
+        steps: [`Paydalar eşit: ${d}.`, `Paylar: ${s.join(' < ')}`, `En ${enBuyuk ? 'büyük' : 'küçük'}: ${fr(ok, d)}`] });
+    }
+    const n = ri(1, 3), ds = shuffle(Array.from({ length: 10 - n }, (_, i) => i + n + 1)).slice(0, 3), s = ds.slice().sort((x, y) => x - y), ok = enBuyuk ? s[0] : s[2];
+    return Q({ prompt: `${ds.map(x => fr(n, x)).join(', ')}<br>Bu kesirlerden hangisi en ${enBuyuk ? 'büyüktür' : 'küçüktür'}?`, fixed: true,
+      options: ds.map(x => x === ok ? { t: fr(n, x), ok: true } : { t: fr(n, x), ok: false, mis: 'payda_buyuk', ac: `Paylar eşit (${n}). Payda büyüdükçe bütün daha çok parçaya bölünür ve her parça küçülür.` }),
+      hint: 'Paylar eşit. Bir bütünü daha çok parçaya bölünce her parça büyür mü, küçülür mü?',
+      steps: [`Paylar eşit: ${n}.`, `Paydası küçük olanın parçaları büyüktür: ${s.map(x => fr(n, x)).join(' > ')}`, `En ${enBuyuk ? 'büyük' : 'küçük'}: ${fr(n, ok)}`] });
+  });
+  // f_karsilastir seviye 2: günlük hayat (aynı pay, farklı payda)
+  ekle('f_karsilastir', [2], 0.4, () => {
+    const [A, B] = shuffle(NAMES).slice(0, 2), sey = pick(['çikolatadan', 'pastadan', 'kekten', 'pizzadan']), n = ri(1, 3); let d1, d2; do { d1 = ri(n + 1, 10); d2 = ri(n + 1, 10); } while (d1 === d2);
+    const kaz = d1 < d2 ? A : B, kay = kaz === A ? B : A, [dk, db] = [Math.min(d1, d2), Math.max(d1, d2)];
+    return Q({ prompt: `Aynı büyüklükteki iki ${sey} birinin ${fr(n, d1)} kadarını ${A}, diğerinin ${fr(n, d2)} kadarını ${B} aldı. Kim daha çok aldı?`,
+      options: mc(kaz, [[kay, 'payda_buyuk', `${kay} paydası büyük olan kesri aldı. Paydası büyük olunca bütün daha çok parçaya bölünür, parçalar küçülür.`], ['İkisi eşit aldı', 'pay_payda_ayri', `Paylar aynı (${n}) ama paydalar farklı. Parçaların büyüklüğü farklı olduğu için eşit değildir.`]]),
+      hint: 'Paylar aynı. Hangisinde bütün daha az parçaya bölünmüş? Az parçaya bölünen bütünün parçası büyüktür.',
+      steps: [`Paylar eşit: ${n}.`, `${fr(n, dk)} > ${fr(n, db)} çünkü ${dk} parçaya bölünen bütünün parçası daha büyüktür.`, `Daha çok alan: ${kaz}`] });
+  });
+  // f_karsilastir seviye 3: üç kesri sıralama (paydalar birbirinin katı); yanlış sıralar «paya bak» ve «paydaya bak» yanılgılarının sıralarıdır
+  ekle('f_karsilastir', [3], 0.4, () => {
+    let k, n, ok, sp, sd; do {
+      const b = pick([2, 3]); const ds = shuffle([b, b * 2, b * 4]); k = ds.map(d => ({ d, p: ri(1, d - 1) }));
+      const v = (x) => x.p / x.d; n = new Set(k.map(v)).size === 3 && new Set(k.map(x => x.p)).size === 3;
+      ok = k.slice().sort((x, y) => v(x) - v(y)); sp = k.slice().sort((x, y) => x.p - y.p); sd = k.slice().sort((x, y) => x.d - y.d);
+    } while (!n || [ok, sp, sd].map(s => s.map(x => x.p + '/' + x.d).join()).some((t, i, a) => a.indexOf(t) !== i));
+    const D = Math.max(...k.map(x => x.d)), yaz = (s) => s.map(x => fr(x.p, x.d)).join(' < ');
+    return Q({ prompt: `${k.map(x => fr(x.p, x.d)).join(', ')}<br>Bu kesirlerin küçükten büyüğe doğru sıralanışı hangisidir?`,
+      options: mc(yaz(ok), [[yaz(sp), 'pay_payda_ayri', 'Yalnız paylara baktın. Paydalar farklıyken parçalar farklı büyüklüktedir; önce paydaları eşitle.'], [yaz(sd), 'payda_buyuk', 'Paydası büyük olanı büyük saydın. Payda büyüdükçe parçalar küçülür; önce paydaları eşitle.']]),
+      hint: `Paydaları eşitle: her kesri paydası en büyük payda olan denk kesre çevir, sonra payları karşılaştır.`,
+      steps: [...k.map(x => `${fr(x.p, x.d)} = ${fr(x.p * D / x.d, D)}`), `Paylara bak: ${yaz(ok)}`] });
+  });
+  // g_aci_iliski: komşu açılar ve «bütünler mi?» (seviye 1–2)
+  ekle('g_aci_iliski', [1, 2], 0.4, (lv) => {
+    const x = (lv === 1 ? ri(2, 8) : ri(3, 16)) * 10 + pick([0, 5]);
+    if (lv === 1) {
+      if (Math.random() < 0.5) return Q({ type: 'input', prompt: `Bir dik açı, iki komşu açıya ayrılmıştır. Açılardan biri ${x}° ise diğeri kaç derecedir?`, answer: String(90 - x), unit: '°',
+        inputMis: [{ v: 180 - x, mis: 'tumler_butunler' }], hint: 'Dik açının ölçüsünü hatırla. İki komşu açı birlikte onu oluşturur.', steps: ['Dik açı 90°. İki komşu açı birlikte 90° eder: tümler açılar.', `90 − ${x} = ${90 - x}°`] });
+      let y; do { y = ri(2, 8) * 10 + pick([0, 5]); } while (y === x || y === 90 - x);
+      return Q({ prompt: 'Aşağıdaki açı çiftlerinden hangisi birbirinin tümleridir?', options: mc(`${x}° ve ${90 - x}°`, [[`${x}° ve ${180 - x}°`, 'tumler_butunler', `Bu iki açının toplamı 180°; bunlar bütünler. Tümler açıların toplamı 90° olmalı.`], [`${y}° ve ${180 - y}°`, 'tumler_butunler', `Bu iki açının toplamı 180°; bunlar bütünler. Tümler açıların toplamı 90° olmalı.`]]),
+        hint: 'Her çiftin açılarını topla. Tümler açıların toplamı kaç derece olmalı?', steps: [`${x} + ${90 - x} = 90`, 'Toplamı 90° olan iki açı tümlerdir.'] });
+    }
+    if (Math.random() < 0.5) return Q({ type: 'input', prompt: `Bir doğru açı, iki komşu açıya ayrılmıştır. Açılardan biri ${x}° ise diğeri kaç derecedir?`, answer: String(180 - x), unit: '°',
+      inputMis: [...(x < 90 ? [{ v: 90 - x, mis: 'tumler_butunler' }] : []), { v: 360 - x, mis: 'tumler_butunler' }], hint: 'Doğru açının ölçüsünü hatırla. İki komşu açı birlikte onu oluşturur.', steps: ['Doğru açı 180°. İki komşu açı birlikte 180° eder: bütünler açılar.', `180 − ${x} = ${180 - x}°`] });
+    const tip = pick([180, 90, 170]), y = tip - x > 0 ? tip - x : 180 - x, top = x + y;
+    return tfQ({ prompt: `${x}° ve ${y}° ölçülerindeki iki açı birbirinin bütünleridir.`, hint: 'İki açıyı topla. Bütünler açıların toplamı kaç derece olmalı?',
+      steps: [`${x} + ${y} = ${top}`, top === 180 ? 'Toplam 180° → bütünler. İfade DOĞRU.' : top === 90 ? 'Toplam 90° → bunlar tümler, bütünler değil. İfade YANLIŞ.' : `Toplam ${top}°, 180° değil. İfade YANLIŞ.`] }, top === 180, 'tumler_butunler');
+  });
+  // e_oncelik: yeni biçimler (seviye 1: çıkarma/bölme ile; seviye 2: parantez + iki işlem)
+  ekle('e_oncelik', [1], 0.5, () => {
+    const t = pick(['eksi', 'bol', 'iki']);
+    if (t === 'eksi') { const b = ri(2, 9), c = ri(2, 9), a = b * c + ri(3, 30); const yan = (a - b) * c; return Q({ type: 'input', prompt: `${a} − ${b} × ${c} = ?`, answer: String(a - b * c), inputMis: yan !== a - b * c ? [{ v: yan, mis: 'oncelik_soldan' }] : [], hint: 'Çıkarma ile çarpma bir arada: hangisi önce yapılır?', steps: ['Önce çarpma!', `${b} × ${c} = ${b * c}`, `${a} − ${b * c} = ${a - b * c}`] }); }
+    if (t === 'bol') { const c = ri(2, 9), b = c * ri(2, 9), a = ri(3, 30); const sol = (a + b) % c === 0 ? (a + b) / c : null; return Q({ type: 'input', prompt: `${a} + ${b} ÷ ${c} = ?`, answer: String(a + b / c), inputMis: sol !== null && sol !== a + b / c ? [{ v: sol, mis: 'oncelik_soldan' }] : [], hint: 'Toplama ile bölme bir arada: hangisi önce yapılır?', steps: ['Önce bölme!', `${b} ÷ ${c} = ${b / c}`, `${a} + ${b / c} = ${a + b / c}`] }); }
+    let a, b, c, d; do { a = ri(3, 9); b = ri(3, 9); c = ri(2, 6); d = ri(2, 6); } while (a * b <= c * d || (a * b - c) * d === a * b - c * d);
+    return Q({ type: 'input', prompt: `${a} × ${b} − ${c} × ${d} = ?`, answer: String(a * b - c * d), inputMis: [{ v: (a * b - c) * d, mis: 'oncelik_soldan' }], hint: 'İki çarpma ve bir çıkarma var. Hangileri önce yapılır?', steps: ['Önce iki çarpma:', `${a} × ${b} = ${a * b} ve ${c} × ${d} = ${c * d}`, `${a * b} − ${c * d} = ${a * b - c * d}`] });
+  });
+  ekle('e_oncelik', [2], 0.4, () => {
+    if (Math.random() < 0.5) { let a, b, c, d; do { a = ri(2, 9); b = ri(5, 12); c = ri(1, b - 2); d = ri(2, 15); } while (a * b - c + d === a * (b - c) + d);
+      return Q({ type: 'input', prompt: `${a} × (${b} − ${c}) + ${d} = ?`, answer: String(a * (b - c) + d), inputMis: [{ v: a * b - c + d, mis: 'oncelik_soldan' }], hint: 'Parantez varsa önce neresi yapılır? Sonra çarpma mı, toplama mı?', steps: [`Önce parantez: ${b} − ${c} = ${b - c}`, `Sonra çarpma: ${a} × ${b - c} = ${a * (b - c)}`, `En son toplama: ${a * (b - c)} + ${d} = ${a * (b - c) + d}`] }); }
+    let a, b, c, d; do { a = ri(2, 20); b = ri(2, 9); c = ri(2, 9); d = ri(1, 15); } while (d >= a + b * c || (a + b) * c - d === a + b * c - d);
+    return Q({ type: 'input', prompt: `${a} + ${b} × ${c} − ${d} = ?`, answer: String(a + b * c - d), inputMis: [{ v: (a + b) * c - d, mis: 'oncelik_soldan' }], hint: 'Toplama, çarpma ve çıkarma bir arada. Önce hangisi?', steps: [`Önce çarpma: ${b} × ${c} = ${b * c}`, `Sonra soldan sağa: ${a} + ${b * c} = ${a + b * c}`, `${a + b * c} − ${d} = ${a + b * c - d}`] });
+  });
+  // e_esitlik seviye 1: boş yer başka yerde, çarpmalı eşitlik, «hangisi doğru bir eşitlik?»
+  ekle('e_esitlik', [1], 0.5, () => {
+    const t = pick(['yer', 'carp', 'hangi']);
+    if (t === 'yer') { let a, b, c; do { a = ri(3, 12); b = ri(2, 12); c = ri(2, 12); } while (a >= b + c || a === b || a === c); const top = b + c, bas = Math.random() < 0.5;
+      return Q({ type: 'input', prompt: `${bas ? '.......' : a} + ${bas ? a : '.......'} = ${b} + ${c}   Boş yere hangi sayı gelmelidir?`, answer: String(top - a), inputMis: [{ v: top, mis: 'esittir_sonuc' }, { v: top + a, mis: 'esittir_sonuc' }], hint: 'Eşittir işaretinin iki yanı aynı değerde olmalı. Önce bilinen tarafı hesapla.', steps: [`Sağ taraf: ${b} + ${c} = ${top}`, `Sol taraf da ${top} olmalı.`, `${top} − ${a} = ${top - a}`] }); }
+    if (t === 'carp') { const c = ri(2, 5), m = ri(2, 4), y = ri(2, 5), a = c * m, x = m * y;
+      return Q({ type: 'input', prompt: `${a} × ${y} = ${c} × .......   Boş yere hangi sayı gelmelidir?`, answer: String(x), inputMis: [{ v: a * y, mis: 'esittir_sonuc' }], hint: 'Eşittir işaretinin iki yanı aynı değerde olmalı. Önce sol tarafı hesapla.', steps: [`Sol taraf: ${a} × ${y} = ${a * y}`, `${c} × ....... = ${a * y} olmalı.`, `${a * y} ÷ ${c} = ${x}`] }); }
+    const a = ri(3, 12), b = ri(3, 12), e = ri(2, 6); let c; do { c = ri(2, a + b - 2); } while (c === a || c === b);
+    return Q({ prompt: 'Aşağıdakilerden hangisi doğru bir eşitliktir?', options: mc(`${a} + ${b} = ${c} + ${a + b - c}`, [[`${a} + ${b} = ${a + b} + ${e}`, 'esittir_sonuc', `"=" işareti "sonucu yaz" demek değildir; iki yan aynı değerde olmalı. Sağ taraf ${a + b + e}, sol taraf ${a + b}.`], [`${a} + ${b} = ${a + 1} + ${b + 1}`, 'denge_bozma', `İki terimi de 1 artırınca toplam 2 artar: sağ taraf ${a + b + 2}, sol taraf ${a + b}. Denge bozulur.`]]),
+      hint: 'Her şıkta eşittirin iki yanını ayrı ayrı hesapla. İki yan aynı mı?', steps: [`Sol: ${a} + ${b} = ${a + b}`, `Sağ: ${c} + ${a + b - c} = ${a + b}`, 'İki yan eşit → doğru eşitlik.'] });
+  });
+  // a_cevre seviye 1: kare ve eşkenar üçgen
+  ekle('a_cevre', [1], 0.35, () => {
+    const k = ri(3, 15);
+    if (Math.random() < 0.5 && k !== 4) return Q({ type: 'input', prompt: `Bir kenarı ${k} cm olan karenin çevre uzunluğu kaç cm'dir?`, answer: String(4 * k), unit: 'cm', inputMis: [{ v: k * k, mis: 'cevre_alan' }, { v: 2 * k, mis: 'cevre_yarim' }], hint: 'Karenin kaç kenarı var ve kenarları nasıl? Çevre, bütün kenarların toplamıdır.', steps: ['Karenin 4 kenarı eşittir.', `${k} + ${k} + ${k} + ${k} = ${4 * k} cm`] });
+    return Q({ type: 'input', prompt: `Bütün kenarları ${k} cm olan bir üçgenin çevre uzunluğu kaç cm'dir?`, answer: String(3 * k), unit: 'cm', inputMis: [{ v: 4 * k, mis: 'cokgen_sayi' }, { v: 2 * k, mis: 'cevre_yarim' }], hint: 'Üçgenin kaç kenarı var? Çevre, bütün kenarların toplamıdır.', steps: ['Üçgenin 3 kenarı var, hepsi eşit.', `${k} + ${k} + ${k} = ${3 * k} cm`] });
+  });
+  // a_alan seviye 1–2: alanı ve bir kenarı verilen dikdörtgenin diğer kenarı
+  ekle('a_alan', [1, 2], 0.35, () => {
+    const [a, b] = dikKenar(3), A = a * b, [ver, ist] = Math.random() < 0.5 ? [a, b] : [b, a], yan = [{ v: A - ver, mis: 'ters_islem' }];
+    if (A % 2 === 0 && A / 2 - ver > 0 && A / 2 - ver !== ist && A / 2 - ver !== A - ver) yan.push({ v: A / 2 - ver, mis: 'cevre_alan' });
+    return Q({ type: 'input', prompt: `Alanı ${A} m² olan dikdörtgen biçimindeki bir halının bir kenarı ${ver} m'dir. Diğer kenarı kaç metredir?`, answer: String(ist), unit: 'm', inputMis: yan.filter(m => m.v !== ist),
+      hint: 'Dikdörtgenin alanı iki kenarın çarpımıdır. Hangi sayıyı bu kenarla çarpınca alan çıkar?', steps: [`Alan = kenar × kenar → ${ver} × ....... = ${A}`, `${A} ÷ ${ver} = ${ist} m`] });
+  });
+  // a_cevre_alan seviye 3: çevreleri eşit iki dikdörtgenin alanlarını karşılaştırma
+  ekle('a_cevre_alan', [3], 0.45, () => {
+    const h = pick([8, 10, 12]); let x, y; do { x = ri(1, h / 2 - 1); y = ri(x + 1, h / 2); } while ((h - x) * x === (h - y) * y);
+    const A1 = (h - x) * x, A2 = (h - y) * y, [kx, ky] = A2 > A1 ? [`${h - y} cm × ${y} cm`, `${h - x} cm × ${x} cm`] : [`${h - x} cm × ${x} cm`, `${h - y} cm × ${y} cm`];
+    return Q({ prompt: `${h - x} cm × ${x} cm ve ${h - y} cm × ${y} cm boyutlarında iki dikdörtgen var. Hangisi doğrudur?`,
+      options: mc(`Çevreleri eşittir; alanı büyük olan ${kx} olandır.`, [['Çevreleri eşit olduğu için alanları da eşittir.', 'cevre_alan_ayni', `Çevreleri eşit (${2 * h} cm) ama alanları ${A1} cm² ve ${A2} cm²: farklı.`], [`Alanları eşittir; çevresi büyük olan ${ky} olandır.`, 'cevre_alan', `Çevre ile alanı karıştırdın. Çevreler eşit (${2 * h} cm), alanlar farklı.`]]),
+      hint: 'İki dikdörtgenin önce çevrelerini, sonra alanlarını ayrı ayrı hesapla.',
+      steps: [`Çevreler: 2 × (${h - x} + ${x}) = ${2 * h} cm ve 2 × (${h - y} + ${y}) = ${2 * h} cm`, `Alanlar: ${h - x} × ${x} = ${A1} cm² ve ${h - y} × ${y} = ${A2} cm²`, 'Çevreleri eşit dikdörtgenlerin alanları farklı olabilir.'] });
+  });
+  // n_toplacikar: seviye 1 günlük hayat problemi, seviye 2 bilinmeyen eksilen/çıkan
+  ekle('n_toplacikar', [1], 0.35, () => {
+    const a = ri(10, 60) * 1000 + ri(0, 999), b = ri(1, 9) * 1000 + ri(100, 999), ekle_ = Math.random() < 0.5, ans = ekle_ ? a + b : a - b, yan = [{ v: ekle_ ? a - b : a + b, mis: 'ters_islem' }];
+    if (ekle_ && a % 10 + b % 10 >= 10) yan.push({ v: ans - 10, mis: 'elde_unutma' });
+    return Q({ type: 'input', prompt: ekle_ ? `Bir kütüphanede ${fmtN(a)} kitap vardı. ${fmtN(b)} kitap daha geldi. Kütüphanede kaç kitap oldu?` : `Bir kütüphanede ${fmtN(a)} kitap vardı. ${fmtN(b)} kitap başka okullara gönderildi. Kütüphanede kaç kitap kaldı?`,
+      answer: String(ans), unit: 'kitap', inputMis: yan, hint: ekle_ ? 'Kitaplar arttı mı, azaldı mı? Buna göre hangi işlemi yaparsın?' : 'Kitaplar arttı mı, azaldı mı? Buna göre hangi işlemi yaparsın?',
+      steps: [ekle_ ? 'Kitap geldi → sayı artar → toplama.' : 'Kitap gönderildi → sayı azalır → çıkarma.', `${fmtN(a)} ${ekle_ ? '+' : '−'} ${fmtN(b)} = ${fmtN(ans)}`] });
+  });
+  ekle('n_toplacikar', [2], 0.4, () => {
+    const a = ri(12, 60) * 1000 + ri(0, 999), b = ri(2, 9) * 1000 + ri(0, 999);
+    if (Math.random() < 0.5) return Q({ type: 'input', prompt: `....... − ${fmtN(b)} = ${fmtN(a)}   Boş yere hangi sayı gelmelidir?`, answer: String(a + b), inputMis: [{ v: a - b, mis: 'ters_islem' }], hint: 'Bir sayıdan bir şey çıkarınca kalan verilmiş. Başta kaç vardı? Ters işlemi düşün.', steps: ['Eksilen = fark + çıkan', `${fmtN(a)} + ${fmtN(b)} = ${fmtN(a + b)}`] });
+    return Q({ type: 'input', prompt: `${fmtN(a)} − ....... = ${fmtN(b)}   Boş yere hangi sayı gelmelidir?`, answer: String(a - b), inputMis: [{ v: a + b, mis: 'ters_islem' }], hint: 'Büyük sayıdan ne kadar çıkarınca küçük sayı kalır? Ters işlemi düşün.', steps: ['Çıkan = eksilen − fark', `${fmtN(a)} − ${fmtN(b)} = ${fmtN(a - b)}`] });
+  });
+  // n_carpbol seviye 1: 10, 100, 1000'e bölme
+  ekle('n_carpbol', [1], 0.35, () => {
+    const z = pick([10, 100, 1000]), q = pick([3, 4, 5, 6, 7, 8, 9, 12, 15, 25, 45]) * pick([1, 10]), n = q * z, sifir = String(z).length - 1;
+    return Q({ prompt: `${fmtN(n)} ÷ ${fmtN(z)} işleminin sonucu kaçtır?`, options: mc(fmtN(q), [[fmtN(q * 10), 'sifir_sayisi', `Bir sıfır eksik attın. ${fmtN(z)} ile bölerken sondan ${sifir} sıfır atılır.`], ...(q % 10 === 0 ? [[fmtN(q / 10), 'sifir_sayisi', `Bir sıfır fazla attın. ${fmtN(z)} ile bölerken sondan ${sifir} sıfır atılır.`]] : []), [fmtN(n * z), 'ters_islem', 'Çarptın. Bölmede sayı küçülür; sondan sıfır atılır.']]),
+      hint: '10, 100 ya da 1000 ile bölerken sondan kaç sıfır atılır? Bölen sayıdaki sıfırları say.', steps: [`${fmtN(z)} sayısında ${sifir} sıfır var.`, `${fmtN(n)} sayısının sonundan ${sifir} sıfır atılır: ${fmtN(q)}`] });
+  });
   G.MY_GEN = GEN; G.MY_MIS = MIS; G.MY_KES = KES_CHECK; G.MY_OLC = OLC_CHECK; G.MY_GRAF = GRAF_CHECK; G.MY_HATA = HATA; G.MY_ATOLYE = ATOLYE;
   for (const [id, e] of Object.entries(EK)) { const base = GEN[id]; GEN[id] = (lv) => { const L = e.L[lv]; return L && Math.random() < e.p ? pick(L)(lv) : base(lv); }; }
   // Soruya özel ipucu en son eklenir (EK dahil bütün üreticilerin üstünde)
