@@ -4,7 +4,7 @@
    - Sorular TOHUMLU rastgele sayılarla üretilir: aynı soru kimliği her açılışta aynı soruyu verir.
      Ayrıca değerlendirilen sorunun tam kopyası (metin, şıklar, cevap) sunucuya kaydedilir; üretici
      sonradan değişse bile öğretmenin neye baktığı kaybolmaz.
-   - Her konudan 10 örnek (seviye 1·1·1·2·2·2·2·3·3·3) + Hata Avcısı (42) + Problem Atölyesi (20 problem).
+   - Her konudan 10 örnek (seviye 1·1·1·2·2·2·2·3·3·3) + Hata Avcısı (her konudan 2 = 70) + Problem Atölyesi (her şablondan 2 = 30 problem).
    - Kararlar önce cihaza yazılır, sonra sunucuya gönderilir; internet yoksa sırada bekler.
    ========================================================= */
 (function () {

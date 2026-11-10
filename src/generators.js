@@ -1620,6 +1620,97 @@
           steps: ['Paydalar eşit: payı büyük olan büyüktür.', `${buyukK} > ${kucukK} → ${kazanan} daha çok yedi.`] }],
       kontrol: [`${kazanan} daha çok yedi dedin. Hangisi bu cevabı doğrular?`, `Paydalar eşitlenince ${buyukK} > ${kucukK} oluyor.`, [[`${b} < ${D} olduğu için paydası ${D} olan kesir daha büyüktür.`, 'payda_buyuk', 'Payda büyüdükçe dilimler küçülür; paydaya bakarak karar verilmez.'], ['Payı büyük olan kesir her zaman daha büyüktür.', 'pay_payda_ayri', 'Bu her zaman doğru değil; paydalar farklıysa yanılırsın. Önce paydaları eşitle.']], 'Paydaları eşit kesirlerde payı büyük olan daha büyüktür.'] });
   };
+  // ---- 10.11.2026: 5 yeni şablon (bütçe, halı, anket, bozuk para, elma kasası) ----
+  PROB.butce = () => {
+    const ad = pick(NAMES); let B, a, b, top, kalan;
+    do { B = ri(8, 19) * 100 + ri(0, 9) * 10; a = ri(121, 479); b = ri(121, 479); top = a + b; kalan = B - top; } while (a === b || kalan < 60 || kalan === top || kalan === a || kalan === b || B - a === kalan);
+    const yan1 = [{ v: a, mis: 'problem_adim', ac: `Bu yalnız ayakkabının fiyatı. Montun fiyatını (${b} TL) da eklemelisin.` }, { v: Math.abs(a - b), mis: 'fark_toplam', ac: 'İki fiyatın farkını aldın. Harcanan para, iki fiyatın TOPLAMIDIR.' }];
+    if (a % 10 + b % 10 >= 10) yan1.push({ v: top - 10, mis: 'elde_unutma', ac: 'Birler basamağındaki toplam 10\'u geçti; eldeyi onlar basamağına eklemeyi unuttun.' });
+    return P({ skill: 'n_toplacikar', baslik: 'Kumbara bütçesi',
+      tablo: { verilen: [`Kumbarada ${fmtN(B)} TL`, `Ayakkabı ${a} TL`, `Mont ${b} TL`], ara: ['Harcanan toplam para'], istenen: 'Kumbarada kalan para' }, kur: { kartlar: [B, a, b], ornek: `${fmtN(B)} − (${a} + ${b})`, ne: 'kalan parayı' },
+      baglam: `${U.wk(ad, 'in')} kumbarasında ${fmtN(B)} TL vardı. ${a} TL'ye bir ayakkabı, ${b} TL'ye bir mont aldı. Kumbarasında kaç TL kaldı?`,
+      anla: ['Kumbarada kalan para', [['Harcadığı toplam para', 'ara_sonuc', 'Harcanan para bir ara sonuç. Soru kumbarada KALAN parayı soruyor.'], ['Ayakkabının fiyatı', 'istenen_verilen', `Ayakkabının fiyatı problemde verilmiş (${a} TL). Soru verilmeyen bir şeyi soruyor.`], ['Başta kumbarada olan para', 'istenen_verilen', `Baştaki para problemde yazıyor (${fmtN(B)} TL). Soru alışverişten SONRA kalanı soruyor.`]]],
+      plan: ['Önce harcadığı toplam parayı bulurum, sonra kumbaradaki paradan çıkarırım.', [['Kumbaradaki paraya harcadıklarını eklerim.', 'ters_islem', 'Harcanan para kumbaradan ÇIKAR. Eklersek para artmış olur; bu olamaz.'], ['Sadece ayakkabının fiyatını kumbaradaki paradan çıkarırım.', 'problem_adim', 'Mont da alındı. Önce iki ürünün toplam fiyatını bulmalıyız.'], ['Ayakkabı ile montun fiyat farkını bulurum.', 'fark_toplam', 'Fark hangisinin daha pahalı olduğunu söyler; harcanan parayı değil. Harcanan para iki fiyatın toplamıdır.']]],
+      coz: [{ prompt: `${ad} toplam kaç TL harcadı?`, answer: top, unit: 'TL', ip: 'Aldığı iki ürünün fiyatlarını birleştir.', inputMis: yan1,
+          steps: [`Ayakkabı ve mont: ${a} + ${b} = ${top} TL`] },
+        { prompt: `Toplam ${top} TL harcadı. Kumbarasında kaç TL kaldı?`, answer: kalan, unit: 'TL', ip: 'Baştaki paradan harcanan para çıkınca geriye ne kalır?',
+          inputMis: [{ v: B + top, mis: 'ters_islem', ac: `Harcanan parayı ekledin. Harcanan para kumbaradan çıkar: ${fmtN(B)} − ${top}.` }, { v: top, mis: 'ara_sonuc', ac: 'Bu harcanan para, kalan değil. Baştaki paradan bunu çıkarmalısın.' }, { v: B - a, mis: 'problem_adim', ac: `Sadece ayakkabıyı çıkardın. Toplam harcamayı (${top} TL) çıkarmalısın.` }],
+          steps: [`Kalan = baştaki para − harcanan para`, `${fmtN(B)} − ${top} = ${fmtN(kalan)} TL`] }],
+      kontrol: [`Kalan parayı ${fmtN(kalan)} TL buldun. Hangi işlem bu cevabı doğrular?`, `${fmtN(kalan)} + ${top} = ${fmtN(B)}`, [[`${fmtN(B)} + ${top} = ${fmtN(B + top)}`, 'ters_islem', 'Baştaki paraya harcamayı eklemek hiçbir şeyi doğrulamaz. Kalan + harcanan, baştaki paraya eşit olmalı.'], [`${fmtN(kalan)} + ${a} = ${fmtN(kalan + a)}`, 'problem_adim', 'Sadece ayakkabıyı ekledin. Kalan para ile TOPLAM harcama birlikte baştaki paraya eşit olmalı.']], 'Kalan para ile harcanan paranın toplamı, başta kumbarada olan paraya eşit olmalı.'],
+      derin: [`${fmtN(B)} − ${a} − ${b}`, [[`${fmtN(B)} − ${a} + ${b}`, 'ters_islem', 'Montun parası da kumbaradan ÇIKAR; eklenmez.'], [`${a} + ${b}`, 'ara_sonuc', 'Bu yalnız harcanan para; kumbarada kalanı vermez.']]] });
+  };
+  PROB.hali = () => {
+    let a, b; do { [a, b] = dikKenar(4); } while (a * b === a + b || 2 * (a + b) - a === a * b || (a + b) === a * b);
+    const P2 = 2 * (a + b), yari = a + b, alan = a * b;
+    const yan1 = [{ v: P2 - a, mis: 'ters_cevre', ac: `Çevrede uzun kenar İKİ kez var. Önce çevreyi ikiye böl (${yari}), sonra uzun kenarı çıkar.` }, { v: yari, mis: 'ara_sonuc', ac: `Bu iki kenarın toplamı (yarım çevre). Uzun kenarı (${a} m) da çıkarmalısın.` }];
+    return P({ skill: 'a_cevre_alan', baslik: 'Odaya halı',
+      tablo: { verilen: [`Çevresi ${P2} m`, `Uzun kenarı ${a} m`], ara: ['Kısa kenar'], istenen: 'Gereken halının alanı' },
+      baglam: `Dikdörtgen biçimindeki bir odanın çevresi ${P2} m, uzun kenarı ${a} m. Odanın tabanının tamamına halı serilecek. Kaç metrekare halı gerekir?`,
+      anla: ['Gereken halının alanı', [['Odanın çevresi', 'istenen_verilen', `Çevre problemde verilmiş (${P2} m). Soru halının kaç metrekare olacağını soruyor.`], ['Odanın kısa kenarı', 'ara_sonuc', 'Kısa kenar bir ara sonuç. Soru gereken halıyı soruyor.'], ['Odanın etrafına gereken şerit uzunluğu', 'cevre_alan', 'Halı tabanı kaplar. Etraftaki uzunluk değil, tabanın alanı gerekir.']]],
+      plan: ['Çevreyi ikiye bölüp uzun kenarı çıkarırım; kısa kenarı bulunca iki kenarı çarparım.', [['Çevreden uzun kenarı çıkarırım, bulduğum sayı kısa kenardır.', 'ters_cevre', 'Çevrede uzun kenar iki kez var. Önce çevreyi ikiye bölmelisin.'], ['Çevre ile uzun kenarı çarparım.', 'cevre_alan', 'Çevre ile kenarı çarpmak alanı vermez. Alan için iki kenarı çarparız; önce kısa kenarı bulmalıyız.'], ['Kısa kenarı bulurum, iki kenarı toplarım.', 'cevre_alan', 'Kenarları toplamak çevreye götürür. Taban için kenarları çarpıp alanı bulmalıyız.']]],
+      coz: [{ prompt: 'Odanın kısa kenarı kaç metre?', answer: b, unit: 'm', ip: 'Çevrede her kenar iki kez var. Bir uzun ve bir kısa kenar çevrenin kaçta kaçıdır?', inputMis: yan1,
+          steps: [`Bir uzun + bir kısa kenar: ${P2} ÷ 2 = ${yari}`, `Kısa kenar: ${yari} − ${a} = ${b} m`] },
+        { prompt: `Kısa kenar ${b} m. Kaç metrekare halı gerekir?`, answer: alan, unit: 'm²', ip: 'Tabanı 1 metrekarelik karelere bölsen kaç kare olurdu? Kenarları kullan.',
+          inputMis: [{ v: P2, mis: 'cevre_alan', ac: 'Bu odanın çevresi. Halı için alan gerekir: kenarları çarp.' }, { v: yari, mis: 'cevre_alan', ac: 'Kenarları topladın. Alan için kenarları çarp.' }],
+          steps: [`Alan = ${a} × ${b} = ${alan} m²`] }],
+      kontrol: [`${alan} m² buldun. Hangisi bu cevabı doğrular?`, `${alan} ÷ ${a} = ${b} ve ${a} + ${b} + ${a} + ${b} = ${P2}`, [[`${alan} + ${P2} = ${alan + P2}`, 'cevre_alan', 'Alanla çevreyi toplamak hiçbir şeyi doğrulamaz.'], [`${alan} − ${a} = ${alan - a}`, 'ters_islem', 'Kenarı alandan çıkarmak anlamlı değil. Alanı kenara BÖLERSEN öbür kenarı bulursun.']], 'Alanı uzun kenara bölünce kısa kenarı bulmalısın; dört kenar toplanınca da verilen çevre çıkmalı.'],
+      derin: [`${a} × (${P2} ÷ 2 − ${a})`, [[`${a} × (${P2} − ${a})`, 'ters_cevre', 'Çevreyi ikiye bölmeden uzun kenarı çıkardın; kısa kenar yanlış çıkar.'], [`${a} + (${P2} ÷ 2 − ${a})`, 'cevre_alan', 'Kenarları topladın; alan için çarpmalısın.']]] });
+  };
+  // [bütünü kaça böler, okunuşu, iyelik eki (%50'si), ilgi eki (%50'nin)]
+  const YUZDE_PAY = { 50: [2, 'yarısı', 'si', 'nin'], 25: [4, 'dörtte biri', 'i', 'in'], 20: [5, 'beşte biri', 'si', 'nin'], 10: [10, 'onda biri', 'u', 'un'] };
+  PROB.anket = () => {
+    const [X, Y] = shuffle(['futbolu', 'voleybolu', 'basketbolu', 'yüzmeyi', 'tenisi']).slice(0, 2);
+    let T, p1, p2, x, y, fark;
+    do { T = pick([20, 40, 60, 80]); [p1, p2] = pick([[50, 25], [50, 20], [50, 10], [25, 10], [20, 10], [50, 25]]); x = T / YUZDE_PAY[p1][0]; y = T / YUZDE_PAY[p2][0]; fark = x - y; } while (fark === p1 - p2 || fark === y || x + y === fark);
+    const ad = (s) => s.replace(/(u|yi|i)$/, (m) => ({ u: '', yi: '', i: '' })[m]).replace(/futbol$/, 'Futbol').replace(/voleybol$/, 'Voleybol').replace(/basketbol$/, 'Basketbol').replace(/yüzme$/, 'Yüzme').replace(/tenis$/, 'Tenis');
+    const Xa = ad(X), Ya = ad(Y), d1 = YUZDE_PAY[p1][0], d2 = YUZDE_PAY[p2][0];
+    return P({ skill: 's_daire', baslik: 'Spor anketi',
+      tablo: { verilen: [`${T} öğrenci katıldı`, `%${p1} ${X} seçti`, `%${p2} ${Y} seçti`], ara: [`${Xa} seçenlerin sayısı`, `${Ya} seçenlerin sayısı`], istenen: 'İki sayı arasındaki fark' },
+      baglam: `Bir ankete ${T} öğrenci katıldı. Daire grafiğine göre öğrencilerin %${p1}'${YUZDE_PAY[p1][2]} ${X}, %${p2}'${YUZDE_PAY[p2][2]} ${Y} seçti. ${Xa} seçenler, ${Ya.toLocaleLowerCase('tr-TR')} seçenlerden kaç kişi fazladır?`,
+      anla: ['İki sporu seçenlerin sayıca farkı', [[`${Xa} seçenlerin sayısı`, 'ara_sonuc', 'Bu bir ara sonuç. Soru iki sporu seçenler arasındaki FARKI soruyor.'], ['İki sporu seçenlerin toplamı', 'fark_toplam', '"Kaç kişi fazla" bir fark sorusudur, toplam sorusu değil.'], ['Ankete katılan öğrenci sayısı', 'istenen_verilen', `Katılan öğrenci sayısı problemde verilmiş (${T}).`]]],
+      plan: ['Yüzdelerden iki sporu seçenlerin sayısını bulurum, büyükten küçüğü çıkarırım.', [['Yüzdeleri çıkarırım; çıkan sayı kişi sayısıdır.', 'dilim_oran', `Yüzde, kişi sayısı değildir. %${p1}, ${T} öğrencinin bir parçasıdır; önce kaç kişi ettiğini bulmalıyız.`], ['İki sporu seçenlerin sayısını toplarım.', 'fark_toplam', '"Kaç kişi fazla" farkı sorar; büyükten küçüğü çıkarmalıyız.'], ['Daire grafiğinde büyük dilimi bulurum; cevap budur.', 'grafik_okuma', 'Büyük dilim hangi sporun önde olduğunu söyler; kaç kişi fark olduğunu söylemez.']]],
+      coz: [{ prompt: `${Xa} seçen kaç öğrenci var?`, answer: x, unit: 'öğrenci', ip: `%${p1}, bütünün kaçta kaçıdır? Bütün, ankete katılan bütün öğrencilerdir.`,
+          inputMis: [{ v: p1, mis: 'dilim_oran', ac: `%${p1}, ${p1} öğrenci demek değildir. ${T} öğrencinin ${YUZDE_PAY[p1][1]} kadarıdır.` }],
+          steps: [`%${p1}, bütünün ${YUZDE_PAY[p1][1]}`, `${T} ÷ ${d1} = ${x} öğrenci`] },
+        { prompt: `${Xa} seçen ${x} öğrenci var. ${Ya} seçenlerden kaç kişi fazladır?`, answer: fark, unit: 'öğrenci', ip: `Önce %${p2}'${YUZDE_PAY[p2][3]} kaç öğrenci ettiğini bul. Sonra iki sayıyı karşılaştır.`,
+          inputMis: [{ v: p1 - p2, mis: 'dilim_oran', ac: 'Yüzdeleri çıkardın; bu kişi sayısı değil. Önce iki sporun öğrenci sayısını bul.' }, { v: x + y, mis: 'fark_toplam', ac: 'İki sayıyı topladın. "Kaç kişi fazla" sorusunda büyükten küçüğü çıkarırız.' }, { v: y, mis: 'ara_sonuc', ac: `Bu ${Ya.toLocaleLowerCase('tr-TR')} seçenlerin sayısı. Farkı bulmak için ${x} sayısından çıkarmalısın.` }],
+          steps: [`%${p2}, bütünün ${YUZDE_PAY[p2][1]}: ${T} ÷ ${d2} = ${y} öğrenci`, `Fark: ${x} − ${y} = ${fark} öğrenci`] }],
+      kontrol: [`Farkı ${fark} öğrenci buldun. Hangi işlem bu cevabı doğrular?`, `${fark} + ${y} = ${x}`, [[`${fark} + ${x} = ${fark + x}`, 'ters_islem', 'Farkı büyük sayıya eklemek bir şey doğrulamaz. Farkı KÜÇÜK sayıya eklersen büyük sayıyı bulmalısın.'], [`${x} + ${y} = ${x + y}`, 'fark_toplam', 'Bu iki sayının toplamı; farkı kontrol etmez.']], 'Farkı küçük sayıya eklersen büyük sayıyı bulmalısın.'],
+      derin: [`${T} ÷ ${d1} − ${T} ÷ ${d2}`, [[`${p1} − ${p2}`, 'dilim_oran', 'Yüzdeleri çıkarmak kişi sayısını vermez.'], [`${T} ÷ ${d1} + ${T} ÷ ${d2}`, 'fark_toplam', 'Bu iki sayının toplamı; fark gerekiyor.']]] });
+  };
+  PROB.bozuk = () => {
+    const ad = pick(NAMES); let L, c50, c25, k; do { L = ri(1, 5); c50 = ri(2, 7); c25 = ri(1, 7); k = 50 * c50 + 25 * c25; } while (k % 100 === 0 || c50 + c25 === k);
+    const tl = (v) => `${fmtD(v, 2)} TL`, top = L + k / 100, kurusTop = 100 * L + k;
+    return P({ skill: 'f_ondalik', baslik: 'Bozuk paralar',
+      tablo: { verilen: [`${L} tane 1 TL`, `${c50} tane 50 kuruş`, `${c25} tane 25 kuruş`], ara: ['Bozuk paraların kuruş olarak toplamı'], istenen: 'Kumbaradaki toplam para (TL)' },
+      baglam: `${U.wk(ad, 'in')} kumbarasından ${L} tane 1 TL, ${c50} tane 50 kuruş ve ${c25} tane 25 kuruş çıktı. Kumbarada toplam kaç TL var?`,
+      anla: ['Kumbaradaki toplam para (TL olarak)', [['Kumbaradaki paraların adedi', 'problem_adim', 'Soru kaç tane para olduğunu değil, hepsinin birlikte kaç TL ettiğini soruyor.'], ['Bozuk paraların kuruş olarak toplamı', 'ara_sonuc', 'Kuruşların toplamı bir ara sonuç. Soru hepsinin kaç TL ettiğini soruyor.'], ['50 kuruşların sayısı', 'istenen_verilen', `50 kuruşların sayısı problemde verilmiş (${c50}).`]]],
+      plan: ['Bozuk paraları kuruş olarak toplarım, kuruşu liraya çevirip 1 TL\'leri eklerim.', [['Bütün paraların adedini toplarım.', 'problem_adim', 'Adet, paranın değerini söylemez. Her paranın değerini adediyle çarpmalıyız.'], ['Kuruşları liralarla doğrudan toplarım.', 'fiyat_okuma', 'Lira ile kuruş doğrudan toplanmaz. 100 kuruş 1 TL eder; önce aynı birime çevirmeliyiz.'], ['Sadece 1 TL\'leri sayarım; kuruşlar para sayılmaz.', 'problem_adim', 'Kuruşlar da paradır. Onlar da toplama girer.']]],
+      coz: [{ prompt: '50 kuruşlar ve 25 kuruşlar birlikte kaç kuruş eder?', answer: k, unit: 'kuruş', ip: 'Her bozuk paranın değerini adediyle çarp, sonra topla.',
+          inputMis: [{ v: c50 + c25, mis: 'problem_adim', ac: 'Paraların adedini topladın. Her paranın değerini adediyle çarp: 50 kuruşlar ve 25 kuruşlar ayrı ayrı.' }, { v: 50 * c50, mis: 'problem_adim', ac: `Bu yalnız 50 kuruşlar. 25 kuruşları (${c25} tane) da eklemelisin.` }],
+          steps: [`50 kuruşlar: ${c50} × 50 = ${50 * c50} kuruş`, `25 kuruşlar: ${c25} × 25 = ${25 * c25} kuruş`, `Toplam: ${50 * c50} + ${25 * c25} = ${k} kuruş`] },
+        { prompt: `Bozuk paralar ${k} kuruş ediyor. Kumbarada toplam kaç TL var?`, ip: '100 kuruş 1 TL eder. Kuruşları liraya çevir, sonra 1 TL\'leri ekle.',
+          options: mc(tl(top), [[`${L + k} TL`, 'fiyat_okuma', 'Kuruşu lira gibi topladın. 100 kuruş 1 TL eder; önce kuruşu liraya çevirmelisin.'], [`${L},${k} TL`, 'ondalik_basamak', `Kuruşu virgülden sonra olduğu gibi yazdın. ${k} kuruş, ${Math.floor(k / 100)} TL ve ${k % 100} kuruştur; virgülden sonra 2 basamak olur.`], [tl(k / 100), 'problem_adim', `${L} tane 1 TL'yi unuttun. Onları da eklemelisin.`]]),
+          steps: [`${k} kuruş = ${tl(k / 100)}`, `${L} TL + ${tl(k / 100)} = ${tl(top)}`] }],
+      kontrol: [`${tl(top)} buldun. Hangisi bu cevabı doğrular?`, `${L} TL = ${100 * L} kuruş; ${100 * L} + ${k} = ${kurusTop} kuruş; ${kurusTop} kuruş = ${tl(top)}`, [[`${L} + ${k} = ${L + k}`, 'fiyat_okuma', 'Lira ile kuruş doğrudan toplanmaz; önce aynı birime çevirmelisin.'], [`${L} + ${c50} + ${c25} = ${L + c50 + c25}`, 'problem_adim', 'Paraların adedini saydın; değerlerini değil.']], 'Hepsini kuruşa çevirip toplayınca aynı tutara ulaşmalısın; 100 kuruş 1 TL eder.'] });
+  };
+  PROB.kasa = () => {
+    let k, kasa, f, N; do { k = pick([12, 15, 20, 24, 25]); kasa = ri(6, 28); f = pick([40, 50, 60, 75, 80, 120, 150]); N = kasa * k; } while (kasa === f || kasa * f === N * f || kasa + f === kasa * f);
+    const tut = kasa * f;
+    return P({ skill: 'n_carpbol', baslik: 'Elma kasaları',
+      tablo: { verilen: [`${N} elma`, `Bir kasaya ${k} elma`, `Bir kasa ${f} TL`], ara: ['Kasa sayısı'], istenen: 'Kazanılan toplam para' }, kur: { kartlar: [N, k, f], ornek: `${N} ÷ ${k} × ${f}`, ne: 'kazanılan parayı' },
+      baglam: `Bir bahçeden ${N} elma toplandı. Elmalar her kasaya ${k} tane olacak biçimde yerleştirildi. Bir kasa elma ${f} TL'ye satıldı. Bütün kasalar satılınca kaç TL kazanılır?`,
+      anla: ['Satıştan kazanılan toplam para', [['Kasa sayısı', 'ara_sonuc', 'Kasa sayısı bir ara sonuç. Soru kazanılan parayı soruyor.'], ['Bir kasanın fiyatı', 'istenen_verilen', `Bir kasanın fiyatı problemde verilmiş (${f} TL).`], ['Toplanan elma sayısı', 'istenen_verilen', `Elma sayısı problemde verilmiş (${N}).`]]],
+      plan: ['Elmaları kasalara bölerim, kasa sayısını bir kasanın fiyatıyla çarparım.', [['Elma sayısını bir kasanın fiyatıyla çarparım.', 'problem_adim', 'Fiyat bir ELMANIN değil, bir KASANIN fiyatı. Önce kaç kasa olduğunu bulmalıyız.'], ['Elma sayısını bir kasadaki elma sayısıyla çarparım.', 'ters_islem', 'Elmaları kasalara paylaştırmak bölmedir. Çarparsak çok büyük bir sayı çıkar.'], ['Kasa sayısına bir kasanın fiyatını eklerim.', 'problem_adim', `Her kasa için ${f} TL kazanılır. Kasa sayısı kadar ÇARPMALIYIZ.`]]],
+      coz: [{ prompt: 'Kaç kasa elma oldu?', answer: kasa, unit: 'kasa', ip: `${N} elmayı ${k} elmalık gruplara ayırırsan kaç grup olur?`,
+          inputMis: [{ v: N * k, mis: 'ters_islem', ac: 'Çarptın. Elmaları kasalara paylaştırmak bölmedir.' }, { v: N - k, mis: 'ters_islem', ac: 'Bir kasa kadar elma çıkardın. Kaç kasa olduğunu bölme söyler.' }],
+          steps: [`${N} ÷ ${k} = ${kasa} kasa`] },
+        { prompt: `${kasa} kasa elma var. Hepsi satılınca kaç TL kazanılır?`, answer: tut, unit: 'TL', ip: `Bir kasa ${f} TL. ${kasa} kasa için hangi işlemi yaparsın?`,
+          inputMis: [{ v: kasa + f, mis: 'problem_adim', ac: `Kasa sayısıyla fiyatı topladın. Her kasa ${f} TL olduğu için çarpmalısın.` }, { v: N * f, mis: 'problem_adim', ac: 'Elma sayısıyla çarptın. Fiyat bir KASANIN fiyatı; kasa sayısıyla çarpmalısın.' }],
+          steps: [`Her kasa ${f} TL.`, `${kasa} × ${f} = ${fmtN(tut)} TL`] }],
+      kontrol: [`${fmtN(tut)} TL buldun. Hangi işlem bu cevabı doğrular?`, `${fmtN(tut)} ÷ ${f} = ${kasa}`, [[`${fmtN(tut)} × ${f} = ${fmtN(tut * f)}`, 'ters_islem', 'Bu işlem sayıyı büyütüyor, geriye gitmiyor. Çarpmayı kontrol etmek için bölmeyi kullan.'], [`${fmtN(tut)} − ${f} = ${fmtN(tut - f)}`, 'ters_islem', 'Fiyatı çıkarmak anlamlı değil. Toplam parayı bir kasanın fiyatına bölersen kasa sayısını bulursun.']], 'Toplam parayı bir kasanın fiyatına bölersen kasa sayısını bulmalısın.'],
+      derin: [`${f} × ${N} ÷ ${k}`, [[`${N} × ${f}`, 'problem_adim', 'Fiyat bir kasanın fiyatı; elma sayısıyla çarpılmaz.'], [`${N} ÷ ${k} + ${f}`, 'problem_adim', 'Kasa sayısına fiyatı ekledin; çarpmalısın.']]] });
+  };
   const ASAMA = { anla: 'Anla', plan: 'Planla', tahmin: 'Tahmin et', coz: 'Çöz', kontrol: 'Kontrol et', derin: 'Derinleştir', bagimsiz: 'Kendin dene' };
   const ASAMA_IP = {
     anla: 'Problemin son cümlesini oku. Sorulan şey problemde verilmiş bir sayı mı, yoksa bulmamız gereken yeni bir şey mi?',
@@ -1629,7 +1720,7 @@
     gerekce: 'Bu işlem, bulduğun cevaptan problemdeki hangi bilgiye geri dönüyor?',
     derin: 'Her işlemi sırayla hesapla (önce parantez, sonra çarpma, sonra toplama ve çıkarma). Hangisi aynı sonucu veriyor?',
   };
-  const BIRIM = { TL: 'TL', m: 'metre', 'm²': 'metrekare', kg: 'kilogram', sayfa: 'sayfa', '°': 'derece', 'kişi': 'kişi', 'minibüs': 'minibüs', top: 'top' };
+  const BIRIM = { TL: 'TL', m: 'metre', 'm²': 'metrekare', kg: 'kilogram', sayfa: 'sayfa', '°': 'derece', 'kişi': 'kişi', 'minibüs': 'minibüs', top: 'top', 'öğrenci': 'öğrenci', kasa: 'kasa', 'kuruş': 'kuruş' };
   // Tahmin aralığının sınırı: iki değer arasındaki en "yuvarlak" sayı (önce 1000'lik, sonra 500'lük, 100'lük...)
   // İki değerin ikisinden de yeterince uzak (aralığın en az 1/4'ü) olan en yuvarlak sayı; yoksa null.
   const yuvarlakSinir = (lo, hi) => { const pay = (hi - lo) / 4;
@@ -1747,7 +1838,7 @@
     list.forEach((q, i) => { q.atolye.sira = i; q.atolye.toplam = list.length; q.atolye.no = sec.no || 1; q.atolye.sonCoz = q.atolye.asama === 'coz' && list[i + 1].atolye.asama !== 'coz'; });
     return list;
   };
-  const ATOLYE = { tabloKontrol: TABLO_CHECK, kurKontrol: KUR_CHECK, kurGecerli, kurIfade, ifadeHesapla, ifadeParcala, sayiYaz, TABLO_AD, ids: Object.keys(PROB), skillOf: (id) => ({ market: 'n_problem', bahce: 'a_cevre', parke: 'a_alan', okuma: 's_tablo_sutun', terazi: 'e_esitlik', kumbara: 'e_oruntu', gezi: 'n_carpbol', torba: 'p_spektrum', ucgen: 'g_ucgen', pizza: 'f_karsilastir' })[id], sorular: atolyeSorulari, ASAMA, PROB };
+  const ATOLYE = { tabloKontrol: TABLO_CHECK, kurKontrol: KUR_CHECK, kurGecerli, kurIfade, ifadeHesapla, ifadeParcala, sayiYaz, TABLO_AD, ids: Object.keys(PROB), skillOf: (id) => ({ market: 'n_problem', bahce: 'a_cevre', parke: 'a_alan', okuma: 's_tablo_sutun', terazi: 'e_esitlik', kumbara: 'e_oruntu', gezi: 'n_carpbol', torba: 'p_spektrum', ucgen: 'g_ucgen', pizza: 'f_karsilastir', butce: 'n_toplacikar', hali: 'a_cevre_alan', anket: 's_daire', bozuk: 'f_ondalik', kasa: 'n_carpbol' })[id], sorular: atolyeSorulari, ASAMA, PROB };
 
   /* =========================================================
      SORUYA ÖZEL İPUÇLARI (25.10.2026)
