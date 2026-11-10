@@ -883,9 +883,9 @@
   }];
   VAR.e_algoritma = [(lv) => {
     // 10.11.2026: sorular kitaptaki ayran şemasına gönderme yapıyordu ama çocuk şemayı görmüyordu; adımlar artık soruda yazıyor
-    const AYRAN = 'Ayran yapma algoritması: Başla, yoğurt ve su koy, karıştır, tuz ekle, "Tuz yeterli mi?" diye sor, cevap Evet ise bardağa doldur, bitir. ';
+    const AYRAN = 'Ayran yapma akış şeması: Başla, sonra yoğurt eklenir, sonra tuz eklenir, sonra "Tuz yeterli mi?" sorusu, cevap Evet ise bardağa doldurulur, Bitir. ';  // kelimeler soru-sesi sözlüğünde olanlardan seçildi
     const it = pick([
-      [AYRAN + 'Bu algoritmadaki "Tuz yeterli mi?" sorusu hangi tür adımdır?', 'Karar adımı (Evet/Hayır)', [['İşlem adımı', 'algoritma_sira'], ['Başlangıç adımı', 'algoritma_sira'], ['Bitiş adımı', 'algoritma_sira']], ['«Tuz yeterli mi?» adımında bir iş yapılmıyor, bir soru soruluyor.', 'Cevap Evet ya da Hayır olur ve yol buna göre ayrılır.', 'Soru sorulan ve yolu ikiye ayıran adım karar adımıdır.']],
+      [AYRAN + 'Bu akış şemasındaki "Tuz yeterli mi?" sorusu hangi tür adımdır?', 'Karar adımı (Evet/Hayır)', [['İşlem adımı', 'algoritma_sira'], ['Başlangıç adımı', 'algoritma_sira'], ['Bitiş adımı', 'algoritma_sira']], ['«Tuz yeterli mi?» adımında bir iş yapılmıyor, bir soru soruluyor.', 'Cevap Evet ya da Hayır olur ve yol buna göre ayrılır.', 'Soru sorulan ve yolu ikiye ayıran adım karar adımıdır.']],
       ['Bir algoritmanın akış şeması hangi adımla başlar?', 'Başla', [['Bitir', 'algoritma_sira'], ['Karar', 'algoritma_sira'], ['Sonucu yaz', 'algoritma_sira']], ['Her akış şemasının ilk kutusu «Başla», son kutusu «Bitir»dir.', 'İşlem ve karar adımları bu ikisinin arasında yer alır.']],
       [AYRAN + '"Tuz yeterli mi?" sorusunun cevabı "Hayır" ise ne yapılır?', 'Tuz ekleme adımına geri dönülür', [['Algoritma biter', 'karar_dongu'], ['Baştan yoğurt eklenir', 'karar_dongu'], ['Bardağa doldurulur', 'karar_dongu']], ['Cevap «Hayır» ise tuz henüz yetmiyor demektir.', 'Bu yüzden bir önceki adıma dönülür: biraz daha tuz eklenir ve soru yeniden sorulur.', 'Cevap «Evet» olunca bardağa doldurulur ve algoritma biter.']],
     ]);
