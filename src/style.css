@@ -1432,7 +1432,7 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 .bs-kupa{font-size:22px;flex:none}
 @keyframes bsGel{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 /* «Kaldığım yere git» */
-.yer-git{position:fixed;z-index:9;right:max(14px,calc(50% - 226px));bottom:calc(84px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;min-height:48px;padding:8px 14px 8px 10px;border-radius:26px;border:3px solid #fff;background:#FFC531;color:#4A2E00;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 5px 0 #D99A00,0 10px 18px rgba(20,20,60,.3);animation:bsGel .22s ease-out}
+.yer-git{position:fixed;z-index:9;right:max(14px,calc(50% - 226px));bottom:calc(100px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;min-height:48px;padding:8px 14px 8px 10px;border-radius:26px;border:3px solid #fff;background:#FFC531;color:#4A2E00;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 5px 0 #D99A00,0 10px 18px rgba(20,20,60,.3);animation:bsGel .22s ease-out}
 .yer-git:active{transform:translateY(4px);box-shadow:0 1px 0 #D99A00}
 .yg-ok{width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:17px;line-height:1;animation:ygOk 1s ease-in-out infinite}
 .yer-git.yukari .yg-ok{transform:rotate(180deg);animation:ygOkYukari 1s ease-in-out infinite}
@@ -1442,3 +1442,33 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 .bolge-atla .chip{border-width:3px}
 @media (prefers-reduced-motion: reduce){.path.harita .node.cur,.path.harita .node.cur::before,.path.harita .node.cur::after,.path.harita .node.bitti::after,.bolge-kapi::after,.cur-isik i,.cur-pi,.cur-pi .mascot.pim img,.bs,.yer-git,.yg-ok,.yer-git.yukari .yg-ok,.path.harita .cur-wrap .bubble{animation:none}
   .path.harita .node.cur::after,.path.harita .node.bitti::after,.bolge-kapi::after{display:none} .cur-isik i{opacity:1;transform:none}}
+
+/* ===== Alt menü tazeleme (11.11.2026): büyük 3B simge, renkli balon, kalın yazı ===== */
+.nav button{--tc:#5B4BFF;--tt:#E8E5FF;--ti:#4334D9}
+.nav .nv-yol{--tc:#5B4BFF;--tt:#E8E5FF;--ti:#4334D9}
+.nav .nv-kitap{--tc:#14B8A6;--tt:#D5F5F0;--ti:#0B6F65}
+.nav .nv-pratik{--tc:#F97316;--tt:#FFE6D3;--ti:#A8470A}
+.nav .nv-lig{--tc:#EAB308;--tt:#FFF3C4;--ti:#7A5C00}
+.nav .nv-profil{--tc:#EC4899;--tt:#FDE0EE;--ti:#A8235F}
+.nav .nv-veli{--tc:#3B82F6;--tt:#DCEBFF;--ti:#1D4FB0}
+:root[data-theme="dark"] .nav .nv-yol{--tt:#2C2870;--ti:#B9B2FF}
+:root[data-theme="dark"] .nav .nv-kitap{--tt:#0F3F3A;--ti:#6FE3D4}
+:root[data-theme="dark"] .nav .nv-pratik{--tt:#4A2408;--ti:#FFB37A}
+:root[data-theme="dark"] .nav .nv-lig{--tt:#463A05;--ti:#FFDD66}
+:root[data-theme="dark"] .nav .nv-profil{--tt:#4A1230;--ti:#FF9CCB}
+:root[data-theme="dark"] .nav .nv-veli{--tt:#12305F;--ti:#9CC4FF}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .nav .nv-yol{--tt:#2C2870;--ti:#B9B2FF} :root:not([data-theme="light"]) .nav .nv-kitap{--tt:#0F3F3A;--ti:#6FE3D4} :root:not([data-theme="light"]) .nav .nv-pratik{--tt:#4A2408;--ti:#FFB37A} :root:not([data-theme="light"]) .nav .nv-lig{--tt:#463A05;--ti:#FFDD66} :root:not([data-theme="light"]) .nav .nv-profil{--tt:#4A1230;--ti:#FF9CCB} :root:not([data-theme="light"]) .nav .nv-veli{--tt:#12305F;--ti:#9CC4FF} }
+#app:not(.masa) .nav{border-top:0;border-radius:22px 22px 0 0;box-shadow:0 -4px 18px rgba(30,27,75,.14);padding:8px 4px calc(6px + env(safe-area-inset-bottom));align-items:flex-end}
+#app:not(.masa) .nav button{position:relative;flex:1 1 0;min-width:0;gap:3px;padding:4px 2px 4px;font-size:12px;font-weight:900;letter-spacing:.01em;background:none;-webkit-tap-highlight-color:transparent}
+#app:not(.masa) .nav button .ic{font-size:27px;width:46px;height:38px;display:grid;place-items:center;border-radius:16px;transition:transform .18s ease,background .18s ease;filter:saturate(.85)}
+#app:not(.masa) .nav button .ic img.emj{vertical-align:0}
+#app:not(.masa) .nav button:active .ic{transform:scale(.9)}
+#app:not(.masa) .nav button.on{background:none;color:var(--ti)}
+#app:not(.masa) .nav button.on .ic{font-size:31px;width:56px;height:46px;background:var(--tt);box-shadow:0 3px 0 var(--tc),0 6px 14px color-mix(in srgb,var(--tc) 35%,transparent);transform:translateY(-9px);filter:none}
+#app:not(.masa) .nav button.on .ad{transform:translateY(-3px)}
+#app:not(.masa) .nav button.on::after{content:"";position:absolute;bottom:0;left:50%;width:18px;height:4px;margin-left:-9px;border-radius:4px;background:var(--tc)}
+#app:not(.masa) .nav button.on.yeni .ic{animation:navZipla .42s cubic-bezier(.3,1.6,.5,1)}
+@keyframes navZipla{0%{transform:translateY(0) scale(.8)}55%{transform:translateY(-15px) scale(1.12)}100%{transform:translateY(-9px) scale(1)}}
+#app.masa .nav button.on{color:var(--ti);background:var(--tt)}
+@media (max-width:359px){ #app:not(.masa) .nav button{font-size:11px} #app:not(.masa) .nav button .ic{width:40px} #app:not(.masa) .nav button.on .ic{width:48px} }
+@media (prefers-reduced-motion:reduce){ #app:not(.masa) .nav button .ic{transition:none} #app:not(.masa) .nav button.on.yeni .ic{animation:none} }
