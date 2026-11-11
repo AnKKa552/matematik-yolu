@@ -37,4 +37,4 @@ self.addEventListener('notificationclick', e => {
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(L => { for (const c of L) if ('focus' in c) return c.focus(); return self.clients.openWindow('./'); }));
 });
 
-// uygulama sürümü: d35281c014
+// uygulama sürümü: 5e845c311c

@@ -46,6 +46,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 html,body{margin:0;height:100%}
+html{overscroll-behavior-y:none}  /* aşağı çekince sayfa yenilenmesin (11.11.2026): Chrome bu ayarı kök öğeden okur */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:17px;line-height:1.45;overscroll-behavior:none}
 button{font-family:inherit;color:inherit}
@@ -1404,6 +1405,68 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
 /* Çarkta mavi olmayan dilimler sarı/kırmızı (07.11.2026, proje sahibi: «mavi dediği alanda renk göremiyorum») */
 .vis .sy{fill:#FFC233;stroke:var(--surface);stroke-width:2} .vis .sr{fill:#FF6B6B;stroke:var(--surface);stroke-width:2}
 .vis .sb{fill:#2F80FF}
+
+/* ===== Harita canlandırma (11.11.2026, proje sahibinin isteği: kalınan yerde animasyonlu buton, sabit bölge başlığı,
+   «kaldığım yere git», daha canlı renkler) ===== */
+/* Renk canlılığı: manzara, düğümler, iz, bölge düğmeleri */
+.bolge::before{filter:saturate(1.55) brightness(1.03) contrast(1.06)}
+:root[data-theme="dark"] .bolge::before{filter:saturate(1.55) brightness(.97) contrast(1.06)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .bolge::before{filter:saturate(1.55) brightness(.97) contrast(1.06)} }
+.path.harita .node{background:radial-gradient(circle at 34% 26%,rgba(255,255,255,.75) 0 12%,rgba(255,255,255,0) 40%),linear-gradient(160deg,color-mix(in srgb,var(--c,#5B4BFF) 70%,#fff) 0%,var(--c,#5B4BFF) 48%,var(--cd,#4334D9) 100%);box-shadow:0 8px 0 var(--cd,#4334D9),0 0 0 5px color-mix(in srgb,var(--c,#5B4BFF) 28%,transparent),0 16px 20px rgba(20,20,60,.32);border:4px solid #fff}
+.path.harita .node.locked{background:radial-gradient(circle at 34% 26%,rgba(255,255,255,.8) 0 12%,rgba(255,255,255,0) 40%),color-mix(in srgb,var(--c,#9a96c8) 46%,#fff);box-shadow:0 8px 0 color-mix(in srgb,var(--cd,#77739f) 55%,#fff),0 12px 14px rgba(20,20,60,.18)}
+/* Biten konu: altın çerçeve ve ara sıra geçen parıltı */
+.path.harita .node.bitti{border-color:#FFD84D;box-shadow:0 8px 0 var(--cd),0 0 0 5px rgba(255,216,77,.45),0 0 22px rgba(255,205,60,.7),0 16px 20px rgba(20,20,60,.32)}
+.path.harita .node.bitti::after{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 68% 24%,rgba(255,255,255,.95) 0 7%,rgba(255,255,255,0) 26%),linear-gradient(105deg,transparent 34%,rgba(255,255,255,.6) 50%,transparent 66%);opacity:0;animation:dugumParla 4.2s ease-in-out infinite}
+@keyframes dugumParla{0%,70%,100%{opacity:0}85%{opacity:1}}
+@keyframes kapiParla{0%,72%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(520%) skewX(-18deg)}}
+.iz-golge{stroke:rgba(255,255,255,.9);stroke-width:19}
+.iz-yol{stroke-width:9;stroke-dasharray:2 18}
+.diyar-bas .bar>i{background:linear-gradient(90deg,#14B8A6,#3B82F6,#8B5CF6,#EC4899,#F97316,#EAB308);background-size:480px 100%}
+.bolge-kapi{position:relative;overflow:hidden;border-color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.2),0 14px 24px rgba(20,20,60,.28)}
+.bolge-kapi::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);animation:kapiParla 6s ease-in-out infinite;pointer-events:none}
+.path.harita .node-label{box-shadow:0 3px 0 rgba(30,27,75,.16)}
+.path.harita .cur-wrap .node-label{background:#FFF3C4;border-color:#FFC531;color:#4A2E00}
+/* Kalınan yer: büyük düğüm, dönen altın halka, yayılan dalgalar, ışıltılar ve yanında bekleyen Pi */
+.path.harita .cur-wrap{z-index:3}
+.path.harita .node.cur{width:98px;height:92px;font-size:42px;animation:dugumZipla 1.3s ease-in-out infinite;box-shadow:0 9px 0 var(--cd),0 0 0 6px rgba(255,255,255,.55),0 0 30px color-mix(in srgb,var(--c) 85%,#fff),0 18px 22px rgba(20,20,60,.34)}
+.path.harita .node.cur::before{content:'';position:absolute;inset:-15px;border-radius:50%;border:5px dashed #FFC531;animation:halkaDon 7s linear infinite;pointer-events:none}
+.path.harita .node.cur::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:5px solid color-mix(in srgb,var(--c) 70%,#fff);animation:dalgaYay 1.8s ease-out infinite;pointer-events:none}
+@keyframes halkaDon{to{transform:rotate(360deg)}}
+@keyframes dalgaYay{0%{transform:scale(.9);opacity:.95}100%{transform:scale(1.75);opacity:0}}
+.cur-isik{position:absolute;left:50%;top:46px;width:0;height:0;z-index:2;pointer-events:none}
+.cur-isik i{position:absolute;width:14px;height:14px;background:#FFE066;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:isilti 1.9s ease-in-out infinite;filter:drop-shadow(0 0 4px #fff)}
+.cur-isik i:nth-child(1){left:-72px;top:-52px}
+.cur-isik i:nth-child(2){left:58px;top:-34px;width:18px;height:18px;animation-delay:.6s;background:#fff}
+.cur-isik i:nth-child(3){left:44px;top:42px;width:11px;height:11px;animation-delay:1.2s}
+@keyframes isilti{0%,100%{transform:scale(0) rotate(0);opacity:0}50%{transform:scale(1.15) rotate(90deg);opacity:1}}
+.cur-pi{position:absolute;top:6px;width:70px;z-index:2;pointer-events:none;animation:curPiGel .5s ease-out both}
+.cur-pi.sol{right:calc(50% + 62px)} .cur-pi.sag{left:calc(50% + 62px)}
+.cur-pi.sag .mascot{transform:scaleX(-1)}
+.cur-pi .mascot.pim img{animation:curPiZipla 1.3s ease-in-out infinite;filter:drop-shadow(0 8px 8px rgba(20,30,90,.35))}
+@keyframes curPiZipla{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@keyframes curPiGel{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+.path.harita .cur-wrap .bubble{top:-52px;font-size:15px;padding:7px 14px;animation:float 1.3s ease-in-out infinite}
+/* Sabit bölge başlığı */
+.bolge-sabit{position:fixed;z-index:6;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 64px);width:min(456px,calc(100% - 24px));pointer-events:none}
+.bolge-sabit[hidden],.bs[hidden],.yer-git[hidden]{display:none}
+.bs{pointer-events:auto;width:100%;display:flex;align-items:center;gap:10px;text-align:left;border:3px solid #fff;border-radius:16px;padding:7px 12px;min-height:52px;color:#fff;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.22),0 10px 18px rgba(20,20,60,.25);animation:bsGel .22s ease-out}
+.bs.bg-teal{background:#0F766E}.bs.bg-blue{background:#1D4ED8}.bs.bg-orange{background:#C2410C}.bs.bg-pink{background:#BE185D}.bs.bg-purple{background:#6D28D9}.bs.bg-green{background:#15803D}.bs.bg-yellow{background:#A16207}
+.bs-ic{font-size:24px;width:38px;height:38px;display:grid;place-items:center;background:rgba(255,255,255,.22);border-radius:11px;flex:none}
+.bs-ust{display:block;font-size:11px;font-weight:900;letter-spacing:.06em}
+.bs b{display:block;font-size:17px;line-height:1.15}
+.bs-kupa{font-size:22px;flex:none}
+@keyframes bsGel{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+/* «Kaldığım yere git» */
+.yer-git{position:fixed;z-index:9;right:max(14px,calc(50% - 226px));bottom:calc(84px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;min-height:48px;padding:8px 14px 8px 10px;border-radius:26px;border:3px solid #fff;background:#FFC531;color:#4A2E00;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 5px 0 #D99A00,0 10px 18px rgba(20,20,60,.3);animation:bsGel .22s ease-out}
+.yer-git:active{transform:translateY(4px);box-shadow:0 1px 0 #D99A00}
+.yg-ok{width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:17px;line-height:1;animation:ygOk 1s ease-in-out infinite}
+.yer-git.yukari .yg-ok{transform:rotate(180deg);animation:ygOkYukari 1s ease-in-out infinite}
+@keyframes ygOk{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
+@keyframes ygOkYukari{0%,100%{transform:rotate(180deg) translateY(-2px)}50%{transform:rotate(180deg) translateY(3px)}}
+/* Bölge düğmeleri kendi renginde */
+.bolge-atla .chip{border-width:3px}
+@media (prefers-reduced-motion: reduce){.path.harita .node.cur,.path.harita .node.cur::before,.path.harita .node.cur::after,.path.harita .node.bitti::after,.bolge-kapi::after,.cur-isik i,.cur-pi,.cur-pi .mascot.pim img,.bs,.yer-git,.yg-ok,.yer-git.yukari .yg-ok,.path.harita .cur-wrap .bubble{animation:none}
+  .path.harita .node.cur::after,.path.harita .node.bitti::after,.bolge-kapi::after{display:none} .cur-isik i{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -5820,10 +5883,12 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
       const isCur = un && !curRef.found && cr < 3; if (isCur) curRef.found = th.id;
       const style = `--c:var(--${th.color});--cd:var(--${th.color}-d)`;
       const sandik = ((i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '') + (i === Math.min(3, sks.length - 2) ? hazineDuragi(th) : '');
-      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label ${OK.has(s.id) ? 'okul' : ''}">${OK.has(s.id) ? '🏫 ' : ''}${esc(s.title)}</div></div>${sandik}`;
+      const off = offs[i % offs.length], sag = off < 0 || i === 1;  // Pi, düğümün ekranın ortasına bakan yanında durur (komşu 2. düğümün solunda)
+      const curEk = isCur ? `<span class="cur-isik" aria-hidden="true"><i></i><i></i><i></i></span><span class="cur-pi ${sag ? 'sag' : 'sol'}" aria-hidden="true">${giyiliPi(70, 'happy')}</span>` : '';
+      return `<div class="node-wrap ${isCur ? 'cur-wrap' : ''}" style="transform:translateX(${off}px);${style}">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}${curEk}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''} ${un && cr >= 1 && !isCur ? 'bitti' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label ${OK.has(s.id) ? 'okul' : ''}">${OK.has(s.id) ? '🏫 ' : ''}${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const kupa = A.st.trophies[th.id], acik = kupa || done === sks.length;
-    return `<section class="bolge" id="bolge-${th.id}" ${GEC_YUKLU.has('img/fon_' + th.id + '.webp') ? `style="--fon:url(img/fon_${th.id}.webp)"` : `data-fon="img/fon_${th.id}.webp"`}>
+    return `<section class="bolge" id="bolge-${th.id}" data-c="${th.color}" ${GEC_YUKLU.has('img/fon_' + th.id + '.webp') ? `style="--fon:url(img/fon_${th.id}.webp)"` : `data-fon="img/fon_${th.id}.webp"`}>
       <div class="bolge-kapi bg-${th.color}"><div class="bk-ic">${th.icon}</div><div class="grow"><div class="bk-ust">${th.no}. BÖLGE · ${done}/${sks.length} konu</div><h2>${bolgeAd(th.id)}</h2><div class="bk-alt">${esc(th.title)} · <span>📗 Kitabında: ${th.book}. Kitap, ${th.no}. Tema</span></div></div>${kupa ? '<div class="bk-kupa" aria-label="Kupa kazanıldı">🏆</div>' : ''}</div>
       ${nodes}<div class="node-wrap"><button class="node ${acik ? '' : 'locked'}" style="${kupa ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : acik ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="${bolgeAd(th.id)} sınavı">${kupa ? '🏆' : '🎓'}</button><div class="node-label">${kupa ? 'Kupa kazanıldı!' : 'Bölge Sınavı'}</div></div>
     </section>`;
@@ -5839,8 +5904,41 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
       ${okulKart()}${pilotTestKart()}${yedekUyari()}
       <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
       <div class="path harita tek">${bolgeler}</div>
-    </div>${nav()}`;
+    </div>${bolgeSabitHtml()}<button class="yer-git" data-act="yer-git" aria-label="Kaldığım yere git" hidden><span class="yg-ok">⬇</span><span class="yg-yazi">Kaldığım yer</span></button>${nav()}`;
   }
+  /* Sabit bölge başlığı (11.11.2026, proje sahibinin isteği): haritada aşağı inince bölgenin kapı kartı kaybolur;
+     üstte küçük, bölge renginde bir başlık kalır ve kaydırdıkça bulunulan bölgeye göre değişir. Dokununca bölgenin başına gider. */
+  function bolgeSabitHtml() {
+    return `<div class="bolge-sabit" hidden>${THEMES.map(th => { const sks = SKILLS.filter(s => s.theme === th.id), done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
+      return `<button class="bs bg-${th.color}" data-act="theme" data-v="${th.id}" hidden><span class="bs-ic">${th.icon}</span><span class="grow"><span class="bs-ust">${th.no}. BÖLGE · ${done}/${sks.length} konu</span><b>${bolgeAd(th.id)}</b></span>${A.st.trophies[th.id] ? '<span class="bs-kupa">🏆</span>' : ''}</button>`; }).join('')}</div>`;
+  }
+  // Kaydırırken: hangi bölgedeyiz (sabit başlık), kalınan düğüm ekranda mı («kaldığım yere git» düğmesi), kaydırma yeri (yenilemede geri dönmek için)
+  let izleBekle = false, yerZ = 0;
+  function haritaIzle() {
+    izleBekle = false; if (!yerZ) yerZ = setTimeout(() => { yerZ = 0; yerYaz(); }, 300);  // kaydırma yeri en çok 300 ms'de bir yazılır (her karede değil)
+    const sabit = document.querySelector('.bolge-sabit'), git = document.querySelector('.yer-git'); if (!sabit || !git) return;
+    const tb = document.querySelector('.topbar'), nv = document.querySelector('.nav'), yol = document.querySelector('.path.harita'); if (!yol) return;
+    const masa = $app.classList.contains('masa'), R = yol.getBoundingClientRect();
+    const tbR = tb ? tb.getBoundingClientRect() : { bottom: 0, left: 0, right: 0 }, ustte = !masa || (tbR.left < R.right && tbR.right > R.left);
+    const ust = ustte ? tbR.bottom : 0, alt = masa || !nv ? (window.innerHeight || 0) : nv.getBoundingClientRect().top;
+    let hangi = null;
+    yol.querySelectorAll('.bolge').forEach(b => { const r = b.getBoundingClientRect(), k = b.querySelector('.bolge-kapi'); if (r.top < ust + 70 && r.bottom > ust + 70 && k && k.getBoundingClientRect().bottom < ust + 6) hangi = b.id.slice(6); });
+    sabit.hidden = !hangi; sabit.querySelectorAll('.bs').forEach(b => { b.hidden = b.dataset.v !== hangi; });
+    if (masa) { sabit.style.cssText = `top:${ust}px;left:${R.left + 8}px;width:${R.width - 16}px;transform:none`; git.style.cssText = `right:auto;left:${R.right - 168}px;bottom:24px`; } else { sabit.style.cssText = ''; git.style.cssText = ''; }
+    const cur = yol.querySelector('.node.cur'); let yon = 0;
+    if (cur) { const c = cur.getBoundingClientRect(); if (c.bottom < ust + (hangi ? 60 : 0)) yon = -1; else if (c.top > alt - 10) yon = 1; }
+    git.hidden = !yon; git.classList.toggle('yukari', yon < 0);
+  }
+  addEventListener('scroll', () => { if (!izleBekle) { izleBekle = true; requestAnimationFrame(haritaIzle); } }, { passive: true });
+  addEventListener('resize', () => requestAnimationFrame(haritaIzle));
+  /* Yenilemede yer kaybolmasın (11.11.2026): sayfa yanlışlıkla yenilenirse (aşağı çekme vb.) aynı sekmede aynı oyuncu
+     «Kim oynuyor?» ekranını görmeden, kaldığı sekmeye ve kaydırma yerine döner. Yalnız bu sekmede (sessionStorage) tutulur;
+     uygulama kapatılıp açılınca her zamanki açılış olur. */
+  const YER_ANAHTAR = 'my_yer';
+  function yerYaz() { try { if (A.secici || !A.st.profile || A.view !== 'home' || A._ekran === 'pdavet') return; sessionStorage.setItem(YER_ANAHTAR, JSON.stringify({ p: E.profilId(), tab: A.tab, y: Math.round(scrollY), t: Date.now() })); } catch (e) { } }
+  function yerOku() { try { const nv = (performance.getEntriesByType('navigation')[0] || {}).type; if (nv && nv !== 'reload') return null;  // yalnız yenilemede; bağlantıyla (ör. pilot daveti) gelince her zamanki açılış
+    const o = JSON.parse(sessionStorage.getItem(YER_ANAHTAR) || 'null'); return o && o.p === E.profilId() && Date.now() - o.t < 30 * 60e3 && ['yol', 'kitap', 'pratik', 'lig', 'profil'].includes(o.tab) ? o : null; } catch (e) { return null; } }
+
   /* Okul takvimi kartı: MEB taslak yıllık planına göre o haftanın konusu ya da çocuğun/velinin seçtiği konu.
      Dokununca haritada o konuya gider; «Değiştir» okul konusunu seçtirir. */
   // Yedek kapalıysa (ikinci dersten sonra) haritada küçük uyarı; ✕ ile 7 gün gizlenir. İki gerçek olayda çocuk ilerlemesini kaybetti (03.11.2026)
@@ -7228,12 +7326,12 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
     $app.innerHTML = emojiSar(h);
     A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'vitrin') vitrinCanlandir();
-    gecYukle();
+    gecYukle(); if (A._geriY == null) yerYaz();
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
-      if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
-      requestAnimationFrame(izCiz); setTimeout(izCiz, 400);
-    }
+      if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else if (A._geriY != null) { const y = A._geriY; A._geriY = null; requestAnimationFrame(() => scrollTo(0, y)); } else requestAnimationFrame(() => haritaKaydir());
+      requestAnimationFrame(izCiz); setTimeout(izCiz, 400); requestAnimationFrame(() => requestAnimationFrame(haritaIzle));
+    } else if (A._geriY != null && A._ekran === A.tab) { const y = A._geriY; A._geriY = null; requestAnimationFrame(() => scrollTo(0, y)); }
   }
 
   /* =================== AKIŞ =================== */
@@ -7366,6 +7464,7 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
     switch (act) {
       case 'ust': if (UST[v]) { sfx.tap(); toast(UST[v]()); } break;
       case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
+      case 'yer-git': sfx.tap(); haritaKaydir(null, true); break;
       case 'theme': A.theme = v; sfx.tap(); document.querySelectorAll('.bolge-atla .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v)); haritaKaydir(v, true); setTimeout(() => { const k = document.querySelector(`#bolge-${v} .komsu`); if (k && komsuSay[v] === undefined) k.click(); }, 700); break;
       case 'node': A.modal = skillModal(v); render(); break;
       case 'bil-ac': { const b = bil(); el.disabled = true; bildirimAboneOl().then(j => { b.abone = j; b.acik = true; b.onay = Date.now(); save(); return bildirimKaydet(); })
@@ -7590,7 +7689,8 @@ html:has(#app.genis .vt){scroll-behavior:smooth}  /* yalnız tanıtım sayfasın
   // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
   { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
     if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }
-    if (E.profiller().liste.length > 1 || (pilotDavet() && A.st.profile)) A.secici = true; }
+    if (E.profiller().liste.length > 1 || (pilotDavet() && A.st.profile)) A.secici = true;
+    const yer = A.st.profile && yerOku(); if (yer) { A.secici = false; A.tab = yer.tab; A._geriY = yer.y; } }
   aileSunucuBak().then(() => setTimeout(aileKontrol, 800)); pilotSunucuBak(); pilotAcilis(); setTimeout(pilotGonder, 3000);
   if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });

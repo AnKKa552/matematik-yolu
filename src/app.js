@@ -633,10 +633,12 @@
       const isCur = un && !curRef.found && cr < 3; if (isCur) curRef.found = th.id;
       const style = `--c:var(--${th.color});--cd:var(--${th.color}-d)`;
       const sandik = ((i % 3 === 2 && i < sks.length - 1) ? sandikDuragi(th, s, i) : '') + (i === Math.min(3, sks.length - 2) ? hazineDuragi(th) : '');
-      return `<div class="node-wrap" style="transform:translateX(${offs[i % offs.length]}px)">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label ${OK.has(s.id) ? 'okul' : ''}">${OK.has(s.id) ? '🏫 ' : ''}${esc(s.title)}</div></div>${sandik}`;
+      const off = offs[i % offs.length], sag = off < 0 || i === 1;  // Pi, düğümün ekranın ortasına bakan yanında durur (komşu 2. düğümün solunda)
+      const curEk = isCur ? `<span class="cur-isik" aria-hidden="true"><i></i><i></i><i></i></span><span class="cur-pi ${sag ? 'sag' : 'sol'}" aria-hidden="true">${giyiliPi(70, 'happy')}</span>` : '';
+      return `<div class="node-wrap ${isCur ? 'cur-wrap' : ''}" style="transform:translateX(${off}px);${style}">${i === 1 ? komsuHtml(th.id) : ''}${isCur ? `<div class="bubble">${sk.n ? 'DEVAM' : 'BAŞLA'}</div>` : ''}${curEk}<button class="node ${un ? '' : 'locked'} ${isCur ? 'cur' : ''} ${un && cr >= 1 && !isCur ? 'bitti' : ''}" style="${style}" data-act="node" data-v="${s.id}" aria-label="${esc(s.title)}">${un ? (cr >= 5 ? '👑' : cr >= 1 ? '⭐' : th.icon) : '🔒'}${cr ? `<span class="crowns">${cr}</span>` : ''}</button><div class="node-label ${OK.has(s.id) ? 'okul' : ''}">${OK.has(s.id) ? '🏫 ' : ''}${esc(s.title)}</div></div>${sandik}`;
     }).join('');
     const kupa = A.st.trophies[th.id], acik = kupa || done === sks.length;
-    return `<section class="bolge" id="bolge-${th.id}" ${GEC_YUKLU.has('img/fon_' + th.id + '.webp') ? `style="--fon:url(img/fon_${th.id}.webp)"` : `data-fon="img/fon_${th.id}.webp"`}>
+    return `<section class="bolge" id="bolge-${th.id}" data-c="${th.color}" ${GEC_YUKLU.has('img/fon_' + th.id + '.webp') ? `style="--fon:url(img/fon_${th.id}.webp)"` : `data-fon="img/fon_${th.id}.webp"`}>
       <div class="bolge-kapi bg-${th.color}"><div class="bk-ic">${th.icon}</div><div class="grow"><div class="bk-ust">${th.no}. BÖLGE · ${done}/${sks.length} konu</div><h2>${bolgeAd(th.id)}</h2><div class="bk-alt">${esc(th.title)} · <span>📗 Kitabında: ${th.book}. Kitap, ${th.no}. Tema</span></div></div>${kupa ? '<div class="bk-kupa" aria-label="Kupa kazanıldı">🏆</div>' : ''}</div>
       ${nodes}<div class="node-wrap"><button class="node ${acik ? '' : 'locked'}" style="${kupa ? 'background:var(--gold);box-shadow:0 7px 0 #C79400' : acik ? 'background:var(--brand);box-shadow:0 7px 0 var(--brand-d)' : ''}" data-act="trophy" data-v="${th.id}" aria-label="${bolgeAd(th.id)} sınavı">${kupa ? '🏆' : '🎓'}</button><div class="node-label">${kupa ? 'Kupa kazanıldı!' : 'Bölge Sınavı'}</div></div>
     </section>`;
@@ -652,8 +654,41 @@
       ${okulKart()}${pilotTestKart()}${yedekUyari()}
       <div class="themes bolge-atla">${THEMES.map(t => `<button class="chip ${t.id === simdiki ? 'on' : ''}" data-act="theme" data-v="${t.id}">${t.icon} ${bolgeAd(t.id)}</button>`).join('')}</div>
       <div class="path harita tek">${bolgeler}</div>
-    </div>${nav()}`;
+    </div>${bolgeSabitHtml()}<button class="yer-git" data-act="yer-git" aria-label="Kaldığım yere git" hidden><span class="yg-ok">⬇</span><span class="yg-yazi">Kaldığım yer</span></button>${nav()}`;
   }
+  /* Sabit bölge başlığı (11.11.2026, proje sahibinin isteği): haritada aşağı inince bölgenin kapı kartı kaybolur;
+     üstte küçük, bölge renginde bir başlık kalır ve kaydırdıkça bulunulan bölgeye göre değişir. Dokununca bölgenin başına gider. */
+  function bolgeSabitHtml() {
+    return `<div class="bolge-sabit" hidden>${THEMES.map(th => { const sks = SKILLS.filter(s => s.theme === th.id), done = sks.filter(s => E.crowns(E.eff(A.st.skills[s.id])) >= 1).length;
+      return `<button class="bs bg-${th.color}" data-act="theme" data-v="${th.id}" hidden><span class="bs-ic">${th.icon}</span><span class="grow"><span class="bs-ust">${th.no}. BÖLGE · ${done}/${sks.length} konu</span><b>${bolgeAd(th.id)}</b></span>${A.st.trophies[th.id] ? '<span class="bs-kupa">🏆</span>' : ''}</button>`; }).join('')}</div>`;
+  }
+  // Kaydırırken: hangi bölgedeyiz (sabit başlık), kalınan düğüm ekranda mı («kaldığım yere git» düğmesi), kaydırma yeri (yenilemede geri dönmek için)
+  let izleBekle = false, yerZ = 0;
+  function haritaIzle() {
+    izleBekle = false; if (!yerZ) yerZ = setTimeout(() => { yerZ = 0; yerYaz(); }, 300);  // kaydırma yeri en çok 300 ms'de bir yazılır (her karede değil)
+    const sabit = document.querySelector('.bolge-sabit'), git = document.querySelector('.yer-git'); if (!sabit || !git) return;
+    const tb = document.querySelector('.topbar'), nv = document.querySelector('.nav'), yol = document.querySelector('.path.harita'); if (!yol) return;
+    const masa = $app.classList.contains('masa'), R = yol.getBoundingClientRect();
+    const tbR = tb ? tb.getBoundingClientRect() : { bottom: 0, left: 0, right: 0 }, ustte = !masa || (tbR.left < R.right && tbR.right > R.left);
+    const ust = ustte ? tbR.bottom : 0, alt = masa || !nv ? (window.innerHeight || 0) : nv.getBoundingClientRect().top;
+    let hangi = null;
+    yol.querySelectorAll('.bolge').forEach(b => { const r = b.getBoundingClientRect(), k = b.querySelector('.bolge-kapi'); if (r.top < ust + 70 && r.bottom > ust + 70 && k && k.getBoundingClientRect().bottom < ust + 6) hangi = b.id.slice(6); });
+    sabit.hidden = !hangi; sabit.querySelectorAll('.bs').forEach(b => { b.hidden = b.dataset.v !== hangi; });
+    if (masa) { sabit.style.cssText = `top:${ust}px;left:${R.left + 8}px;width:${R.width - 16}px;transform:none`; git.style.cssText = `right:auto;left:${R.right - 168}px;bottom:24px`; } else { sabit.style.cssText = ''; git.style.cssText = ''; }
+    const cur = yol.querySelector('.node.cur'); let yon = 0;
+    if (cur) { const c = cur.getBoundingClientRect(); if (c.bottom < ust + (hangi ? 60 : 0)) yon = -1; else if (c.top > alt - 10) yon = 1; }
+    git.hidden = !yon; git.classList.toggle('yukari', yon < 0);
+  }
+  addEventListener('scroll', () => { if (!izleBekle) { izleBekle = true; requestAnimationFrame(haritaIzle); } }, { passive: true });
+  addEventListener('resize', () => requestAnimationFrame(haritaIzle));
+  /* Yenilemede yer kaybolmasın (11.11.2026): sayfa yanlışlıkla yenilenirse (aşağı çekme vb.) aynı sekmede aynı oyuncu
+     «Kim oynuyor?» ekranını görmeden, kaldığı sekmeye ve kaydırma yerine döner. Yalnız bu sekmede (sessionStorage) tutulur;
+     uygulama kapatılıp açılınca her zamanki açılış olur. */
+  const YER_ANAHTAR = 'my_yer';
+  function yerYaz() { try { if (A.secici || !A.st.profile || A.view !== 'home' || A._ekran === 'pdavet') return; sessionStorage.setItem(YER_ANAHTAR, JSON.stringify({ p: E.profilId(), tab: A.tab, y: Math.round(scrollY), t: Date.now() })); } catch (e) { } }
+  function yerOku() { try { const nv = (performance.getEntriesByType('navigation')[0] || {}).type; if (nv && nv !== 'reload') return null;  // yalnız yenilemede; bağlantıyla (ör. pilot daveti) gelince her zamanki açılış
+    const o = JSON.parse(sessionStorage.getItem(YER_ANAHTAR) || 'null'); return o && o.p === E.profilId() && Date.now() - o.t < 30 * 60e3 && ['yol', 'kitap', 'pratik', 'lig', 'profil'].includes(o.tab) ? o : null; } catch (e) { return null; } }
+
   /* Okul takvimi kartı: MEB taslak yıllık planına göre o haftanın konusu ya da çocuğun/velinin seçtiği konu.
      Dokununca haritada o konuya gider; «Değiştir» okul konusunu seçtirir. */
   // Yedek kapalıysa (ikinci dersten sonra) haritada küçük uyarı; ✕ ile 7 gün gizlenir. İki gerçek olayda çocuk ilerlemesini kaybetti (03.11.2026)
@@ -2041,12 +2076,12 @@
     $app.innerHTML = emojiSar(h);
     A._ekran = A.secici ? 'secici' : pilotDavetGoster() ? 'pdavet' : A._vitrin ? 'vitrin' : !A.st.profile ? 'onb' : (A.view === 'lesson' || A.view === 'end') ? A.view : A.tab;
     if (A._ekran === 'vitrin') vitrinCanlandir();
-    gecYukle();
+    gecYukle(); if (A._geriY == null) yerYaz();
     if (A._ekran === 'yol') {
       const sc = $app.querySelector('.scroll');
-      if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else requestAnimationFrame(() => haritaKaydir());
-      requestAnimationFrame(izCiz); setTimeout(izCiz, 400);
-    }
+      if (onceki === 'yol') { if (sc) sc.scrollTop = t0; scrollTo(0, y0); } else if (A._geriY != null) { const y = A._geriY; A._geriY = null; requestAnimationFrame(() => scrollTo(0, y)); } else requestAnimationFrame(() => haritaKaydir());
+      requestAnimationFrame(izCiz); setTimeout(izCiz, 400); requestAnimationFrame(() => requestAnimationFrame(haritaIzle));
+    } else if (A._geriY != null && A._ekran === A.tab) { const y = A._geriY; A._geriY = null; requestAnimationFrame(() => scrollTo(0, y)); }
   }
 
   /* =================== AKIŞ =================== */
@@ -2179,6 +2214,7 @@
     switch (act) {
       case 'ust': if (UST[v]) { sfx.tap(); toast(UST[v]()); } break;
       case 'tab': if (v !== 'veli') { A.veliAcik = false; A.veliDuzenle = false; } A.tab = v; A.view = 'home'; sfx.tap(); render(); window.scrollTo(0, 0); break;
+      case 'yer-git': sfx.tap(); haritaKaydir(null, true); break;
       case 'theme': A.theme = v; sfx.tap(); document.querySelectorAll('.bolge-atla .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v)); haritaKaydir(v, true); setTimeout(() => { const k = document.querySelector(`#bolge-${v} .komsu`); if (k && komsuSay[v] === undefined) k.click(); }, 700); break;
       case 'node': A.modal = skillModal(v); render(); break;
       case 'bil-ac': { const b = bil(); el.disabled = true; bildirimAboneOl().then(j => { b.abone = j; b.acik = true; b.onay = Date.now(); save(); return bildirimKaydet(); })
@@ -2403,7 +2439,8 @@
   // Kardeşler: yarım kalmış (adı girilmemiş) oyuncu kayıtlarını temizle; birden çok oyuncu varsa açılışta «Kim oynuyor?»
   { const p = E.profiller(); p.liste.filter(id => id !== p.aktif && !(E.profilOku(id) || {}).profile).forEach(id => E.profilSil(id));
     if (!A.st.profile && E.profiller().liste.length > 1) { const dolu = E.profiller().liste.find(id => (E.profilOku(id) || {}).profile); if (dolu) { E.profilSil(E.profilId()); A.st = E.profilSec(dolu); } }
-    if (E.profiller().liste.length > 1 || (pilotDavet() && A.st.profile)) A.secici = true; }
+    if (E.profiller().liste.length > 1 || (pilotDavet() && A.st.profile)) A.secici = true;
+    const yer = A.st.profile && yerOku(); if (yer) { A.secici = false; A.tab = yer.tab; A._geriY = yer.y; } }
   aileSunucuBak().then(() => setTimeout(aileKontrol, 800)); pilotSunucuBak(); pilotAcilis(); setTimeout(pilotGonder, 3000);
   if (A.st.bildirim && A.st.bildirim.acik) bildirimKaydet().catch(() => { });  // saatleri, son ders gününü ve seriyi tazele
   if (A.st.profile) document.addEventListener('pointerdown', function once() { document.removeEventListener('pointerdown', once); if (A.view !== 'lesson' && (A.st.sessions || []).length) setTimeout(() => piSay('hosgeldin_geri'), 120); }, { once: true });

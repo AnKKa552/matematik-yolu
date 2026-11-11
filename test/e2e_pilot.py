@@ -161,7 +161,7 @@ async def main():
         d = await yeni_sayfa(); await d.goto(APP + '?pilot=5a'); await d.wait_for_timeout(600)
         ok(await d.query_selector('[data-act=pd-katil]') is not None and await d.query_selector('#f-name') is None, 'Davet bağlantısıyla ilk ekran veli karşılaması (kayıttan önce)')
         ok('pilot=' not in d.url, 'Bağlantıdaki pilot kodu adres çubuğundan kaldırılır')
-        await d.reload(); await d.wait_for_timeout(600)
+        await d.evaluate("sessionStorage.removeItem('my_yer')"); await d.reload(); await d.wait_for_timeout(600)
         ok(await d.query_selector('[data-act=pd-katil]') is not None, 'Karar verilmeden kapatılıp açılınca karşılama yine gelir')
         await d.check('#f-pd-onay'); await d.click('[data-act=pd-katil]'); await d.wait_for_timeout(300)
         ok(not KAT and await d.query_selector('#f-pd-ad') is not None, 'Rumuz yazılmadan katılım olmaz')
@@ -190,7 +190,7 @@ async def main():
         h = await yeni_sayfa(); await h.goto(APP + '?pilot=6b'); await h.wait_for_timeout(600); once = len(KAT)
         await h.fill('#f-pd-ad', 'Kuzey'); await h.click('[data-act=pd-hayir]'); await h.wait_for_timeout(300)
         ok(await h.query_selector('[data-k=his]') is not None and len(KAT) == once, 'Katılmadan devam: kayıt yok, kayıt sürer')
-        await h.reload(); await h.wait_for_timeout(600)
+        await h.evaluate("sessionStorage.removeItem('my_yer')"); await h.reload(); await h.wait_for_timeout(600)
         ok(await h.query_selector('[data-act=pd-katil]') is None, 'Katılmayan aileye ekran bir daha gelmez')
         # Zaten kullanan çocuk bağlantıyı açarsa
         e = await yeni_sayfa(); await e.goto(APP); await e.wait_for_timeout(500)

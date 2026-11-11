@@ -58,7 +58,7 @@ async def main():
         ok(st['veli'], 'Veli şifresi kardeşe kopyalanır (veli tek)')
         await pg.evaluate("(()=>{const a=window.MY_APP;a.st.xp=30;})()"); await pg.evaluate("localStorage.setItem(Object.keys(localStorage).find(k=>k.startsWith('matematik_yolu_v1:')), JSON.stringify(window.MY_APP.st))")
         # Uygulamayı yeniden aç
-        await pg.reload(); await pg.wait_for_timeout(700)
+        await pg.evaluate("sessionStorage.removeItem('my_yer')"); await pg.reload(); await pg.wait_for_timeout(700)
         _ad = await secici_adlar(pg); ok(sorted(_ad) == ['Toprak', 'Ömer'], f'Açılışta «Kim oynuyor?» iki oyuncuyu gösterir {_ad}')
         await pg.screenshot(path=OUT + 'profil_01_secici.png')
         await pg.click('.sec-kart:has-text("Toprak")'); await pg.wait_for_timeout(900)
@@ -71,7 +71,7 @@ async def main():
         await pg.click('[data-act=onb-iptal]'); await pg.wait_for_timeout(300)
         ok(sorted(await secici_adlar(pg)) == ['Toprak', 'Ömer'] and await pg.evaluate("JSON.parse(localStorage.getItem('matematik_yolu_profiller')).liste.length") == 2, '«Oyunculara dön» boş kaydı siler')
         await pg.click('[data-act=oyuncu-ekle]'); await pg.wait_for_timeout(800)
-        await pg.reload(); await pg.wait_for_timeout(700)
+        await pg.evaluate("sessionStorage.removeItem('my_yer')"); await pg.reload(); await pg.wait_for_timeout(700)
         ok(sorted(await secici_adlar(pg)) == ['Toprak', 'Ömer'] and await pg.evaluate("JSON.parse(localStorage.getItem('matematik_yolu_profiller')).liste.length") == 2, 'Ad girilmeden kapatılan kardeş kaydı açılışta temizlenir')
         # Bir oyuncuyu silmek diğerini etkilemez
         await pg.click('.sec-kart:has-text("Ömer")'); await pg.wait_for_timeout(900)
@@ -102,7 +102,7 @@ async def main():
         b2 = [o['veri'].get('beceri') for o in OLAY if o['tur'] == 'ders_birak' and o['cihaz'] == c2]
         ok(b1 == ['g_temel'] and b2 == ['n_okuma'], f'Her çocuğun dersi kendi numarasıyla kaydedildi ({b1} / {b2})')
         # Rumuzla giriş: açılışta seçici, aynı rumuz aynı kayda, yeni rumuz yeni kayda
-        await d.reload(); await d.wait_for_timeout(800)
+        await d.evaluate("sessionStorage.removeItem('my_yer')"); await d.reload(); await d.wait_for_timeout(800)
         ok(sorted(await secici_adlar(d)) == ['Ali', 'Ayşe'] and await d.query_selector('#f-sec-ad') is not None, 'Açılışta oyuncular ve rumuz kutusu')
         await d.screenshot(path=OUT + 'profil_02_rumuz.png')
         await d.fill('#f-sec-ad', '  ALİ '); await d.click('[data-act=sec-gir]'); await d.wait_for_timeout(900)
