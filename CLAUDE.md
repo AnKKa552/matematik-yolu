@@ -247,7 +247,7 @@ Proje sahibi Cloudflare'in açık kaynak `security-audit-skill` becerisini (gith
   - `yonetici_giris` kilitliyken de «yanlis» döner (ad ya da şifrenin doğruluğu anlaşılmaz); sayfa mesajı «5 yanlış denemeden sonra giriş 30 dakika kapanır».
   - `veli-eposta` (sürüm 2): önce sahiplik ve cihaz sınırı, sonra sayaçlar; adres sınırı kök adrese (+etiket ve Gmail noktaları yok sayılır); uygulama geneli günde en çok 300 doğrulama e-postası.
   - Gece temizliği (pg_cron `guvenlik-temizle`, 03.41): `ag_sayac` 3 günden, `istat_*` 400 günden eski satırlar silinir.
-- **Açık kalanlar:** bütün IP sınırları `x-forwarded-for`'un ilk değerine dayanır; Supabase ağ geçidinin bunu nasıl ilettiği doğrulanmadı. `cevaplar` tablosuna giriş yapmış veli sınırsız satır ekleyebilir (eski düzlem; tek hesap var). **Proje sahibi panelden:** Authentication → yeni kayıtları kapat (e-postalı giriş kullanılmıyor; eski düzlemin bütün riskini kapatır).
+- **Açık kalanlar:** bütün IP sınırları `x-forwarded-for`'un ilk değerine dayanır; Supabase ağ geçidinin bunu nasıl ilettiği doğrulanmadı. `cevaplar` tablosuna giriş yapmış veli sınırsız satır ekleyebilir (eski düzlem; tek hesap var). Proje sahibi 16.11.2026'da Authentication → «Allow new users to sign up» ayarını kapattı (yeni hesap açılamaz; eski düzlemde yalnız mevcut tek hesap kaldı).
 - Yeni bir anon RPC ya da edge function eklerken: girdiyi sunucuda biçimle sınırla, sayaçları satır kilidiyle ya da tek UPDATE ile artır, kişi başı sınır genel bütçeden küçük olsun, istemciye dönen her alanı ekranda `esc()` ile yaz.
 
 ### 3.10 İsimsiz soru istatistiği (06.11.2026, proje sahibinin isteği: "pilot şart değil, bağlanan herkes için")
