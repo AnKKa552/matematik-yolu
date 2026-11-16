@@ -12,7 +12,9 @@ const ANAHTAR = Deno.env.get("EPOSTA_ANAHTAR") ?? "";
 const GONDEREN = Deno.env.get("EPOSTA_GONDEREN") ?? "rapor@matematikyolu.com";
 const KURULU = !!ANAHTAR && (SAGLAYICI === "brevo" || SAGLAYICI === "resend");
 const RIZALAR = new Set(["rapor-eposta-v1"]);
-const AG_GUNLUK = 10, ADRES_GUNLUK = 3, CIHAZ_GUNLUK = 3, RAPOR_EN_UZUN = 6000;
+const AG_GUNLUK = 10, ADRES_GUNLUK = 3, CIHAZ_GUNLUK = 3, GENEL_GUNLUK = 300, RAPOR_EN_UZUN = 6000;
+// Adres sınırı için kök adres: "+etiket" atılır, Gmail'de noktalar yok sayılır (aynı kutuya giden adresler tek sayılır).
+const adresKok = (e: string) => { let [a, d] = e.split("@"); a = a.split("+")[0]; if (d === "gmail.com" || d === "googlemail.com") { a = a.replace(/\./g, ""); d = "gmail.com"; } return a + "@" + d; };
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "content-type, apikey, authorization, x-client-info, x-admin-token", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const yanit = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
@@ -106,14 +108,16 @@ Deno.serve(async (req) => {
       if (!cihazGecerli) return yanit({ hata: "cihaz" }, 400);
       if (!gecerliEposta(eposta)) return yanit({ hata: "eposta" });
       if (!RIZALAR.has(riza)) return yanit({ hata: "riza" }, 400);
-      const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
-      const ag = (await ozet(SIR.slice(0, 16) + ip)).slice(0, 24);
-      if (((await sb.rpc("veli_eposta_say", { p_anahtar: "ag:" + ag })).data ?? 99) > AG_GUNLUK) return yanit({ hata: "cok" });
-      if (((await sb.rpc("veli_eposta_say", { p_anahtar: "adres:" + (await ozet(eposta)).slice(0, 24) })).data ?? 99) > ADRES_GUNLUK) return yanit({ hata: "cok" });
+      // Önce sahiplik ve cihaz sınırı (sayaçlar boşuna artmasın), sonra ağ, adres ve genel günlük sınır.
       const s = await satirAl();
       if (s && !(await yetkili(s))) return yanit({ hata: "yetkisiz" }, 403);
       const gun = trGun(), n = s && s.dogrulama_gun === gun ? s.dogrulama_n : 0;
       if (n >= CIHAZ_GUNLUK) return yanit({ hata: "cok" });
+      const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
+      const ag = (await ozet(SIR.slice(0, 16) + ip)).slice(0, 24);
+      if (((await sb.rpc("veli_eposta_say", { p_anahtar: "ag:" + ag })).data ?? 99) > AG_GUNLUK) return yanit({ hata: "cok" });
+      if (((await sb.rpc("veli_eposta_say", { p_anahtar: "adres:" + (await ozet(adresKok(eposta))).slice(0, 24) })).data ?? 99) > ADRES_GUNLUK) return yanit({ hata: "cok" });
+      if (((await sb.rpc("veli_eposta_say", { p_anahtar: "genel" })).data ?? 1e9) > GENEL_GUNLUK) return yanit({ hata: "cok" });
       const tok = belirtec();
       const alanlar = { eposta, ad, riza, riza_at: new Date().toISOString(), onay_ozet: await ozet(tok), dogrulama_n: n + 1, dogrulama_gun: gun,
         onaylandi: s && s.eposta === eposta ? s.onaylandi : null };

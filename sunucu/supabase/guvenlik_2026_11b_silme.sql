@@ -1,4 +1,4 @@
--- guvenlik_2026_11b.sql'in silme içeren parçası. Ajan oturumunda çalışmaz; proje sahibi SQL Editor'den çalıştırır.
+-- guvenlik_2026_11b.sql'in silme içeren parçası. Canlıda kurulu (16.11.2026, cron işi guvenlik-temizle).
 
 -- Veli onay kaydını silemesin (onay izi korunsun).
 revoke delete on public.rizalar from authenticated;

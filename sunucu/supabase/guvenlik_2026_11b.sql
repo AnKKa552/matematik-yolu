@@ -1,7 +1,6 @@
 -- Güvenlik sağlamlaştırması, 2. tur (16.11.2026). guvenlik_2026_11.sql'den sonra çalışır;
--- buradaki tanımlar eski SQL dosyalarındakilerin yerine geçer. Durum: canlıya uygulanmayı bekliyor (proje sahibinin onayı).
--- Silme içeren parçalar (eski sayaç ve istatistik temizliği, rızalarda silme yetkisinin kaldırılması)
--- ajan oturumunda çalışmadığı için guvenlik_2026_11b_silme.sql dosyasında; proje sahibi SQL Editor'den çalıştırır.
+-- buradaki tanımlar eski SQL dosyalarındakilerin yerine geçer. Canlıya uygulandı ve denendi (16.11.2026).
+-- Silme içeren parça (rızalarda silme yetkisinin kaldırılması, gece temizliği) guvenlik_2026_11b_silme.sql dosyasında; o da canlıda kurulu.
 
 -- 1) Tablo yetkileri: anon ve authenticated için gereksiz TRUNCATE/REFERENCES/TRIGGER yetkileri
 --    (PostgREST kullanamaz ama bir yanlış yapılandırmada tabloyu boşaltma yolu açmasın).

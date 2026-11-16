@@ -240,8 +240,14 @@ Proje sahibi Cloudflare'in açık kaynak `security-audit-skill` becerisini (gith
   - `soru_sesi_hak`: tek ağ günlük toplam karakter bütçesinin en çok dörtte birini kullanabilir.
   - `bildirim_kaydet`: bildirim adresi yalnız FCM, Mozilla, Apple ve Windows push sunucuları olabilir.
   - `gizli_al`, `admin_token_dogru`: canlıda kuruluydu ama depoda yoktu; canlıdan okunup dosyaya yazıldı. Canlıda anon/authenticated için zaten kapalıydı, `gizli_al` yalnız `elevenlabs_api_key` döndürür.
-- **Açık kalanlar** (düşük öncelik, izleniyor): `pilot_katil`/`istatistik_kaydet` için ağ başına günlük sınır ve `istat_*` saklama süresi yok (16.11.2026: veritabanı 38 MB, kötüye kullanım izi yok); `veli-eposta kaydet` doğrulama e-postası sınırları (e-posta sağlayıcısı kurulu olmadığı için şu an hiç e-posta gitmiyor; sağlayıcı kurulmadan önce genel günlük sınır eklenmeli); yönetici adının var olup olmadığı kilit cevabından anlaşılabiliyor (tek yönetici, düşük değer). Bütün IP sınırları `x-forwarded-for`'un ilk değerine dayanır; Supabase ağ geçidinin bunu nasıl ilettiği doğrulanmadı.
-- **Kapsam dışı kalan** (sonraki denetimde bakılmalı): `schema.sql` giriş yapmış veli tabloları ve RLS, `xp_ekle`/`lig_getir`, `cloud.js` e-postalı giriş oturumu, `haftalik-rapor` veri akışı.
+- **2. tur (16.11.2026, `guvenlik_2026_11b.sql` + `_silme.sql`, canlıda, işlem içinde denendi):**
+  - Bütün public tablolarda anon/authenticated için TRUNCATE/REFERENCES/TRIGGER kaldırıldı (varsayılan yetkiler de).
+  - Eski e-postalı giriş düzlemi: `ogrenciler`de veli yalnız `ad, takma_ad, dogum_tarihi` yazar (lig kademesi ve ilk 3 sayısı yalnız sunucuda); `rizalar` değiştirilemez ve silinemez; `ogrenci_durum` en çok 600 KB; `veliler` tetikleyicisi (`veli_iletisim_denetle`) e-postayı her zaman girişteki e-postaya eşitler, telefonu rakama indirger, rapor kanalını denetler; `xp_ekle` haftada en çok 10 000. `schema.sql`'i yeniden çalıştırırsan bu yetkileri geri açar; sonra bu dosyayı da çalıştır.
+  - İsimsiz kayıtlara ağ başına günlük sınır (`ag_sayac`, `ag_hak(tur, sınır)`, dışarıdan çağrılamaz): `pilot_katil` 40, `pilot_kaydet` 3000, `istatistik_kaydet` 2000.
+  - `yonetici_giris` kilitliyken de «yanlis» döner (ad ya da şifrenin doğruluğu anlaşılmaz); sayfa mesajı «5 yanlış denemeden sonra giriş 30 dakika kapanır».
+  - `veli-eposta` (sürüm 2): önce sahiplik ve cihaz sınırı, sonra sayaçlar; adres sınırı kök adrese (+etiket ve Gmail noktaları yok sayılır); uygulama geneli günde en çok 300 doğrulama e-postası.
+  - Gece temizliği (pg_cron `guvenlik-temizle`, 03.41): `ag_sayac` 3 günden, `istat_*` 400 günden eski satırlar silinir.
+- **Açık kalanlar:** bütün IP sınırları `x-forwarded-for`'un ilk değerine dayanır; Supabase ağ geçidinin bunu nasıl ilettiği doğrulanmadı. `cevaplar` tablosuna giriş yapmış veli sınırsız satır ekleyebilir (eski düzlem; tek hesap var). **Proje sahibi panelden:** Authentication → yeni kayıtları kapat (e-postalı giriş kullanılmıyor; eski düzlemin bütün riskini kapatır).
 - Yeni bir anon RPC ya da edge function eklerken: girdiyi sunucuda biçimle sınırla, sayaçları satır kilidiyle ya da tek UPDATE ile artır, kişi başı sınır genel bütçeden küçük olsun, istemciye dönen her alanı ekranda `esc()` ile yaz.
 
 ### 3.10 İsimsiz soru istatistiği (06.11.2026, proje sahibinin isteği: "pilot şart değil, bağlanan herkes için")

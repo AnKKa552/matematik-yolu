@@ -188,6 +188,7 @@ create trigger yeni_veli_tetik after insert on auth.users for each row execute f
 -- Açık yetkiler ("Yeni tabloları otomatik göster" kapalı kurulum için). Anonim kullanıcıya hiçbir tablo açılmaz.
 grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.veliler, public.rizalar, public.ogrenciler, public.ogrenci_durum to authenticated;
+-- Not: bu yetkiler guvenlik_2026_11b.sql ile daraltıldı; bu dosyayı yeniden çalıştırırsan onu da çalıştır.
 grant select, insert on public.cevaplar to authenticated;
 grant select on public.haftalik_xp, public.abonelikler to authenticated;
 grant usage, select on all sequences in schema public to authenticated;
