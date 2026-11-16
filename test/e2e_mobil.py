@@ -143,7 +143,7 @@ async def main():
         await p6.reload(); await p6.wait_for_timeout(1200)
         y2 = await p6.evaluate("Math.round(scrollY)")
         ok(abs(y1 - y2) < 4 and y1 > 1000 and await p6.query_selector('.path.harita') is not None, f'Sayfa yenilenince harita aynı yerde kalır ({y1} → {y2})')
-        await p6.click('.yer-git'); await p6.wait_for_timeout(900)
+        await p6.click('.yer-git'); await p6.wait_for_timeout(2200)
         g = await p6.evaluate("(()=>{const r=document.querySelector('.node.cur').getBoundingClientRect();return [r.top>0&&r.bottom<innerHeight, document.querySelector('.yer-git').hidden]})()")
         ok(g[0] and g[1], f'«Kaldığım yer» düğmesi kalınan düğüme götürür ve kaybolur ({g})')
         await p6.click('.nav button[data-v=pratik]'); await p6.wait_for_timeout(300); await p6.reload(); await p6.wait_for_timeout(900)

@@ -958,12 +958,32 @@
   // Buluta giden kopya: veliye ait iletişim ve güvenlik bilgileri çıkarılır
   const aileTemiz = (st) => { const c = JSON.parse(JSON.stringify(st)); delete c.veli; delete c.bildirim; delete c.aile; delete c.pilot; delete c.eposta;
     if (c.profile) { delete c.profile.parentName; delete c.profile.parentPhone; delete c.profile.parentEmail; delete c.profile.kvkk; } return c; };
-  const aileOzet = (d) => ({ ad: (d.profile || {}).name || '—', xp: d.xp || 0, konu: SKILLS.filter(s => d.skills && d.skills[s.id] && d.skills[s.id].n > 0).length, seri: d.streak || 0 });
+  /* Buluttan gelen durum güvenilmez veridir (güvenlik denetimi 16.11.2026): şekli E.fresh() kalıbına uydurulur.
+     Kalıpta sayı olan alan sayıya çevrilir (sayı değilse varsayılan), nesne beklenen yere nesne olmayan gelmez,
+     __proto__/constructor anahtarları atılır. Böylece xp/streak/gems gibi alanlarla sayfaya HTML sızdırılamaz. */
+  const KOTU_ANAHTAR = new Set(['__proto__', 'constructor', 'prototype']);
+  const kalibaUydur = (v, t, derin) => {
+    if (typeof t === 'number') { const n = Number(v); return Number.isFinite(n) ? n : t; }
+    if (typeof t === 'boolean') return typeof v === 'boolean' ? v : t;
+    if (t && typeof t === 'object') {
+      if (!v || typeof v !== 'object' || Array.isArray(v) !== Array.isArray(t)) return JSON.parse(JSON.stringify(t));
+      if (Array.isArray(t) || derin > 4) return v;
+      const o = JSON.parse(JSON.stringify(t)); for (const k of Object.keys(v)) { if (KOTU_ANAHTAR.has(k)) continue; o[k] = Object.prototype.hasOwnProperty.call(t, k) ? kalibaUydur(v[k], t[k], derin + 1) : v[k]; } return o;
+    }
+    return v;
+  };
+  const durumTemizle = (d) => { const f = E.fresh(); if (!d || typeof d !== 'object' || Array.isArray(d)) return f;
+    const o = kalibaUydur(d, f, 0);
+    if (o.profile && typeof o.profile === 'object' && !Array.isArray(o.profile)) { const pr = {}; for (const k of Object.keys(o.profile)) if (!KOTU_ANAHTAR.has(k)) pr[k] = o.profile[k]; pr.name = String(pr.name == null ? '' : pr.name).slice(0, 40); o.profile = pr; }
+    else o.profile = null;
+    return o; };
+  const aileOzet = (dd) => { const d = durumTemizle(dd); return ({ ad: (d.profile || {}).name || '—', xp: d.xp || 0, konu: SKILLS.filter(s => d.skills && d.skills[s.id] && d.skills[s.id].n > 0).length, seri: d.streak || 0 }); };
   let aileZaman = null, aileGidiyor = false;
   const aileZamanla = () => { clearTimeout(aileZaman); aileZaman = setTimeout(() => aileGonder().catch(() => { }), 4000); };
   // Yereli buluttan gelenle değiştir: bu cihaza ait veli bilgileri, şifre, bildirim ve aile kodu korunur
   function aileYukle(uzak, kod, surum) {
     const yerel = A.st, p = yerel.profile || {};
+    uzak = durumTemizle(uzak);
     A.st = Object.assign(E.fresh(), uzak);
     A.st.profile = Object.assign({}, uzak.profile || {}, { parentName: p.parentName, parentPhone: p.parentPhone, parentEmail: p.parentEmail, kvkk: p.kvkk });
     if (yerel.veli) A.st.veli = yerel.veli; if (yerel.bildirim) A.st.bildirim = yerel.bildirim; if (yerel.pilot) A.st.pilot = yerel.pilot; else delete A.st.pilot; if (yerel.eposta) A.st.eposta = yerel.eposta; else delete A.st.eposta;
@@ -1016,7 +1036,7 @@
     catch (e) { toast('Sunucuya ulaşılamadı. İnternetini kontrol et.'); }
     return null;
   }
-  const aileBulunanKart = (b, iptal) => { const o = aileOzet(b.durum); return `<div class="card aile-bulunan"><b>☁️ Yedek bulundu</b><div class="aile-ozet"><span>👤 ${esc(o.ad)}</span><span>⚡ ${o.xp} XP</span><span>📚 ${o.konu} konu</span><span>🔥 ${o.seri} gün</span></div><p class="muted sm" style="margin:6px 0 10px">Bu ilerleme bu telefona yüklenecek${A.st.profile && (A.st.xp || 0) > 0 ? `; bu telefondaki ilerlemenin (⚡ ${A.st.xp} XP) yerini alacak` : ''}.</p><button class="btn" data-act="aile-yukle">Evet, yükle</button><button class="btn ghost small" data-act="${iptal}" style="margin-top:6px">Vazgeç</button></div>`; };
+  const aileBulunanKart = (b, iptal) => { const o = aileOzet(b.durum); return `<div class="card aile-bulunan"><b>☁️ Yedek bulundu</b><div class="aile-ozet"><span>👤 ${esc(o.ad)}</span><span>⚡ ${esc(o.xp)} XP</span><span>📚 ${esc(o.konu)} konu</span><span>🔥 ${esc(o.seri)} gün</span></div><p class="muted sm" style="margin:6px 0 10px">Bu ilerleme bu telefona yüklenecek${A.st.profile && (A.st.xp || 0) > 0 ? `; bu telefondaki ilerlemenin (⚡ ${A.st.xp} XP) yerini alacak` : ''}.</p><button class="btn" data-act="aile-yukle">Evet, yükle</button><button class="btn ghost small" data-act="${iptal}" style="margin-top:6px">Vazgeç</button></div>`; };
   /* ---------------- Pilot çalışma: isimsiz kullanım kaydı (03.11.2026) ----------------
      Yalnız veli, şifreli Veli alanında onay verirse açılır (sunucu/supabase/pilot.sql). Bu telefona rastgele 22 karakterlik bir
      numara verilir; ad, telefon, e-posta, aile kodu, oyuncu adı ya da yazılan metin GİTMEZ. Olaylar cihazda sıraya alınır,
@@ -1218,7 +1238,7 @@
   function pdMevcut(karar) { if (A.st.profile || !pilotDavet()) return false; const o = rumuzBul(A.onb.data.name); if (!o || o.aktif) return false;
     const bos = E.profilId(); A.st = E.profilSec(o.id); E.profilSil(bos); A.onb = { step: 0, data: {} }; A.secici = false;
     if (!(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar))) { if (karar === 'evet') { izinVer(pilotDavet()); return true; } A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; A.st.izin = A.st.izin || { karar: 'hayir', at: Date.now() }; save(); }
-    toast(`👋 Tekrar hoş geldin, ${A.st.profile.name}!`); render(); return true; }
+    toast(`👋 Tekrar hoş geldin, ${esc(A.st.profile.name)}!`); render(); return true; }
   const izinKarar = () => !!(A.st.izin || (A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar)) || (A.st.aile && A.st.aile.kod));
   // Davetle gelende her zaman (kayıtlı çocukta da); davetsiz ilk açılışta tanıtım sayfasından sonra, kayıttan önce
   const pilotDavetGoster = () => !A.secici && (pilotDavet() ? !(A.st.pilot && (A.st.pilot.acik || A.st.pilot.karar)) : (aileAyarli() && !A.st.profile && A.onb.step === 0 && !izinKarar() && !vitrinGoster()));
@@ -2409,7 +2429,7 @@
         izinVer(pilotDavet()).then(ok => { if (!ok) { render(); return; } if (A.st.profile && !(A.st.olcme && A.st.olcme.on)) { A.modal = confirmModal('Kısa bir test çözelim mi?', 'Çocuğunuz şimdi 10 soruluk başlangıç testini çözebilir (yaklaşık 10 dakika). İsterseniz sonra da haritadan başlatabilir.', 'pd-test', 'Şimdi başla', 'Sonra'); render(); } }); break; }
       case 'pd-hayir': if (!pdRumuz()) break; if (pdMevcut('hayir')) break; if (pilotDavet()) A.st.pilot = { acik: false, karar: 'hayir', at: Date.now() }; A.st.izin = { karar: 'hayir', at: Date.now() }; save(); render(); break;
       case 'sec-gir': { const ad = ((document.getElementById('f-sec-ad') || {}).value || '').trim(); if (ad.length < 2) { toast('Rumuz en az 2 harf olsun.'); break; }
-        const o = rumuzBul(ad); if (o) { if (o.aktif) { A.secici = false; render(); } else oyuncuGec(o.id); toast(`👋 Tekrar hoş geldin, ${o.s.profile.name}!`); } else oyuncuGec(null, ad); break; }
+        const o = rumuzBul(ad); if (o) { if (o.aktif) { A.secici = false; render(); } else oyuncuGec(o.id); toast(`👋 Tekrar hoş geldin, ${esc(o.s.profile.name)}!`); } else oyuncuGec(null, ad); break; }
       case 'pd-test': A.modal = null; A.olcmeForm = 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break;
       case 'olcme': { const o = A.st.olcme || {}; if (o[v]) break; A.olcmeForm = v === 'son' ? 'son' : 'on'; A.view = 'home'; A.tab = 'yol'; startSession('olcme', null); break; }
       case 'pilot-ayril': A.modal = confirmModal('Pilottan ayrılmak istiyor musunuz?', 'Bu telefondan gönderilen bütün isimsiz kayıtlar sunucudan silinir ve kayıt durur. Çocuğunuzun ilerlemesi etkilenmez.', 'pilot-ayril-evet', 'Evet, ayrıl', 'Vazgeç'); render(); break;

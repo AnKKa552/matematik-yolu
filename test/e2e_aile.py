@@ -180,6 +180,17 @@ async def main():
         await A.click('[data-act=aile-sil]'); await A.wait_for_timeout(200); await A.click('[data-act=aile-sil-evet]'); await A.wait_for_timeout(500)
         ok(len(DB) == 0 and await A.evaluate("!window.MY_APP.st.aile") and await A.evaluate("window.MY_APP.st.xp") == 1200, 'Yedek silindi, telefondaki ilerleme duruyor')
         ok(not errA and not errB, f'Sayfa hatası yok {errA + errB}')
+        # --- Güvenlik denetimi 16.11.2026: buluttan gelen kötü niyetli durum sayfaya HTML olarak giremez ---
+        kotu = 'ABCDEFGHJKMNPQRS'; yuk = '<img src=x onerror="document.title=\'XSS\'">'
+        DB[ozet(kotu)] = {'surum': 9, 'durum': {'profile': {'name': '<b>T</b>'}, 'xp': yuk, 'streak': yuk, 'gems': yuk, 'skills': {}, '__proto__': {'x': 1}}}
+        ctxX, X, errX = await telefon(b)
+        await X.click('[data-act=onb-kod]'); await X.click('[data-act=onb-kod-ac]'); await X.fill('#f-aile-kod', kotu); await X.click('[data-act=aile-bul]'); await X.wait_for_timeout(500)
+        ok(await X.query_selector('.aile-bulunan img[src=x]') is None and await X.title() != 'XSS', 'Kötü niyetli yedek önizlemede HTML çalıştıramaz')
+        await X.click('[data-act=aile-yukle]'); await X.wait_for_timeout(600)
+        st = await X.evaluate("[typeof window.MY_APP.st.xp, window.MY_APP.st.xp, typeof window.MY_APP.st.streak, window.MY_APP.st.gems]")
+        ok(st[0] == 'number' and st[1] == 0 and st[2] == 'number' and st[3] == 20, f'Yüklenen yedekte sayı alanları sayıya çevrildi {st}')
+        await X.evaluate("window.MY_APP.view='home'; window.MY_APP.tab='yol'; window.MY_APP_RENDER()"); await X.wait_for_timeout(400)
+        ok(await X.query_selector('img[src=x]') is None and await X.title() != 'XSS' and not errX, f'Yüklenen yedek ekranda HTML çalıştıramaz {errX}')
         await b.close()
     print('BİTTİ', 'hata:', len(HATA))
 asyncio.run(main())
