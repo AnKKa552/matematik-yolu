@@ -28,6 +28,16 @@ Kurallar 10.11.2026'da Google'ın yardım sayfalarından doğrulandı; Play Cons
 ```
 Matematik Yolu, 5. sınıf öğrencilerinin matematiği adım adım, oynar gibi öğrenmesi için hazırlandı. Maarif Modeli 5. sınıf matematik programındaki 35 konunun hepsi, ders kitabındaki sırayla tek bir haritada.
 
+5. SINIF MATEMATİKTE NELERİ ÖĞRENİR?
+• Geometri: nokta, doğru, ışın, çember ve daire, dikme ve paralel doğrular, açılar ve açıölçerle açı ölçme, tümler, bütünler ve ters açılar, çokgenler, üçgenler
+• Doğal sayılar: büyük sayıları okuma ve yazma, basamak değeri, karşılaştırma ve sıralama, toplama, çıkarma, çarpma ve bölme, yuvarlama ve tahmin, gerçek hayat problemleri
+• Çevre ve alan: dikdörtgenin çevresi ve alanı
+• Kesirler: kesir türleri, denk kesirler, ondalık gösterim, yüzde, kesirleri karşılaştırma
+• Veri ve grafik: istatistiksel araştırma, sıklık tablosu, sütun grafiği, daire grafiği, nokta grafiği
+• Cebirsel düşünme: eşitlik ve denge, işlem özellikleri, kare ve küp, işlem önceliği, sayı ve şekil örüntüleri, algoritma ve akış şeması
+• Olasılık: kesin, imkânsız ve mümkün olaylar, olasılık spektrumu
+Okulda o hafta işlenen konu haritada işaretlenir; çocuğunuz derste gördüğü konuyu aynı gün evde tekrar eder.
+
 NASIL ÇALIŞIR?
 • Kısa dersler: 6–10 soru, birkaç dakika. Her gün küçük bir adım.
 • Pi konuşur: Maskotumuz Pi soruları ve konu anlatımlarını sesli okur. Okumakta zorlanan çocuk da rahat çalışır.

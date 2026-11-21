@@ -5,7 +5,8 @@ import asyncio, json, re, pathlib, os
 from playwright.async_api import async_playwright
 OUT = str(pathlib.Path(__file__).resolve().parent / 'shots') + '/'
 os.makedirs(OUT, exist_ok=True)
-APP = (pathlib.Path(__file__).resolve().parent.parent / 'dist' / 'index.html').as_uri()
+import sys; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent)); from yerel import adres
+APP = adres()  # file:// yerine http: yenilemede localStorage kaybolmasın (yerel.py)
 KAT = {}; OLAY = []; HAM = []; HATA = []
 TURLER = {'acilis', 'ders_basla', 'cevap', 'ders_bitti', 'ders_birak', 'kart', 'test'}
 def sunucu(fn, a):
@@ -54,7 +55,7 @@ async def cevapla(pg):
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        ctx = await b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+        ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
         await ctx.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")  # vitrin (tanıtım) testlerde atlanır
         pg = await ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
@@ -152,7 +153,7 @@ async def main():
         ok(not OLAY and not [h for h in HAM if '"p_olaylar": []' not in h], 'Ayrıldıktan sonra hiçbir olay gönderilmez')
         # ---- Davet bağlantısı (04.11.2026): …/?pilot=5a ile ilk açılış ----
         async def yeni_sayfa():
-            c = await b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+            c = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
             await c.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")  # vitrin (tanıtım) testlerde atlanır
             g = await c.new_page(); g.on('pageerror', lambda e: errs.append(str(e)))
             await g.route(re.compile(r'.*/rest/v1/rpc/.*'), yol); await g.route(re.compile(r'.*cdn\.jsdelivr\.net.*'), lambda r: r.abort())
@@ -178,8 +179,9 @@ async def main():
         await btn.click(); await d.wait_for_timeout(1300)
         ok(await d.evaluate("window.MY_APP.view==='lesson' && window.MY_APP.ses.mode==='olcme' && window.MY_APP.ses.form==='on'"), 'Kısa test (başlangıç formu) başladı')
         n = 0
-        while await d.evaluate("window.MY_APP.view") == 'lesson' and n < 25: await cevapla(d); n += 1
-        await d.wait_for_timeout(2000)
+        while await d.evaluate("window.MY_APP.view") == 'lesson' and n < 60: await cevapla(d); n += 1  # kutlama sahnesi bir dokunuşu yutabilir; sınır cömert
+        # Son cevaptan sonra seri kutlaması (EFSANE sahnesi, en çok ~4,2 sn) bitince ders sonu açılır; http'de video gerçekten oynar
+        await d.wait_for_function("window.MY_APP.view !== 'lesson'", timeout=12000); await d.wait_for_timeout(2000)
         ok(any(o['tur'] == 'test' and o['veri']['form'] == 'on' for o in OLAY), 'Test sonucu sunucuya gitti')
         await d.evaluate("(()=>{const a=window.MY_APP;a.view='home';a.tab='yol';window.MY_APP_RENDER();})()"); await d.wait_for_timeout(300)
         ok(await d.query_selector('[data-act=olcme]') is None, 'Test bitince haritada test kartı kalmaz')

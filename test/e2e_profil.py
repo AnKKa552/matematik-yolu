@@ -4,7 +4,8 @@ import asyncio, json, re, pathlib, os
 from playwright.async_api import async_playwright
 OUT = str(pathlib.Path(__file__).resolve().parent / 'shots') + '/'
 os.makedirs(OUT, exist_ok=True)
-APP = (pathlib.Path(__file__).resolve().parent.parent / 'dist' / 'index.html').as_uri()
+import sys; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent)); from yerel import adres
+APP = adres()  # file:// yerine http: yenilemede localStorage kaybolmasın (yerel.py)
 KAT = {}; OLAY = []; HATA = []
 def sunucu(fn, a):
     if fn == 'pilot_katil': KAT[a['p_cihaz']] = a.get('p_grup'); return {'ok': True}
@@ -34,7 +35,7 @@ async def main():
             body = sunucu(fn, json.loads(route.request.post_data or '{}')) if fn.startswith('pilot_') else None
             await route.fulfill(status=200, content_type='application/json', body=json.dumps(body))
         async def sayfa():
-            c = await b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
+            c = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
             await c.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")  # vitrin (tanıtım) testlerde atlanır
             g = await c.new_page(); g.on('pageerror', lambda e: errs.append(str(e)))
             await g.route(re.compile(r'.*/rest/v1/rpc/.*'), yol); await g.route(re.compile(r'.*cdn\.jsdelivr\.net.*'), lambda r: r.abort())
@@ -120,14 +121,14 @@ async def main():
         # Bağlantısız tek çocuklu telefonda seçici açılmaz (yukarıda), Ben başlığında değiştir düğmesi
         await ben(d); ok(await d.query_selector('.prof-top [data-act=oyuncu-ac], h2 [data-act=oyuncu-ac]') is not None, 'Ben başlığında oyuncu değiştir düğmesi')
         # Vitrin (tanıtım): ilk kez gelen ziyaretçiye görünür; başla deyince kayda geçer ve bir daha gelmez; pilot bağlantısında görünmez
-        v = await (await b.new_context(viewport={'width': 390, 'height': 844})).new_page(); await v.goto(APP); await v.wait_for_timeout(700)
+        v = await (await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844})).new_page(); await v.goto(APP); await v.wait_for_timeout(700)
         ok(await v.query_selector('.vt') is not None, 'İlk ziyarette vitrin görünür')
         await v.click('[data-act=vt-basla] >> nth=0'); await v.wait_for_timeout(300)
         ok(await v.query_selector('[data-act=pd-katil]') is not None, 'Hemen başla → önce veliye tek izin ekranı')
         await v.click('[data-act=pd-hayir]'); await v.wait_for_timeout(200)
         ok(await v.query_selector('[data-act=onb-next]') is not None, 'İzin ekranından sonra kayıt')
         await v.reload(); await v.wait_for_timeout(700); ok(await v.query_selector('.vt') is None, 'Bir kez geçilen vitrin yeniden gelmez')
-        v2 = await (await b.new_context(viewport={'width': 390, 'height': 844})).new_page(); await v2.goto(APP + '?pilot=VT1'); await v2.wait_for_timeout(700)
+        v2 = await (await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844})).new_page(); await v2.goto(APP + '?pilot=VT1'); await v2.wait_for_timeout(700)
         ok(await v2.query_selector('.vt') is None and await v2.query_selector('[data-act=pd-katil]') is not None, 'Pilot bağlantısında vitrin yok, veli karşılaması gelir')
         ok(not errs, f'Sayfa hatası yok {errs[:3]}')
         await b.close()

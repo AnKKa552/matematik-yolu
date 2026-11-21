@@ -1,7 +1,8 @@
 # Haftalık rapor e-postası: Veli alanındaki kart, doğrulama, rapor yükleme, durdurma (sahte sunucuyla).
 import asyncio, json, pathlib, re
 from playwright.async_api import async_playwright
-APP = (pathlib.Path(__file__).resolve().parent.parent / 'dist' / 'index.html').as_uri()
+import sys; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent)); from yerel import adres
+APP = adres()  # file:// yerine http: yenilemede localStorage kaybolmasın (yerel.py)
 SAYFA = (pathlib.Path(__file__).resolve().parent.parent / 'dist' / 'eposta' / 'index.html').as_uri()
 HATA = []
 def ok(c, m):
@@ -46,7 +47,7 @@ async def yol(route):
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
-        c = await b.new_context(viewport={'width': 390, 'height': 844})
+        c = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844})
         await c.add_init_script("try{localStorage.setItem('my_vitrin_gecti','1')}catch(e){}")
         pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.route(re.compile(r'.*/functions/v1/veli-eposta.*'), yol)
